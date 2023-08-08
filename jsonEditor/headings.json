@@ -1,0 +1,9 @@
+{
+	"recon": "Reconstruction",
+	"time": "Time",
+	"prior": "Bayesian Priors",
+	"proxy": "Climate Proxies",
+	"geo": "Geospatial",
+	"model": "Model",
+	"uncertainty": "Uncertainty"
+}

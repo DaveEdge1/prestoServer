@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>User Information</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  </head>
+  <h1>Paleo Presto Reconstruction Builder</h1>
+
+  <h3>Please choose a reconstruction method</h3>
+
+  <h3><script>"var doSomething function () {return = "changed"} doSomething()"</script></h3>
+
+  <form id="tableForm" action="/getUserInfo" method="post">
+	  <select onchange= "var doSomething function () {return = "changed"} doSomething()" class="selectpicker" data-style="btn-info" name="selectpicker" id="selectpicker">
+          <optgroup label="Select Reconstruction">
+              <option name="HoloceneDA" value="holocene_da">Holocene DA</option>
+              <option name="temp12k" value="temp12k">Temp12k</option>
+          </optgroup>
+      </select>
+      <input type="submit" />
+  </form>
+  <h2>Abstract</h2>
+  <p><iframe src="" id="abstract" width="1200" height="300" frameborder=0 ></iframe></p>
+  <p><iframe src="holocene_da/abstract.txt" width="1200" height="300" frameborder=0 ></iframe></p>
+<select id="noOfDevice" class="form-control" name="noOfDevice" onchange="getDeviceCount(this)">
+    <option selected>Select</option>
+    <option value="1">01</option>
+    <option value="2">02</option>
+</select>
+
+<script>
+    function getDeviceCount(sel) {
+        var countNo = sel.value;
+        // TODO Send countNo to somewhere
+    }
+</script>
+<span>Hello 0</span>
+<span>Hello 1</span>
+<span>Hello 2</span>
+</html>

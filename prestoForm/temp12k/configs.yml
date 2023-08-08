@@ -1,0 +1,82 @@
+#==============================================
+# SETTINGS for running the temp12k composites code
+# See the README.md file for more explaination.
+# https://github.com/DaveEdge1/temp12k-regional-composites
+#==============================================
+
+
+time:
+  range_to_reconstruct: 
+    value: [7000,10000]
+    default: [7000, 10000]
+    limits: [0, 12000]
+    options: null
+    precision: 1
+    long_name: time interval for reconstruction
+    description: define a start and end year in units years BP
+    data_type: range
+    complexity: standard
+    URL: null
+
+  resolution: 
+    value: 200
+    default: 200
+    limits: [1, 1000]
+    options: null
+    precision: 1
+    long_name: reconstruction temporal resolution
+    description: Ttime step of reconstruction (yrs)
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+proxy:
+  interpVariable: 
+    value: Temperature
+    default: Temperature
+    limits: null
+    options: [Temperature, Precipitation]
+    precision: null
+    long_name: interpretation variable
+    description: Climate interpretation of proxies
+    data_type: character
+    complexity: standard
+    URL: null
+
+  seasonalityGeneral: 
+    value: summer+
+    default: summer+
+    limits: null
+    options: [annual, summerOnly, winterOnly, summer+, winter+]
+    precision: null
+    long_name: seasonality of proxies to assimilate
+    description: Limits the incorporation of proxies based on the season which the proxies are sensitive to
+    data_type: character
+    complexity: advanced
+    URL: https://lipdverse.org/vocabulary/interpretation_seasonality/
+
+geo:
+  proxy_coords:
+    value: [-90, 90, -180, 180]
+    default: [-90, 90, -180, 180]
+    limits: [-90, 90, -180, 180]
+    options: null
+    precision: 0.001
+    long_name: coordinate bounds for incorporating proxies
+    description: Provide bounds to include only proxies in a given region
+    data_type: lat-lon
+    complexity: standard
+    URL: null
+
+uncertainty:
+  nens:
+    value: 50
+    default: 50
+    limits: [1,1000]
+    options: null
+    precision: 1
+    long_name: number of ensembles
+    description: Number of ensemble members, used to estimate uncertainty
+    data_type: numeric
+    complexity: standard
+    URL: null
