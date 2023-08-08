@@ -2,6 +2,7 @@ Docker = require('dockerode');
 express = require("express");
 child_process = require("child_process")
 PORT = process.env.PORT || 3000
+const fs = require('fs');
 
 var configLoc = ''
 var app = express()
@@ -27,7 +28,15 @@ updateHDAParams = function (){
 	                return('/root/presto/prestoForm/holocene_da/config_default.yml')
 }
 
+newDir = function(dirname) {
+	fs.mkdirSync(dirname, (err) => {
+		  if (err) throw err;
+	});
+	return (dirname)
+}
+
 app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, res) => {
+  //console.log('dirname: ' + dirname())
   var d = new Date();
   var timeNow = "" + d.getTime() + Math.round(Math.random()*10000)
   var destURL = 'http://137.184.4.96:83/downloads/' + timeNow
@@ -44,7 +53,7 @@ app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, r
   subject: 'Presto Custom Reconstruction ' + timeNow,
   html:   '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 	  + '<br>'
-	  + '<a href="' + destURL + '" download>Download Custom Reconstruction</a>'
+	  + '<a href="' + destURL + '" download>Download Custom Reconstruction '+timeNow+'</a>'
 	  + '<br>'
 	  + '<br>'
 	  + '<br>'
@@ -68,6 +77,14 @@ app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, r
         ]
       }
     }
+	fs.copyFileSync(configLoc, newDir(dirname)+'configs.yml', 0, (err) => {
+		  if (err) {
+			      console.log("Error Found:", err);
+			    }
+		  else {
+		          console.log("\nFile Contents of copied_file:")
+		       }
+		  });
 	docker.run('davidedge/lipd_webapps:holocene_da',
 	  [], 
 	  process.stdout,
