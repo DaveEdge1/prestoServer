@@ -146,7 +146,7 @@ prior:
     value: ['hadcm3_regrid','trace_regrid']
     default: ['hadcm3_regrid','trace_regrid']
     limits: null
-    options: ['hadcm3_regrid','trace_regrid','famous_regrid']
+    options: ['hadcm3_regrid','trace_regrid']
     precision: null
     long_name: models used for prior
     description: model details here 
@@ -243,7 +243,7 @@ proxy:
     value: [temp12k]
     default: [temp12k]
     limits: null
-    options: [temp12k, pages2k, pseudo_temp12k_using_trace_noise_whiteproxyrmse]
+    options: [temp12k, pages2k]
     precision: null
     long_name: proxy datasets to assimilate
     description: proxy data from compilations and project datasets

@@ -173,7 +173,6 @@ prior:
     options:
       - hadcm3_regrid
       - trace_regrid
-      - famous_regrid
     precision: null
     long_name: models used for prior
     description: model details here
@@ -345,7 +344,6 @@ proxy:
     options:
       - temp12k
       - pages2k
-      - pseudo_temp12k_using_trace_noise_whiteproxyrmse
     precision: null
     long_name: proxy datasets to assimilate
     description: proxy data from compilations and project datasets

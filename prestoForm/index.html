@@ -19,11 +19,11 @@
     <!-- Google fonts-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,700">
     <!-- Swiper slider-->
-    <link rel="stylesheet" href="vendor/swiper/swiper-bundle.min.css">
+    <link rel="stylesheet" href="http://137.184.4.96:84/vendor/swiper/swiper-bundle.min.css">
     <!-- Choices.js [Custom select]-->
-    <link rel="stylesheet" href="vendor/choices.js/public/assets/styles/choices.css">
+    <link rel="stylesheet" href="http://137.184.4.96:84/vendor/choices.js/public/assets/styles/choices.css">
     <!-- Theme stylesheet-->
-    <link rel="stylesheet" href="css/style.default.css" id="theme-stylesheet">
+    <link rel="stylesheet" href="http://137.184.4.96:84/css/style.default.css" id="theme-stylesheet">
     <!-- Custom stylesheet - for your changes-->
     <link rel="stylesheet" href="css/custom.css">
     <!-- Favicon and apple touch icons-->
@@ -40,11 +40,16 @@
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
     <!-- JavaScript files-->
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="vendor/waypoints/lib/noframework.waypoints.js"></script>
-    <script src="vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="vendor/choices.js/public/assets/scripts/choices.js"></script>
-    <script src="js/theme.js"></script>
+    <script src="http://137.184.4.96:84/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="http://137.184.4.96:84/vendor/waypoints/lib/noframework.waypoints.js"></script>
+    <script src="http://137.184.4.96:84/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="http://137.184.4.96:84/vendor/choices.js/public/assets/scripts/choices.js"></script>
+    <script src="http://137.184.4.96:84/js/theme.js"></script>
+	<script>
+	      function resizeIframe(obj) {
+		          obj.style.height = obj.contentWindow.document.documentElement.scrollHeight + 'px';
+		        }
+	</script>
     <!-- FontAwesome CSS - loading as last, so it doesn't block rendering-->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   </head>
@@ -99,71 +104,84 @@
       <section class="py-5">
         <div class="container py-5">
           <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-12">
+              <h1>Welcome to the Presto Custom Reconstruction Engine</h1><br>
+	      <p id="recon_descr" class="lead mb-1" align="justify">Each reconstruction method comes with a unique set of strengths and weaknesses. The table below provides useful summaries. For more in-depth analysis, links to the corresponding publications are also in the table.</p><br>
 
-              <h1>1. Choosing a Reconstruction Method</h1><br>
-              <p id="recon_descr" class="lead mb-1" align="justify">Each reconstruction method comes with a unique set of strengths and weaknesses. We have attempted to give useful summaries, but we recommend reading the linked publications.</p>
+              <ol>
+		<li>Choose a Reconstruction Method</li>
+		<li>Provide your contact information to receive results</li>
+		<li>Customize the Reconstruction Paramters via:</li>
+		  <ul>
+		    <li>Web form</li>
+		    <li>Use defaults</li>
+		    <li>Manually upload paramters file (advanced)</li>
+		  </ul>
+		  <li>Custom reconstruction computed by Presto Engine</li>
+		  <li>Results emailed to address provided</li>
+              </ol>
 
-              <ul>
-                <li><p class="lead mb-1" align="justify"><a id="link1" href="https://www.python.org/about/gettingstarted/" target="_blank" rel="noopener noreferrer">Get started with Python</a></p></li>
-                <li><p class="lead mb-1" align="justify"><a href="https://www.r-project.org/" target="_blank" rel="noopener noreferrer">Get started with R</a></p></li>
-              </ul>
-	        <form id="tableForm" action="/getUserInfo" method="POST">
-      <select onchange="val()" id="select_id" name="select_id">
-          <optgroup label="Select Reconstruction">
+	      <!--<div style="margin:auto; padding-left:40px;"><iframe id="abstract2" src="reconTable.html" width="100%" height="100%" frameborder="20px" scrolling="no" onload="resizeIframe(this)"></iframe></div>
+	      -->
+                <div class="table-responsive">
+	        <table class="table table-striped">
+		<tr>
+		<th>Reconstruction Name</th>
+		<th>Time Interval Covered</th>
+		<th>Proxies</th>
+		<th>Models</th>
+		<th>Methods</th>
+		<th>Original Publication</th>
+		</tr>
+		<tr>
+		<td>Holocene DA</td>
+		<td>0-12,000 years BP</td>
+		<td><a href="https://lipdverse.org/project/temp12k/" target="_blank">Temperature 12k proxy database</a></td>
+		<td><a href="https://www.earthsystemgrid.org/project/trace.html" target="_blank">TraCE-21ka</a> and a <a href="https://www.metoffice.gov.uk/research/approach/modelling-systems/unified-model/climate-models/hadcm3" target="_blank">HadCM3</a> transient deglacial simulation</td>
+		<td>Data Assimilation</td>
+		<td><a href="https://doi.org/10.5194/cp-18-2599-2022" target=:"_blank">publication link</a><td>
+		</tr>
+		<tr>
+		<td>Temperature 12k Composites</td>
+		<td>0-12,000 years BP</td>
+		<td><a href="https://lipdverse.org/project/temp12k/" target="_blank">Temperature 12k proxy database</a></td>
+		<td>N/A</td>
+		<td>Standard calibrated composite (SCC)</td>
+		<td><a href="https://doi.org/10.1038/s41597-020-0445-3" target=:"_blank">publication link</a><td>
+		</tr>
+		</table>
+                <br><br>
+
+		<div style="text-align:center;">
+		<form id="tableForm" style="padding-right:50px; font-size:24px" action="/getUserInfo" method="POST">
+      <select onchange="val()" id="select_id" name="select_id" style="font-size:24px">
+          <optgroup label="Select Reconstruction" style="font-size:24px">
               <option name="HoloceneDA" value="holocene_da">Holocene DA</option>
               <option name="temp12k" value="temp12k">Temp12k</option>
           </optgroup>
       </select>
-      <input type="submit">
-  </form>
-            </div>
+      <br><br>
+              <div class="button-submit" style="text-align:center">
+	           <button style="height:100%; width:200px;; font-size:16px; text-align:center" tye="submit" class="btn btn-primary">Submit</button>
+	      </div>
+      </form>
+       </div>
+                   </div>
+		             </div>
+			           </section>
+	    <!--
             <div class="col-md-4">
               <center>
 		<img id=image1 src="holocene_da/image.png" style="width:400px;height:300px;"></img>
                 <p><i>Figure from the selected reconstruction method.</i></p>
               </center>
             </div>
-          </div>
-            <div class="row">
-            <div class="col">
-
-              <br><h2>2. Customizing the Reconstruction Paramters</h2><br>
-	      <p class="lead mb-1" align="justify">Each reconstruction method comes with a set of options, such as the temporal resolution or the paleoclimate proxies used. You can choose to use:</p> 
-	      <p class="lead mb-1" align="justify">1) the default paramters, which will produce a reconstruction similar (possible changes due to availability of new data) to the orignal, published data,</p>
-	      <p class="lead mb-1" align="justify">2) the online configuration editor, which provides short descriptions and possible options of each paramter, or</p>
-	      <p class="lead mb-1" align="justify">3) the manual paramter upload option, for expert use.</p>
-
-              <br><h2>3. Exploring the Results</h2><br>
-              <p class="lead mb-1" align="justify">After you submit your reconstruction choices, you will receive an email with a link to the results, including both data and visualiztion(s). The readme file will provide some details on how to use and interpret the results.</p>
-          </div>
-          </div>
-        </div>
-      </section>
-
-  <h3>Please choose a reconstruction method</h3>
-
-  <!--form id="tableForm" action="/getUserInfo" method="POST">
-      <select onchange="val()" id="select_id" name="select_id">
-          <optgroup label="Select Reconstruction">
-              <option name="HoloceneDA" value="holocene_da">Holocene DA</option>
-              <option name="temp12k" value="temp12k">Temp12k</option>
-          </optgroup>
-      </select>
-      <input type="submit">
-  </form-->
-
-  <h3> </h3>
-
-  <h5>  Abstract</h3>
-
-  <p><iframe id="abstract2" src="holocene_da/abstract.txt" width="1200" height="180" frameborder=0 ></iframe></p>
-
+	    -->
+<!--
   <p><iframe id="doi" src="holocene_da/doi.txt" width="1200" height="45" frameborder=0 ></iframe></p>
 
   <p><iframe id="github" src="holocene_da/github.txt" width="1200" height="45" frameborder=0 ></iframe></p>
 
-  <!-- img id=image1 src="holocene_da/image.png" style="width:400px;height:300px;"></img -->
 
   <script>
   function val() {
@@ -178,7 +196,8 @@
       document.getElementById("link1").href = d + '/doi.txt';
   }
   </script>
-  </body>
+  -->
+  
 
         <footer>
         <!-- COPYRIGHTS                -->
@@ -196,4 +215,5 @@
           </div>
         </div>
       </footer>
+      </body>
 </html>
