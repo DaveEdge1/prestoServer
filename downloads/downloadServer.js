@@ -8,7 +8,7 @@ var app = express();
 
 app.get('/downloads/:downloadId', (req, res) => {
 	  const archive = function (foldername) {
-		      var zipName = "presto.zip";
+		      var zipName = foldername+"presto.zip";
 		      const source = '/root/presto/userRecons/' + foldername;
 		  const archive = archiver('zip', { zlib: { level: 9 }});
 		      const stream = fs.createWriteStream(zipName);
@@ -20,7 +20,7 @@ app.get('/downloads/:downloadId', (req, res) => {
 
 		      stream.on('close', function(){
 			            res.status(200);
-			            res.download('/root/presto/downloads/presto.zip')
+			            res.download('/root/presto/downloads/'+zipName)
 			            //res.sendFile('/root/presto/downloads/index.html')
 			          });
 		      archive.finalize();
