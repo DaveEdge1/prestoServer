@@ -107,7 +107,7 @@
 <br>
 <br>
 <br>
-<p style="font-size:16px"><p style="font-size:15px">To create a Holocene reconstruction, adjust the options below and click "submit." You will recieve an email when your reconstruction is done.
+<p style="font-size:16px"><p style="font-size:15px">To create a Holocene reconstruction, adjust the options below and click "submit." You will receive an email when your reconstruction is done.
 <br>
 <br>
 For more information about each of the options, mouse over the question mark icons or see <a href="https://cp.copernicus.org/articles/18/2599/2022/" target="_blank">Erb et al. 2022</a> for more details. Default values will produce a reconstruction similar to the one in Erb et al., 2022. If you are unsure what an option does, leaving it at its default value is a good choice.<p>
@@ -120,7 +120,7 @@ For more information about each of the options, mouse over the question mark ico
 </form>
 <br>
 <br>
-<form method="POST" action="/sendReconRequest">
+<form method="POST" action="/sendReconRequest" onsubmit="return confirm('Submit Custom Reconstruction request?');">
 <button type="button" class="collapsible">Reconstruction</button>
 <div class="content">
 <br>
@@ -164,23 +164,6 @@ For more information about each of the options, mouse over the question mark ico
 <br>
 <br>
 <div style: "vertical-align: middle; height: 50px;" class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="time_resolution_label" for="time_resolution">duration of reconstruction time step </label>
-<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">The base temporal resolution, in years {10}</span>
-</div>
-<div class="range_container">
-<div class="sliders_control">
-<input id="time_resolutionSilder" type="range" value="200" min="10" max="1000" step="55"/>
-<br>
-<input type="number" id="time_resolutionInput" name="time_resolution" value="200" min="10" max="1000" step="10"/>
-</div>
-</div>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-</div>
-<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">time interval for reconstruction </label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
 <span class="tooltip-text">define a start and end year in units years BP</span>
@@ -200,6 +183,23 @@ For more information about each of the options, mouse over the question mark ico
 <div class="form_control_container__time">Max</div>
 <input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="12000" min="0" max="12000" step="1"/>
 </div>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="time_resolution_label" for="time_resolution">duration of reconstruction time step </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The base temporal resolution, in years {10}</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="time_resolutionSilder" type="range" value="200" min="10" max="1000" step="55"/>
+<br>
+<input type="number" id="time_resolutionInput" name="time_resolution" value="200" min="10" max="1000" step="10"/>
 </div>
 </div>
 <br>
@@ -239,6 +239,32 @@ For more information about each of the options, mouse over the question mark ico
 <div class="content">
 <br>
 <br>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="prior_models_label" for="prior_models">models used for prior </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">model details here</span>
+</div>
+<div name="prior_models" id="prior_models" class="form-check">
+<div class=check-item>
+<input name="prior_models" class="checkbox-1" type="checkbox" value="hadcm3_regrid" checked id = "hadcm3_regrid">
+<label style="font-size:14px;" for="hadcm3_regrid">hadcm3_regrid</label>
+</div>
+<div class=check-item>
+<input name="prior_models" class="checkbox-1" type="checkbox" value="trace_regrid" checked id = "trace_regrid">
+<label style="font-size:14px;" for="trace_regrid">trace_regrid</label>
+</div>
+</div>
+<div class="checkall-container">
+<div class="checkAll">
+<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('prior_models', prior_models_incrementCheckCycle());" >
+</div>
+</div>
+<br>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
 <div style: "vertical-align: middle; height: 50px;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="prior_time_window_label" for="prior_time_window">prior time window </label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
@@ -333,104 +359,33 @@ For more information about each of the options, mouse over the question mark ico
 <hr class="solid">
 <br>
 </div>
-<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="prior_models_label" for="prior_models">models used for prior </label>
-<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">model details here</span>
-</div>
-<div name="prior_models" id="prior_models" class="form-check">
-<div class=check-item>
-<input name="prior_models" class="checkbox-1" type="checkbox" value="hadcm3_regrid" checked id = "hadcm3_regrid">
-<label style="font-size:14px;" for="hadcm3_regrid">hadcm3_regrid</label>
-</div>
-<div class=check-item>
-<input name="prior_models" class="checkbox-1" type="checkbox" value="trace_regrid" checked id = "trace_regrid">
-<label style="font-size:14px;" for="trace_regrid">trace_regrid</label>
-</div>
-</div>
-<div class="checkall-container">
-<div class="checkAll">
-<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('prior_models', prior_models_incrementCheckCycle());" >
-</div>
-</div>
-<br>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-</div>
 </div>
 <button type="button" class="collapsible">Climate Proxies</button>
 <div class="content">
 <br>
 <br>
-<div class="form-group-advanced">
-<label style="font-size:20px; padding-right:10px; color:black" for="proxy_assimilate_together">joint proxy assimilation (advanced) </label>
-<div class="hover-text">?
-<span class="tooltip-text">If False, assimile proxies one at a time (slower) {True,False}</span>
-</div>
-<div class="boolean_container">
-<input id="proxy_assimilate_together" type = "radio" value="true" name="proxy_assimilate_together" checked>
-<label for="true">True</label><br>
-<input id="proxy_assimilate_together" type = "radio" value="false" name="proxy_assimilate_together">
-<label for="false">False</label><br>
-</div>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-</div>
 <div style: "vertical-align: middle; height: 50px;" class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="proxy_resolution_max_label" for="proxy_resolution_max">maximum resolution to use for proxies </label>
+<label style="font-size:20px; padding-right:10px; color:black" id="proxy_datasets_label" for="proxy_datasets">proxy datasets to assimilate </label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">The maximum temporal resolution to assimilate proxies at, in years {1000}</span>
-</div>
-<div class="range_container">
-<div class="sliders_control">
-<input id="proxy_resolution_maxSilder" type="range" value="200" min="10" max="1000" step="55"/>
-<br>
-<input type="number" id="proxy_resolution_maxInput" name="proxy_resolution_max" value="200" min="10" max="1000" step="10"/>
-</div>
-</div>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-</div>
-<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="proxy_seasonality_label" for="proxy_seasonality">seasonality of proxies to assimilate </label>
-<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">The reconstruction will still try to represent annual means.</span>
+<span class="tooltip-text">proxy data from compilations and project datasets</span>
 </div>
 <div>
-<a class="a-URL" target="_blank" href=https://lipdverse.org/vocabulary/interpretation_seasonality/>more info</a>
+<a class="a-URL" target="_blank" href=https://lipdverse.org/project/>more info</a>
 </div>
 <br>
-<div name="proxy_seasonality" id="proxy_seasonality" class="form-check">
+<div name="proxy_datasets" id="proxy_datasets" class="form-check">
 <div class=check-item>
-<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="annual" checked id = "annual">
-<label style="font-size:14px;" for="annual">annual</label>
+<input name="proxy_datasets" class="checkbox-1" type="checkbox" value="temp12k" checked id = "temp12k">
+<label style="font-size:14px;" for="temp12k">temp12k</label>
 </div>
 <div class=check-item>
-<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="summerOnly" checked id = "summerOnly">
-<label style="font-size:14px;" for="summerOnly">summerOnly</label>
-</div>
-<div class=check-item>
-<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="winterOnly" checked id = "winterOnly">
-<label style="font-size:14px;" for="winterOnly">winterOnly</label>
-</div>
-<div class=check-item>
-<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="summer+" checked id = "summer+">
-<label style="font-size:14px;" for="summer+">summer+</label>
-</div>
-<div class=check-item>
-<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="winter+" checked id = "winter+">
-<label style="font-size:14px;" for="winter+">winter+</label>
+<input name="proxy_datasets" class="checkbox-1" type="checkbox" value="pages2k" id = "pages2k">
+<label style="font-size:14px;" for="pages2k">pages2k</label>
 </div>
 </div>
 <div class="checkall-container">
 <div class="checkAll">
-<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('proxy_seasonality', proxy_seasonality_incrementCheckCycle());" >
+<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('proxy_datasets', proxy_datasets_incrementCheckCycle());" >
 </div>
 </div>
 <br>
@@ -525,6 +480,81 @@ For more information about each of the options, mouse over the question mark ico
 <hr class="solid">
 <br>
 </div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="proxy_seasonality_label" for="proxy_seasonality">seasonality of proxies to assimilate </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The reconstruction will still try to represent annual means.</span>
+</div>
+<div>
+<a class="a-URL" target="_blank" href=undefined>more info</a>
+</div>
+<br>
+<div name="proxy_seasonality" id="proxy_seasonality" class="form-check">
+<div class=check-item>
+<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="annual" checked id = "annual">
+<label style="font-size:14px;" for="annual">annual</label>
+</div>
+<div class=check-item>
+<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="summerOnly" checked id = "summerOnly">
+<label style="font-size:14px;" for="summerOnly">summerOnly</label>
+</div>
+<div class=check-item>
+<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="winterOnly" checked id = "winterOnly">
+<label style="font-size:14px;" for="winterOnly">winterOnly</label>
+</div>
+<div class=check-item>
+<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="summer+" id = "summer+">
+<label style="font-size:14px;" for="summer+">summer+</label>
+</div>
+<div class=check-item>
+<input name="proxy_seasonality" class="checkbox-1" type="checkbox" value="winter+" id = "winter+">
+<label style="font-size:14px;" for="winter+">winter+</label>
+</div>
+</div>
+<div class="checkall-container">
+<div class="checkAll">
+<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('proxy_seasonality', proxy_seasonality_incrementCheckCycle());" >
+</div>
+</div>
+<br>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="proxy_resolution_max_label" for="proxy_resolution_max">maximum resolution to use for proxies </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The maximum temporal resolution to assimilate proxies at, in years {1000}</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="proxy_resolution_maxSilder" type="range" value="200" min="10" max="1000" step="55"/>
+<br>
+<input type="number" id="proxy_resolution_maxInput" name="proxy_resolution_max" value="200" min="10" max="1000" step="10"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="proxy_assimilate_together">joint proxy assimilation (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">If False, assimile proxies one at a time (slower) {True,False}</span>
+</div>
+<div class="boolean_container">
+<input id="proxy_assimilate_together" type = "radio" value="true" name="proxy_assimilate_together" checked>
+<label for="true">True</label><br>
+<input id="proxy_assimilate_together" type = "radio" value="false" name="proxy_assimilate_together">
+<label for="false">False</label><br>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
 <div class="form-group-advanced">
 <label style="font-size:20px; padding-right:10px; color:black" for="proxy_seed">proxy pseudo-random selection seed (advanced) </label>
 <div class="hover-text">?
@@ -542,58 +572,17 @@ For more information about each of the options, mouse over the question mark ico
 <hr class="solid">
 <br>
 </div>
-<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="proxy_datasets_label" for="proxy_datasets">proxy datasets to assimilate </label>
-<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">proxy data from compilations and project datasets</span>
-</div>
-<div>
-<a class="a-URL" target="_blank" href=https://lipdverse.org/project/>more info</a>
-</div>
-<br>
-<div name="proxy_datasets" id="proxy_datasets" class="form-check">
-<div class=check-item>
-<input name="proxy_datasets" class="checkbox-1" type="checkbox" value="temp12k" checked id = "temp12k">
-<label style="font-size:14px;" for="temp12k">temp12k</label>
-</div>
-<div class=check-item>
-<input name="proxy_datasets" class="checkbox-1" type="checkbox" value="pages2k" id = "pages2k">
-<label style="font-size:14px;" for="pages2k">pages2k</label>
-</div>
-</div>
-<div class="checkall-container">
-<div class="checkAll">
-<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('proxy_datasets', proxy_datasets_incrementCheckCycle());" >
-</div>
-</div>
-<br>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-</div>
 </div>
 <button type="button" class="collapsible">Geospatial</button>
 <div class="content">
 <br>
 <br>
-<div class="form-group-advanced">
-<label style="font-size:20px; padding-right:10px; color:black" for="geo_localization_radius">proxy assimilation radius (advanced) </label>
-<div class="hover-text">?
-<span class="tooltip-text">Localization radius, in meters {None,15000}  Only works if assimate_together=False</span>
-</div>
-<input style="font-size:14px;" type="text" class="form-control" id="geo_localization_radius" aria-describedby="emailHelp" value="null" name="geo_localization_radius">
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-</div>
 <div style: "vertical-align: middle; height: 50px;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label" for="geo_proxy_coords">coordinate bounds for assimilating proxies </label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
 <span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>
 </div>
-<p style="color: red;">Hint: At the four corners of the map, you will find dragable handles<p>
+<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>
 <div class="mapall-container">
 <canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url('/SimpleWorldMap4.png')"></canvas>
 <div class="map-numeric">
@@ -609,6 +598,17 @@ For more information about each of the options, mouse over the question mark ico
 <label>max</label>
 </div>
 </div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="geo_localization_radius">proxy assimilation radius (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">Localization radius, in meters {None,15000}  Only works if assimate_together=False</span>
+</div>
+<input style="font-size:14px;" type="text" class="form-control" id="geo_localization_radius" aria-describedby="emailHelp" value="null" name="geo_localization_radius">
 <br>
 <hr class="solid">
 <hr class="solid">

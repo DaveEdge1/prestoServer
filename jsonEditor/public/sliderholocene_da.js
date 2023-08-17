@@ -402,18 +402,18 @@ function prior_models_incrementCheckCycle(){
 prior_models_checkCycle = prior_models_checkCycle+1;
 return (prior_models_checkCycle);
 }
-var proxy_seasonality_checkCycle = 0;
-function proxy_seasonality_incrementCheckCycle(){
-proxy_seasonality_checkCycle = proxy_seasonality_checkCycle+1;
-return (proxy_seasonality_checkCycle);
+var proxy_datasets_checkCycle = 0;
+function proxy_datasets_incrementCheckCycle(){
+proxy_datasets_checkCycle = proxy_datasets_checkCycle+1;
+return (proxy_datasets_checkCycle);
 }
 var proxy_archives_checkCycle = 0;
 function proxy_archives_incrementCheckCycle(){
 proxy_archives_checkCycle = proxy_archives_checkCycle+1;
 return (proxy_archives_checkCycle);
 }
-var proxy_datasets_checkCycle = 0;
-function proxy_datasets_incrementCheckCycle(){
-proxy_datasets_checkCycle = proxy_datasets_checkCycle+1;
-return (proxy_datasets_checkCycle);
+var proxy_seasonality_checkCycle = 0;
+function proxy_seasonality_incrementCheckCycle(){
+proxy_seasonality_checkCycle = proxy_seasonality_checkCycle+1;
+return (proxy_seasonality_checkCycle);
 }
