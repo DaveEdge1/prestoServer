@@ -1,8 +1,8 @@
 time:
   range_to_reconstruct:
     value:
-      - 7000
-      - 10000
+      - 0
+      - 12000
     default:
       - 7000
       - 10000
@@ -44,7 +44,7 @@ proxy:
     complexity: standard
     URL: null
   seasonalityGeneral:
-    value: summer+
+    value: annual
     default: summer+
     limits: null
     options:

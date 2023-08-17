@@ -150,7 +150,7 @@ function dataTypeHTML (configJSON, key, id1) {
 		console.log(key)
 		console.log("defaults: " + configJSON[key].default + " limits: " + configJSON[key].limits)
 		dataHTML = dataHTML
-		+ '<p style="color: red;">Hint: At the four corners of the map, you will find dragable handles<p>\n'
+		+ '<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>\n'
 		+ '<div class="mapall-container">\n'
 		+ '<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(\'/SimpleWorldMap4.png\')"></canvas>\n'
 		+ '<div class="map-numeric">\n'
@@ -413,7 +413,7 @@ function buildHtml(configs, recon) {
        + '<br>\n'
        + '<br>\n'
        //+ '<form onSubmit="search();return false;" action="">\n'//action="/sendReconRequest" method="POST"
-       + '<form method="POST" action="/sendReconRequest">\n'
+       + '<form method="POST" action="/sendReconRequest" onsubmit="return confirm('+"'Submit Custom Reconstruction request?'"+');">\n'
        + writeBody(configs) 
        + '<br>\n'
        + '<br>\n'
