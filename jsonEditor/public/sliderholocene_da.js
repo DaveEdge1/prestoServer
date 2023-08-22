@@ -402,11 +402,6 @@ function prior_models_incrementCheckCycle(){
 prior_models_checkCycle = prior_models_checkCycle+1;
 return (prior_models_checkCycle);
 }
-var proxy_datasets_checkCycle = 0;
-function proxy_datasets_incrementCheckCycle(){
-proxy_datasets_checkCycle = proxy_datasets_checkCycle+1;
-return (proxy_datasets_checkCycle);
-}
 var proxy_archives_checkCycle = 0;
 function proxy_archives_incrementCheckCycle(){
 proxy_archives_checkCycle = proxy_archives_checkCycle+1;

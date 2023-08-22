@@ -164,7 +164,7 @@ proxy:
     long_name: proxy datasets to assimilate
     description: proxy data from compilations and project datasets
     data_type: list
-    complexity: standard
+    complexity: experimental
     URL: https://lipdverse.org/project/
 
   archives:
