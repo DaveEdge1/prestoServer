@@ -189,6 +189,7 @@ proxy:
     description: The reconstruction will still try to represent annual means.
     data_type: list
     complexity: standard
+    URL: null
 
   resolution_max:
     value: 200

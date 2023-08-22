@@ -64,12 +64,24 @@ function editConfigs (configLoc, formEdits, recon){
 					if (Array.isArray(newKey)){
 					}else{
 						newKey = new Array(newKey)
+						configFileNew[key1][key2]['value'] = []
+						console.log('made empty array: ' + configFileNew[key1][key2]['value'])
 					}
-					for (ii in configFileNew[key1][key2]['value']){
+					var dataType = ''
+					if (typeof(configFileNew[key1][key2]['value'][0]) === "number"){
+						dataType = 'num'
+					}  else if (typeof(configFileNew[key1][key2]['value'][0]) === 'boolean'){
+					        dataType = 'bool'
+					}
+
+					configFileNew[key1][key2]['value'] = []
+					console.log('made empty array: ' + configFileNew[key1][key2]['value'])
+					
+					for (ii in newKey){
 						console.log("old: ", configFileNew[key1][key2]['value'][ii], " new: ", newKey[ii])
-					    if (typeof(configFileNew[key1][key2]['value'][ii]) === "number"){
+					    if (dataType === "num"){
 						    configFileNew[key1][key2]['value'][ii] = Number(newKey[ii])
-					    }  else if (typeof(configFileNew[key1][key2]['value'][ii]) === 'boolean'){
+					    }  else if (dataType === 'bool'){
 						    configFileNew[key1][key2]['value'][ii] = parseBool(newKey[ii])
 					    } else {
 						    configFileNew[key1][key2]['value'][ii] = newKey[ii]
@@ -98,7 +110,7 @@ function editConfigs (configLoc, formEdits, recon){
 
 function writeConfigs (recon, user, domain, jsonBody) {
   var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
-  var downloadPath = 'http://137.184.4.96:81/' + recon + '/username/' + user + '/domainname/' + domain + '/configloc/manual'
+  var downloadPath = 'http://137.184.4.96:81/' + recon + '/' + user + '/' + domain + '/manual'
   editConfigs(configLoc, jsonBody, recon)
   return (downloadPath);
 }
@@ -109,7 +121,7 @@ var getUserInfo = function (reqparamsrecon, reqparamsparsedUser, reqparamsparsed
 	return userInfo;
 }
 
-app.get('/:recon/username/:parsedUser/domainname/:parsedDomain/configloc/manual', function (req, res) {
+app.get('/:recon/:parsedUser/:parsedDomain/manual', function (req, res) {
   console.log(req.params.recon)
   userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain)
   res.sendFile('/root/presto/jsonEditor/forms/' + req.params.recon + '.html')

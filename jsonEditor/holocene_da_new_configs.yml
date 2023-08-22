@@ -60,7 +60,7 @@ time:
     complexity: standard
     URL: null
   resolution:
-    value: 100
+    value: 200
     default: 200
     limits:
       - 10
@@ -197,21 +197,8 @@ proxy:
     URL: https://lipdverse.org/project/
   archives:
     value:
-      - Borehole
-      - Coral
-      - FluvialSediment
-      - GlacierIce
-      - GroundIce
       - LakeSediment
       - MarineSediment
-      - Midden
-      - MolluskShell
-      - Other
-      - Peat
-      - Sclerosponge
-      - Shoreline
-      - Speleothem
-      - TerrestrialSediment
       - Wood
     default:
       - Borehole
@@ -257,8 +244,6 @@ proxy:
   seasonality:
     value:
       - annual
-      - summerOnly
-      - winterOnly
     default:
       - annual
       - summerOnly
@@ -275,6 +260,7 @@ proxy:
     description: The reconstruction will still try to represent annual means.
     data_type: list
     complexity: standard
+    URL: null
   resolution_max:
     value: 200
     default: 200
@@ -364,10 +350,10 @@ proxy:
 geo:
   proxy_coords:
     value:
-      - -90
-      - 90
-      - -180
-      - 180
+      - -48
+      - -9
+      - 111
+      - 158
     default:
       - -90
       - 90

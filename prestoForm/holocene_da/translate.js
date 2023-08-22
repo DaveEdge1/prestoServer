@@ -40,7 +40,15 @@ function writeYaml () {
 			             configsOrig[orig] = false
 				   }
 				 } else {
-				 configsOrig[orig] = configs1.value
+					 /*if (Array.isArray(configsOrig[orig])){
+						 console.log(configsOrig[orig])
+						 configsOrig[orig] = null
+						 console.log(configsOrig[orig])
+						 configsOrig[orig] = configs1.value
+						 console.log(configsOrig[orig])
+					 } else {*/
+				                 configsOrig[orig] = configs1.value
+					 //}
 				 }
 				}else{
 					console.log('no value')
