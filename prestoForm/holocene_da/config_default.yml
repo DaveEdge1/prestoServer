@@ -1,5 +1,5 @@
 data_dir: //
-exp_name: default
+exp_name: default_trace
 vars_to_reconstruct:
   - tas
 time_resolution: 200
@@ -15,17 +15,31 @@ assimilate_selected_seasons:
   - summerOnly
   - winterOnly
 assimilate_selected_archives:
+  - Borehole
+  - Coral
+  - FluvialSediment
+  - GlacierIce
+  - GroundIce
+  - LakeSediment
+  - MarineSediment
+  - Midden
+  - MolluskShell
+  - Other
+  - Peat
+  - Sclerosponge
+  - Shoreline
+  - Speleothem
+  - TerrestrialSediment
   - Wood
 assimilate_selected_region:
-  - -58
-  - 18
-  - -89
-  - -28
+  - -90
+  - 90
+  - -180
+  - 180
 assimilate_selected_resolution: false
 percent_to_assimilate: 100
 seed_for_proxy_choice: 0
 models_for_prior:
-  - hadcm3_regrid
   - trace_regrid
 proxy_datasets_to_assimilate:
   - temp12k
