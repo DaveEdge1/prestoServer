@@ -12,6 +12,7 @@ var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
 var d = new Date();
 var timeNow = d.getTime()
 var nodemailer = require('nodemailer');
+var align = require('align-yaml');
 
 /*const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
@@ -91,9 +92,10 @@ app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
 	  function (err, data, container) {
 		    var configFileTxt = function (configFileLoc) {
 			        var s = fs.readFileSync(configFileLoc,'utf8');
-			        s = YAML.parse(s)
-			        s = YAML.stringify(s)
-			        s = s.replace(/(?:\r\n|\r|\n)/g, '<br>');
+			        //s = YAML.parse(s)
+			        //s = YAML.stringify(s)
+			        s = align(s, 5)
+			        //s = s.replace(/(?:\r\n|\r|\n)/g, '<br>');
 			        return s
 		    }
 		    console.log(configFileTxt(configLoc))
@@ -104,6 +106,19 @@ app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
 			      html:   '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 			              + '<br>'
 			              + '<a href="' + destURL + '" download>Download Custom Reconstruction '+timeNow+'</a>'
+			              + '<br><br>'
+			              + '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
+			              + '<pre>' + configFileTxt(configLoc) + '</pre>'
+			              + '<br><br>'
+			              + '<div><p style="font-size: 16px; font-weight: 700">Acknowledgement</p></div>'
+			              + '<div>If you publish or present this work, please acknowledge all of the science and tools that make PReSto possible.<br></div>'
+			              + '<div><br></div><div><b>Data</b></div>'
+			              + '<div>Please cite the datasets you used in PReSto. This potentially includes both paleoclimate data and model simulations. <a href="https://lipdverse.org" target="_blank">https://lipdverse.org</a> provides bibliographies, bibtex files, and guidance on how to best cite data, including large data compilations. Reference information for model simulations is provided in the Reconstructions section of&nbsp;<a href="https://paleopresto.com/" target="_blank">https://paleopresto.com/</a>.</div><div><br></div>'
+			              + '<div><b>Reconstruction Algorithm</b></div>'
+			              + '<div>Cite the paper(s) that present or describe the analytical approach. This information is provided in the Reconstructions section of&nbsp;<a href="https://paleopresto.com/" target="_blank">https://paleopresto.com/</a>.</div><div><br></div>'
+			              + '<div><b>PReSto</b></div>'
+			              + '<div>PReSto is still in development, but if you use PReSto in a research project, please cite it as:&nbsp;</div><div><br></div>'
+			              + '<div>Dave Edge, Michael Erb, Nicholas McKay, Feng Zhu, Deborah Khider, Julien Emile-Geay, &amp; Cody Routson. (2023). The Paleoclimate Reconstruction Storehouse (PReSto) platform (alpha-release). Zenodo. <a href="https://doi.org/10.5281/zenodo.8274756">https://doi.org/10.5281/zenodo.8274756</a><br></div>'
 			              + '<br>'
 			              + '<br>'
 			              + '<br>'
@@ -113,9 +128,6 @@ app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
 			              + '<p>This account is not monitored for replies</p>'
 			              + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
 			              + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu?Subject=' + timeNow  +'">email us directly</a>  with your unique reconstruction id: ' + timeNow + '</p>'
-			              + '<br><br>'
-			              + '<p><b>Custom Parameters:</b></p>'
-			              + '<p>' + configFileTxt(configLoc) + '</p>'
 			      };
 		      var mailOptions2 = {
 			                    from: 'no-reply@paleopresto.com',
@@ -134,8 +146,27 @@ app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
 			                            + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
 			                            + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu' + timeNow  +'">email us directly</a>  with your unique reconstruction id: ' + timeNow + '</p>'
 			                            + '<br><br>'
-			                            + '<p><b>Custom Parameters</b></p>'
-			                            + '<p>' + configFileTxt(configLoc) + '</p>'
+			                            + '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
+			                            + '<pre>' + configFileTxt(configLoc) + '</pre>'
+			                            + '<br><br>'
+			                            + '<div><p style="font-size: 16px; font-weight: 700">Acknowledgement</p></div>'
+			                            + '<div>If you publish or present this work, please acknowledge all of the science and tools that make PReSto possible.<br></div>'
+			                            + '<div><br></div><div><b>Data</b></div>'
+			                            + '<div>Please cite the datasets you used in PReSto. This potentially includes both paleoclimate data and model simulations. <a href="https://lipdverse.org" target="_blank">https://lipdverse.org</a> provides bibliographies, bibtex files, and guidance on how to best cite data, including large data compilations. Reference information for model simulations is provided in the Reconstructions section of&nbsp;<a href="https://paleopresto.com/" target="_blank">https://paleopresto.com/</a>.</div><div><br></div>'
+			                            + '<div><b>Reconstruction Algorithm</b></div>'
+			                            + '<div>Cite the paper(s) that present or describe the analytical approach. This information is provided in the Reconstructions section of&nbsp;<a href="https://paleopresto.com/" target="_blank">https://paleopresto.com/</a>.</div><div><br></div>'
+			                            + '<div><b>PReSto</b></div>'
+			                            + '<div>PReSto is still in development, but if you use PReSto in a research project, please cite it as:&nbsp;</div><div><br></div>'
+			                            + '<div>Dave Edge, Michael Erb, Nicholas McKay, Feng Zhu, Deborah Khider, Julien Emile-Geay, &amp; Cody Routson. (2023). The Paleoclimate Reconstruction Storehouse (PReSto) platform (alpha-release). Zenodo. <a href="https://doi.org/10.5281/zenodo.8274756">https://doi.org/10.5281/zenodo.8274756</a><br></div>'
+			                            + '<br>'
+			                            + '<br>'
+			                            + '<br>'
+			                            + '<br>'
+			                            + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>'
+			                            + '<br>'
+			                            + '<p>This account is not monitored for replies</p>'
+			                            + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
+			                            + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu' + timeNow  +'">email us directly</a>  with your unique reconstruction id: ' + timeNow + '</p>'
 		      };
 		  fs.readdir(dirname, function(err, files) {
 			    const txtFiles = files.filter(el => path.extname(el) === '.nc')

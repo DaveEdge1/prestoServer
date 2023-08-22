@@ -12,15 +12,15 @@ percent_of_prior: 100
 seed_for_prior: 0
 assimilate_selected_seasons:
   - annual
+  - summerOnly
+  - winterOnly
 assimilate_selected_archives:
-  - LakeSediment
-  - MarineSediment
   - Wood
 assimilate_selected_region:
-  - -48
-  - -9
-  - 111
-  - 158
+  - -58
+  - 18
+  - -89
+  - -28
 assimilate_selected_resolution: false
 percent_to_assimilate: 100
 seed_for_proxy_choice: 0

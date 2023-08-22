@@ -197,8 +197,6 @@ proxy:
     URL: https://lipdverse.org/project/
   archives:
     value:
-      - LakeSediment
-      - MarineSediment
       - Wood
     default:
       - Borehole
@@ -244,6 +242,8 @@ proxy:
   seasonality:
     value:
       - annual
+      - summerOnly
+      - winterOnly
     default:
       - annual
       - summerOnly
@@ -350,10 +350,10 @@ proxy:
 geo:
   proxy_coords:
     value:
-      - -48
-      - -9
-      - 111
-      - 158
+      - -58
+      - 18
+      - -89
+      - -28
     default:
       - -90
       - 90
