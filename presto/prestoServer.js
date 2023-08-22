@@ -3,6 +3,7 @@ express = require("express");
 child_process = require("child_process")
 PORT = process.env.PORT || 3000
 const fs = require('fs');
+var YAML = require('yaml')
 const streams = require('memory-streams')
 const path = require('path')
 var configLoc = ''
@@ -23,16 +24,24 @@ myOAuth2Client.setCredentials({
 	refresh_token:'1//04YIbdUZ1XuQ-CgYIARAAGAQSNwF-L9Ir35IF06Q1GEJ7yI6qWGk1OKbhnxh3bGI6NRWHEm_6N3Sj99oWgToZXpadmBc0d9tRxrE'
 });
 const myAccessToken = myOAuth2Client.getAccessToken()*/
+/*
 var transporter = nodemailer.createTransport({
   service: 'hotmail',
   auth: {
     user: 'paleopresto@outlook.com',
     pass: 'U4,wU_?dBN)U,b6',
-    //clientId: '1046081870453-g0nj94lb3kpal58elfiklrc8tm3ofv6c.apps.googleusercontent.com',
-    //clientSecret: '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',
-    //accessToken: myAccessToken,
-    //refreshToken: '1//04wi-3Qq9II9TCgYIARAAGAQSNwF-L9IrQH8H5dcZ2-nD6fDBqmys5oT_b15bvciRUDMQ9W6XqG4SJgTrvV_lN2KeUysGX50GlTE'
   }
+});
+*/
+
+let transporter = nodemailer.createTransport({
+    host: 'smtp.zoho.com',
+	    port: 465,
+	    name: 'zoho.com',
+	    auth: {
+		            user: "no-reply@paleopresto.com",
+		            pass: "5-KBS%*YsTneRs4"
+		        }
 });
 
 updateHDAParams = function (){
@@ -48,7 +57,7 @@ newDir = function(dirname) {
 	return (dirname)
 }
 
-app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, res) => {
+app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
   //console.log('dirname: ' + dirname())
   var dockerSuccess = 0
   const stdout = new streams.WritableStream()
@@ -63,47 +72,7 @@ app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, r
   } else {
 	  configLoc = updateHDAParams()
   }
-  var mailOptions = {
-  from: 'paleopresto@outlook.com',
-  to: emailRecip,
-  subject: 'Presto Custom Reconstruction ' + timeNow,
-  html:   '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
-	  + '<br>'
-	  + '<a href="' + destURL + '" download>Download Custom Reconstruction '+timeNow+'</a>'
-	  + '<br>'
-	  + '<br>'
-	  + '<br>'
-	  + '<br>'
-	  + '<br>'
-	  + '<br>'
-	  + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>'
-	  + '<br>'
-	  + '<p>This account is not monitored for replies</p>'
-	  + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
-	  + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu">email us directly</a>  with your unqie reconstruction id: ' + timeNow + '</p>'
-	  //'Copy and paste the following URL into your web browser to download the requested reconstruction (expires after 7 days): \n' + destURL + '\n\nThis account is not monitored for replies\n' + 'More at https://paleopresto.com/'
-  };
-    var mailOptions2 = {
-	      from: 'paleopresto@outlook.com',
-	      to: emailRecip,
-	      subject: 'Presto Custom Reconstruction ' + timeNow,
-	      html:   '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
-	              + '<br>'
-	              + '<a href="' + destURL + '" download>Download Custom Reconstruction '+timeNow+'</a>'
-	              + '<br>'
-	              + '<br>'
-	              + '<br>'
-	              + '<br>'
-	              + '<br>'
-	              + '<br>'
-	              + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>'
-	              + '<br>'
-	              + '<p>This account is not monitored for replies</p>'
-	              + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
-	              + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu">email us directly</a>  with your unqie reconstruction id: ' + timeNow + '</p>'
-	              //'Copy and paste the following URL into your web browser to download the requested reconstruction (expires after 7 days): \n' + destURL + '\n\nThis account is not monitored for replies\n' + 'More at https://paleopresto.com/'
-};
-  res.send('Starting your custom Presto reconstruction<br /><br />' + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' + 'The results will be sent to: ' + emailRecip + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 5 seconds' + '<script>var timeout = 5000; setTimeout(function () {window.location = "https://paleopresto.com/"; }, timeout); </script>')
+  res.send('Starting your custom Presto reconstruction<br /><br />' + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' + 'The results will be sent to: ' + emailRecip + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' + '<script>var timeout = 10000; setTimeout(function () {window.location = "https://paleopresto.com/"; }, timeout); </script>')
       let options = {
       Tty: false,
       HostConfig: {
@@ -114,21 +83,60 @@ app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, r
         ]	
       }
     }
-	fs.copyFileSync(configLoc, newDir(dirname)+'configs.yml', 0, (err) => {
-		  if (err) {
-			      console.log("Error Found:", err);
-			    }
-		  else {
-		          console.log("\nFile Contents of copied_file:")
-		       }
-		  });
 	docker.run('davidedge/lipd_webapps:holocene_da',
 	  [], 
 	  [stdout, stderr],
 	  options,
 
 	  function (err, data, container) {
-          //console.log(datai.StatusCode);
+		    var configFileTxt = function (configFileLoc) {
+			        var s = fs.readFileSync(configFileLoc,'utf8');
+			        s = YAML.parse(s)
+			        s = YAML.stringify(s)
+			        s = s.replace(/(?:\r\n|\r|\n)/g, '<br>');
+			        return s
+		    }
+		    console.log(configFileTxt(configLoc))
+                    var mailOptions = {
+			      from: 'no-reply@paleopresto.com',
+			      to: emailRecip,
+			      subject: 'Presto Custom Reconstruction ' + timeNow,
+			      html:   '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
+			              + '<br>'
+			              + '<a href="' + destURL + '" download>Download Custom Reconstruction '+timeNow+'</a>'
+			              + '<br>'
+			              + '<br>'
+			              + '<br>'
+			              + '<br>'
+			              + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>'
+			              + '<br>'
+			              + '<p>This account is not monitored for replies</p>'
+			              + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
+			              + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu?Subject=' + timeNow  +'">email us directly</a>  with your unique reconstruction id: ' + timeNow + '</p>'
+			              + '<br><br>'
+			              + '<p><b>Custom Parameters:</b></p>'
+			              + '<p>' + configFileTxt(configLoc) + '</p>'
+			      };
+		      var mailOptions2 = {
+			                    from: 'no-reply@paleopresto.com',
+			                    to: emailRecip,
+			                    subject: 'Presto Custom Reconstruction ' + timeNow,
+			                    html:   '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
+			                            + '<br>'
+			                            + '<a href="' + destURL + '" download>Download Custom Reconstruction '+timeNow+'</a>'
+			                            + '<br>'
+			                            + '<br>'
+			                            + '<br>'
+			                            + '<br>'
+			                            + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>'
+			                            + '<br>'
+			                            + '<p>This account is not monitored for replies</p>'
+			                            + '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
+			                            + '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu' + timeNow  +'">email us directly</a>  with your unique reconstruction id: ' + timeNow + '</p>'
+			                            + '<br><br>'
+			                            + '<p><b>Custom Parameters</b></p>'
+			                            + '<p>' + configFileTxt(configLoc) + '</p>'
+		      };
 		  fs.readdir(dirname, function(err, files) {
 			    const txtFiles = files.filter(el => path.extname(el) === '.nc')
 			    console.log('.nc files: names, length, length==0')
@@ -136,18 +144,25 @@ app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, r
 			    console.log(txtFiles.length)
 			    dockerSuccess = txtFiles.length
 			  })
-		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString(), function(err) {
-			                      if(err) {
-						                                                              return console.log(err);
-						                                                          }
+		  fs.copyFile(configLoc, dirname+'configs.yml', 0, (err) => {
+			 if (err) {
+			           console.log("Error Found:", err);
+			 } else {
+			           console.log("\nFile Contents of copied_file:")
+			 }
 		  });
-		                    fs.writeFile(dirname+'docker_stderr.txt', stderr.toString(), function(err) {
-					                                                  if(err) {
-												                                                                                                                return console.log(err);
-												                                                                                                            }
-					                      });
+		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString(), function(err) {
+		         if(err) {
+		                   return console.log(err);
+		         }
+		  });
+		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString(), function(err) {
+		         if(err) {
+		                   return console.log(err);
+		         }
+		  });
 
-		  if (dockerSuccess==0){
+		  if (dockerSuccess>0){
 		     transporter.sendMail(mailOptions2, function(error, info){
 		       if (error) {
 		          console.log(error);
@@ -166,7 +181,7 @@ app.get("/holocene_da/username/:user/domainname/:domain/configloc/:loc", (req, r
            }
 	 });
 		  }
-	  })
+	})
 })
 
 

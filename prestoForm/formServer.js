@@ -143,8 +143,8 @@ app.post('/manualORdefault', function (req, res) {
 	parsedDomain = useremail.split('@')[1];
 	//console.log(parsedUser)
 	//console.log(parsedDomain)
-	var downloadpath = 'http://137.184.4.96:81/' + reconPicker +  '/username/' + parsedUser + '/domainname/' + parsedDomain + '/configloc/default'
-        var editorpath = 'http://137.184.4.96:85/' + reconPicker + '/username/' + parsedUser + '/domainname/' + parsedDomain + '/configloc/manual'
+	var downloadpath = 'http://137.184.4.96:81/' + reconPicker +  '/' + parsedUser + '/' + parsedDomain + '/default'
+        var editorpath = 'http://137.184.4.96:85/' + reconPicker + '/' + parsedUser + '/' + parsedDomain + '/manual'
 	console.log(reconPicker)
         if (reconPicker === 'temp12k') {
 	  var titleHeading = 'Configure Temperature 12k Paramaters'
@@ -182,7 +182,7 @@ app.post("/uploadConfigs",function (req, res, next) {
         }
         else {
   
-	    var downloadpath = 'http://68.183.108.187:81/' + reconPicker + '/username/' + parsedUser + '/domainname/' + parsedDomain + '/configloc/manual'
+	    var downloadpath = 'http://68.183.108.187:81/' + reconPicker + '/' + parsedUser + '/' + parsedDomain + '/manual'
 	    res.writeHead(302, {
               Location: downloadpath
             });
