@@ -1,6 +1,6 @@
 recon:
   exp_name:
-    value: default
+    value: default_trace
     default: default
     limits: null
     options: null
@@ -92,7 +92,6 @@ time:
 prior:
   models:
     value:
-      - hadcm3_regrid
       - trace_regrid
     default:
       - hadcm3_regrid
@@ -193,10 +192,25 @@ proxy:
     long_name: proxy datasets to assimilate
     description: proxy data from compilations and project datasets
     data_type: list
-    complexity: standard
+    complexity: experimental
     URL: https://lipdverse.org/project/
   archives:
     value:
+      - Borehole
+      - Coral
+      - FluvialSediment
+      - GlacierIce
+      - GroundIce
+      - LakeSediment
+      - MarineSediment
+      - Midden
+      - MolluskShell
+      - Other
+      - Peat
+      - Sclerosponge
+      - Shoreline
+      - Speleothem
+      - TerrestrialSediment
       - Wood
     default:
       - Borehole
@@ -350,10 +364,10 @@ proxy:
 geo:
   proxy_coords:
     value:
-      - -58
-      - 18
-      - -89
-      - -28
+      - -90
+      - 90
+      - -180
+      - 180
     default:
       - -90
       - 90
