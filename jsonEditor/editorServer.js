@@ -47,7 +47,8 @@ function formKeyIndex (formData, formKey){
 
 function parseBool(val) { return val === true || val === "true" }
 
-function editConfigs (configLoc, formEdits, recon){
+function editConfigs (configLoc, formEdits, recon, uniqueID){
+	configDir = newDir('/root/presto/userRecons/' + uniqueID)
 	var configFile = fs.readFileSync(configLoc,'utf8')
 	var configFileNew = YAML.parse(configFile)
 	for (var key1 in configFileNew){
@@ -99,19 +100,27 @@ function editConfigs (configLoc, formEdits, recon){
 		//console.log("orig: ", configFileNew[key1], "new: ", formEdits[key1])
 		//configFile[key1] <- formEdits[key1]
 	}
-	fs.writeFileSync('/root/presto/jsonEditor/' + recon + '_new_configs.yml', YAML.stringify(configFileNew, options={}), function(err) {
+	fs.writeFileSync(configDir + '/configs.yml', YAML.stringify(configFileNew, options={}), function(err) {
                     if(err) {
 			    return console.log(err);
 		    }
                     console.log("The config file file was saved!");
 });
-	return('/root/presto/prestoForm/' + recon + 'config.yml')
+	return(configDir + 'configs.yml')
 }
 
-function writeConfigs (recon, user, domain, jsonBody) {
+newDir = function(dirname) {
+	        fs.mkdirSync(dirname, (err) => {
+			                  if (err) throw err;
+			        });
+	        return (dirname)
+}
+
+function writeConfigs (recon, user, domain, jsonBody, uniqueID) {
   var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
-  var downloadPath = 'http://137.184.4.96:81/' + recon + '/' + user + '/' + domain + '/manual'
-  editConfigs(configLoc, jsonBody, recon)
+  var downloadPath = 'http://137.184.4.96:81/' + recon + '/' + user + '/' + domain + '/manual/' + uniqueID
+  editConfigs(configLoc, jsonBody, recon, uniqueID)
+  //newDir('/root/presto/userRecons/' + uniqueID)
   return (downloadPath);
 }
 
@@ -131,7 +140,9 @@ app.get('/:recon/:parsedUser/:parsedDomain/manual', function (req, res) {
 app.post('/sendReconRequest', function(req, res) {
         console.log(userInfo)
 	console.log(req.body)
-	var downloadPath = writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body)
+	var d = new Date();
+	var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
+	var downloadPath = writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body, timeNow())
 	res.redirect(downloadPath)
 	//res.download(writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body))
 });

@@ -1,6 +1,7 @@
 Docker = require('dockerode');
 express = require("express");
 child_process = require("child_process")
+//const child = require('child_process').spawn;
 PORT = process.env.PORT || 3000
 const fs = require('fs');
 var YAML = require('yaml')
@@ -9,31 +10,73 @@ const path = require('path')
 var configLoc = ''
 var app = express()
 var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
-var d = new Date();
-var timeNow = d.getTime()
+//var d = new Date();
+//var timeNow = d.getTime()
 var nodemailer = require('nodemailer');
 var align = require('align-yaml');
 
-/*const { google } = require("googleapis");
-const OAuth2 = google.auth.OAuth2;
-const myOAuth2Client = new OAuth2(
-	'1046081870453-g0nj94lb3kpal58elfiklrc8tm3ofv6c.apps.googleusercontent.com',
-	'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',
-	"https://developers.google.com/oauthplayground"
-)
-myOAuth2Client.setCredentials({
-	refresh_token:'1//04YIbdUZ1XuQ-CgYIARAAGAQSNwF-L9Ir35IF06Q1GEJ7yI6qWGk1OKbhnxh3bGI6NRWHEm_6N3Sj99oWgToZXpadmBc0d9tRxrE'
+
+var translate = function (uniqueID){
+var yaml = require('js-yaml')
+
+const lookup = function() {
+	                const s = fs.readFileSync('/root/presto/prestoForm/holocene_da/lookup.json','utf8');
+	                return JSON.parse(s)
+}
+
+
+const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
+
+
+const configsOrig = yaml.load(fs.readFileSync('/root/presto/prestoForm/holocene_da/config_default.yml','utf8'));
+
+
+function writeYaml () {
+	                        var yamlText = ''
+	                        var newConfigs = configs
+	                        var lookups = lookup()
+	                        for (var key1 in lookups) {
+
+					                          var first = lookups[key1].first
+					                          var last = lookups[key1].last
+								                            var orig = lookups[key1].orig
+											                              if (configs.hasOwnProperty(first)){
+														                                  if (configs[first].hasOwnProperty(last)){
+																		                                      console.log('long name: ' + configs[first][last].long_name)
+																						                                     if (configs[first][last].hasOwnProperty('value')){
+																										                                      console.log('orig key: ' + orig)
+                                 var configs1 = configs[first][last]
+                                 console.log('orig val: ' + configsOrig[orig])
+                                 console.log('new value: ' + configs1.value)
+                                 console.log('......................................................')
+                                 if (configs1.value == undefined || configs1.value == 'null'){
+					                                    if (orig == 'localization_radius' || orig == 'model_processing'){
+										                                         configsOrig[orig] = 'None'
+										                                       } else if (orig == 'assign_seasonality' || orig == 'change_uncertainty'){
+															                                            configsOrig[orig] = false
+															                                          }
+					                                  } else {
+										                                           
+															                                                    configsOrig[orig] = configs1.value
+
+																					                                     }
+																									                                     }else{
+																													                                             console.log('no value')
+																																		                                     }
+																																						                                  }
+															                                }
+					                        }
+	                        console.log(configsOrig)
+	                    }
+writeYaml()
+
+fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml', yaml.dump(configsOrig), function(err) {
+	                                    if(err) {
+						                                                return console.log(err)
+						                                        }
+	                console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml has been edited');
 });
-const myAccessToken = myOAuth2Client.getAccessToken()*/
-/*
-var transporter = nodemailer.createTransport({
-  service: 'hotmail',
-  auth: {
-    user: 'paleopresto@outlook.com',
-    pass: 'U4,wU_?dBN)U,b6',
-  }
-});
-*/
+}
 
 let transporter = nodemailer.createTransport({
     host: 'smtp.zoho.com',
@@ -44,36 +87,49 @@ let transporter = nodemailer.createTransport({
 		            pass: "5-KBS%*YsTneRs4"
 		        }
 });
-
+/*
 updateHDAParams = function (){
 	                require('child_process').fork('/root/presto/prestoForm/holocene_da/translate.js');
 	                console.log("updating Holocene_DA paramters via /root/presto/prestoForm/holocene_da/translate.js")
 	                return('/root/presto/prestoForm/holocene_da/config_default.yml')
 }
+*/
+updateHDAParams = function (uniqueID){
+         //const child = require('child_process').fork;
+         //const script = '/root/presto/prestoForm/holocene_da/translate.js';
+         translate(uniqueID)
+	 //require('child_process').fork(['/root/presto/prestoForm/holocene_da/translate.js', uniqueID]);
+         // pass the variable a to child
+         //child('node', [script, uniqueID]);
+	 //console.log('tranlate.js run successful')
+	 return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
+}
 
+/*
 newDir = function(dirname) {
 	fs.mkdirSync(dirname, (err) => {
 		  if (err) throw err;
 	});
 	return (dirname)
 }
-
-app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
+*/
+app.get("/holocene_da/:user/:domain/:loc/:uniqueID", (req, res) => {
   //console.log('dirname: ' + dirname())
   var dockerSuccess = 0
   const stdout = new streams.WritableStream()
   const stderr = new streams.WritableStream()
-  var d = new Date();
-  var timeNow = "" + d.getTime() + Math.round(Math.random()*10000)
+  //var d = new Date();
+  var timeNow = req.params.uniqueID
   var destURL = 'http://137.184.4.96:83/downloads/' + timeNow
   var dirname = '/root/presto/userRecons/' + timeNow + '/';
   var emailRecip = req.params.user + '@' + req.params.domain;
   if (req.params.loc === 'default') {
 	  configLoc = '/root/presto/presto/holocene_da/config_default.yml'
   } else {
-	  configLoc = updateHDAParams()
+	  configLoc = updateHDAParams(req.params.uniqueID)
   }
-  res.send('Starting your custom Presto reconstruction<br /><br />' + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' + 'The results will be sent to: ' + emailRecip + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' + '<script>var timeout = 10000; setTimeout(function () {window.location = "https://paleopresto.com/"; }, timeout); </script>')
+  //res.redirect('/root/presto/presto/submitted.html')
+	res.send('Starting your custom Presto reconstruction<br /><br />' + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' + 'The results will be sent to: ' + emailRecip + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' + '<script>var timeout = 10000; setTimeout(function () {window.location = "https://paleopresto.com/"; }, timeout); </script>')
       let options = {
       Tty: false,
       HostConfig: {
@@ -84,6 +140,7 @@ app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
         ]	
       }
     }
+	
 	docker.run('davidedge/lipd_webapps:holocene_da',
 	  [], 
 	  [stdout, stderr],
@@ -166,13 +223,13 @@ app.get("/holocene_da/:user/:domain/:loc", (req, res) => {
 			    console.log(txtFiles.length)
 			    dockerSuccess = txtFiles.length
 			  })
-		  fs.copyFile(configLoc, dirname+'configs.yml', 0, (err) => {
+		  /*fs.copyFile(configLoc, dirname+'configs.yml', 0, (err) => {
 			 if (err) {
 			           console.log("Error Found:", err);
 			 } else {
 			           console.log("\nFile Contents of copied_file:")
 			 }
-		  });
+		  });*/
 		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString(), function(err) {
 		         if(err) {
 		                   return console.log(err);

@@ -1,5 +1,5 @@
 data_dir: //
-exp_name: default_trace
+exp_name: custom3 - Siberia
 vars_to_reconstruct:
   - tas
 time_resolution: 200
@@ -32,14 +32,15 @@ assimilate_selected_archives:
   - TerrestrialSediment
   - Wood
 assimilate_selected_region:
-  - -90
-  - 90
-  - -180
-  - 180
+  - 48
+  - 78
+  - 109
+  - 174
 assimilate_selected_resolution: false
 percent_to_assimilate: 100
 seed_for_proxy_choice: 0
 models_for_prior:
+  - hadcm3_regrid
   - trace_regrid
 proxy_datasets_to_assimilate:
   - temp12k
