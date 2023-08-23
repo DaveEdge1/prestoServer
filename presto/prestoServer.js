@@ -122,14 +122,14 @@ app.get("/holocene_da/:user/:domain/:loc/:uniqueID", (req, res) => {
   var timeNow = req.params.uniqueID
   var destURL = 'http://137.184.4.96:83/downloads/' + timeNow
   var dirname = '/root/presto/userRecons/' + timeNow + '/';
-  var emailRecip = req.params.user + '@' + req.params.domain;
+  //var emailRecip = req.params.user + '@' + req.params.domain;
   if (req.params.loc === 'default') {
 	  configLoc = '/root/presto/presto/holocene_da/config_default.yml'
   } else {
 	  configLoc = updateHDAParams(req.params.uniqueID)
   }
   //res.redirect('/root/presto/presto/submitted.html')
-	res.send('Starting your custom Presto reconstruction<br /><br />' + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' + 'The results will be sent to: ' + emailRecip + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' + '<script>var timeout = 10000; setTimeout(function () {window.location = "https://paleopresto.com/"; }, timeout); </script>')
+	res.send('Starting your custom Presto reconstruction<br /><br />' + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' + 'The results will be sent to: ' + req.params.user + '@' + req.params.domain + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' + '<script>history.pushState(null, null, window.location.href);history.back();window.onpopstate = () => history.forward();var timeout = 10000; setTimeout(function () {window.location = "https://paleopresto.com/"; }, timeout); </script>')
       let options = {
       Tty: false,
       HostConfig: {
@@ -158,7 +158,7 @@ app.get("/holocene_da/:user/:domain/:loc/:uniqueID", (req, res) => {
 		    console.log(configFileTxt(configLoc))
                     var mailOptions = {
 			      from: 'no-reply@paleopresto.com',
-			      to: emailRecip,
+			      to: req.params.user + '@' + req.params.domain,
 			      subject: 'Presto Custom Reconstruction ' + timeNow,
 			      html:   '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 			              + '<br>'
@@ -188,7 +188,7 @@ app.get("/holocene_da/:user/:domain/:loc/:uniqueID", (req, res) => {
 			      };
 		      var mailOptions2 = {
 			                    from: 'no-reply@paleopresto.com',
-			                    to: emailRecip,
+			                    to: req.params.user + '@' + req.params.domain,
 			                    subject: 'Presto Custom Reconstruction ' + timeNow,
 			                    html:   '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
 			                            + '<br>'

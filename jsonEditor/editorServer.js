@@ -125,14 +125,14 @@ function writeConfigs (recon, user, domain, jsonBody, uniqueID) {
 }
 
 var userInfo = ''
-var getUserInfo = function (reqparamsrecon, reqparamsparsedUser, reqparamsparsedDomain) { 
-	var userInfo = { recon: [reqparamsrecon], parsedUser: [reqparamsparsedUser], parsedDomain: [reqparamsparsedDomain] }
+var getUserInfo = function (reqparamsrecon, reqparamsparsedUser, reqparamsparsedDomain, uniqueID) { 
+	var userInfo = { recon: [reqparamsrecon], parsedUser: [reqparamsparsedUser], parsedDomain: [reqparamsparsedDomain], uniqueID: [uniqueID] }
 	return userInfo;
 }
 
-app.get('/:recon/:parsedUser/:parsedDomain/manual', function (req, res) {
+app.get('/:recon/:parsedUser/:parsedDomain/:uniqueID', function (req, res) {
   console.log(req.params.recon)
-  userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain)
+  userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain, req.params.uniqueID)
   res.sendFile('/root/presto/jsonEditor/forms/' + req.params.recon + '.html')
 });
 
@@ -140,9 +140,9 @@ app.get('/:recon/:parsedUser/:parsedDomain/manual', function (req, res) {
 app.post('/sendReconRequest', function(req, res) {
         console.log(userInfo)
 	console.log(req.body)
-	var d = new Date();
-	var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
-	var downloadPath = writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body, timeNow())
+	//var d = new Date();
+	//var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
+	var downloadPath = writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body, userInfo.uniqueID)
 	res.redirect(downloadPath)
 	//res.download(writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body))
 });
