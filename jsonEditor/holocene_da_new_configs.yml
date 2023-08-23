@@ -1,6 +1,6 @@
 recon:
   exp_name:
-    value: default_trace
+    value: custom3 - Siberia
     default: default
     limits: null
     options: null
@@ -92,6 +92,7 @@ time:
 prior:
   models:
     value:
+      - hadcm3_regrid
       - trace_regrid
     default:
       - hadcm3_regrid
@@ -364,10 +365,10 @@ proxy:
 geo:
   proxy_coords:
     value:
-      - -90
-      - 90
-      - -180
-      - 180
+      - 48
+      - 78
+      - 109
+      - 174
     default:
       - -90
       - 90

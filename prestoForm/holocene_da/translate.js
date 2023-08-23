@@ -1,7 +1,7 @@
 
 var fs = require('fs')
 var yaml = require('js-yaml')
-
+//var uniqueID = '16928062884166311'
 
 const lookup = function() {
 	        const s = fs.readFileSync('/root/presto/prestoForm/holocene_da/lookup.json','utf8');
@@ -9,7 +9,7 @@ const lookup = function() {
 }
 
 //const configs = yaml.load(fs.readFileSync('/root/presto/prestoForm/holocene_da/configs.yml','utf8'));
-const configs = yaml.load(fs.readFileSync('/root/presto/jsonEditor/holocene_da_new_configs.yml','utf8'));
+const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
 
 
 const configsOrig = yaml.load(fs.readFileSync('/root/presto/prestoForm/holocene_da/config_default.yml','utf8'));
@@ -60,10 +60,10 @@ function writeYaml () {
 	            }
 writeYaml()
 
-fs.writeFileSync('/root/presto/prestoForm/holocene_da/config_default.yml', yaml.dump(configsOrig), function(err) {
+fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml', yaml.dump(configsOrig), function(err) {
 	                            if(err) {
 					    return console.log(err)
 				    }
-	        console.log("/root/presto/prestoForm/holocene_da/config_default.yml has been edited");
+	        console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml has been edited');
 });
 
