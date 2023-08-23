@@ -9,11 +9,6 @@ var titleHeading = 'Configure Reconstruction Paramaters'
 var express = require('express'),
     app = express()
 
-var reconPick = ''
-var useremail = ''
-var parsedUser = ''
-var parsedDomain = ''
-
 const path = require("path")
 const multer = require("multer")
 
@@ -111,12 +106,9 @@ app.get('/', function (req, res) {
 });
 
 
-app.post('/getUserInfo', function (req, res) {
-   reconPicker = req.body.select_id
+app.post('/getUserInfo/:recon/:uniqueID', function (req, res) {
 
-   console.log(req.body.select_id)
-
-   if (req.body.select_id === 'temp12k') {
+   if (req.param.recon === 'temp12k') {
         var hrefConfig = 'https://github.com/paleopresto/temp12k-regional-composites'
    }
    
@@ -138,6 +130,7 @@ app.get('/configDownload', function(req, res) {
 })
 
 app.post('/manualORdefault', function (req, res) {
+	reconpicker = 
 	useremail = req.body.useremail;
 	parsedUser = useremail.split('@')[0];
 	parsedDomain = useremail.split('@')[1];

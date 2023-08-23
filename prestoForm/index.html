@@ -153,8 +153,8 @@
                 <br><br>
 
 		<div style="text-align:center;">
-		<form id="tableForm" style="padding-right:50px; font-size:24px" action="/getUserInfo" method="POST">
-      <select onchange="val()" id="select_id" name="select_id" style="font-size:24px">
+		<form id="tableForm" style="padding-right:50px; font-size:24px" onSubmit="EvaluateForm()" method="POST">
+      <select id="select_id" name="select_id" style="font-size:24px">
           <optgroup label="Select Reconstruction" style="font-size:24px">
               <option name="HoloceneDA" value="holocene_da">Holocene DA</option>
               <option name="temp12k" value="temp12k">Temp12k</option>
@@ -162,13 +162,21 @@
       </select>
       <br><br>
               <div class="button-submit" style="text-align:center">
-	           <button style="height:100%; width:200px;; font-size:16px; text-align:center" tye="submit" class="btn btn-primary">Submit</button>
+	           <button style="height:100%; width:200px;; font-size:16px; text-align:center" Style="submit" class="btn btn-primary">Submit</button>
 	      </div>
       </form>
        </div>
                    </div>
 		             </div>
 			           </section>
+<script>
+	function EvaluateForm()
+{
+	    var d = new Date();
+	    var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
+            document.getElementById('tableForm').action = "/getUserInfo/" + document.getElementById('select_id').value + '/' + timeNow();
+}
+</script>
 	    <!--
             <div class="col-md-4">
               <center>
