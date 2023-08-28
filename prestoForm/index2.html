@@ -101,7 +101,7 @@
 	<h1>Who & How</h1>
       <h4>Tell us where to send the results and how you would like to edit the reconstruction parameters</h4>
       <br>
-      <form action="/manualORdefault" method="POST">
+      <form id=tableForm2 onSubmit="EvaluateForm2()" method="POST">
         <div class="form-group">
           <label for="Name">Name</label>
           <input type="text" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Enter your name" name="name">
@@ -112,18 +112,18 @@
           <input type="text" class="form-control" id="useremail" aria-describedby="emailHelp" name="useremail" placeholder="Enter your email address (eg. John.Doe@vsmu.edu)">
         </div>
 	<div class="radio-group" id="config" style="padding:24px 24px; border-radius:16px;">
-	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" name="optradio" value="2" checked="true"><span style="font-weight:900">Edit Parameters In Browser Window</span>
+	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="GUI" name="optradio" checked="true"><span style="font-weight:900">Edit Parameters In Browser Window</span>
 Edit the default parameters using a web form</label>
 	<br>
 	<!--label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" name="optradio" value="0"><span style="font-weight:900">Use Defaults</span>
 Reproduce original rconstruction with updated poxy database</label>
 	<br-->
-	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" name="optradio" value="1"><span style="font-weight:900">Upload Parameters File (Advanced)</span>
+	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="upload" name="optradio"><span style="font-weight:900">Upload Parameters File (Advanced)</span>
 For users familiar with the code, upload reconstruction parameters directly</label>
         </div>
 	<br>
 	<div class="button-submit" style="text-align:center">
-		<button style="height:100%; width:200px; font-size:16px; text-align:center" tye="submit" class="btn btn-primary">Submit</button>
+		<button style="height:100%; width:200px; font-size:16px; text-align:center" Style="submit" class="btn btn-primary">Submit</button>
 	</div>
         </form>
 	</section>
@@ -149,4 +149,14 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	</div>
 	</footer>
 
+	<script>
+		        function EvaluateForm2(){
+				//document.getElementById('tableForm2').action = "/manualORdefault"}
+	            		const urlParams = new URLSearchParams(window.location.search);
+				//document.getElementById('tableForm2').action = "/manualORdefault"
+	            		document.getElementById('tableForm2').action = "/manualORdefault?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&email=' + document.getElementById('useremail').value + '&parampath=' + document.getElementById('GUI').value
+			}
+	</script>
 </html>
+
+

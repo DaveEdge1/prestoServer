@@ -100,15 +100,24 @@ var doSomething = function(){
 
 app.get('/', function (req, res) {
     //res.end(dom1.serialize());
-    res.sendFile("/root/presto/prestoForm/index.html")
+    //res.sendFile("/root/presto/prestoForm/index.html")
+    res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
     //console.log(dom1.window.document.getElementById("abstract").src)
     //console.log(dom1.window.document.getElementById("selectpicker").value)
 });
 
+app.get('/start', function (req, res) {
+	res.sendFile("/root/presto/prestoForm/index.html")
+});
 
-app.post('/getUserInfo/:recon/:uniqueID', function (req, res) {
+app.get('/query', function (req, res) {
+	        res.send(req.query.id+'<br>'+req.query.num)
+});
 
-   if (req.param.recon === 'temp12k') {
+
+app.post('/getUserInfo', function (req, res) {
+
+   if (req.query.recon === 'temp12k') {
         var hrefConfig = 'https://github.com/paleopresto/temp12k-regional-composites'
    }
    
@@ -130,36 +139,33 @@ app.get('/configDownload', function(req, res) {
 })
 
 app.post('/manualORdefault', function (req, res) {
-	reconpicker = 
-	useremail = req.body.useremail;
-	parsedUser = useremail.split('@')[0];
-	parsedDomain = useremail.split('@')[1];
+	//reconpicker = req.query.recon 
+	//useremail = req.body.useremail;
+	//parsedUser = useremail.split('@')[0];
+	//parsedDomain = useremail.split('@')[1];
 	//console.log(parsedUser)
 	//console.log(parsedDomain)
-	var downloadpath = 'http://137.184.4.96:81/' + reconPicker +  '/' + parsedUser + '/' + parsedDomain + '/default'
-        var editorpath = 'http://137.184.4.96:85/' + reconPicker + '/' + parsedUser + '/' + parsedDomain + '/manual'
-	console.log(reconPicker)
-        if (reconPicker === 'temp12k') {
-	  var titleHeading = 'Configure Temperature 12k Paramaters'
-          var hrefConfig = 'https://github.com/paleopresto/temp12k-regional-composites'
-	} else if (reconPicker === 'holocene_da') {
-	  var titleHeading = 'Configure Holocene DA Paramaters'
-          var hrefConfig = 'https://github.com/Holocene-Reconstruction/Holocene-code/blob/main/config_default.yml'
-        }
-	if (req.body.optradio === '0'){
-	  res.writeHead(302, {
-             Location: downloadpath
-          });
-          res.end();
-	} else if (req.body.optradio === '2'){
+	//var downloadpath = 'http://137.184.4.96:81/' + req.query.recon +  '/' + req.query.email.split('@')[0] + '/' + req.query.email.split('@')[1] + '/default'
+        var editorpath = function() { return ('http://137.184.4.96:85/' + req.query.recon + '/' + req.query.email.split('@')[0] + '/' + req.query.email.split('@')[1] + '/' + req.query.uniqueID)}
+	whichRecon = function(reconPicker){
+        	if (reconPicker === 'temp12k') {
+	  		var titleHeading = 'Configure Temperature 12k Paramaters'
+          		var hrefConfig = 'https://github.com/paleopresto/temp12k-regional-composites'
+		} else if (reconPicker === 'holocene_da') {
+	  		var titleHeading = 'Configure Holocene DA Paramaters'
+          		var hrefConfig = 'https://github.com/Holocene-Reconstruction/Holocene-code/blob/main/config_default.yml'
+        	}
+		return ({hrefConfig, titleHeading})
+	}
+	if (req.query.parampath === 'on'){
           res.writeHead(302, {
-             Location: editorpath
+             Location: editorpath()
           });
           res.end();
 	}
 	else{
 	  console.log(hrefConfig);
-          res.render("Signup", {hrefConfig, titleHeading});
+          res.render("Signup", whichRecon(req.query.recon));
 	}
 
 })
