@@ -174,7 +174,7 @@
 {
 	    var d = new Date();
 	    var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
-            document.getElementById('tableForm').action = "/getUserInfo/" + document.getElementById('select_id').value + '/' + timeNow();
+            document.getElementById('tableForm').action = "/getUserInfo?recon=" + document.getElementById('select_id').value + '&uniqueID=' + timeNow();
 }
 </script>
 	    <!--
