@@ -118,32 +118,32 @@ newDir = function(dirname) {
 
 function writeConfigs (recon, user, domain, jsonBody, uniqueID) {
   var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
-  var downloadPath = 'http://137.184.4.96:81/' + recon + '/' + user + '/' + domain + '/manual/' + uniqueID
+  var downloadPath = 'http://137.184.4.96:81/' + recon + '/' + user + '/' + domain + '/' + uniqueID
   editConfigs(configLoc, jsonBody, recon, uniqueID)
   //newDir('/root/presto/userRecons/' + uniqueID)
   return (downloadPath);
 }
-
+/*
 var userInfo = ''
 var getUserInfo = function (reqparamsrecon, reqparamsparsedUser, reqparamsparsedDomain, uniqueID) { 
 	var userInfo = { recon: [reqparamsrecon], parsedUser: [reqparamsparsedUser], parsedDomain: [reqparamsparsedDomain], uniqueID: [uniqueID] }
 	return userInfo;
 }
-
-app.get('/:recon/:parsedUser/:parsedDomain/:uniqueID', function (req, res) {
-  console.log(req.params.recon)
-  userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain, req.params.uniqueID)
-  res.sendFile('/root/presto/jsonEditor/forms/' + req.params.recon + '.html')
+*/
+app.get('/', function (req, res) {
+  //console.log(req.params.recon)
+  //userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain, req.params.uniqueID)
+  res.sendFile('/root/presto/jsonEditor/forms/' + req.query.recon + '.html')
 });
 
 
 app.post('/sendReconRequest', function(req, res) {
-        console.log(userInfo)
-	console.log(req.body)
+        //console.log(userInfo)
+	//console.log(req.body)
 	//var d = new Date();
 	//var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
-	var downloadPath = writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body, userInfo.uniqueID)
-	res.redirect(downloadPath)
+	//var downloadPath = writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID)
+	res.redirect(writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID))
 	//res.download(writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body))
 });
 
