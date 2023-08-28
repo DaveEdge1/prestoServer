@@ -413,7 +413,7 @@ function buildHtml(configs, recon) {
        + '<br>\n'
        + '<br>\n'
        //+ '<form onSubmit="search();return false;" action="">\n'//action="/sendReconRequest" method="POST"
-       + '<form method="POST" action="/sendReconRequest" onsubmit="return confirm('+"'Submit Custom Reconstruction request?'"+');">\n'
+       + '<form id="paramsForm" method="POST" onsubmit="buildURL()">\n'
        + writeBody(configs) 
        + '<br>\n'
        + '<br>\n'
@@ -423,6 +423,15 @@ function buildHtml(configs, recon) {
        + '<button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>\n'
        + '</div>\n'
        + '</form>\n'
+       + '<script>\n'
+       + 'function buildURL(){\n'
+       + 'var urlParams = new URLSearchParams(window.location.search);\n'
+       //+ 'document.getElementById('tableForm2').action = "/manualORdefault"\n'
+       //+ 'document.getElementById("paramsForm").action = "/sendReconRequest?recon="
+       + 'document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")\n'
+       + 'return confirm("Submit Custom Reconstruction request?");\n'
+       + '}\n'
+       + '</script>\n'
        + '<script>\n'
        + 'function val() {'
        + 'document.getElementById("abstract2").src = "/slider.css";'
