@@ -1,7 +1,5 @@
 Docker = require('dockerode');
 express = require("express");
-child_process = require("child_process")
-//const child = require('child_process').spawn;
 PORT = process.env.PORT || 3000
 const fs = require('fs');
 var YAML = require('yaml')
@@ -16,62 +14,58 @@ var align = require('align-yaml');
 
 
 var translate = function (uniqueID){
-var yaml = require('js-yaml')
-
-const lookup = function() {
-	                const s = fs.readFileSync('/root/presto/prestoForm/holocene_da/lookup.json','utf8');
-	                return JSON.parse(s)
-}
-
-
-const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
-
-
-const configsOrig = yaml.load(fs.readFileSync('/root/presto/prestoForm/holocene_da/config_default.yml','utf8'));
-
-
-function writeYaml () {
-	        var yamlText = ''
-	        var newConfigs = configs
-	        var lookups = lookup()
-	        for (var key1 in lookups) {
-                        var first = lookups[key1].first
-                        var last = lookups[key1].last
-                        var orig = lookups[key1].orig
-                        if (configs.hasOwnProperty(first)){
-                                 if (configs[first].hasOwnProperty(last)){
-                                     console.log('long name: ' + configs[first][last].long_name)
-                                          if (configs[first][last].hasOwnProperty('value')){
-	                                      console.log('orig key: ' + orig)
-                                              var configs1 = configs[first][last]
-                                              console.log('orig val: ' + configsOrig[orig])
-                                              console.log('new value: ' + configs1.value)
-                                              console.log('......................................................')
-                                 		  if (configs1.value == undefined || configs1.value == 'null'){
-				                          if (orig == 'localization_radius' || orig == 'model_processing'){
-								  configsOrig[orig] = 'None'
-   		                                          } else if (orig == 'assign_seasonality' || orig == 'change_uncertainty'){
-								  configsOrig[orig] = false
-		                                          }
-	 	                                  } else {
-						      configsOrig[orig] = configs1.value
-  	                                          }
-					     }else{
-						console.log('no value')
-					  }
-				 }
+	var yaml = require('js-yaml')
+	
+	const lookup = function() {
+		const s = fs.readFileSync('/root/presto/prestoForm/holocene_da/lookup.json','utf8');
+		return JSON.parse(s)
+	}
+	
+	const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
+	
+	const configsOrig = yaml.load(fs.readFileSync('/root/presto/prestoForm/holocene_da/config_default.yml','utf8'));
+	
+	function writeYaml () {
+		        var yamlText = ''
+		        var newConfigs = configs
+		        var lookups = lookup()
+		        for (var key1 in lookups) {
+	                        var first = lookups[key1].first
+	                        var last = lookups[key1].last
+	                        var orig = lookups[key1].orig
+	                        if (configs.hasOwnProperty(first)){
+	                                 if (configs[first].hasOwnProperty(last)){
+	                                     console.log('long name: ' + configs[first][last].long_name)
+	                                          if (configs[first][last].hasOwnProperty('value')){
+		                                      console.log('orig key: ' + orig)
+	                                              var configs1 = configs[first][last]
+	                                              console.log('orig val: ' + configsOrig[orig])
+	                                              console.log('new value: ' + configs1.value)
+	                                              console.log('......................................................')
+	                                 		  if (configs1.value == undefined || configs1.value == 'null'){
+					                          if (orig == 'localization_radius' || orig == 'model_processing'){
+									  configsOrig[orig] = 'None'
+	   		                                          } else if (orig == 'assign_seasonality' || orig == 'change_uncertainty'){
+									  configsOrig[orig] = false
+			                                          }
+		 	                                  } else {
+							      configsOrig[orig] = configs1.value
+	  	                                          }
+						     }else{
+							console.log('no value')
+						  }
+					 }
+				}
 			}
 		}
-	        console.log(configsOrig)
-	}
-writeYaml()
-
-fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml', yaml.dump(configsOrig), function(err) {
-	if(err) {
-	          return console.log(err)
-	}
-	console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml has been edited');
-});
+	writeYaml()
+	
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml', yaml.dump(configsOrig), function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml has been edited');
+	});
 }
 
 let transporter = nodemailer.createTransport({
@@ -79,9 +73,9 @@ let transporter = nodemailer.createTransport({
 	    port: 465,
 	    name: 'zoho.com',
 	    auth: {
-		            user: "no-reply@paleopresto.com",
-		            pass: "5-KBS%*YsTneRs4"
-		        }
+		    user: "no-reply@paleopresto.com",
+		    pass: "5-KBS%*YsTneRs4"
+	    }
 });
 
 updateHDAParams = function (uniqueID){
@@ -89,20 +83,21 @@ updateHDAParams = function (uniqueID){
 	 return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
 }
 
-
 countNetcdf = function (dirname) {
   var dockerSuccess = 0;
   fs.readdir(dirname, function(err, files) {
   const txtFiles = files.filter(el => path.extname(el) === '.nc')
-  console.log('.nc files: names, length, length==0')
-  console.log(txtFiles)
-  console.log(txtFiles.length)
   dockerSuccess = txtFiles.length
   })
   return (dockerSuccess)
 }
 
 emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
+   var configFileTxt = function (configFileLoc) {
+	   var s = fs.readFileSync(configFileLoc,'utf8');
+	   s = align(s, 5)
+	   return s
+   }
 	if (DockerSuccess > 0) {
 		var text1 = '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
 	} else {
@@ -136,15 +131,29 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 	return(text1)
 }
 
-
-
+  sendEmail = function (dockerSuccess, user, domain, uniqueID, configLoc) {
+    var destURL = 'http://137.184.4.96:83/downloads/' + uniqueID
+    var mailOptions = {
+      from: 'no-reply@paleopresto.com',
+      to: user + '@' + domain,
+      subject: 'Presto Custom Reconstruction ' + uniqueID,
+      html: emailHTML(dockerSuccess, uniqueID, destURL, configLoc)
+    };
+      transporter.sendMail(mailOptions, function(error, info){
+       if (error) {
+	  console.log(error);
+       } else {
+	  console.log('Email sent: ' + info.response);
+       }
+     });
+  }
 
 runrecon = function(uniqueID, user, domain, recon) {
-	var dockerSuccess = 0
+	var configLoc = updateHDAParams(uniqueID)
 	const stdout = new streams.WritableStream()
 	const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
-	
+	var dockerSuccess = countNetcdf(dirname)
 	let options = {
 		Tty: false,
 		HostConfig: {
@@ -156,116 +165,39 @@ runrecon = function(uniqueID, user, domain, recon) {
 			}
 		}
 		docker.run('davidedge/lipd_webapps:holocene_da',
-	  [], 
-	  [stdout, stderr],
-	  options,
-
-	  function (err, data, container) {
-		    var configFileTxt = function (configFileLoc) {
-			        var s = fs.readFileSync(configFileLoc,'utf8');
-			        //s = YAML.parse(s)
-			        //s = YAML.stringify(s)
-			        s = align(s, 5)
-			        //s = s.replace(/(?:\r\n|\r|\n)/g, '<br>');
-			        return s
-		    }
-		    console.log(configFileTxt(configLoc))
-
-
-
-
-		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString(), function(err) {
-		         if(err) {
-		                   return console.log(err);
-		         }
-		  });
-		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString(), function(err) {
-		         if(err) {
-		                   return console.log(err);
-		         }
-		  });
-
-		  sendEmail = function (dockerSuccess, user, domain, uniqueID) {
-		    var destURL = 'http://137.184.4.96:83/downloads/' + uniqueID
-		    var configLoc = updateHDAParams(uniqueID)
-		    var mailOptions = {
-		      from: 'no-reply@paleopresto.com',
-		      to: user + '@' + domain,
-		      subject: 'Presto Custom Reconstruction ' + uniqueID,
-		      html:   emailHTML(dockerSuccess)
-		    };
-		      transporter.sendMail(mailOptions, function(error, info){
-		       if (error) {
-		          console.log(error);
-		       } else {
-		          console.log('Email sent: ' + info.response);
-		       }
-		     });
-		  }
-	})
+			   [],
+			   [stdout, stderr],
+			   options,
+			   
+			   function (err, data, container) {
+				   fs.writeFile(dirname+'docker_stdout.txt', stdout.toString(), function(err) {
+					   if(err) {
+						   return console.log(err);
+					   }
+				   });
+				   fs.writeFile(dirname+'docker_stderr.txt', stderr.toString(), function(err) {
+					   if(err) {
+						   return console.log(err);
+					   }
+				   });
+				   sendEmail(dockerSuccess, user, domain, uniqueID)
+			   })
+}
   
-
-app.get("/holocene_da/:user/:domain/:uniqueID", (req, res) => {
-  //console.log('dirname: ' + dirname())
-  runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon
-  //res.redirect('/root/presto/presto/submitted.html')
-	res.send('Starting your custom Presto reconstruction<br /><br />' 
+prestoStartHtml = function (uniqueID, user, domain) {
+	return('Starting your custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' 
-		 + 'The results will be sent to: ' + req.params.user + '@' + req.params.domain 
+		 + 'The results will be sent to: ' + user + '@' + domain 
 		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' 
 		 + '<script>history.pushState(null, null, window.location.href);history.back();window.onpopstate = () => history.forward();var timeout = 10000; setTimeout(function ()' 
 		 + '{window.location = "https://paleopresto.com/"; }, timeout); </script>')
-      
+}
+
+app.get("/holocene_da/:user/:domain/:uniqueID", (req, res) => {
+	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
+	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain))
 })
-
-
-app.get("/temp12k/username/:user/domainname/:domain/configloc/:loc", (req, res) => {
-  var d = new Date();
-  var timeNow = d.getTime()
- 
-  var destURL = 'http://137.184.4.96:83/downloads/' + timeNow
-  var dirname = '/root/presto/' + timeNow + '/';
-  var emailRecip = req.params.user + '@' + req.params.domain;
-  if (req.params.loc === 'default') {
-          configLoc = '/rooti/presto/presto/temp12k/params.json'
-  } else {
-          configLoc = '/root/presto/prestoForm/temp12k/params.json'
-  }
-  var mailOptions = {
-  from: 'paleoreconstorehouse@gmail.com',
-  to: emailRecip,
-  subject: 'Presto Reconstruction Download',
-  text: 'Copy and paste the following URL into your web browser to download the requested reconstruction (expires after 7 days): \n' + destURL + '\n\nThis account is not monitored for replies\n' + 'More at https://paleopresto.com/'
-  };
-  res.send('Starting your reconstruction<br /><br />' + 'Temp 12k - https://github.com/paleopresto/temp12k-regional-composites<br /><br />' + 'The results will be sent to: ' + emailRecip + '<br>If results do not arrive within 1-2 hours, check your Spam folder')
-      let options = {
-      Tty: false,
-      HostConfig: {
-        Binds: [
-          dirname + ':/output',
-        configLoc + ':/params.json'
-        ]
-      }
-    }
-        docker.run('davidedge/lipd_webapps:temp12k',
-          [],
-          process.stdout,
-          options,
-
-          function (err, data, container) {
-          //console.log(data.StatusCode);
-
-         transporter.sendMail(mailOptions, function(error, info){
-           if (error) {
-             console.log(error);
-           } else {
-             console.log('Email sent: ' + info.response);
-           }
-         });
-})
-})
-
 
 app.listen(PORT, function () {
   console.log(`Express server listening on port ${PORT}`)
