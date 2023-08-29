@@ -2,6 +2,7 @@ Docker = require('dockerode');
 express = require("express");
 PORT = process.env.PORT || 3000
 const fs = require('fs');
+var archiver = require('archiver');
 var YAML = require('yaml')
 const streams = require('memory-streams')
 const path = require('path')
@@ -148,6 +149,24 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
      });
   }
 
+        zipIt = function (uniqueID) {
+		var downloadLoc = '/root/presto/userRecons/' + uniqueID + '/' + uniqueID + '.zip'
+		var source_dir = '/root/presto/userRecons/' + uniqueID
+		var output = fs.createWriteStream(downloadLoc);
+		var archive = archiver('zip');
+                output.on('close', function () {
+			console.log(archive.pointer() + ' total bytes');
+			console.log('archiver has been finalized and the output file descriptor has closed.');
+		})
+		archive.on('error', function(err){
+			throw err;
+		});
+		archive.pipe(output);
+		archive.directory(source_dir, false);
+		//archive.directory('subdir/', 'new-subdir');
+		archive.finalize();
+	}
+
 runRecon = function(uniqueID, user, domain, recon) {
 	var configLoc = updateHDAParams(uniqueID)
 	const stdout = new streams.WritableStream()
@@ -181,6 +200,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 					   }
 				   });
 				   sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
+				   zipIt(uniqueID)
 			   })
 }
   
