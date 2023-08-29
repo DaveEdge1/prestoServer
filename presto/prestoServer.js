@@ -98,7 +98,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 	   s = align(s, 5)
 	   return s
    }
-	if (DockerSuccess > 0) {
+	if (dockerSuccess > 0) {
 		var text1 = '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
 	} else {
 		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
@@ -148,7 +148,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
      });
   }
 
-runrecon = function(uniqueID, user, domain, recon) {
+runRecon = function(uniqueID, user, domain, recon) {
 	var configLoc = updateHDAParams(uniqueID)
 	const stdout = new streams.WritableStream()
 	const stderr = new streams.WritableStream()
@@ -180,7 +180,7 @@ runrecon = function(uniqueID, user, domain, recon) {
 						   return console.log(err);
 					   }
 				   });
-				   sendEmail(dockerSuccess, user, domain, uniqueID)
+				   sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 			   })
 }
   
