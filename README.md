@@ -42,4 +42,13 @@ Build web form for interactive parameter editing:
 ### prestoServer
 
 Launch the recon algorithm:
-* add the recon code URL, recon title, and docker image tag to presto/reconLibrary.json
+* handle (holocene_da)
+* full title (Holocene DA Reconstruction)
+* params location in container (':/config_default.yml')
+* results directory (':/resultsl')
+* github URL (https://github.com/Holocene-Reconstruction/Holocene-code)
+* container tag (lipd_webapps:holocene_da)
+* path to params file to use in container ('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
+* path to working config file ('/root/presto/prestoForm/holocene_da/config_default.yml')  
+*paths to standardized configs and lookup.json are standardized by recon handle
+
