@@ -14,7 +14,7 @@ var nodemailer = require('nodemailer');
 var align = require('align-yaml');
 
 
-var translate = function (uniqueID){
+var translateHDA = function (uniqueID){
 	var yaml = require('js-yaml')
 	
 	const lookup = function() {
@@ -79,9 +79,14 @@ let transporter = nodemailer.createTransport({
 	    }
 });
 
-updateHDAParams = function (uniqueID){
-         translate(uniqueID)
-	 return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
+updateHDAParams = function (uniqueID, recon){
+	if (recon == 'holocene_da'){
+		translate(uniqueID, recon)
+		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
+	} else {
+		return('/root/presto/userRecons/' + uniqueID  + '/configs.yml')
+	}
+	
 }
 
 countNetcdf = function (dirname) {
@@ -168,7 +173,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 	}
 
 runRecon = function(uniqueID, user, domain, recon) {
-	var configLoc = updateHDAParams(uniqueID)
+	var configLoc = updateHDAParams(uniqueID, recon)
 	const stdout = new streams.WritableStream()
 	const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
