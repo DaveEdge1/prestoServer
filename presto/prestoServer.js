@@ -14,17 +14,17 @@ var nodemailer = require('nodemailer');
 var align = require('align-yaml');
 
 
-var translateHDA = function (uniqueID){
+var translate = function (uniqueID, recon){
 	var yaml = require('js-yaml')
 	
 	const lookup = function() {
-		const s = fs.readFileSync('/root/presto/prestoForm/holocene_da/lookup.json','utf8');
+		const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/lookup.json','utf8');
 		return JSON.parse(s)
 	}
 	
 	const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
 	
-	const configsOrig = yaml.load(fs.readFileSync('/root/presto/prestoForm/holocene_da/config_default.yml','utf8'));
+	const configsOrig = yaml.load(fs.readFileSync('/root/presto/prestoForm/' + recon + '/config_default.yml','utf8'));
 	
 	function writeYaml () {
 		        var yamlText = ''
@@ -82,6 +82,9 @@ let transporter = nodemailer.createTransport({
 updateParams = function (uniqueID, recon){
 	if (recon == 'holocene_da'){
 		translate(uniqueID)
+		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
+	} else if (recon == 'graph_em'){
+		translateGEM(uniqueID)
 		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
 	} else {
 		return('/root/presto/userRecons/' + uniqueID  + '/configs.yml')
