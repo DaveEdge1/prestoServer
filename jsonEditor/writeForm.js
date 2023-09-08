@@ -155,13 +155,14 @@ function dataTypeHTML (configJSON, key, id1) {
 		                + '<br>\n'
 		                + '<br>\n'
         } else if (configJSON[key].data_type === 'lat-lon'){
+		var mapLoc = '/SimpleWorld' + configJSON[key].options[0] + configJSON[key].options[1] + '.png'
 		buildJS4(configJSON[key].options[1]);
 		console.log(key)
 		console.log("defaults: " + configJSON[key].default + " limits: " + configJSON[key].limits)
 		dataHTML = dataHTML
 		+ '<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>\n'
 		+ '<div class="mapall-container">\n'
-		+ '<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(\'/SimpleWorldMap4.png\')"></canvas>\n'
+		+ '<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(' + mapLoc + ')"></canvas>\n'
 		+ '<div class="map-numeric">\n'
 		+ '<label style="font-size:16px; margin-right:8px;">Latitude</label>\n'
 		+ '<input style:"-moz-appearance: textfield;" class="coord-input" type="number" name="'+id1+'" id="lat_min" value="' + configJSON[key].default[0] + '" min="' + configJSON[key].limits[0] + '" max="' + configJSON[key].limits[1] + '" step="' + configJSON[key].precision + '" onchange="updateRect();">\n'
