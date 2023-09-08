@@ -140,28 +140,28 @@ for (i = 0; i < coll.length; i++) {
 function uncheckAll(divid, checkCycle) {
 	                    var checks = document.querySelectorAll('#' + divid + ' input[type="checkbox"]');
 	                    for(var i =0; i< checks.length;i++){
-				                    var check = checks[i];
-				                    if(!check.disabled){
-							                        if (checkCycle % 2 == 0){
-											                    check.checked = true;
-											                    } else {
-														                        check.checked = false;
-														                        }
-							                    }
-				                }
-	        }
+			    	var check = checks[i];
+				    if(!check.disabled){
+					if (checkCycle % 2 == 0){
+						check.checked = true;
+					} else {
+						check.checked = false;
+					}
+				    }
+			    }
+}
 
 var canvas = document.getElementById('canvas'),
-	            ctx = canvas.getContext('2d'),
-	            rect = {
-			                                x: 150,
-			                                y: 100,
-			                                w: 123,
-			                                h: 58
-			                            },
-	            handlesSize = 40,
-	            currentHandle = false,
-	            drag = false;
+	    ctx = canvas.getContext('2d'),
+	    rect = {
+			x: 150,
+			y: 100,
+			w: 123,
+			h: 58
+		    },
+	    handlesSize = 40,
+	    currentHandle = false,
+	    drag = false;
 
 function init() {
 	            canvas.addEventListener('mousedown', mouseDown, false);
@@ -170,165 +170,174 @@ function init() {
 }
 
 function point(x, y) {
-	            return {
-			                                x: x,
-			                                y: y
-			                            };
+	    return {
+			x: x,
+			y: y
+		    };
 }
 
 function dist(p1, p2) {
-	            return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+	    return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
 }
 
 function getHandle(mouse) {
-	            if (dist(mouse, point(rect.x, rect.y)) <= handlesSize) return 'topleft';
-	            if (dist(mouse, point(rect.x + rect.w, rect.y)) <= handlesSize) return 'topright';
-	            if (dist(mouse, point(rect.x, rect.y + rect.h)) <= handlesSize) return 'bottomleft';
-	            if (dist(mouse, point(rect.x + rect.w, rect.y + rect.h)) <= handlesSize) return 'bottomright';
-	            if (dist(mouse, point(rect.x + rect.w / 2, rect.y)) <= handlesSize) return 'top';
-	            if (dist(mouse, point(rect.x, rect.y + rect.h / 2)) <= handlesSize) return 'left';
-	            if (dist(mouse, point(rect.x + rect.w / 2, rect.y + rect.h)) <= handlesSize) return 'bottom';
-	            if (dist(mouse, point(rect.x + rect.w, rect.y + rect.h / 2)) <= handlesSize) return 'right';
-	            return false;
+	    if (dist(mouse, point(rect.x, rect.y)) <= handlesSize) return 'topleft';
+	    if (dist(mouse, point(rect.x + rect.w, rect.y)) <= handlesSize) return 'topright';
+	    if (dist(mouse, point(rect.x, rect.y + rect.h)) <= handlesSize) return 'bottomleft';
+	    if (dist(mouse, point(rect.x + rect.w, rect.y + rect.h)) <= handlesSize) return 'bottomright';
+	    if (dist(mouse, point(rect.x + rect.w / 2, rect.y)) <= handlesSize) return 'top';
+	    if (dist(mouse, point(rect.x, rect.y + rect.h / 2)) <= handlesSize) return 'left';
+	    if (dist(mouse, point(rect.x + rect.w / 2, rect.y + rect.h)) <= handlesSize) return 'bottom';
+	    if (dist(mouse, point(rect.x + rect.w, rect.y + rect.h / 2)) <= handlesSize) return 'right';
+	    return false;
 }
 
 function mouseDown(e) {
-	            if (currentHandle) drag = true;
-	            draw();
+	    if (currentHandle) drag = true;
+	    draw();
 }
 
 function mouseUp() {
-	            drag = false;
-	            currentHandle = false;
-	            draw();
+	    drag = false;
+	    currentHandle = false;
+	    draw();
 }
 function mouseMove(e) {
-	            var previousHandle = currentHandle;
-	            if (!drag) currentHandle = getHandle(point(e.pageX - this.offsetLeft, e.pageY - this.offsetTop));
-	            if (currentHandle && drag) {
-			                                var mousePos = point(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
-			                                switch (currentHandle) {
-								                                                case 'topleft':
-									                                                            rect.w += rect.x - mousePos.x;
-									                                                            rect.h += rect.y - mousePos.y;
-									                                                            rect.x = mousePos.x;
-									                                                            rect.y = mousePos.y;
-									                                                            break;
-									                                                        case 'topright':
-									                                                            rect.w = mousePos.x - rect.x;
-									                                                            rect.h += rect.y - mousePos.y;
-									                                                            rect.y = mousePos.y;
-									                                                            break;
-									                                                        case 'bottomleft':
-									                                                            rect.w += rect.x - mousePos.x;
-									                                                            rect.x = mousePos.x;
-									                                                            rect.h = mousePos.y - rect.y;
-									                                                            break;
-									                                                        case 'bottomright':
-									                                                            rect.w = mousePos.x - rect.x;
-									                                                            rect.h = mousePos.y - rect.y;
-									                                                            break;
+    var previousHandle = currentHandle;
+    if (!drag) currentHandle = getHandle(point(e.pageX - this.offsetLeft, e.pageY - this.offsetTop));
+	if (currentHandle && drag) {
+		var mousePos = point(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+		switch (currentHandle) {
+			case 'topleft':
+			    rect.w += rect.x - mousePos.x;
+			    rect.h += rect.y - mousePos.y;
+			    rect.x = mousePos.x;
+			    rect.y = mousePos.y;
+			    break;
+			case 'topright':
+			    rect.w = mousePos.x - rect.x;
+			    rect.h += rect.y - mousePos.y;
+			    rect.y = mousePos.y;
+			    break;
+			case 'bottomleft':
+			    rect.w += rect.x - mousePos.x;
+			    rect.x = mousePos.x;
+			    rect.h = mousePos.y - rect.y;
+			    break;
+			case 'bottomright':
+			    rect.w = mousePos.x - rect.x;
+			    rect.h = mousePos.y - rect.y;
+			    break;
 
-									                                                        case 'top':
-									                                                            rect.h += rect.y - mousePos.y;
-									                                                            rect.y = mousePos.y;
-									                                                            break;
+			case 'top':
+			    rect.h += rect.y - mousePos.y;
+			    rect.y = mousePos.y;
+			    break;
 
-									                                                        case 'left':
-									                                                            rect.w += rect.x - mousePos.x;
-									                                                            rect.x = mousePos.x;
-									                                                            break;
+			case 'left':
+			    rect.w += rect.x - mousePos.x;
+			    rect.x = mousePos.x;
+			    break;
 
-									                                                        case 'bottom':
-									                                                            rect.h = mousePos.y - rect.y;
-									                                                            break;
+			case 'bottom':
+			    rect.h = mousePos.y - rect.y;
+			    break;
 
-									                                                        case 'right':
-									                                                            rect.w = mousePos.x - rect.x;
-									                                                            break;
-									                                                    }
-			                            }
-	            if (drag || currentHandle != previousHandle) draw();
+			case 'right':
+			    rect.w = mousePos.x - rect.x;
+			    break;
+		}
+	    }
+    if (drag || currentHandle != previousHandle) draw();
 }
 
-function draw() {
+function draw(mapMax) {
 
-	            if (rect.w < 0){
-			                        rect.w = 0
-			                }
-	            if (rect.h < 0){
-			                        rect.h = 0
-			                }
+    if (rect.w < 0){
+	rect.w = 0
+    }
+    if (rect.h < 0){
+	rect.h = 0
+    }
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "rgba(5, 5, 5, 0.3)";
+    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    if (currentHandle) {
+	var posHandle = point(0, 0);
+		switch (currentHandle) {
+			case 'topleft':
+			    posHandle.x = rect.x;
+			    posHandle.y = rect.y;
+			    break;
+			case 'topright':
+			    posHandle.x = rect.x + rect.w;
+			    posHandle.y = rect.y;
+			    break;
+			case 'bottomleft':
+			    posHandle.x = rect.x;
+			    posHandle.y = rect.y + rect.h;
+			    break;
+			case 'bottomright':
+			    posHandle.x = rect.x + rect.w;
+			    posHandle.y = rect.y + rect.h;
+			    break;
+			case 'top':
+			    posHandle.x = rect.x + rect.w / 2;
+			    posHandle.y = rect.y;
+			    break;
+			case 'left':
+			    posHandle.x = rect.x;
+			    posHandle.y = rect.y + rect.h / 2;
+			    break;
+			case 'bottom':
+			    posHandle.x = rect.x + rect.w / 2;
+			    posHandle.y = rect.y + rect.h;
+			    break;
+			case 'right':
+			    posHandle.x = rect.x + rect.w;
+			    posHandle.y = rect.y + rect.h / 2;
+			    break;
+		    }
+	var latMin = Math.round(180-(rect.y+rect.h)/3-90)
+	var latMax = Math.round(90-rect.y/3)
+	if (mapMax == 180) {
+		var lonMin = Math.round(rect.x/3-180)
+		var lonMax = Math.round((rect.x+rect.w)/3-180)
+	} else if (mapMax == 360) {
+		var lonMin = Math.round(rect.x/3)
+		var lonMax = Math.round((rect.x+rect.w)/3)
+	}
 
-	            ctx.clearRect(0, 0, canvas.width, canvas.height);
-	            ctx.fillStyle = "rgba(5, 5, 5, 0.3)";
-	            ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
-	            if (currentHandle) {
-			                                var posHandle = point(0, 0);
-			                                switch (currentHandle) {
-								                                                case 'topleft':
-									                                                            posHandle.x = rect.x;
-									                                                            posHandle.y = rect.y;
-									                                                            break;
-									                                                        case 'topright':
-									                                                            posHandle.x = rect.x + rect.w;
-									                                                            posHandle.y = rect.y;
-									                                                            break;
-									                                                        case 'bottomleft':
-									                                                            posHandle.x = rect.x;
-									                                                            posHandle.y = rect.y + rect.h;
-									                                                            break;
-									                                                        case 'bottomright':
-									                                                            posHandle.x = rect.x + rect.w;
-									                                                            posHandle.y = rect.y + rect.h;
-									                                                            break;
-									                                                        case 'top':
-									                                                            posHandle.x = rect.x + rect.w / 2;
-									                                                            posHandle.y = rect.y;
-									                                                            break;
-									                                                        case 'left':
-									                                                            posHandle.x = rect.x;
-									                                                            posHandle.y = rect.y + rect.h / 2;
-									                                                            break;
-									                                                        case 'bottom':
-									                                                            posHandle.x = rect.x + rect.w / 2;
-									                                                            posHandle.y = rect.y + rect.h;
-									                                                            break;
-									                                                        case 'right':
-									                                                            posHandle.x = rect.x + rect.w;
-									                                                            posHandle.y = rect.y + rect.h / 2;
-									                                                            break;
-									                                                    }
-			                        var latMin = Math.round(180-(rect.y+rect.h)/3-90)
-			                        var latMax = Math.round(90-rect.y/3)
-			                        var lonMin = Math.round(rect.x/3-180)
-			                        var lonMax = Math.round((rect.x+rect.w)/3-180)
+	document.getElementById("lat_max").value = latMax
+	document.getElementById("lat_min").value = latMin
+	document.getElementById("lon_max").value = lonMax
+	document.getElementById("lon_min").value = lonMin
 
-			                        document.getElementById("lat_max").value = latMax
-			                        document.getElementById("lat_min").value = latMin
-			                        document.getElementById("lon_max").value = lonMax
-			                        document.getElementById("lon_min").value = lonMin
-
-			                                ctx.globalCompositeOperation = 'xor';
-			                                ctx.beginPath();
-			                                ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
-			                                ctx.fill();
-			                                ctx.globalCompositeOperation = 'source-over';
-			                            }
+	ctx.globalCompositeOperation = 'xor';
+	ctx.beginPath();
+	ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
+	ctx.fill();
+	ctx.globalCompositeOperation = 'source-over';
+    }
 }
 
-function updateRect() {
-	        var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
-	        var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
-	        var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
-	        var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
-	        rect.x = xmin
-	        rect.y = ymax
-	        rect.h = height
-	        rect.w = width
-	        draw()
+function updateRect(mapMax) {
+	if (mapMax == 180) {
+		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
+		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
+	} else if (mapMax == 360) {
+		var xmin = Math.round(Math.round(document.getElementById("lon_min").value))*3
+		var width = ((Math.round(document.getElementById("lon_max").value)) * 3) - xmin
+	}
+	var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
+	var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
+	rect.x = xmin
+	rect.y = ymax
+	rect.h = height
+	rect.w = width
+	draw(mapMax)
 }
 
 init();
-updateRect();
+
