@@ -323,7 +323,7 @@ function draw(mapMax) {
 }
 
 function updateRect(mapMax) {
-	document.getElementById("mapStuff").innerText = 'mapmax = ' mapMax;
+	//document.getElementById("mapStuff").innerText = 'mapmax = ' mapMax;
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
