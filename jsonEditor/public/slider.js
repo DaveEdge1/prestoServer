@@ -336,6 +336,7 @@ function updateRect(mapMax) {
 	rect.y = ymax
 	rect.h = height
 	rect.w = width
+	document.getElementById("mapStuff").innerText = 'xmin = ' + xmin + ', width = ' + width + ', ymax = ' + ymax + ', height = ' + height + '<br>' + 'lon_min = ' + document.getElementById("lon_min").value + ' lat_min = ' + document.getElementById("lat_min").value
 	draw(mapMax)
 }
 
