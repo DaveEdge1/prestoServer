@@ -323,7 +323,6 @@ function draw(mapMax) {
 }
 
 function updateRect(mapMax) {
-	document.getElementById("mapStuff").innerText = 'xmin = ' + xmin + ', width = ' + width + ', ymax = ' + ymax + ', height = ' + height + '\n' + 'lon_min = ' + document.getElementById("lon_min").value + ' lat_min = ' + document.getElementById("lat_min").value
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
@@ -337,6 +336,8 @@ function updateRect(mapMax) {
 	rect.y = ymax
 	rect.h = height
 	rect.w = width
+	document.getElementById("mapStuff").innerText = 'xmin = ' + xmin + ', width = ' + width + ', ymax = ' + ymax + ', height = ' + height + '\n' + 'lon_min = ' + document.getElementById("lon_min").value + ' lat_min = ' + document.getElementById("lat_min").value
+
 	draw(mapMax)
 }
 
