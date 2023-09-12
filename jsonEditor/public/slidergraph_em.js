@@ -195,13 +195,13 @@ function getHandle(mouse) {
 
 function mouseDown(e) {
 	    if (currentHandle) drag = true;
-	    draw();
+	    draw(mapMax);
 }
 
 function mouseUp() {
 	    drag = false;
 	    currentHandle = false;
-	    draw();
+	    draw(mapMax);
 }
 function mouseMove(e) {
     var previousHandle = currentHandle;
@@ -249,7 +249,7 @@ function mouseMove(e) {
 			    break;
 		}
 	    }
-    if (drag || currentHandle != previousHandle) draw();
+    if (drag || currentHandle != previousHandle) draw(mapMax);
 }
 
 function draw(mapMax) {
@@ -326,6 +326,7 @@ function draw(mapMax) {
 }
 
 function updateRect(mapMax) {
+	mapMax = mapMax;
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
