@@ -1,6 +1,7 @@
 //Credit to Predrag Davidovic for the dual slider: "https://medium.com/@predragdavidovic10/native-dual-range-slider-html-css-javascript-91e778134816"
 const color1 = '#896A67'
 const color2 = '#C6C6C6'
+var mapMax = 0;
 function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 	    const [from, to] = getParsed(fromInput, toInput);
 	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
@@ -314,7 +315,7 @@ function draw(mapMax) {
 	document.getElementById("lon_max").value = lonMax
 	document.getElementById("lon_min").value = lonMin
 
-	document.getElementById("mapStuff").innerText = 'xmin = ' + rect.x + ', width = ' + rect.w + ', ymax = ' + rect.y + ', height = ' + rect.h + '\n' 
+	document.getElementById("mapStuff").innerText = 'mapMax = ' + mapMax + ' xmin = ' + rect.x + ', width = ' + rect.w + ', ymax = ' + rect.y + ', height = ' + rect.h + '\n' 
 		+ 'latMax = ' + latMax + ', latMin = ' + latMin + ', lonMax = ' + lonMax + ', lonMin = ' + lonMin
 	ctx.globalCompositeOperation = 'xor';
 	ctx.beginPath();
