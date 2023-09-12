@@ -158,6 +158,7 @@ function dataTypeHTML (configJSON, key, id1) {
 		var mapLoc = '/SimpleWorld' + configJSON[key].options[0] + configJSON[key].options[1] + '.png'
 		buildJS4(configJSON[key].options[1]);
 		console.log(key)
+		console.log("mapMax: " + configJSON[key].options[1]);
 		console.log("defaults: " + configJSON[key].default + " limits: " + configJSON[key].limits)
 		dataHTML = dataHTML
 		+ '<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>\n'
