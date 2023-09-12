@@ -314,6 +314,7 @@ function draw(mapMax) {
 	document.getElementById("lon_max").value = lonMax
 	document.getElementById("lon_min").value = lonMin
 
+	document.getElementById("mapStuff").innerText = 'latMax = ' + latMax + ', latMin = ' + latMin + ', lonMax = ' + lonMax + ', lonMin = ' + lonMin
 	ctx.globalCompositeOperation = 'xor';
 	ctx.beginPath();
 	ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
@@ -336,7 +337,7 @@ function updateRect(mapMax) {
 	rect.y = ymax
 	rect.h = height
 	rect.w = width
-	document.getElementById("mapStuff").innerText = 'xmin = ' + xmin + ', width = ' + width + ', ymax = ' + ymax + ', height = ' + height + '\n' + 'lon_min = ' + document.getElementById("lon_min").value + ' lat_min = ' + document.getElementById("lat_min").value
+	//document.getElementById("mapStuff").innerText = 'xmin = ' + xmin + ', width = ' + width + ', ymax = ' + ymax + ', height = ' + height + '\n' + 'lon_min = ' + document.getElementById("lon_min").value + ' lat_min = ' + document.getElementById("lat_min").value
 
 	draw(mapMax)
 }
