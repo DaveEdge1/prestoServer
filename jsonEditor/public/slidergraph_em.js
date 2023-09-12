@@ -195,13 +195,13 @@ function getHandle(mouse) {
 
 function mouseDown(e) {
 	    if (currentHandle) drag = true;
-	    draw(mapMax);
+	    draw();
 }
 
 function mouseUp() {
 	    drag = false;
 	    currentHandle = false;
-	    draw(mapMax);
+	    draw();
 }
 function mouseMove(e) {
     var previousHandle = currentHandle;
@@ -249,10 +249,10 @@ function mouseMove(e) {
 			    break;
 		}
 	    }
-    if (drag || currentHandle != previousHandle) draw(mapMax);
+    if (drag || currentHandle != previousHandle) draw();
 }
 
-function draw(mapMax) {
+function draw() {
 
     if (rect.w < 0){
 	rect.w = 0
@@ -325,8 +325,8 @@ function draw(mapMax) {
     }
 }
 
-function updateRect(mapMax) {
-	mapMax = mapMax;
+function updateRect(maxOfMap) {
+	mapMax = maxOfMap;
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
@@ -342,7 +342,7 @@ function updateRect(mapMax) {
 	rect.w = width
 	//document.getElementById("mapStuff").innerText = 'xmin = ' + xmin + ', width = ' + width + ', ymax = ' + ymax + ', height = ' + height + '\n' + 'lon_min = ' + document.getElementById("lon_min").value + ' lat_min = ' + document.getElementById("lat_min").value
 
-	draw(mapMax)
+	draw()
 }
 
 init();
