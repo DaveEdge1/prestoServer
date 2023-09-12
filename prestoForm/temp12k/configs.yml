@@ -60,7 +60,7 @@ geo:
     value: [-90, 90, -180, 180]
     default: [-90, 90, -180, 180]
     limits: [-90, 90, -180, 180]
-    options: null
+    options: [single,360]
     precision: 0.001
     long_name: coordinate bounds for incorporating proxies
     description: Provide bounds to include only proxies in a given region
