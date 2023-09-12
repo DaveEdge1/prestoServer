@@ -314,7 +314,8 @@ function draw(mapMax) {
 	document.getElementById("lon_max").value = lonMax
 	document.getElementById("lon_min").value = lonMin
 
-	document.getElementById("mapStuff").innerText = 'latMax = ' + latMax + ', latMin = ' + latMin + ', lonMax = ' + lonMax + ', lonMin = ' + lonMin
+	document.getElementById("mapStuff").innerText = 'xmin = ' + rect.x + ', width = ' + rect.w + ', ymax = ' + rect.y + ', height = ' + rect.h + '\n' 
+		+ 'latMax = ' + latMax + ', latMin = ' + latMin + ', lonMax = ' + lonMax + ', lonMin = ' + lonMin
 	ctx.globalCompositeOperation = 'xor';
 	ctx.beginPath();
 	ctx.arc(posHandle.x, posHandle.y, handlesSize, 0, 2 * Math.PI);
