@@ -162,7 +162,6 @@ function dataTypeHTML (configJSON, key, id1) {
 		console.log("defaults: " + configJSON[key].default + " limits: " + configJSON[key].limits)
 		dataHTML = dataHTML
 		+ '<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>\n'
-		+ '<p id=mapStuff>hi</p>\n'
 		+ '<div class="mapall-container">\n'
 		+ '<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(' + mapLoc + ')"></canvas>\n'
 		+ '<div class="map-numeric">\n'
