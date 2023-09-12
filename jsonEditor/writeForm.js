@@ -65,9 +65,9 @@ buildJS3 = function(id) {
 
 jsExt4 = '';
 
-buildJS4 = function(mapMax) {
+buildJS4 = function(mapNum, mapMax) {
 	jsExt4 = jsExt4
-	+ 'updateRect(' + mapMax + ')\n'
+	+ 'updateRect(' + mapNum + ', '  + mapMax + ')\n'
 	return(jsExt4)
 }
 
@@ -160,7 +160,7 @@ function dataTypeHTML (configJSON, key, id1) {
 			var canvasHeight = 270
 		}
 		var mapLoc = '/SimpleWorld' + configJSON[key].options[0] + configJSON[key].options[1] + '.png'
-		buildJS4(configJSON[key].options[1]);
+		buildJS4(configJSON[key].options[0],configJSON[key].options[1]);
 		console.log(key)
 		console.log("mapMax: " + configJSON[key].options[1]);
 		console.log("defaults: " + configJSON[key].default + " limits: " + configJSON[key].limits)
