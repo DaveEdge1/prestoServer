@@ -120,7 +120,7 @@ For more information about each of the options, mouse over the question mark ico
 </form>
 <br>
 <br>
-<form method="POST" action="/sendReconRequest">
+<form id="paramsForm" method="POST" onsubmit="buildURL()">
 <button type="button" class="collapsible">Time</button>
 <div class="content">
 <br>
@@ -246,19 +246,19 @@ For more information about each of the options, mouse over the question mark ico
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
 <span class="tooltip-text">Provide bounds to include only proxies in a given region</span>
 </div>
-<p style="color: red;">Hint: At the four corners of the map, you will find dragable handles<p>
+<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>
 <div class="mapall-container">
-<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url('/SimpleWorldMap4.png')"></canvas>
+<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(/SimpleWorldsingle360.png)"></canvas>
 <div class="map-numeric">
 <label style="font-size:16px; margin-right:8px;">Latitude</label>
-<input style:"-moz-appearance: textfield;" class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="0.001" onchange="updateRect();">
+<input style:"-moz-appearance: textfield;" class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="0.001" onchange="updateRect(360);">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateRect();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateRect(360);">
 <label style="margin-right:30px;">max</label>
 <label style="font-size:16px; margin-right:8px;">Longitude</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateRect();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateRect(360);">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateRect();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateRect(360);">
 <label>max</label>
 </div>
 </div>
@@ -298,6 +298,13 @@ For more information about each of the options, mouse over the question mark ico
 <button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
 </div>
 </form>
+<script>
+function buildURL(){
+var urlParams = new URLSearchParams(window.location.search);
+document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
+return confirm("Submit Custom Reconstruction request?");
+}
+</script>
 <script>
 function val() {document.getElementById("abstract2").src = "/slider.css";}
 </script>
