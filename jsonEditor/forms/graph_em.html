@@ -327,6 +327,7 @@ For more information about each of the options, mouse over the question mark ico
 <canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(/SimpleWorldsingle360.png)"></canvas>
 <div class="map-numeric">
 <label style="font-size:16px; margin-right:8px;">Latitude</label>
+<<<<<<< HEAD
 <input style:"-moz-appearance: textfield;" class="coord-input" type="number" name="calibration_coord_bounds" id="lat_min" value="-20" min="-90" max="90" step="0.001" onchange="updateRect(configJSON[key].options[1]);">
 <label style="margin-right:8px;">min</label>
 <input class="coord-input" type="number" name="calibration_coord_bounds" id="lat_max" value="20" min="-90" max="90" step="0.001" onchange="updateRect(configJSON[key].options[1]);">
@@ -335,6 +336,16 @@ For more information about each of the options, mouse over the question mark ico
 <input class="coord-input" type="number" name="calibration_coord_bounds" id="lon_min" value="150" min="0" max="360" step="0.001" onchange="updateRect(configJSON[key].options[1]);">
 <label style="margin-right:8px;">min</label>
 <input class="coord-input" type="number" name="calibration_coord_bounds" id="lon_max" value="260" min="0" max="360" step="0.001" onchange="updateRect(configJSON[key].options[1]);">
+=======
+<input style:"-moz-appearance: textfield;" class="coord-input" type="number" name="calibration_coord_bounds" id="lat_min" value="-20" min="-90" max="90" step="0.001" onchange="updateRect(); mapMax=360;">
+<label style="margin-right:8px;">min</label>
+<input class="coord-input" type="number" name="calibration_coord_bounds" id="lat_max" value="20" min="-90" max="90" step="0.001" onchange="updateRect(); mapMax=360;">
+<label style="margin-right:30px;">max</label>
+<label style="font-size:16px; margin-right:8px;">Longitude</label>
+<input class="coord-input" type="number" name="calibration_coord_bounds" id="lon_min" value="150" min="0" max="360" step="0.001" onchange="updateRect(); mapMax=360;">
+<label style="margin-right:8px;">min</label>
+<input class="coord-input" type="number" name="calibration_coord_bounds" id="lon_max" value="260" min="0" max="360" step="0.001" onchange="updateRect(); mapMax=360;">
+>>>>>>> 75a014529ee3c62f0b3fdc98062046b75ab3e3a4
 <label>max</label>
 </div>
 </div>
