@@ -300,14 +300,16 @@ function draw() {
 			    posHandle.y = rect.y + rect.h / 2;
 			    break;
 		    }
-	var latMin = Math.round(180-(rect.y+rect.h)/3-90)
-	var latMax = Math.round(90-rect.y/3)
 	if (mapMax == 180) {
+		var latMin = Math.round(180-(rect.y+rect.h)/3-90)
+		var latMax = Math.round(90-rect.y/3)
 		var lonMin = Math.round(rect.x/3-180)
 		var lonMax = Math.round((rect.x+rect.w)/3-180)
 	} else if (mapMax == 360) {
-		var lonMin = Math.round(rect.x/3)
-		var lonMax = Math.round((rect.x+rect.w)/3)
+		var latMin = Math.round(Math.round(135-rect.y-rect.h)/1.5)
+		var latMax = Math.round(90-rect.y/1.5)
+		var lonMin = Math.round(rect.x/1.5) - 360
+		var lonMax = Math.round((rect.x+rect.w)/1.5) - 360
 	}
 
 	document.getElementById("lat_max").value = latMax
@@ -328,17 +330,19 @@ function updateRect(maxOfMap) {
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
+		var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
+		var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
 	} else if (mapMax == 360) {
-		var xmin = Math.round(Math.round(document.getElementById("lon_min").value))*3
-		var width = ((Math.round(document.getElementById("lon_max").value)) * 3) - xmin
+		var xmin = Math.round(Math.round(Math.round(document.getElementById("lon_min").value) + 360)*1.5)
+		var width = ((Math.round(document.getElementById("lon_max").value) + 360) * 1.5) - xmin
+		var ymax = Math.round((135 - Math.round(document.getElementById("lat_max").value)*1.5))
+		var height = Math.round(135 - (ymax + Math.round(document.getElementById("lat_min").value)*1.5))
 	}
-	var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
-	var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
 	rect.x = xmin
 	rect.y = ymax
 	rect.h = height
 	rect.w = width
-
+        document.getElementById("rectVals").innerText = "x = " + rect.x + " y = " + rect.y + " height = " + rect.h + " width = " + rect.w + " mapWidth = " + mapMax
 	draw()
 }
 
