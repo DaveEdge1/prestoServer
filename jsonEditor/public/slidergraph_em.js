@@ -2,6 +2,7 @@
 const color1 = '#896A67'
 const color2 = '#C6C6C6'
 var mapMax = 0;
+var mapCount = '';
 function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 	    const [from, to] = getParsed(fromInput, toInput);
 	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
@@ -325,7 +326,7 @@ function draw() {
     }
 }
 
-function updateRect(maxOfMap) {
+function updateRect(mapCountIt, maxOfMap) {
 	mapMax = maxOfMap;
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
@@ -338,11 +339,12 @@ function updateRect(maxOfMap) {
 		var ymax = Math.round((135 - Math.round(document.getElementById("lat_max").value)*1.5))
 		var height = Math.round(135 - (ymax + Math.round(document.getElementById("lat_min").value)*1.5))
 	}
+
 	rect.x = xmin
 	rect.y = ymax
 	rect.h = height
 	rect.w = width
-        document.getElementById("rectVals").innerText = "x = " + rect.x + " y = " + rect.y + " height = " + rect.h + " width = " + rect.w + " mapWidth = " + mapMax
+
 	draw()
 }
 
@@ -403,4 +405,4 @@ function proxy_archiveType_incrementCheckCycle(){
 proxy_archiveType_checkCycle = proxy_archiveType_checkCycle+1;
 return (proxy_archiveType_checkCycle);
 }
-updateRect(360)
+updateRect(double, 360)
