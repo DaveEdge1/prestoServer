@@ -80,11 +80,8 @@ let transporter = nodemailer.createTransport({
 });
 
 updateParams = function (uniqueID, recon){
-	if (recon == 'holocene_da'){
-		translate(uniqueID)
-		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
-	} else if (recon == 'graph_em'){
-		translateGEM(uniqueID)
+	if (recon == 'holocene_da' || recon == 'graph_em'){
+		translate(uniqueID, recon)
 		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
 	} else {
 		return('/root/presto/userRecons/' + uniqueID  + '/configs.yml')
@@ -215,14 +212,14 @@ runRecon = function(uniqueID, user, domain, recon) {
 prestoStartHtml = function (uniqueID, user, domain) {
 	return('Starting your custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
-		 + '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' 
+		 //+ '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' 
 		 + 'The results will be sent to: ' + user + '@' + domain 
 		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' 
 		 + '<script>history.pushState(null, null, window.location.href);history.back();window.onpopstate = () => history.forward();var timeout = 10000; setTimeout(function ()' 
 		 + '{window.location = "https://paleopresto.com/"; }, timeout); </script>')
 }
 
-app.get("/holocene_da/:user/:domain/:uniqueID", (req, res) => {
+app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
 	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
 	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain))
 })
