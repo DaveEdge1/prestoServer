@@ -50,7 +50,8 @@ var translateJSON = function (uniqueID, recon){
 					      console.log('new value: ' + configs1.value)
 					      console.log('......................................................')
 					      if (configs[first][last].hasOwnProperty('position')){
-						      for (ii in configs[first][last].position){
+						      console.log('position length: ' + configs[first][last].position.length)
+						      for (ii in configs[first][last]['position']){
 							      console.log("position increment: " + ii)
 							      configsOrig[orig] = configs1.value[ii]
 						      }
