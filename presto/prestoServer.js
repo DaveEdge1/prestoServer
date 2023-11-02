@@ -57,7 +57,7 @@ var translateJSON = function (uniqueID, recon){
 						      for (ii in pos){
 							      console.log("position increment: " + ii)
 							      configsOrig[orig][origPos] = configs1.value[ii]
-							      origPos = ++
+							      origPos = origPos + 1
 						      }
 					      } else {
 						      configsOrig[orig] = configs1.value
