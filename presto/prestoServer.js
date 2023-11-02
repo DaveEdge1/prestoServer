@@ -59,6 +59,13 @@ var translateJSON = function (uniqueID, recon){
 							      configsOrig[orig][origPos] = configs1.value[ii]
 							      origPos = origPos + 1
 						      }
+						      if (orig == 'latRange' || orig == 'lonRange'){
+							      var newVal1 = configsOrig[orig] + ''
+							      configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
+						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution') {
+							      var newVal1 = configsOrig[orig] + ''
+							      parseInt(newVal1)
+						      }
 					      } else {
 						      configsOrig[orig] = configs1.value
 					      }
