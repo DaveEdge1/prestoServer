@@ -64,7 +64,7 @@ var translateJSON = function (uniqueID, recon){
 							      configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
 						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution') {
 							      var newVal1 = configsOrig[orig] + ''
-							      parseInt(newVal1)
+							      configsOrig[orig] = parseInt(newVal1)
 						      }
 					      } else {
 						      configsOrig[orig] = configs1.value
