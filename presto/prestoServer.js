@@ -173,6 +173,14 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 	}
 
 runRecon = function(uniqueID, user, domain, recon) {
+
+	const reconParams = function() {
+		const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
+		return JSON.parse(reconParamsNow)
+	}
+
+	console.log(reconParams())
+	
 	var configLoc = updateParams(uniqueID, recon)
 	const stdout = new streams.WritableStream()
 	const stderr = new streams.WritableStream()
