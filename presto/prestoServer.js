@@ -49,7 +49,13 @@ var translateJSON = function (uniqueID, recon){
 					      console.log('orig val: ' + configsOrig[orig])
 					      console.log('new value: ' + configs1.value)
 					      console.log('......................................................')
-					      configsOrig[orig] = configs1.value
+					      if (configs[first][last].hasOwnProperty('position')){
+						      for (ii in configs[first][last].position){
+							      configsOrig[orig] = configs1.value[ii]
+						      }
+					      } else {
+						      configsOrig[orig] = configs1.value
+					      }
 					  }
 				 }
 			}
