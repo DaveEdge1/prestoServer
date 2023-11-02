@@ -40,6 +40,7 @@ var translateJSON = function (uniqueID, recon){
 			var first = lookups[key1].first
 			var last = lookups[key1].last
 			var orig = lookups[key1].orig
+			var pos = lookups[key1].position
 			if (configs.hasOwnProperty(first)){
 				 if (configs[first].hasOwnProperty(last)){
 				     console.log('long name: ' + configs[first][last].long_name)
@@ -49,9 +50,9 @@ var translateJSON = function (uniqueID, recon){
 					      console.log('orig val: ' + configsOrig[orig])
 					      console.log('new value: ' + configs1.value)
 					      console.log('......................................................')
-					      if (configs[first][last].hasOwnProperty('position')){
-						      console.log('position length: ' + configs[first][last].position.length)
-						      for (ii in configs[first][last]['position']){
+					      if (typeof(pos) != undefined){
+						      console.log('position length: ' + pos.length)
+						      for (ii in pos){
 							      console.log("position increment: " + ii)
 							      configsOrig[orig] = configs1.value[ii]
 						      }
