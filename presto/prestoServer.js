@@ -46,10 +46,11 @@ var translate = function (uniqueID, recon){
 	                                          if (configs[first][last].hasOwnProperty('value')){
 		                                      console.log('orig key: ' + orig)
 	                                              var configs1 = configs[first][last]
+						      var newVal1 = configs1.value
 	                                              console.log('orig val: ' + configsOrig[orig])
 	                                              console.log('new value: ' + configs1.value)
 	                                              console.log('......................................................')
-	                                 		  if (configs1.value == undefined || configs1.value == 'null'){
+	                                 		  if (newVal1 == undefined || configs1.value == 'null'){
 					                          if (orig == 'localization_radius' || orig == 'model_processing'){
 									  configsOrig[orig] = 'None'
 	   		                                          } else if (orig == 'assign_seasonality' || orig == 'change_uncertainty'){
@@ -57,9 +58,9 @@ var translate = function (uniqueID, recon){
 			                                          }
 		 	                                  } else if (orig == 'obs_annualize_months' || orig == 'annualize_proxydb_months'){
 								  console.log("caught annualize months var")
-								  configsOrig[orig] = configs1.value.split(",").map(Number).filter(x => !isNaN(x))
+								  configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
 							  } else {
-							      configsOrig[orig] = configs1.value
+							      configsOrig[orig] = newVal1
 	  	                                          }
 						     }else{
 							console.log('no value')
