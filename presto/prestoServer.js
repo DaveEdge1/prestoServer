@@ -179,7 +179,9 @@ runRecon = function(uniqueID, user, domain, recon) {
 		return JSON.parse(reconParamsNow)
 	}
 
-	console.log(reconParams())
+	rparams = reconParams()
+
+	console.log(rparams.graph_em)
 	
 	var configLoc = updateParams(uniqueID, recon)
 	const stdout = new streams.WritableStream()
