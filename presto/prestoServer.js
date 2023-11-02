@@ -55,7 +55,11 @@ var translate = function (uniqueID, recon){
 	   		                                          } else if (orig == 'assign_seasonality' || orig == 'change_uncertainty'){
 									  configsOrig[orig] = false
 			                                          }
-		 	                                  } else if (orig == 'obs_annualize_months' || orig == 'annualize_proxydb_months' || orig == 'obs_regrid_nlat' || orig == 'obs_regrid_nlon'){
+		 	                                  } else if (orig == 'obs_regrid_nlat' || orig == 'obs_regrid_nlon'){
+								  console.log("caught regrid var")
+								  var newVal1 = configs1.value + ''
+								  configsOrig[orig] = parseInt(newVal1)
+							  } else if (orig == 'obs_annualize_months' || orig == 'annualize_proxydb_months'){
 								  var newVal1 = configs1.value + ''
 								  console.log("caught annualize months var")
 								  configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
