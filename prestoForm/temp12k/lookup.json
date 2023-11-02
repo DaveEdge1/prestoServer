@@ -30,7 +30,7 @@
         "orig":"lonRange",
         "first":"geo",
         "last":"proxy_coords",
-        "position":[0,1]},
+        "position":[2,3]},
     "uncertainty_nens":{
         "orig":"nens",
         "first":"uncertainty",
