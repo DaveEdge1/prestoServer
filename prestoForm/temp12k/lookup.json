@@ -1,10 +1,16 @@
 {
-    "time_range_to_reconstruct":{
-        "orig":"age_range_to_reconstruct",
+    "time_range_to_reconstruct1":{
+        "orig":"binstart",
         "first":"time",
-        "last":"range_to_reconstruct"},
+        "last":"range_to_reconstruct",
+        "position":0},
+    "time_range_to_reconstruct2":{
+        "orig":"binend",
+        "first":"time",
+        "last":"range_to_reconstruct",
+        "position":1},
     "time_resolution":{
-        "orig":"time_resolution",
+        "orig":"binres",
         "first":"time",
         "last":"resolution"}
 }
