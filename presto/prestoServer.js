@@ -181,7 +181,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 
 	rparams = reconParams()
 
-	console.log(rparams.graph_em)
+	console.log(rparams[recon])
 	
 	var configLoc = updateParams(uniqueID, recon)
 	const stdout = new streams.WritableStream()
