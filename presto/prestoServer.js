@@ -46,7 +46,7 @@ var translate = function (uniqueID, recon){
 	                                          if (configs[first][last].hasOwnProperty('value')){
 		                                      console.log('orig key: ' + orig)
 	                                              var configs1 = configs[first][last]
-						      var newVal1 = configs1.value
+						      var newVal1 = configs1.value + ''
 	                                              console.log('orig val: ' + configsOrig[orig])
 	                                              console.log('new value: ' + configs1.value)
 	                                              console.log('......................................................')
