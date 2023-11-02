@@ -13,6 +13,12 @@ var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
 var nodemailer = require('nodemailer');
 var align = require('align-yaml');
 
+const reconParams = function() {
+	const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
+	return JSON.parse(reconParamsNow)
+}
+
+var rparams = reconParams()
 
 var translate = function (uniqueID, recon){
 	var yaml = require('js-yaml')
@@ -174,14 +180,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 
 runRecon = function(uniqueID, user, domain, recon) {
 
-	const reconParams = function() {
-		const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
-		return JSON.parse(reconParamsNow)
-	}
-
-	rparams = reconParams()
-
-	console.log(rparams[recon])
+	console.log('recon: ' + rparams[recon].title)
 	
 	var configLoc = updateParams(uniqueID, recon)
 	const stdout = new streams.WritableStream()
@@ -193,12 +192,12 @@ runRecon = function(uniqueID, user, domain, recon) {
 		HostConfig: {
 			AutoRemove: true,
 			Binds: [
-				dirname + ':/results',
-				configLoc + ':/config_default.yml'
+				dirname + ':' + rparams[recon].resultsDir,
+				configLoc + ':' + rparams[recon].paramsCon
 				]	
 			}
 		}
-		docker.run('davidedge/lipd_webapps:holocene_da',
+		docker.run(rparams[recon].conTag,
 			   [],
 			   [stdout, stderr],
 			   options,
@@ -220,9 +219,9 @@ runRecon = function(uniqueID, user, domain, recon) {
 }
   
 prestoStartHtml = function (uniqueID, user, domain) {
-	return('Starting your custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
+	return('Starting your' + rparams[recon].title + 'custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
-		 //+ '<a href=https://github.com/Holocene-Reconstruction/Holocene-code target="_blank">Holocene DA Reconstruction Code</a><br /><br />' 
+		 + '<a href=' + rparams[recon].github + 'target="_blank">' + rparams[recon].title + 'Reconstruction Code</a><br /><br />' 
 		 + 'The results will be sent to: ' + user + '@' + domain 
 		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' 
 		 + '<script>history.pushState(null, null, window.location.href);history.back();window.onpopstate = () => history.forward();var timeout = 10000; setTimeout(function ()' 
