@@ -55,7 +55,7 @@ var translate = function (uniqueID, recon){
 	   		                                          } else if (orig == 'assign_seasonality' || orig == 'change_uncertainty'){
 									  configsOrig[orig] = false
 			                                          }
-		 	                                  } else if (orig == obs_annualize_months || orig == annualize_proxydb_months){
+		 	                                  } else if (orig == 'obs_annualize_months' || orig == 'annualize_proxydb_months'){
 								  console.log("caught annualize months var")
 								  configsOrig[orig] = configs1.value.split(",").map(Number).filter(x => !isNaN(x))
 							  } else {
