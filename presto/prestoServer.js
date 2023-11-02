@@ -218,7 +218,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 			   })
 }
   
-prestoStartHtml = function (uniqueID, user, domain) {
+prestoStartHtml = function (uniqueID, user, domain, recon) {
 	return('Starting your' + rparams[recon].title + 'custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + rparams[recon].github + 'target="_blank">' + rparams[recon].title + 'Reconstruction Code</a><br /><br />' 
@@ -230,7 +230,7 @@ prestoStartHtml = function (uniqueID, user, domain) {
 
 app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
 	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
-	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain))
+	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon))
 })
 
 app.listen(PORT, function () {
