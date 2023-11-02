@@ -11,8 +11,16 @@
 		"title":"Temperature 12k Composites",
 		"time":"0-12,000 years",
 		"proxies":"Temperature 12k proxy database",
-		"models":"TraCE-21ka and a HadCM3 transient deglacial simulation",
+		"models":"N/A",
 		"methods":"Standard calibrated composite (SCC)",
 		"doi":"https://doi.org/10.1038/s41597-020-0445-3"
+	},
+	"graph_em": {
+		"title":"GraphEM",
+		"time":"0-2,000 years",
+		"proxies":"Pages 2k proxy database",
+		"models":"N/A",
+		"methods":"Graphical Expectation-Maximization algorithm",
+		"doi":"https://doi.org/10.1214/14-AOAS794"
 	}
 }
