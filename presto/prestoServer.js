@@ -50,7 +50,7 @@ var translateJSON = function (uniqueID, recon){
 					      console.log('orig val: ' + configsOrig[orig])
 					      console.log('new value: ' + configs1.value)
 					      console.log('......................................................')
-					      if (typeof(pos) != undefined){
+					      if (typeof(pos) != 'undefined'){
 						      console.log('position length: ' + pos.length)
 						      for (ii in pos){
 							      console.log("position increment: " + ii)
