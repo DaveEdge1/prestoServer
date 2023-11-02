@@ -55,6 +55,7 @@ function editConfigs (configLoc, formEdits, recon, uniqueID){
 		for (var key2 in configFileNew[key1]){
 			var formKey = key1 + "_" + key2
 			console.log("key1: ", key1, "key2:", key2, "form key:", formKey, "old: ", configFileNew[key1][key2]['value'], "new: ", formEdits[formKeyIndex(formEdits, formKey)])
+			console.log("old object type: " + typeof configFileNew[key1][key2]['value'] + " new: " + typeof formEdits[formKeyIndex(formEdits, formKey)])
 			var newKey = formEdits[formKeyIndex(formEdits, formKey)]
 			if (newKey == undefined){
 			} else {
