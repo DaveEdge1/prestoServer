@@ -52,7 +52,7 @@ var translateJSON = function (uniqueID, recon){
 					      console.log('......................................................')
 					      if (typeof(pos) != 'undefined'){
 						      console.log('position length: ' + pos.length)
-						      configsOrig[orig].length = new Array(pos.length)
+						      configsOrig[orig].length = new Array()
 						      var origPos = 0
 						      for (ii in pos){
 							      console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
