@@ -13,7 +13,7 @@
     "paramsCon": "/params.json",
     "resultsDir": "/output",
     "github": "https://github.com/paleopresto/temp12k-regional-composites",
-    "conTag": "davidedge/lipd_webapps:temp12k",
+    "conTag": "davidedge/lipd_webapps:temp12knew",
     "translate": "false"
   },
   "graph_em": {
