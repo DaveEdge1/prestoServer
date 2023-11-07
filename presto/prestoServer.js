@@ -59,10 +59,10 @@ var translateJSON = function (uniqueID, recon){
 							      configsOrig[orig][origPos] = configs1.value[ii]
 							      origPos = origPos + 1
 						      }
-						      if (orig == 'latRange' || orig == 'lonRange'){
+						      if (orig == 'latRange' || orig == 'lonRange' || orig == 'searchRange'){
 							      var newVal1 = configsOrig[orig] + ''
 							      configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
-						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution') {
+						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution' || orig == 'duration') {
 							      var newVal1 = configsOrig[orig] + ''
 							      configsOrig[orig] = parseInt(newVal1)
 						      }
