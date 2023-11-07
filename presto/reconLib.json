@@ -4,7 +4,7 @@
     "paramsCon": "/config_default.yml",
     "resultsDir": "/resultsl",
     "github": "https://github.com/Holocene-Reconstruction/Holocene-code",
-    "conTag": "lipd_webapps:holocene_da",
+    "conTag": "davidedge/lipd_webapps:holocene_da",
     "translate": "true",
     "workingParams": "/root/presto/prestoForm/holocene_da/config_default.yml"
   },
