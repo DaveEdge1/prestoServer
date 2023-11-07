@@ -256,6 +256,10 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 runRecon = function(uniqueID, user, domain, recon) {
 
 	console.log('recon: ' + rparams[recon].title)
+
+	console.log('resultsDir: ', rparams[recon].resultsDir)
+	console.log('paramsLoc: ', rparams[recon].paramsCon)
+	console.log('container: ', rparams[recon].conTag)
 	
 	var configLoc = updateParams(uniqueID, recon)
 	const stdout = new streams.WritableStream()
