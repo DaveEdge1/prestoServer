@@ -326,7 +326,7 @@ function draw() {
     }
 }
 
-function updateRect(mapCountIt, maxOfMap) {
+function updateRect(maxOfMap) {
 	mapMax = maxOfMap;
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
@@ -407,4 +407,4 @@ function proxy_archiveType_incrementCheckCycle(){
 proxy_archiveType_checkCycle = proxy_archiveType_checkCycle+1;
 return (proxy_archiveType_checkCycle);
 }
-updateRect(double, 360)
+updateRect(360)
