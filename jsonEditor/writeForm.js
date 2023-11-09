@@ -67,7 +67,7 @@ jsExt4 = '';
 
 buildJS4 = function(mapNum, mapMax) {
 	jsExt4 = jsExt4
-	+ 'updateRect(' + mapNum + ', '  + mapMax + ')\n'
+	+ 'updateRect(' + mapMax + ')\n'
 	return(jsExt4)
 }
 
@@ -170,7 +170,7 @@ function dataTypeHTML (configJSON, key, id1) {
 		+ '<canvas id="canvas" width="1080" height="' + canvasHeight + '" style="margin-right:10px; background: url(' + mapLoc + ')"></canvas>\n'
 		+ '<div class="map-numeric">\n'
 		+ '<label style="font-size:16px; margin-right:8px;">Latitude</label>\n'
-		+ '<input style:"-moz-appearance: textfield;" class="coord-input" type="number" name="'+id1+'" id="lat_min" value="' + configJSON[key].default[0] + '" min="' + configJSON[key].limits[0] + '" max="' + configJSON[key].limits[1] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
+		+ '<input style="-moz-appearance: textfield;" class="coord-input" type="number" name="'+id1+'" id="lat_min" value="' + configJSON[key].default[0] + '" min="' + configJSON[key].limits[0] + '" max="' + configJSON[key].limits[1] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
 		+ '<label style="margin-right:8px;">min</label>\n'
 		+ '<input class="coord-input" type="number" name="'+id1+'" id="lat_max" value="' + configJSON[key].default[1] + '" min="' + configJSON[key].limits[0] + '" max="' + configJSON[key].limits[1] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
 		+ '<label style="margin-right:30px;">max</label>\n'
