@@ -326,7 +326,7 @@ function draw() {
     }
 }
 
-function updateRect(mapCountIt, maxOfMap) {
+function updateRect(maxOfMap) {
 	mapMax = maxOfMap;
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
