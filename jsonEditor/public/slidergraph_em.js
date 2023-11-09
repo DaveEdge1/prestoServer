@@ -345,6 +345,8 @@ function updateRect(mapCountIt, maxOfMap) {
 	rect.h = height
 	rect.w = width
 
+	document.getElementById("rectVals").innerText = "x = " + rect.x + " y = " + rect.y + " height = " + rect.h + " width = " + rect.w + " mapWidth = " + mapMax
+
 	draw()
 }
 
