@@ -88,7 +88,7 @@ calibration:
   coord_bounds: 
     value: [-20,20,150,260]
     default: [-20,20,150,260]
-    limits: [-90,90,0,360]
+    limits: [-90,90,-360,360]
     options: [double,360]
     precision: .001
     long_name: coordinate bounds for instrumental data

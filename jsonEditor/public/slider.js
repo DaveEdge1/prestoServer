@@ -261,8 +261,8 @@ function draw() {
     if (rect.h < 0){
 	rect.h = 0
     }
-    if (rect.w > 1080){
-	rect.w = 1080
+    if (rect.w > 540){
+	rect.w = 540
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -331,6 +331,9 @@ function draw() {
 
 function updateRect(maxOfMap) {
 	mapMax = maxOfMap;
+	if ((Math.round((document.getElementById("lon_max").value - document.getElementById("lon_min").value) * 1000) / 1000) > 360){
+		    document.getElementById("lon_max").value = (Math.round(Math.round(document.getElementById("lon_min").value * 1000) / 1000)+360)
+	}
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
