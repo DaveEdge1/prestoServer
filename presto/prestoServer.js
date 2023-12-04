@@ -273,11 +273,11 @@ runRecon = function(uniqueID, user, domain, recon) {
 	let options = {
 		Tty: false,
 		HostConfig: {
-			AutoRemove: true,
+			AutoRemove: true/*,
 			Binds: [
 				dirname + ':' + rparams[recon].resultsDir,
 				configLoc + ':' + rparams[recon].paramsCon
-				]	
+				]*/	
 			}
 		}
         /*
