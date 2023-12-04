@@ -119,7 +119,7 @@ newDir = function(dirname) {
 
 function writeConfigs (recon, user, domain, jsonBody, uniqueID) {
   var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
-  var downloadPath = 'http://137.184.4.96:81/' + recon + '/' + user + '/' + domain + '/' + uniqueID
+  var downloadPath = 'http://143.198.98.66:81/' + recon + '/' + user + '/' + domain + '/' + uniqueID
   editConfigs(configLoc, jsonBody, recon, uniqueID)
   //newDir('/root/presto/userRecons/' + uniqueID)
   return (downloadPath);
