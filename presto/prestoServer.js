@@ -286,7 +286,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	  const result1 = function(launchText){
 		  console.log('container function running')
 		  console.log(launchText)
-		  var container1 = exec(launchText);
+		  var container1 = exec('docker run --rm -v /root/presto/userRecons/17017202231887968/:/results -v /root/presto/userRecons/17017202231887968/configsTranslated.yml:/config_default.yml davidedge/lipd_webapps:holocene_da');
 		  container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 		  container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 		  console.log('end of container function')
