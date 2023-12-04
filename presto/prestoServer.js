@@ -173,14 +173,11 @@ updateParams = function (uniqueID, recon){
 }
 
 countNetcdf = function (dirname) {
-  var dockerSuccess = 0;
+  var txtFiles;
   fs.readdir(dirname, function(err, files) {
-  var txtFiles = files.filter(el => path.extname(el) === '.nc')
-  dockerSuccess = txtFiles.length
-	  console.log(txtFiles)
+  txtFiles = files.filter(el => path.extname(el) === '.nc')
   })
-	console.log(dockerSuccess)
-  return (dockerSuccess)
+  return (txtFiles)
 }
 
 emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
@@ -298,8 +295,8 @@ runRecon = function(uniqueID, user, domain, recon) {
 		        setTimeout(resolve, milliseconds);
 		    });
 		}
-	  while (countNetcdf(rparams[recon].resultsDir) < 1) {
-		  countNetcdf(rparams[recon].resultsDir)
+		console.log(countNetcdf(rparams[recon].resultsDir))
+	  while (countNetcdf(rparams[recon].resultsDir).length < 1) {
 		  delay(1000);
 	  }
 
