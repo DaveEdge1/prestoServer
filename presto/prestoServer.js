@@ -255,7 +255,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 	}
 
 
-runRecon = function(uniqueID, user, domain, recon) {
+runRecon = async function(uniqueID, user, domain, recon) {
 
 	console.log('recon: ' + rparams[recon].title)
 
@@ -282,7 +282,7 @@ runRecon = function(uniqueID, user, domain, recon) {
         */
 	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
 	console.log('here1')
-	function startContainer(launchText) {
+	async function startContainer(launchText) {
 	  console.log('running container...');
 
 	  console.log('container function running')
@@ -302,9 +302,8 @@ runRecon = function(uniqueID, user, domain, recon) {
 	  //}
 	  delay(300000);
 
-
 	}
-	  startContainer(launchText)
+	  await startContainer(launchText)
 	  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
 	  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
 	  console.log('end of container function')
