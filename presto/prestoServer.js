@@ -298,8 +298,8 @@ runRecon = function(uniqueID, user, domain, recon) {
 		        setTimeout(resolve, milliseconds);
 		    });
 		}
-	  while (countNetcdf(resultsDir) < 1) {
-		  countNetcdf(resultsDir)
+	  while (countNetcdf(rparams[recon].resultsDir) < 1) {
+		  countNetcdf(rparams[recon].resultsDir)
 		  delay(1000);
 	  }
 
