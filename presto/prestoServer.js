@@ -280,15 +280,17 @@ runRecon = function(uniqueID, user, domain, recon) {
 			}
 		}
         */
-	var launchText = 'docker run -it --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + rparams[recon].conTag
+	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + rparams[recon].conTag
 	function startContainer(launchText) {
 	  console.log('running container...');
-	  const result = async function(){
-		  var container1 = await exec(launchText);
+	  const result1 = function(launchText){
+		  console.log('container function running')
+		  var container1 = exec(launchText);
 		  container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 		  container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  console.log('end of container function')
 	  }
-	  result()
+	  result1(launchText)
 	  console.log('container run complete');
 	  sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 	  zipIt(uniqueID)
