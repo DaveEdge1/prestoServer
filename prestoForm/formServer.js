@@ -181,7 +181,7 @@ app.post("/uploadConfigs",function (req, res, next) {
         }
         else {
   
-	    var downloadpath = 'http://68.183.108.187:81/' + reconPicker + '/' + parsedUser + '/' + parsedDomain + '/manual'
+	    var downloadpath = 'http://143.198.98.66:85:81/' + reconPicker + '/' + parsedUser + '/' + parsedDomain + '/manual'
 	    res.writeHead(302, {
               Location: downloadpath
             });
