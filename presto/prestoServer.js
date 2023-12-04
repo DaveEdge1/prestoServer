@@ -264,8 +264,8 @@ runRecon = function(uniqueID, user, domain, recon) {
 	console.log('container: ', rparams[recon].conTag)
 	
 	var configLoc = updateParams(uniqueID, recon)
-	const stdout = new streams.WritableStream()
-	const stderr = new streams.WritableStream()
+	//const stdout = new streams.WritableStream()
+	//const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	//var dockerSuccess = countNetcdf(dirname)
 	/*
