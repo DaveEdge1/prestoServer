@@ -1,13 +1,14 @@
-Docker = require('dockerode');
+//Docker = require('dockerode');
 express = require("express");
 PORT = process.env.PORT || 3000
 const fs = require('fs');
+var exec = require("child_process").exec;
 var archiver = require('archiver');
 var YAML = require('yaml')
 const streams = require('memory-streams')
 const path = require('path')
 var app = express()
-var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
+//var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
 //var d = new Date();
 //var timeNow = d.getTime()
 var nodemailer = require('nodemailer');
@@ -253,6 +254,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 		archive.finalize();
 	}
 
+
 runRecon = function(uniqueID, user, domain, recon) {
 
 	console.log('recon: ' + rparams[recon].title)
@@ -266,6 +268,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	var dockerSuccess = countNetcdf(dirname)
+	/*
 	let options = {
 		Tty: false,
 		HostConfig: {
@@ -276,6 +279,17 @@ runRecon = function(uniqueID, user, domain, recon) {
 				]	
 			}
 		}
+        */
+	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + rparams[recon].conTag
+	async function runRecon(err, data, container) {
+	  console.log('running container...');
+	  await exec(launchText);
+	  console.log('container run complete');
+	  sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
+	  zipIt(uniqueID)
+	}
+
+	/*
 		docker.run(rparams[recon].conTag,
 			   [],
 			   [stdout, stderr],
@@ -294,7 +308,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 				   });
 				   sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 				   zipIt(uniqueID)
-			   })
+			   })*/
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon) {
