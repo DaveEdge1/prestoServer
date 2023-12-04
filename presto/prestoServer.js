@@ -296,7 +296,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 		    });
 		}
 		console.log(countNetcdf(rparams[recon].resultsDir))
-	  while (countNetcdf(rparams[recon].resultsDir).length < 1) {
+	  while (countNetcdf(rparams[recon].resultsDir) === undefined) {
 		  delay(1000);
 	  }
 
