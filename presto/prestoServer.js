@@ -345,8 +345,8 @@ prestoStartHtml = function (uniqueID, user, domain, recon) {
 }
 
 app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
-	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
 	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon))
+	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
 })
 
 app.listen(PORT, function () {
