@@ -310,6 +310,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	  sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 	  zipIt(uniqueID)
 	}
+	startContainer(launchText)
 
         /*
 
