@@ -1,15 +1,15 @@
-Docker = require('dockerode');
+//Docker = require('dockerode');
 express = require("express");
 PORT = process.env.PORT || 3000
 const fs = require('fs');
-//const util = require('util');
-//var exec = util.promisify(require("child_process").exec);
+const util = require('util');
+var exec = util.promisify(require("child_process").exec);
 var archiver = require('archiver');
 var YAML = require('yaml')
 const streams = require('memory-streams')
 const path = require('path')
 var app = express()
-var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
+//var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
 //var d = new Date();
 //var timeNow = d.getTime()
 var nodemailer = require('nodemailer');
@@ -269,7 +269,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	var dockerSuccess = countNetcdf(dirname)
-	
+	/*
 	let options = {
 		Tty: false,
 		HostConfig: {
@@ -280,16 +280,18 @@ runRecon = function(uniqueID, user, domain, recon) {
 				]	
 			}
 		}
-        /*
+        */
 	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
-	function startContainer(launchText) {
+	async function startContainer(launchText) {
 	  console.log('running container...');
 	  const result1 = function(launchText){
 		  console.log('container function running')
 		  console.log(launchText)
-		  var container1 = exec('docker run --rm -v /root/presto/userRecons/17017202231887968/:/results -v /root/presto/userRecons/17017202231887968/configsTranslated.yml:/config_default.yml davidedge/lipd_webapps:holocene_da');
-		  container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  var { stdout, stderr } = await exec(launchText);
+		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
+		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
+		  //container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  //container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 		  console.log('end of container function')
 	  }
 	  result1(launchText)
@@ -299,7 +301,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	}
 
 	startContainer(launchText)
-        */
+        /*
 
 	
 		docker.run(rparams[recon].conTag,
@@ -320,7 +322,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 				   });
 				   sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 				   zipIt(uniqueID)
-			   })
+			   })*/
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon) {
