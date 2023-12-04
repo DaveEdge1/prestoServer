@@ -300,7 +300,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  //while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
 	//	  delay(1000);
 	  //}
-	  delay(300000);
+	  await delay(300000);
 
 	}
 	  await startContainer(launchText)
