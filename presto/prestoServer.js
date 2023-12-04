@@ -295,7 +295,8 @@ runRecon = function(uniqueID, user, domain, recon) {
 		        setTimeout(resolve, milliseconds);
 		    });
 		}
-		console.log(countNetcdf(rparams[recon].resultsDir))
+		console.log('dir: ' + rparams[recon].resultsDir)
+		console.log('nc files: ' + countNetcdf(rparams[recon].resultsDir))
 	  while (countNetcdf(rparams[recon].resultsDir) === undefined) {
 		  delay(1000);
 	  }
