@@ -285,6 +285,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	  console.log('running container...');
 	  const result1 = function(launchText){
 		  console.log('container function running')
+		  console.log(launchText)
 		  var container1 = exec(launchText);
 		  container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 		  container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
