@@ -302,14 +302,16 @@ runRecon = function(uniqueID, user, domain, recon) {
 	  //}
 	  delay(300000);
 
+
+	}
+	  startContainer(launchText)
 	  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
 	  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
 	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 	  zipIt(uniqueID)
-	}
-	startContainer(launchText)
+	
 
         /*
 
