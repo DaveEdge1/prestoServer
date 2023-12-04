@@ -146,7 +146,7 @@ app.post('/manualORdefault', function (req, res) {
 	//console.log(parsedUser)
 	//console.log(parsedDomain)
 	//var downloadpath = 'http://137.184.4.96:81/' + req.query.recon +  '/' + req.query.email.split('@')[0] + '/' + req.query.email.split('@')[1] + '/default'
-        var editorpath = function() { return ('http://143.198.98.66/:85/?recon=' + req.query.recon + '&user=' + req.query.email.split('@')[0] + '&domain=' + req.query.email.split('@')[1] + '&uniqueID=' + req.query.uniqueID)}
+        var editorpath = function() { return ('http://143.198.98.66:85/?recon=' + req.query.recon + '&user=' + req.query.email.split('@')[0] + '&domain=' + req.query.email.split('@')[1] + '&uniqueID=' + req.query.uniqueID)}
 	whichRecon = function(reconPicker){
         	if (reconPicker === 'temp12k') {
 	  		var titleHeading = 'Configure Temperature 12k Paramaters'
