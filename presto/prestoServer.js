@@ -1,15 +1,15 @@
-Docker = require('dockerode');
+//Docker = require('dockerode');
 express = require("express");
 PORT = process.env.PORT || 3000
 const fs = require('fs');
 //const util = require('util');
-//var exec = util.promisify(require("child_process").exec);
+var exec = require("child_process").exec;
 var archiver = require('archiver');
 var YAML = require('yaml')
 const streams = require('memory-streams')
 const path = require('path')
 var app = express()
-var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
+//var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
 //var d = new Date();
 //var timeNow = d.getTime()
 var nodemailer = require('nodemailer');
@@ -271,7 +271,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 	const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	//var dockerSuccess = countNetcdf(dirname)
-	
+	/*
 	let options = {
 		Tty: false,
 		HostConfig: {
@@ -282,7 +282,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 				]
 			}
 		}
-        
+        */
 	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
 	function startContainer(launchText) {
 	  console.log('running container...');
@@ -298,6 +298,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 		    });
 		}
 	  while (countNetcdf() < 1) {
+		  countNetcdf()
 		  delay(1000);
 	  }
 
