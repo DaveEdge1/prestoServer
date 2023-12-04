@@ -219,7 +219,7 @@ emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
 }
 
   sendEmail = function (dockerSuccess, user, domain, uniqueID, configLoc) {
-    var destURL = 'http://137.184.4.96:83/downloads/' + uniqueID
+    var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
       to: user + '@' + domain,
