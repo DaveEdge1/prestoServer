@@ -268,40 +268,46 @@ runRecon = function(uniqueID, user, domain, recon) {
 	const stdout = new streams.WritableStream()
 	const stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
-	var dockerSuccess = countNetcdf(dirname)
+	//var dockerSuccess = countNetcdf(dirname)
 	
 	let options = {
 		Tty: false,
 		HostConfig: {
-			AutoRemove: true/*,
+			AutoRemove: true,
 			Binds: [
 				dirname + ':' + rparams[recon].resultsDir,
 				configLoc + ':' + rparams[recon].paramsCon
-				]*/	
+				]
 			}
 		}
-        /*
+        
 	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
 	function startContainer(launchText) {
 	  console.log('running container...');
-	  const result1 = async function(launchText){
-		  console.log('container function running')
-		  console.log(launchText)
-		  var { stdout, stderr } = await exec(launchText);
-		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
-		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
-		  //container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  //container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  console.log('end of container function')
+
+	  console.log('container function running')
+	  console.log(launchText)
+	  var { stdout, stderr } = exec(launchText);
+	  //container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+	  //container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		function delay(milliseconds){
+		    return new Promise(resolve => {
+		        setTimeout(resolve, milliseconds);
+		    });
+		}
+	  while (countNetcdf() < 1) {
+		  delay(1000);
 	  }
-	  result1(launchText)
+
+	  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
+	  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
+	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 	  zipIt(uniqueID)
 	}
 
-	startContainer(launchText)
-        */
+        /*
 
 	
 		docker.run(rparams[recon].conTag,
@@ -322,7 +328,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 				   });
 				   sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
 				   zipIt(uniqueID)
-			   })
+			   })*/
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon) {
