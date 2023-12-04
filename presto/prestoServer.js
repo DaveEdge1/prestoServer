@@ -282,9 +282,9 @@ runRecon = function(uniqueID, user, domain, recon) {
 		}
         */
 	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
-	async function startContainer(launchText) {
+	function startContainer(launchText) {
 	  console.log('running container...');
-	  const result1 = function(launchText){
+	  const result1 = async function(launchText){
 		  console.log('container function running')
 		  console.log(launchText)
 		  var { stdout, stderr } = await exec(launchText);
