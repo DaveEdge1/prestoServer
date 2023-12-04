@@ -297,9 +297,10 @@ runRecon = function(uniqueID, user, domain, recon) {
 		}
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 		console.log('nc files: ' + countNetcdf('/root/presto/userRecons/' + uniqueID))
-	  while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
-		  delay(1000);
-	  }
+	  //while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
+	//	  delay(1000);
+	  //}
+	  delay(300000);
 
 	  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
 	  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
