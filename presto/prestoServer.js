@@ -175,9 +175,11 @@ updateParams = function (uniqueID, recon){
 countNetcdf = function (dirname) {
   var dockerSuccess = 0;
   fs.readdir(dirname, function(err, files) {
-  const txtFiles = files.filter(el => path.extname(el) === '.nc')
+  var txtFiles = files.filter(el => path.extname(el) === '.nc')
   dockerSuccess = txtFiles.length
+	  console.log(txtFiles)
   })
+	console.log(dockerSuccess)
   return (dockerSuccess)
 }
 
