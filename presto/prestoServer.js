@@ -284,6 +284,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 		}
         */
 	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
+	console.log('here1')
 	function startContainer(launchText) {
 	  console.log('running container...');
 
