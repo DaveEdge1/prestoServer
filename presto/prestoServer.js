@@ -295,9 +295,9 @@ runRecon = function(uniqueID, user, domain, recon) {
 		        setTimeout(resolve, milliseconds);
 		    });
 		}
-		console.log('dir: ' + rparams[recon].resultsDir)
-		console.log('nc files: ' + countNetcdf(rparams[recon].resultsDir))
-	  while (countNetcdf(rparams[recon].resultsDir) === undefined) {
+		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
+		console.log('nc files: ' + countNetcdf('/root/presto/userRecons/' + uniqueID))
+	  while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
 		  delay(1000);
 	  }
 
