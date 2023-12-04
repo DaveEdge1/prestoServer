@@ -280,7 +280,7 @@ runRecon = function(uniqueID, user, domain, recon) {
 			}
 		}
         */
-	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + rparams[recon].conTag
+	var launchText = 'docker run -it --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + rparams[recon].conTag
 	function startContainer(launchText) {
 	  console.log('running container...');
 	  const result = async function(){
