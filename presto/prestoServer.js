@@ -285,8 +285,8 @@ runRecon = function(uniqueID, user, domain, recon) {
 	  console.log('running container...');
 	  const result = async function(){
 		  var container1 = await exec(launchText);
-		  query1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  query1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 	  }
 	  result()
 	  console.log('container run complete');
