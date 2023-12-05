@@ -89,7 +89,7 @@ calibration:
     value: [-20,20,150,260]
     default: [-20,20,150,260]
     limits: [-90,90,-360,360]
-    options: [double,360]
+    options: [single,360]
     precision: .001
     long_name: coordinate bounds for instrumental data
     description: provide bounds to include only climate data in a given region
