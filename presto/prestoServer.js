@@ -305,8 +305,8 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  console.log('container function running')
 	  console.log(launchText)
 	  var { stdout, stderr } = exec(launchText);
-	  container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-	  container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+	  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+	  stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 
@@ -315,12 +315,14 @@ runRecon = async function(uniqueID, user, domain, recon) {
 
 	}
 	  await startContainer(launchText)
+	  /*
 	  if (stdout != null){
 		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
 	  }
 	  if (stderr != null){
 		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
 	  }
+          */
 	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(user, domain, uniqueID, configLoc)
