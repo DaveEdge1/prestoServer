@@ -137,9 +137,10 @@ var translate = function (uniqueID, recon){
 								  console.log("caught annualize months var")
 								  configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
 							  } else if (orig.length > 1){
-						      		console.log('position length: ' + pos.length)
+								  console.log("GOT IN!")
+						      		console.log('position length: ' + orig.length)
 						      		var origPos = 0
-						      		for (ii in pos){
+						      		for (let ii = 0; i < orig.length; i++)
 							      		console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
 							      		configsOrig[orig][origPos] = configs1.value[ii]
 							      		origPos = origPos + 1
