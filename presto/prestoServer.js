@@ -306,7 +306,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  console.log(launchText)
 	  var { stdout, stderr } = exec(launchText);
 	  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-	  stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+	  stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
 
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 
