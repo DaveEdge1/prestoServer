@@ -23,6 +23,7 @@
     "memory-streams": "^0.1.3",
     "nodemailer": "^6.9.1",
     "parseurl": "^1.3.3",
+    "shelljs": "^0.8.5",
     "stream-demux": "^8.1.0",
     "util": "^0.12.5",
     "yaml": "^2.3.1"
