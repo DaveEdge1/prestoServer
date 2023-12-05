@@ -68,11 +68,6 @@ var translateJSON = function (uniqueID, recon){
 						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution' || orig == 'duration') {
 							      var newVal1 = configsOrig[orig] + ''
 							      configsOrig[orig] = parseInt(newVal1)
-						      } else if (orig == "obs_lat_min,obs_lat_max,obs_lon_min,obs_lon_max"){
-							      for (var origNow in orig){
-								      console.log(origNow)
-								      configsOrig[origNow] = configs1.value[0]
-							      }
 						      }
 					      } else {
 						      configsOrig[orig] = configs1.value
@@ -141,11 +136,21 @@ var translate = function (uniqueID, recon){
 								  var newVal1 = configs1.value + ''
 								  console.log("caught annualize months var")
 								  configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
-							  } else {
+							  } else if (typeof(pos) != 'undefined'){
+						      		console.log('position length: ' + pos.length)
+						      		configsOrig[orig].length = new Array()
+						      		var origPos = 0
+						      		for (ii in pos){
+							      		console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
+							      		configsOrig[orig][origPos] = configs1.value[ii]
+							      		origPos = origPos + 1
+						      	  	}
+							  }
+							  else {
 							      configsOrig[orig] = configs1.value
 	  	                                          }
-						     }else{
-							console.log('no value')
+						     	  }else{
+								console.log('no value')
 						  }
 					 }
 				}
