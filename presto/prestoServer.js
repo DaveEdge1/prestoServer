@@ -175,6 +175,9 @@ updateParams = function (uniqueID, recon){
 
 dockerStatus = async function (uniqueID) {
   docker_status = shelljs.exec('docker ps -a').stdout
+	  if (docker_status.search(uniqueID) == -1){
+		  console.log('no container launched!')
+	  }
           if (docker_status.search(uniqueID) != -1){
                 console.log('awaiting removal')
                 //console.log('docker_status.search("test2") !== -1: ' + docker_status.search("test2") !== -1)
@@ -273,8 +276,8 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	console.log('container: ', rparams[recon].conTag)
 	
 	var configLoc = updateParams(uniqueID, recon)
-	//const stdout = new streams.WritableStream()
-	//const stderr = new streams.WritableStream()
+	var stdout = new streams.WritableStream()
+	var stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	//var dockerSuccess = countNetcdf(dirname)
 	/*
