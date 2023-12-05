@@ -68,6 +68,11 @@ var translateJSON = function (uniqueID, recon){
 						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution' || orig == 'duration') {
 							      var newVal1 = configsOrig[orig] + ''
 							      configsOrig[orig] = parseInt(newVal1)
+						      } else if (configs1 == "calibration_coord_bounds"){
+							      for (var origNow in orig){
+								      console.log(origNow)
+								      configsOrig[origNow] = configs1.value[0]
+							      }
 						      }
 					      } else {
 						      configsOrig[orig] = configs1.value
