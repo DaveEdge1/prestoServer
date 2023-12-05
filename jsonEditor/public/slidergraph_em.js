@@ -261,10 +261,11 @@ function draw() {
     if (rect.h < 0){
 	rect.h = 0
     }
+    /*
     if (rect.w > 540){
 	rect.w = 540
     }
-
+    */
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "rgba(5, 5, 5, 0.3)";
     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
