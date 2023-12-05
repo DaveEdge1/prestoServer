@@ -89,6 +89,10 @@ var translateJSON = function (uniqueID, recon){
 
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 var translate = function (uniqueID, recon){
 	var yaml = require('js-yaml')
 	
@@ -182,6 +186,7 @@ dockerStatus = async function (uniqueID) {
                 console.log('awaiting removal')
                 //console.log('docker_status.search("test2") !== -1: ' + docker_status.search("test2") !== -1)
                 while (docker_status.search(uniqueID) != -1){
+			await sleep(1000)
                         docker_status = shelljs.exec('docker ps -a').stdout
                 }
                 console.log('constainer removed')
@@ -304,10 +309,6 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  //container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
-		
-	  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 	  await sleep(1000)
 	  await dockerStatus(uniqueID);
