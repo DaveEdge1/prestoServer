@@ -231,13 +231,13 @@ emailHTML = function (uniqueID, destURL, configLoc) {
 	return(text1)
 }
 
-  sendEmail = function (dockerSuccess, user, domain, uniqueID, configLoc) {
+  sendEmail = function (user, domain, uniqueID, configLoc) {
     var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
       to: user + '@' + domain,
       subject: 'Presto Custom Reconstruction ' + uniqueID,
-      html: emailHTML(dockerSuccess, uniqueID, destURL, configLoc)
+      html: emailHTML(uniqueID, destURL, configLoc)
     };
       transporter.sendMail(mailOptions, function(error, info){
        if (error) {
@@ -305,18 +305,24 @@ runRecon = async function(uniqueID, user, domain, recon) {
 
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 		
-	  //while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
-	//	  delay(1000);
-	  //}
+	  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+	  await sleep(1000)
 	  await dockerStatus(uniqueID);
 
 	}
 	  await startContainer(launchText)
-	  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
-	  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
+	  if (stdout != null){
+		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
+	  }
+	  if (stderr != null){
+		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
+	  }
 	  console.log('end of container function')
 	  console.log('container run complete');
-	  sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
+	  sendEmail(user, domain, uniqueID, configLoc)
 	  zipIt(uniqueID)
 	
 
