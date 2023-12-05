@@ -301,7 +301,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  //container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
-		console.log('nc files: ' + countNetcdf('/root/presto/userRecons/' + uniqueID))
+		
 	  //while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
 	//	  delay(1000);
 	  //}
