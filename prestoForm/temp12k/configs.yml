@@ -32,10 +32,10 @@ time:
 
 proxy:
   interpVariable: 
-    value: Temperature
-    default: Temperature
+    value: T
+    default: T
     limits: null
-    options: [Temperature, Precipitation]
+    options: [T, P]
     precision: null
     long_name: interpretation variable
     description: Climate interpretation of proxies
