@@ -2,6 +2,7 @@
 express = require("express");
 PORT = process.env.PORT || 3000
 const fs = require('fs');
+var shelljs = require("shelljs");
 //const util = require('util');
 var exec = require("child_process").exec;
 var archiver = require('archiver');
@@ -172,25 +173,33 @@ updateParams = function (uniqueID, recon){
 	
 }
 
-countNetcdf = function (dirname) {
-  var txtFiles;
-  fs.readdir(dirname, function(err, files) {
-  txtFiles = files.filter(el => path.extname(el) === '.nc')
-  })
-  return (txtFiles)
+dockerStatus = async function (uniqueID) {
+  docker_status = shelljs.exec('docker ps -a').stdout
+          if (docker_status.search(uniqueID) != -1){
+                console.log('awaiting removal')
+                //console.log('docker_status.search("test2") !== -1: ' + docker_status.search("test2") !== -1)
+                while (docker_status.search(uniqueID) != -1){
+                        docker_status = shelljs.exec('docker ps -a').stdout
+                }
+                console.log('constainer removed')
+                return 'done'
+        }
 }
 
-emailHTML = function (dockerSuccess, uniqueID, destURL, configLoc) {
+emailHTML = function (uniqueID, destURL, configLoc) {
    var configFileTxt = function (configFileLoc) {
 	   var s = fs.readFileSync(configFileLoc,'utf8');
 	   s = align(s, 5)
 	   return s
    }
+	/*
 	if (dockerSuccess > 0) {
 		var text1 = '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
 	} else {
 		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 	}
+        */
+	var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
 	text1 = text1
 		+ '<br>'
 		+ '<a href="' + destURL + '" download>Download Custom Reconstruction '+uniqueID+'</a>'
@@ -280,7 +289,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 			}
 		}
         */
-	var launchText = 'docker run --rm -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
+	var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
 	console.log('here1')
 	async function startContainer(launchText) {
 	  console.log('running container...');
@@ -290,17 +299,13 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  var { stdout, stderr } = exec(launchText);
 	  //container1.stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 	  //container1.stderr.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		function delay(milliseconds){
-		    return new Promise(resolve => {
-		        setTimeout(resolve, milliseconds);
-		    });
-		}
+
 		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 		console.log('nc files: ' + countNetcdf('/root/presto/userRecons/' + uniqueID))
 	  //while (countNetcdf('/root/presto/userRecons/' + uniqueID) === undefined) {
 	//	  delay(1000);
 	  //}
-	  await delay(300000);
+	  await dockerStatus(uniqueID);
 
 	}
 	  await startContainer(launchText)
