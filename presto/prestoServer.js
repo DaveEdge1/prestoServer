@@ -68,7 +68,7 @@ var translateJSON = function (uniqueID, recon){
 						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution' || orig == 'duration') {
 							      var newVal1 = configsOrig[orig] + ''
 							      configsOrig[orig] = parseInt(newVal1)
-						      } else if (configs1 == "calibration_coord_bounds"){
+						      } else if (orig == "obs_lat_min,obs_lat_max,obs_lon_min,obs_lon_max"){
 							      for (var origNow in orig){
 								      console.log(origNow)
 								      configsOrig[origNow] = configs1.value[0]
