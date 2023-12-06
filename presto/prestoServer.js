@@ -142,6 +142,8 @@ var translate = function (uniqueID, recon){
 						      		var origPos = 0
 						      		for (let ii = 0; ii < orig.length; ii++){
 							      		console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
+									console.log('configsOrig[orig]: ' + configsOrig[orig])
+									console.log('configsOrig[orig][origPos]: ' + configsOrig[orig][origPos])
 							      		configsOrig[orig][origPos] = configs1.value[ii]
 							      		origPos = origPos + 1
 						      	  	}
