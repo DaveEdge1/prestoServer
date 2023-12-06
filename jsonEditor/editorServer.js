@@ -132,9 +132,10 @@ var getUserInfo = function (reqparamsrecon, reqparamsparsedUser, reqparamsparsed
 }
 */
 app.get('/', function (req, res) {
+  var recon1 = req.query.recon
   //console.log(req.params.recon)
   //userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain, req.params.uniqueID)
-  res.sendFile('/root/presto/jsonEditor/forms/' + req.query.recon + '.html')
+  res.sendFile('/root/presto/jsonEditor/forms/' + recon1 + '.html')
 });
 
 
