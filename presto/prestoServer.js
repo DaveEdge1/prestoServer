@@ -67,6 +67,7 @@ var translateJSON = function (uniqueID, recon){
 							      var newVal1 = configs1.value
 							      if (orig == 'latRange' || orig == 'searchRange') {
 								      for (let ii = 0; ii < 2; ii++){
+									      console.log('key, ii, newVal1[ii]: ' + key + ' ' + ii + ' ' + newVal1[ii])
 									      configsOrig[orig[ii]] = newVal1[ii]
 								      }
 							      } else if (orig == 'lonRange') {
