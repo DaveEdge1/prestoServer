@@ -63,15 +63,16 @@ var translateJSON = function (uniqueID, recon){
 							      //configsOrig[orig][origPos] = configs1.value[ii]
 							      origPos = origPos + 1
 						      }*/
-						      if (orig == 'latRange' || orig == 'lonRange' || orig == 'searchRange'){
+						      if (orig == 'latRange' || orig == 'lonRange'){
 							      var newVal1 = configs1.value
-							      if (orig == 'latRange' || orig == 'searchRange') {
+							      if (orig == 'latRange') {
 								      for (let ii = 0; ii < 2; ii++){
-									      console.log('key, ii, newVal1[ii]: ' + orig + ' ' + ii + ' ' + newVal1[ii])
+									      console.log('key, ii, newVal1[ii], configsOrig[orig], configsOrig[orig[ii]]: ' + orig + ' ' + ii + ' ' + newVal1[ii] + ' ' + configsOrig[orig] + ' ' + configsOrig[orig[ii]])
 									      configsOrig[orig[ii]] = newVal1[ii]
 								      }
 							      } else if (orig == 'lonRange') {
 							      		for (let ii = 2; ii < 4; ii++){
+										console.log('key, ii, newVal1[ii], configsOrig[orig], configsOrig[orig[ii]]: ' + orig + ' ' + ii + ' ' + newVal1[ii] + ' ' + configsOrig[orig] + ' ' + configsOrig[orig[ii]])
 										configsOrig[orig[(ii-2)]] = newVal1[ii]
 									}
 							      }
