@@ -428,7 +428,9 @@ function buildURL(){
   if (confirm("Submit Custom Reconstruction request?")){
     var urlParams = new URLSearchParams(window.location.search);
     document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
+    return true;
   } else {
+    return false;
   };
 }
 </script>
