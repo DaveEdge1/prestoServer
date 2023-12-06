@@ -64,9 +64,25 @@ var translateJSON = function (uniqueID, recon){
 						      }
 						      if (orig == 'latRange' || orig == 'lonRange' || orig == 'searchRange'){
 							      var newVal1 = configsOrig[orig] + ''
-							      configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
-						      } else if (orig == 'binstart' || orig == 'binend' || orig == 'maxResolution' || orig == 'duration') {
+							      if (orig == 'searchRange') {
+								      configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
+							      } else if (orig == 'latRange') {
+								      for (let ii = 0; ii < 2; ii++){
+									      configsOrig[orig[ii]] = newVal1.split(",").map(Number).filter(x => !isNaN(x))[ii]
+								      }
+							      } else if (orig == 'lonRange') {
+							      		for (let ii = 2; ii < 4; ii++){
+										configsOrig[orig[ii]] = newVal1.split(",").map(Number).filter(x => !isNaN(x))[ii]
+									}
+							      }
+						      } else if (orig == 'maxResolution' || orig == 'duration') {
 							      var newVal1 = configsOrig[orig] + ''
+							      configsOrig[orig] = parseInt(newVal1)
+						      } else if (orig == 'binstart') {
+							      var newVal1 = configsOrig[orig[0]] + ''
+							      configsOrig[orig] = parseInt(newVal1)
+						      } else if (orig == 'binend') {
+							      var newVal1 = configsOrig[orig[1]] + ''
 							      configsOrig[orig] = parseInt(newVal1)
 						      }
 					      } else {
