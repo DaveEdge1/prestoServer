@@ -131,11 +131,15 @@ var getUserInfo = function (reqparamsrecon, reqparamsparsedUser, reqparamsparsed
 	return userInfo;
 }
 */
+
+var formLocate = function(recon1){
+	return '/root/presto/jsonEditor/forms/' + recon1 + '.html'
+}
+
 app.get('/', function (req, res) {
-  var recon1 = req.query.recon
   //console.log(req.params.recon)
   //userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain, req.params.uniqueID)
-  res.sendFile('/root/presto/jsonEditor/forms/' + recon1 + '.html')
+  res.sendFile(formLocate(req.query.recon))
 });
 
 
