@@ -134,7 +134,7 @@ function getQueryVariable(variable)
                if(pair[0] == variable){
                  return pair[1];}
        }
-       return("eggNoodle");
+       return(false);
 }
 </script>
 <script>
@@ -148,10 +148,10 @@ document.getElementById('uniqueID').value = getQueryVariable("uniqueID");
 <script>
 popQueryVariable()
 </script>
-<input id="recon" name="recon" type="text" value="graph_em">
-<input id="user" name="user" type="text" value="">
-<input id="domain" name="domain" type="text" value="">
-<input id="uniqueID" name="uniqueID" type="text" value="">
+<input id="recon" name="recon" type="hidden" value="">
+<input id="user" name="user" type="hidden" value="">
+<input id="domain" name="domain" type="hidden" value="">
+<input id="uniqueID" name="uniqueID" type="hidden" value="">
 <br>
 <div style: "vertical-align: middle; height: 50px;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">time interval for reconstruction </label>
