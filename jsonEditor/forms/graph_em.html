@@ -124,6 +124,12 @@ For more information about each of the options, mouse over the question mark ico
 <button type="button" class="collapsible">Time</button>
 <div class="content">
 <br>
+<script>
+recon.value = Request.QueryString["recon"];
+user.value = Request.QueryString["user"];
+domain.value = Request.QueryString["domain"];
+uniqueID.value = Request.QueryString["uniqueID"];
+</script>
 <input id="recon" name="recon" type="hidden" value="graph_em">
 <input id="user" name="user" type="hidden" value="">
 <input id="domain" name="domain" type="hidden" value="">
