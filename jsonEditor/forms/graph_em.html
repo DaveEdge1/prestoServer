@@ -430,7 +430,7 @@ function buildURL(){
     document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
     return true;
   } else {
-    document.getElementById("paramsForm").action = ""
+    document.getElementById("paramsForm").method = ""
     return false;
   };
 }
