@@ -136,16 +136,16 @@ function getQueryVariable(variable)
        return(false);
 }
 function popQueryVariable(){
-recon.value = getQueryVariable("recon");
-user.value = getQueryVariable("user");
-domain.value = getQueryVariable("domain");
-uniqueID.value = getQueryVariable("uniqueID");
+document.getElementById('recon.value') = getQueryVariable("recon");
+document.getElementById('user.value') = getQueryVariable("user");
+document.getElementById('domain.value') = getQueryVariable("domain");
+document.getElementById('uniqueID.value') = getQueryVariable("uniqueID");
 }
 </script>
 <input id="recon" name="recon" type="hidden" value="graph_em">
 <input id="user" name="user" type="hidden" value="" onload="popQueryVariable()">
-<input id="domain" name="domain" type="hidden" value="getQueryVariable("domain")">
-<input id="uniqueID" name="uniqueID" type="hidden" value="getQueryVariable("uniqueID")">
+<input id="domain" name="domain" type="hidden" value="">
+<input id="uniqueID" name="uniqueID" type="hidden" value="">
 <br>
 <div style: "vertical-align: middle; height: 50px;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">time interval for reconstruction </label>
