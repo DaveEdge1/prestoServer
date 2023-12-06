@@ -141,9 +141,10 @@ document.getElementById('user.value') = getQueryVariable("user");
 document.getElementById('domain.value') = getQueryVariable("domain");
 document.getElementById('uniqueID.value') = getQueryVariable("uniqueID");
 }
+popQueryVariable()
 </script>
 <input id="recon" name="recon" type="hidden" value="graph_em">
-<input id="user" name="user" type="hidden" value="" onload="popQueryVariable()">
+<input id="user" name="user" type="hidden" value="">
 <input id="domain" name="domain" type="hidden" value="">
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
 <br>
@@ -457,6 +458,9 @@ function buildURL(){
     return false;
   };
 }
+</script>
+<script>
+popQueryVariable()
 </script>
 <script>
 function val() {document.getElementById("abstract2").src = "/slider.css";}
