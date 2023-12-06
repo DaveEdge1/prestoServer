@@ -136,12 +136,16 @@ function getQueryVariable(variable)
        }
        return("eggNoodle");
 }
+</script>
+<script>
 function popQueryVariable(){
-document.getElementById('recon.value') = getQueryVariable("recon");
-document.getElementById('user.value') = getQueryVariable("user");
-document.getElementById('domain.value') = getQueryVariable("domain");
-document.getElementById('uniqueID.value') = getQueryVariable("uniqueID");
+document.getElementById('recon').value = getQueryVariable("recon");
+document.getElementById('user').value = getQueryVariable("user");
+document.getElementById('domain').value = getQueryVariable("domain");
+document.getElementById('uniqueID').value = getQueryVariable("uniqueID");
 }
+</script>
+<script>
 popQueryVariable()
 </script>
 <input id="recon" name="recon" type="text" value="graph_em">
