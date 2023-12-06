@@ -68,12 +68,12 @@ var translateJSON = function (uniqueID, recon){
 							      if (orig == 'latRange') {
 								      for (let ii = 0; ii < 2; ii++){
 									      console.log('key, ii, newVal1[ii], configsOrig[orig], configsOrig[orig[ii]]: ' + orig + ' ' + ii + ' ' + newVal1[ii] + ' ' + configsOrig[orig] + ' ' + configsOrig[orig[ii]])
-									      configsOrig[orig[ii]] = newVal1[ii]
+									      configsOrig[orig][ii] = newVal1[ii]
 								      }
 							      } else if (orig == 'lonRange') {
 							      		for (let ii = 2; ii < 4; ii++){
 										console.log('key, ii, newVal1[ii], configsOrig[orig], configsOrig[orig[ii]]: ' + orig + ' ' + ii + ' ' + newVal1[ii] + ' ' + configsOrig[orig] + ' ' + configsOrig[orig[ii]])
-										configsOrig[orig[(ii-2)]] = newVal1[ii]
+										configsOrig[orig][(ii-2)] = newVal1[ii]
 									}
 							      }
 						      } else if (orig == 'maxResolution' || orig == 'duration') {
