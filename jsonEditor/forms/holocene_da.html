@@ -120,7 +120,7 @@ For more information about each of the options, mouse over the question mark ico
 </form>
 <br>
 <br>
-<form id="paramsForm" method="POST" onsubmit="buildURL()">
+<form id="paramsForm" onsubmit="buildURL()">
 <button type="button" class="collapsible">Reconstruction</button>
 <div class="content">
 <br>
@@ -592,9 +592,15 @@ For more information about each of the options, mouse over the question mark ico
 </form>
 <script>
 function buildURL(){
-var urlParams = new URLSearchParams(window.location.search);
-document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
-return confirm("Submit Custom Reconstruction request?");
+  if (confirm("Submit Custom Reconstruction request?")){
+    var urlParams = new URLSearchParams(window.location.search);
+    document.getElementById("paramsForm").method = "POST"
+    document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
+    return true;
+  } else {
+    document.getElementById("paramsForm").action = ""
+    return false;
+  };
 }
 </script>
 <script>
