@@ -106,6 +106,7 @@
 <h1 style="font-size:30px; text-align:center">Customize Graphical Expectation-Maximization Parameters</h1>
 <br>
 <br>
+<input id="formTitle" type="text" value="graph_em">
 <br>
 <p style="font-size:16px"><p style="font-size:15px">To create a Graph-EM reconstruction, adjust the options below and click "submit." You will receive an email when your reconstruction is done.
 <br>
@@ -431,6 +432,7 @@ function buildURL(){
     document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
     return true;
   } else {
+    document.getElementById("paramsForm").action = "setTimeout(function () { window.location.reload(); }, 10)"
     return false;
   };
 }
