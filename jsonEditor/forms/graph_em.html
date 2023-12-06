@@ -425,9 +425,11 @@ For more information about each of the options, mouse over the question mark ico
 </form>
 <script>
 function buildURL(){
-var urlParams = new URLSearchParams(window.location.search);
-document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
-return confirm("Submit Custom Reconstruction request?");
+  if (confirm("Submit Custom Reconstruction request?")){
+    var urlParams = new URLSearchParams(window.location.search);
+    document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
+  } else {
+  };
 }
 </script>
 <script>
