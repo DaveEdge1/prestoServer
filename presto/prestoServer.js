@@ -144,7 +144,7 @@ var translate = function (uniqueID, recon){
 							      		console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
 									console.log('configsOrig: ' + configsOrig)
 									console.log('configsOrig[orig]: ' + configsOrig[orig])
-									console.log('configsOrig['obs_lat_min']: ' + configsOrig['obs_lat_min'])
+									console.log('configsOrig[obs_lat_min]: ' + configsOrig['obs_lat_min'])
 									console.log('configsOrig[orig][ii]: ' + configsOrig[orig][ii])
 									console.log('configsOrig[orig][origPos]: ' + configsOrig[orig][origPos])
 							      		configsOrig[orig][origPos] = configs1.value[ii]
