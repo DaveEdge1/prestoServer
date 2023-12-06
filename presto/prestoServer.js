@@ -136,7 +136,7 @@ var translate = function (uniqueID, recon){
 								  var newVal1 = configs1.value + ''
 								  console.log("caught annualize months var")
 								  configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
-							  } else if (orig.length > 1){
+							  } else if (orig[0] == 'obs_lat_min'){
 								  console.log("GOT IN!")
 						      		console.log('position length: ' + orig.length)
 						      		var origPos = 0
