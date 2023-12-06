@@ -432,7 +432,7 @@ function buildURL(){
     document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
     return true;
   } else {
-    document.getElementById("paramsForm").action = "setTimeout(function () { window.location.reload(); }, 10)"
+    document.getElementById("paramsForm").action = ""
     return false;
   };
 }
