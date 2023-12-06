@@ -56,14 +56,15 @@ var translateJSON = function (uniqueID, recon){
 					      if (typeof(pos) != 'undefined'){
 						      console.log('position length: ' + pos.length)
 						      configsOrig[orig].length = new Array()
-						      var origPos = 0
+						      //var origPos = 0
+						      /*
 						      for (ii in pos){
 							      console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
-							      configsOrig[orig][origPos] = configs1.value[ii]
+							      //configsOrig[orig][origPos] = configs1.value[ii]
 							      origPos = origPos + 1
-						      }
+						      }*/
 						      if (orig == 'latRange' || orig == 'lonRange' || orig == 'searchRange'){
-							      var newVal1 = configsOrig[orig] + ''
+							      var newVal1 = configs1.value
 							      if (orig == 'searchRange') {
 								      configsOrig[orig] = newVal1.split(",").map(Number).filter(x => !isNaN(x))
 							      } else if (orig == 'latRange') {
@@ -72,17 +73,17 @@ var translateJSON = function (uniqueID, recon){
 								      }
 							      } else if (orig == 'lonRange') {
 							      		for (let ii = 2; ii < 4; ii++){
-										configsOrig[orig[ii]] = newVal1.split(",").map(Number).filter(x => !isNaN(x))[ii]
+										configsOrig[orig[(ii-2)]] = newVal1.split(",").map(Number).filter(x => !isNaN(x))[ii]
 									}
 							      }
 						      } else if (orig == 'maxResolution' || orig == 'duration') {
-							      var newVal1 = configsOrig[orig] + ''
+							      var newVal1 = configs1.value
 							      configsOrig[orig] = parseInt(newVal1)
 						      } else if (orig == 'binstart') {
-							      var newVal1 = configsOrig[orig[0]] + ''
+							      var newVal1 = configs1.value[0]
 							      configsOrig[orig] = parseInt(newVal1)
 						      } else if (orig == 'binend') {
-							      var newVal1 = configsOrig[orig[1]] + ''
+							      var newVal1 = configs1.value[1]
 							      configsOrig[orig] = parseInt(newVal1)
 						      }
 					      } else {
