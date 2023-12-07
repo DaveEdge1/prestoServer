@@ -315,7 +315,7 @@ moveZipped = function(uniqueID){
 		} else {
 
 			if (stat.isDirectory()){
-				removeZipped(filename);
+				moveZipped(filename);
 			} else {
 				fs.unlinkSync(filename);
 			}
