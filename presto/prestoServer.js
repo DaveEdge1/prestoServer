@@ -294,7 +294,7 @@ removeZipped = function(source_dir){
         	var filename = path.join(source_dir, list[i]);
 		var stat = fs.statSync(filename);
 
-		if(stat.isDirectory() != true){
+		if(path.extname(filename) != '.zip'){
 			fs.unlinkSync(filename);
 		}
 	}
