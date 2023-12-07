@@ -20,7 +20,7 @@ var reconParams = function(recon) {
 	const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
 	//console.log(JSON.parse(reconParamsNow))
 	//console.log(JSON.stringify(JSON.parse(reconParamsNow)))
-	const rparams = JSON.parse(reconParamsNow).recon
+	const rparams = JSON.parse(reconParamsNow)[recon]
 	console.log(rparams)
 	console.log(rparams.title)
 	return JSON.parse(reconParamsNow).recon
