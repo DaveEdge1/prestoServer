@@ -288,10 +288,22 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
      });
   }
 
+removeZipped(source_dir){
+	var list = fs.readdirSync(source_dir);
+    	for(var i = 0; i < list.length; i++) {
+        	var filename = path.join(source_dir, list[i]);
+		var stat = fs.statSync(filename);
+
+		if(stat.isDirectory() != true){
+			fs.unlinkSync(filename);
+		}
+	}
+}
+
         zipIt = function (uniqueID) {
-		//var downloadLoc = '/root/presto/userRecons/' + uniqueID + '/' + uniqueID + '.zip'
+		var downloadLoc = '/root/presto/userRecons/' + uniqueID + '/' + uniqueID + '.zip'
 		var source_dir = '/root/presto/userRecons/' + uniqueID
-		//var output = fs.createWriteStream(downloadLoc);
+		var output = fs.createWriteStream(downloadLoc);
 		var archive = archiver('zip');
                 output.on('close', function () {
 			console.log(archive.pointer() + ' total bytes');
@@ -300,10 +312,11 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		archive.on('error', function(err){
 			throw err;
 		});
-		//archive.pipe(output);
+		archive.pipe(output);
 		archive.directory(source_dir, false);
 		//archive.directory('subdir/', 'new-subdir');
 		archive.finalize();
+		removeZipped(source_dir);
 	}
 
 
