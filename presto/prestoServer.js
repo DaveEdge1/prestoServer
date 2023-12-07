@@ -390,7 +390,8 @@ prestoStartHtml = function (uniqueID, user, domain, recon) {
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + reconParams(recon).github + 'target="_blank">' + reconParams(recon).title + 'Reconstruction Code</a><br /><br />' 
 		 + 'The results will be sent to: ' + user + '@' + domain 
-		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' 
+		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds'
+	         + '<br /><br />Let us know how we are doing at the <strong><a href="https://forms.gle/1wPXaCY75WwMyHXJ8" target="_blank" rel="noopener noreferrer">feedback form</a></strong>.
 		 + '<script>history.pushState(null, null, window.location.href);history.back();window.onpopstate = () => history.forward();var timeout = 10000; setTimeout(function ()' 
 		 + '{window.location = "https://paleopresto.com/"; }, timeout); </script>')
 }
