@@ -21,8 +21,6 @@ var reconParams = function(recon) {
 	//console.log(JSON.parse(reconParamsNow))
 	//console.log(JSON.stringify(JSON.parse(reconParamsNow)))
 	const rparams = JSON.parse(reconParamsNow)[recon]
-	console.log(rparams)
-	console.log(rparams.title)
 	return rparams
 }
 
@@ -244,7 +242,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 	}
         */
-	var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom ' + reconParams(recon).title + ' reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
+	var text1 = '<p>Thank you for using Presto! Use the URL below to download the results of your custom ' + reconParams(recon).title + ' reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
 	text1 = text1
 		+ '<br>'
 		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to download your results</a>'
