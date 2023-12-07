@@ -111,7 +111,7 @@ function editConfigs (configLoc, formEdits, recon, uniqueID){
 }
 
 newDir = function(dirname) {
-	        fs.mkdirSync(dirname, (err) => {
+	        fs.mkdirSync(dirname, { recursive: true }, (err) => {
 			                  if (err) throw err;
 			        });
 	        return (dirname)
