@@ -1,6 +1,6 @@
 {
   "holocene_da": {
-    "title": "Holocene DA Reconstruction",
+    "title": "Holocene DA",
     "paramsCon": "/config_default.yml",
     "resultsDir": "/results",
     "github": "https://github.com/Holocene-Reconstruction/Holocene-code",
