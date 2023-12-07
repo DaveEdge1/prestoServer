@@ -77,7 +77,7 @@ app.get('/downloads/:downloadId', (req, res) => {
 	      'Content-Disposition': 'attachment; filename="' + req.params.downloadId + '.zip"',
 	      'Content-Type': '.zip',
 	  })*/
-	  res.download('/root/presto/userRecons/' + req.params.downloadId + '/' + req.params.downloadId + '.zip')
+	  res.download('/root/presto/userRecons/' + req.params.downloadId + '.zip')
 });
 /*
 
