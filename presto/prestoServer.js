@@ -16,11 +16,11 @@ var app = express()
 var nodemailer = require('nodemailer');
 var align = require('align-yaml');
 
-var reconParams = function() {
+var reconParams = function(recon) {
 	const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
-	console.log(JSON.parse(reconParamsNow))
-	console.log(JSON.stringify(JSON.parse(reconParamsNow)))
-	return JSON.parse(reconParamsNow)
+	//console.log(JSON.parse(reconParamsNow))
+	//console.log(JSON.stringify(JSON.parse(reconParamsNow)))
+	return JSON.parse(reconParamsNow).recon
 }
 
 var translateJSON = function (uniqueID, recon){
