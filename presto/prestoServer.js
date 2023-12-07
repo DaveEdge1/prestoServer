@@ -291,7 +291,8 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 
 
 
-removeZipped = function(source_dir){
+removeZipped = function(uniqueID){
+	var source_dir = '/root/presto/userRecons/' + uniqueID
 	var list = fs.readdirSync(source_dir);
     	for(var i = 0; i < list.length; i++) {
         	var filename = path.join(source_dir, list[i]);
@@ -320,8 +321,7 @@ removeZipped = function(source_dir){
 		archive.pipe(output);
 		archive.directory(source_dir, false);
 		//archive.directory('subdir/', 'new-subdir');
-		archive.finalize();
-		removeZipped(source_dir);
+		return(archive.finalize());
 	}
 
 
@@ -381,7 +381,8 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
-	  zipIt(uniqueID)
+	  await zipIt(uniqueID)
+	  removeZipped(uniqueID)
 	
 
         /*
