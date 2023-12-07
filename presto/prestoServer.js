@@ -306,6 +306,8 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 
 runRecon = async function(uniqueID, user, domain, recon) {
 
+	console.log('reconParams(recon): ' + reconParams(recon))
+
 	console.log('recon: ' + reconParams(recon).title)
 
 	console.log('resultsDir: ', reconParams(recon).resultsDir)
