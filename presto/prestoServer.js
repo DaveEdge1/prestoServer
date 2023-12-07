@@ -268,6 +268,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		+ '<p>This account is not monitored for replies</p>'
 		+ '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
 		+ '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu?Subject=' + uniqueID  +'">email us directly</a>  with your unique reconstruction id: ' + uniqueID + '</p>'
+	        + '<p>Let us know how we are doing at the <strong><a href="https://forms.gle/1wPXaCY75WwMyHXJ8" target="_blank" rel="noopener noreferrer">feedback form</a></strong>.</p>'
 	return(text1)
 }
 
