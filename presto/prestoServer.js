@@ -23,7 +23,7 @@ var reconParams = function(recon) {
 	const rparams = JSON.parse(reconParamsNow)[recon]
 	console.log(rparams)
 	console.log(rparams.title)
-	return JSON.parse(reconParamsNow).recon
+	return rparams
 }
 
 var translateJSON = function (uniqueID, recon){
@@ -313,11 +313,11 @@ runRecon = async function(uniqueID, user, domain, recon) {
 
 	console.log('reconParams(recon): ' + reconParams(recon))
 
-	console.log('recon: ' + reconParams(recon)['title'])
+	console.log('recon: ' + reconParams(recon).title)
 
-	console.log('resultsDir: ', reconParams(recon)['resultsDir'])
-	console.log('paramsLoc: ', reconParams(recon)['paramsCon'])
-	console.log('container: ', reconParams(recon)['conTag'])
+	console.log('resultsDir: ', reconParams(recon).resultsDir)
+	console.log('paramsLoc: ', reconParams(recon).paramsCon)
+	console.log('container: ', reconParams(recon).conTag)
 	
 	var configLoc = updateParams(uniqueID, recon)
 	var stdout = new streams.WritableStream()
