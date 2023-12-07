@@ -18,6 +18,8 @@ var align = require('align-yaml');
 
 var reconParams = function() {
 	const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
+	console.log(JSON.parse(reconParamsNow))
+	console.log(JSON.stringify(JSON.parse(reconParamsNow)))
 	return JSON.parse(reconParamsNow)
 }
 
