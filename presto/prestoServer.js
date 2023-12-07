@@ -16,12 +16,10 @@ var app = express()
 var nodemailer = require('nodemailer');
 var align = require('align-yaml');
 
-const reconParams = function() {
+var reconParams = function() {
 	const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
 	return JSON.parse(reconParamsNow)
 }
-
-var rparams = reconParams()
 
 var translateJSON = function (uniqueID, recon){
 	var yaml = require('js-yaml')
@@ -228,7 +226,7 @@ dockerStatus = async function (uniqueID) {
         }
 }
 
-emailHTML = function (uniqueID, destURL, configLoc) {
+emailHTML = function (uniqueID, destURL, configLoc, recon) {
    var configFileTxt = function (configFileLoc) {
 	   var s = fs.readFileSync(configFileLoc,'utf8');
 	   s = align(s, 5)
@@ -241,10 +239,10 @@ emailHTML = function (uniqueID, destURL, configLoc) {
 		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 	}
         */
-	var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
+	var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom ' + reconParams(recon).title + ' reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
 	text1 = text1
 		+ '<br>'
-		+ '<a href="' + destURL + '" download>Download Custom Reconstruction '+uniqueID+'</a>'
+		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to download your results</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
 		+ '<pre>' + configFileTxt(configLoc) + '</pre>'
@@ -270,13 +268,13 @@ emailHTML = function (uniqueID, destURL, configLoc) {
 	return(text1)
 }
 
-  sendEmail = function (user, domain, uniqueID, configLoc) {
+  sendEmail = function (user, domain, uniqueID, configLoc, recon) {
     var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
       to: user + '@' + domain,
       subject: 'Presto Custom Reconstruction ' + uniqueID,
-      html: emailHTML(uniqueID, destURL, configLoc)
+      html: emailHTML(uniqueID, destURL, configLoc, recon)
     };
       transporter.sendMail(mailOptions, function(error, info){
        if (error) {
@@ -308,11 +306,11 @@ emailHTML = function (uniqueID, destURL, configLoc) {
 
 runRecon = async function(uniqueID, user, domain, recon) {
 
-	console.log('recon: ' + rparams[recon].title)
+	console.log('recon: ' + reconParams(recon).title)
 
-	console.log('resultsDir: ', rparams[recon].resultsDir)
-	console.log('paramsLoc: ', rparams[recon].paramsCon)
-	console.log('container: ', rparams[recon].conTag)
+	console.log('resultsDir: ', reconParams(recon).resultsDir)
+	console.log('paramsLoc: ', reconParams(recon).paramsCon)
+	console.log('container: ', reconParams(recon).conTag)
 	
 	var configLoc = updateParams(uniqueID, recon)
 	var stdout = new streams.WritableStream()
@@ -331,7 +329,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 			}
 		}
         */
-	var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + rparams[recon].resultsDir + ' -v ' + configLoc + ':' + rparams[recon].paramsCon + ' ' + rparams[recon].conTag
+	var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	console.log('here1')
 	async function startContainer(launchText) {
 	  console.log('running container...');
@@ -359,7 +357,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
           */
 	  console.log('end of container function')
 	  console.log('container run complete');
-	  sendEmail(user, domain, uniqueID, configLoc)
+	  sendEmail(user, domain, uniqueID, configLoc, recon)
 	  zipIt(uniqueID)
 	
 
@@ -388,9 +386,9 @@ runRecon = async function(uniqueID, user, domain, recon) {
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon) {
-	return('Starting your' + rparams[recon].title + 'custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
+	return('Starting your' + reconParams(recon).title + 'custom Presto reconstruction, ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
-		 + '<a href=' + rparams[recon].github + 'target="_blank">' + rparams[recon].title + 'Reconstruction Code</a><br /><br />' 
+		 + '<a href=' + reconParams(recon).github + 'target="_blank">' + reconParams(recon).title + 'Reconstruction Code</a><br /><br />' 
 		 + 'The results will be sent to: ' + user + '@' + domain 
 		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds' 
 		 + '<script>history.pushState(null, null, window.location.href);history.back();window.onpopstate = () => history.forward();var timeout = 10000; setTimeout(function ()' 
