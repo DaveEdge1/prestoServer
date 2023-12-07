@@ -288,7 +288,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
      });
   }
 
-removeZipped(source_dir){
+removeZipped = function(source_dir){
 	var list = fs.readdirSync(source_dir);
     	for(var i = 0; i < list.length; i++) {
         	var filename = path.join(source_dir, list[i]);
