@@ -288,13 +288,32 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
      });
   }
 
-removeZipped = function(source_dir){
+
+
+moveZipped = function(uniqueID){
+	var source_dir = '/root/presto/userRecons/' + uniqueID
 	var list = fs.readdirSync(source_dir);
     	for(var i = 0; i < list.length; i++) {
         	var filename = path.join(source_dir, list[i]);
 		var stat = fs.statSync(filename);
 
-		if(path.extname(filename) != '.zip'){
+		if(path.extname(filename) == '.zip'){
+
+			fs.copyFile(filename, path.join('/root/presto/userRecons/', uniqueID, '.zip'), (err) => {
+			  if (err) {
+			    console.log("Error Found:", err);
+			  }
+			  else {
+			 
+			    // Get the current filenames
+			    // after the function
+			    getCurrentFilenames();
+			    console.log("\nFile Contents of copied_file:",
+			      fs.readFileSync("copied_file.txt", "utf8"));
+			  }
+			});
+		} else {
+
 			if (stat.isDirectory()){
 				removeZipped(filename);
 			} else {
@@ -323,7 +342,7 @@ removeZipped = function(source_dir){
 		archive.directory(source_dir, false);
 		//archive.directory('subdir/', 'new-subdir');
 		archive.finalize();
-		removeZipped(source_dir);
+		moveZipped(uniqueID);
 	}
 
 
