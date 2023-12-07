@@ -296,11 +296,14 @@ removeZipped = function(source_dir){
 
 		if(path.extname(filename) != '.zip'){
 			if (stat.isDirectory()){
-				rmdir(filename);
+				removeZipped(filename);
 			} else {
 				fs.unlinkSync(filename);
 			}
 		}
+	}
+	if(path.extname(source_dir) != '.zip'){
+		fs.rmdirSync(source_dir);
 	}
 }
 
