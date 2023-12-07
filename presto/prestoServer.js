@@ -301,6 +301,7 @@ removeZipped = function(source_dir){
 			fs.unlinkSync(filename);
 		}
 	}
+	fs.rmdirSync(source_dir);
 }
 
         zipIt = function (uniqueID) {
