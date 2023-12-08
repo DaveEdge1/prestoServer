@@ -3,6 +3,58 @@ const color1 = '#896A67'
 const color2 = '#C6C6C6'
 var mapMax = 0;
 var mapCount = '';
+
+//added to accomodate 3000-year minimum range to reconstruct
+function controlFromInput3000(fromSlider, fromInput, toInput, controlSlider) {
+	    const [from, to] = getParsed(fromInput, toInput);
+	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
+	    if ((from+3001) > to) {
+		            fromSlider.value = to;
+		            fromInput.value = to;
+		        } else {
+				        fromSlider.value = from;
+				    }
+}
+    
+function controlToInput3000(toSlider, fromInput, toInput, controlSlider) {
+	    const [from, to] = getParsed(fromInput, toInput);
+	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
+	    setToggleAccessible(toInput);
+	    if ((from+3001) <= to) {
+		            toSlider.value = to;
+		            toInput.value = to;
+		        } else {
+				        toInput.value = (from+3001);
+				    }
+}
+
+function controlFromSlider3000(fromSlider, toSlider, fromInput) {
+	  const [from, to] = getParsed(fromSlider, toSlider);
+	  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  if ((from+3001) > to) {
+		      fromSlider.value = to;
+		      fromInput.value = to;
+		    } else {
+			        fromInput.value = (from+3001);
+			      }
+}
+
+function controlToSlider3000(fromSlider, toSlider, toInput) {
+	  const [from, to] = getParsed(fromSlider, toSlider);
+	  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  setToggleAccessible(toSlider);
+	  if ((from+3001) <= to) {
+		      toSlider.value = to;
+		      toInput.value = to;
+		    } else {
+			        toInput.value = (from+3001);
+			        toSlider.value = (from+3001);
+			      }
+}
+
+
+
+
 function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 	    const [from, to] = getParsed(fromInput, toInput);
 	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
@@ -10,7 +62,7 @@ function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 		            fromSlider.value = to;
 		            fromInput.value = to;
 		        } else {
-				        fromSlider.value = from;
+				        fromSlider.value = (from+3001);
 				    }
 }
     
@@ -356,10 +408,10 @@ const time_range_to_reconstruct_fromInput = document.getElementById("time_range_
 const time_range_to_reconstruct_toInput = document.getElementById("time_range_to_reconstruct_toInput");
 fillSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, "#C6C6C6", "#896A67", time_range_to_reconstruct_toSilder);
 setToggleAccessible(time_range_to_reconstruct_toSilder);
-time_range_to_reconstruct_fromSilder.oninput = () => controlFromSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput);
-time_range_to_reconstruct_toSilder.oninput = () => controlToSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_toInput);
-time_range_to_reconstruct_fromInput.onchange = () => controlFromInput(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
-time_range_to_reconstruct_toInput.onchange = () => controlToInput(time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
+time_range_to_reconstruct_fromSilder.oninput = () => controlFromSlider3000(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput);
+time_range_to_reconstruct_toSilder.oninput = () => controlToSlider3000(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_toInput);
+time_range_to_reconstruct_fromInput.onchange = () => controlFromInput3000(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
+time_range_to_reconstruct_toInput.onchange = () => controlToInput3000(time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
 const time_resolutionSilder = document.getElementById("time_resolutionSilder");
 const time_resolutionInput = document.getElementById("time_resolutionInput");
 time_resolutionSilder.oninput = () => changeInput(time_resolutionSilder, time_resolutionInput);
