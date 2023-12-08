@@ -149,6 +149,15 @@ document.getElementById('uniqueID').value = getQueryVariable("uniqueID");
 <script>
 popQueryVariable()
 </script>
+<script>
+function minReconRange(from, to){
+  from = document.getElementById('time_range_to_reconstruct_toSilder')
+  to = document.getElementById('time_range_to_reconstruct_toSilder')
+  if (to - from < 3000){
+    document.getElementById('time_range_to_reconstruct_toSilder') = from + 3001
+  }
+}
+</script>
 <input id="recon" name="recon" type="hidden" value="">
 <input id="user" name="user" type="hidden" value="">
 <input id="domain" name="domain" type="hidden" value="">
@@ -161,8 +170,8 @@ popQueryVariable()
 </div>
 <div class="range_container">
 <div class="sliders_control">
-<input id="time_range_to_reconstruct_fromSilder" type="range" value="7000" min="0" max="12000" step="600"/>
-<input id="time_range_to_reconstruct_toSilder" type="range" value="12000" min="0" max="12000" step="600"/>
+<input onChange=minReconRange() id="time_range_to_reconstruct_fromSilder" type="range" value="7000" min="0" max="12000" step="600"/>
+<input onChange=minReconRange() id="time_range_to_reconstruct_toSilder" type="range" value="12000" min="0" max="12000" step="600"/>
 </div>
 <br>
 <div class="form_control">
