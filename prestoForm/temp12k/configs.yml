@@ -7,8 +7,8 @@
 
 time:
   range_to_reconstruct: 
-    value: [7000,10000]
-    default: [7000, 10000]
+    value: [7000,12000]
+    default: [7000, 12000]
     limits: [0, 12000]
     options: null
     precision: 1
