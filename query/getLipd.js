@@ -47,7 +47,7 @@ runIt = async function (){
   console.log('uniqueID: ' + uniqueID)
   await queryParams(uniqueID);
   await dockerStatus(uniqueID);
-  console.log(findLipds('${PWD}/output'))
+  console.log(findLipds('/root/presto/query/output'))
 }
 
 runIt()
