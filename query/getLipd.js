@@ -36,7 +36,7 @@ findLipds = function(dir1){
   var lipdCount = fs.readdir(dir1, (err, files) => {
     console.log('path: ' + dir1)
     console.log('files: ' + files)
-    files.filter(f => path.extname(f).toLowerCase() === '.lpd').length
+    return files.filter(f => path.extname(f).toLowerCase() === '.lpd').length
     //console.log(result)
 });
   return lipdCount;
