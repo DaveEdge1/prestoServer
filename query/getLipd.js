@@ -17,4 +17,4 @@ findLipds = function(dir1){
 }
 
 
-print(findLipds('${PWD}/output'))
+console.log(findLipds('${PWD}/output'))
