@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path')
 var exec = require("child_process").exec;
+var shelljs = require("shelljs");
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
