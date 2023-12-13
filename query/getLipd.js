@@ -41,7 +41,7 @@ function findLipds(path) {
     }
   });
 }
-
+/*
 findLipds = function(dir1){
     var lipdFiles = fs.readdir(dir1);
     //console.log('path: ' + dir1)
@@ -49,7 +49,7 @@ findLipds = function(dir1){
     var lipdCount = files.filter(f => path.extname(f).toLowerCase() === '.lpd').length;
     return lipdCount;
 }
-
+*/
 runIt = async function (){
   var uniqueID = Math.floor(Math.random() * 10000);
   console.log('uniqueID: ' + uniqueID)
