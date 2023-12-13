@@ -65,7 +65,7 @@ runIt = async function (){
   console.log('uniqueID: ' + uniqueID)
   await queryParams(uniqueID);
   await dockerStatus(uniqueID);
-  console.log(fs.readdirSync('/root/presto/query/output'))
+  console.log(fs.readdirSync('/root/presto/query/output').length)
 }
 
 runIt()
