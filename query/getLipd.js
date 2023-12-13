@@ -37,6 +37,8 @@ function findLipds(path) {
     if (err) {
       return err;
     } else {
+      console.log(path)
+      console.log(content)
       return content;
     }
   });
