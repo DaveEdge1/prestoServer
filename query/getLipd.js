@@ -32,6 +32,13 @@ dockerStatus = async function (uniqueID) {
         }
 }
 
+function findLipds(path, callback) {
+    fs.readdir(path, function (err, content) {
+        if (err) return callback(err)
+        callback(null, content)
+    })
+}
+/*
 findLipds = function(path) {
   fs.readdirSync(path, function(err, content) {
     if (err) {
@@ -44,7 +51,7 @@ findLipds = function(path) {
     }
   });
 }
-/*
+
 findLipds = function(dir1){
     var lipdFiles = fs.readdir(dir1);
     //console.log('path: ' + dir1)
