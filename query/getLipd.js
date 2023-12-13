@@ -32,7 +32,7 @@ dockerStatus = async function (uniqueID) {
         }
 }
 
-function findLipds(path1) {
+findLipds = function (path1) {
 	dirCont = fs.readdirSync(path1)
 	if (dirCont == undefined){
 		return 0
@@ -41,6 +41,8 @@ function findLipds(path1) {
 	} else if (dirCont.filter(f => path.extname(f).toLowerCase() === '.lpd').length == 0){
 		return 0
 	} else {
+		pickle1 = exec('docker run --rm -v ' + path1 + ':/output -v /root/presto/query/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
+		pickle1.stdout.pipe(fs.createWriteStream('pickleContainer_stdout.log'));
 		return 1
 	}
 }
