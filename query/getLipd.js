@@ -27,14 +27,15 @@ dockerStatus = async function (uniqueID) {
 			await sleep(5000)
                         docker_status = shelljs.exec('docker ps -a').stdout
                 }
-                console.log('constainer removed')
+                console.log('container removed')
                 return 'done'
         }
 }
 
-function findLipds(path) {
+findLipds = function(path) {
   fs.readdirSync(path, function(err, content) {
     if (err) {
+      console.log('error')
       return err;
     } else {
       console.log(path)
