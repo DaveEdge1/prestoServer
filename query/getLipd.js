@@ -33,7 +33,7 @@ dockerStatus = async function (uniqueID) {
 }
 
 findLipds = function (path1) {
-	f_type = JSON.parse('/root/presto/query/queryParams.json')['file.type']
+	f_type = JSON.parse(fs.readFileSync('/root/presto/query/queryParams.json', 'utf8'))['file.type']
 	if (f_type != 'Python'){
 		return 0
 	} else {	
