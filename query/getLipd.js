@@ -31,14 +31,23 @@ dockerStatus = async function (uniqueID) {
                 return 'done'
         }
 }
-/*
-function findLipds(path, callback) {
-    fs.readdir(path, function (err, content) {
-        if (err) return callback(err)
-        callback(null, content)
-    })
-}
 
+function findLipds(path) {
+	dirCont = fs.readdirSync(path)
+	if (dirCont == undefined){
+		return 0
+	} else if (dirCont.length == 0){
+		return 0
+	} else if (dirCont.filter(f => path.extname(f).toLowerCase() === '.lpd').length == 0){
+		return 0
+	} else {
+		return 1
+	}
+}
+		
+
+}
+/*
 findLipds = function(path) {
   fs.readdirSync(path, function(err, content) {
     if (err) {
@@ -66,6 +75,7 @@ runIt = async function (){
   await queryParams(uniqueID);
   await dockerStatus(uniqueID);
   console.log(fs.readdirSync('/root/presto/query/output').length)
+  console.log(findLipds('/root/presto/query/output'))
 }
 
 runIt()
