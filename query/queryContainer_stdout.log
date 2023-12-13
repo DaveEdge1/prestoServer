@@ -1,27 +1,0 @@
-[1] "Initiating environment..."
-[1] ‘0.5.3’
-[1] "Script starting..."
-[1] "/"
-[1] "Filtering data"
-Based on your query parameters, there are 104 available time series in 12 datasets
-
-Downloading 12 datasets from lipdverse.org...
-[1] "Loading 12 datasets from /tmp/RtmpVjHvhu/lpdDownload..."
-[1] "reading: 8DrQKrJeEANJeVRmqwSv.lpd"
-[1] "reading: B2rsgl4OhbtCEUDn6fq0.lpd"
-[1] "reading: h48J7j2dm9eTPFX37xgk.lpd"
-[1] "reading: iso2k100_CO98SWPR.lpd"
-[1] "reading: iso2k100_MS07SWGG.lpd"
-[1] "reading: kBl18TlqE9qpGWry6lFW.lpd"
-[1] "reading: lSzhRH95qZYF7mJTKarn.lpd"
-[1] "reading: SeBLY0aaVfWEBVzZkCTn.lpd"
-[1] "reading: tX4R3O47xRH5ICFlrFoR.lpd"
-[1] "reading: v5DnPkLBKJPZXITGdopf.lpd"
-[1] "reading: vluZmq7FbqkIqYmBHhFx.lpd"
-[1] "reading: VXnJLYmBlZOvC4OZmPQ7.lpd"
-
-
-[1] "Successfully loaded 12 datasets, with 0 failure(s)."
-[1] "writing lipd for python"
-[1] "Writing 12 datasets to output..."
-  |                                                                              |                                                                      |   0%  |                                                                              |======                                                                |   8%  |                                                                              |============                                                          |  17%  |                                                                              |==================                                                    |  25%  |                                                                              |=======================                                               |  33%  |                                                                              |=============================                                         |  42%  |                                                                              |===================================                                   |  50%  |                                                                              |=========================================                             |  58%  |                                                                              |===============================================                       |  67%  |                                                                              |====================================================                  |  75%  |                                                                              |==========================================================            |  83%  |                                                                              |================================================================      |  92%  |                                                                              |======================================================================| 100%Successfully wrote 12 files with 0 failure(s).

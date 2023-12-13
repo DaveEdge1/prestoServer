@@ -1,3 +1,12 @@
+if (process.argv.length === 2) {
+	  console.error('Expected at least one argument!');
+	  process.exit(1);
+} else {
+	console.log(process.argv[2])
+	var uniqueID = process.argv[2]
+}
+
+
 const fs = require('fs');
 const path = require('path')
 var exec = require("child_process").exec;
@@ -9,7 +18,7 @@ function sleep(ms) {
 
 queryParams = async function (uniqueID){
   console.log('Downloading files from LiPDverse')
-  query1 = exec('docker run --rm --name ' + uniqueID + ' -v ${PWD}/output:/output -v ${PWD}/queryParams.json:/queryParams.json davidedge/lipd_webapps:queryContainer');
+  query1 = exec('docker run --rm --name query' + uniqueID + ' -v /root/presto/userRecons/uniqueID/output:/output -v /root/presto/userRecons/uniqueID//queryParams.json:/queryParams.json davidedge/lipd_webapps:queryContainer');
   query1.stdout.pipe(fs.createWriteStream('queryContainer_stdout.log'));
   await sleep(5000)
   return 1
@@ -33,7 +42,7 @@ dockerStatus = async function (uniqueID) {
 }
 
 findLipds = function (path1) {
-	f_type = JSON.parse(fs.readFileSync('/root/presto/query/queryParams.json', 'utf8'))['file.type']
+	f_type = JSON.parse(fs.readFileSync('/root/presto/userRecons/uniqueID/queryParams.json', 'utf8'))['file.type']
 	if (f_type != 'Python'){
 		return 0
 	} else {	
@@ -45,7 +54,7 @@ findLipds = function (path1) {
 		} else if (dirCont.filter(f => path.extname(f).toLowerCase() === '.lpd').length == 0){
 			return 0
 		} else {
-			pickle1 = exec('docker run --rm -v ' + path1 + ':/output -v /root/presto/query/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
+			pickle1 = exec('docker run --rm --name pickle' + uniqueID + ' -v ' + path1 + ':/output -v /root/presto/userRecons/uniqueID/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
 			pickle1.stdout.pipe(fs.createWriteStream('pickleContainer_stdout.log'));
 			return 1
 		}
@@ -77,12 +86,12 @@ findLipds = function(dir1){
 }
 */
 runIt = async function (){
-  var uniqueID = Math.floor(Math.random() * 10000);
+  //var uniqueID = Math.floor(Math.random() * 10000);
   console.log('uniqueID: ' + uniqueID)
   await queryParams(uniqueID);
   await dockerStatus(uniqueID);
   //console.log(fs.readdirSync('/root/presto/query/output').length)
-  return(findLipds('/root/presto/query/output'))
+  return(findLipds('/root/presto/userRecons/uniqueID/output'))
 }
 
 runIt()
