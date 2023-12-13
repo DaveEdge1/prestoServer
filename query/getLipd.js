@@ -32,8 +32,8 @@ dockerStatus = async function (uniqueID) {
         }
 }
 
-function findLipds(path) {
-	dirCont = fs.readdirSync(path)
+function findLipds(path1) {
+	dirCont = fs.readdirSync(path1)
 	if (dirCont == undefined){
 		return 0
 	} else if (dirCont.length == 0){
