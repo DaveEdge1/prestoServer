@@ -46,7 +46,7 @@ function findLipds(path) {
 }
 		
 
-}
+
 /*
 findLipds = function(path) {
   fs.readdirSync(path, function(err, content) {
