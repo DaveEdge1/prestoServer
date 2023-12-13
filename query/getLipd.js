@@ -31,14 +31,14 @@ dockerStatus = async function (uniqueID) {
                 return 'done'
         }
 }
-
+/*
 function findLipds(path, callback) {
     fs.readdir(path, function (err, content) {
         if (err) return callback(err)
         callback(null, content)
     })
 }
-/*
+
 findLipds = function(path) {
   fs.readdirSync(path, function(err, content) {
     if (err) {
@@ -65,7 +65,7 @@ runIt = async function (){
   console.log('uniqueID: ' + uniqueID)
   await queryParams(uniqueID);
   await dockerStatus(uniqueID);
-  console.log(findLipds('/root/presto/query/output'))
+  console.log(fs.readdirSync('/root/presto/query/output'))
 }
 
 runIt()
