@@ -33,17 +33,22 @@ dockerStatus = async function (uniqueID) {
 }
 
 findLipds = function (path1) {
-	dirCont = fs.readdirSync(path1)
-	if (dirCont == undefined){
+	f_type = JSON.parse('/root/presto/query/queryParams.json')['file.type']
+	if (f_type != 'Python'){
 		return 0
-	} else if (dirCont.length == 0){
-		return 0
-	} else if (dirCont.filter(f => path.extname(f).toLowerCase() === '.lpd').length == 0){
-		return 0
-	} else {
-		pickle1 = exec('docker run --rm -v ' + path1 + ':/output -v /root/presto/query/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
-		pickle1.stdout.pipe(fs.createWriteStream('pickleContainer_stdout.log'));
-		return 1
+	} else {	
+		dirCont = fs.readdirSync(path1)
+		if (dirCont == undefined){
+			return 0
+		} else if (dirCont.length == 0){
+			return 0
+		} else if (dirCont.filter(f => path.extname(f).toLowerCase() === '.lpd').length == 0){
+			return 0
+		} else {
+			pickle1 = exec('docker run --rm -v ' + path1 + ':/output -v /root/presto/query/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
+			pickle1.stdout.pipe(fs.createWriteStream('pickleContainer_stdout.log'));
+			return 1
+		}
 	}
 }
 		
