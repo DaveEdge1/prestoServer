@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path')
 var exec = require("child_process").exec;
 var shelljs = require("shelljs");
+var uniquePath = '/root/presto/userRecons/' + uniqueID
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -18,8 +19,8 @@ function sleep(ms) {
 
 queryParams = async function (uniqueID){
   console.log('Downloading files from LiPDverse')
-  query1 = exec('docker run --rm --name query' + uniqueID + ' -v /root/presto/userRecons/uniqueID/output:/output -v /root/presto/userRecons/uniqueID//queryParams.json:/queryParams.json davidedge/lipd_webapps:queryContainer');
-  query1.stdout.pipe(fs.createWriteStream('queryContainer_stdout.log'));
+  query1 = exec('docker run --rm --name query' + uniqueID + ' -v ' + uniquePath + '/output:/output -v ' + uniquePath + '/queryParams.json:/queryParams.json davidedge/lipd_webapps:queryContainer');
+  query1.stdout.pipe(fs.createWriteStream(uniquePath + '/queryContainer_stdout.log'));
   await sleep(5000)
   return 1
 }
@@ -41,12 +42,12 @@ dockerStatus = async function (uniqueID) {
         }
 }
 
-findLipds = function (path1) {
-	f_type = JSON.parse(fs.readFileSync('/root/presto/userRecons/uniqueID/queryParams.json', 'utf8'))['file.type']
+findLipds = function () {
+	f_type = JSON.parse(fs.readFileSync(uniquePath + '/queryParams.json', 'utf8'))['file.type']
 	if (f_type != 'Python'){
 		return 0
 	} else {	
-		dirCont = fs.readdirSync(path1)
+		dirCont = fs.readdirSync(uniquePath + '/output')
 		if (dirCont == undefined){
 			return 0
 		} else if (dirCont.length == 0){
@@ -54,8 +55,8 @@ findLipds = function (path1) {
 		} else if (dirCont.filter(f => path.extname(f).toLowerCase() === '.lpd').length == 0){
 			return 0
 		} else {
-			pickle1 = exec('docker run --rm --name pickle' + uniqueID + ' -v ' + path1 + ':/output -v /root/presto/userRecons/uniqueID/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
-			pickle1.stdout.pipe(fs.createWriteStream('pickleContainer_stdout.log'));
+			pickle1 = exec('docker run --rm --name pickle' + uniqueID + ' -v ' + uniquePath + '/output:/output -v ' + uniquePath + '/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler')
+			pickle1.stdout.pipe(fs.createWriteStream(uniquePath + '/pickleContainer_stdout.log'));
 			return 1
 		}
 	}
@@ -91,7 +92,7 @@ runIt = async function (){
   await queryParams(uniqueID);
   await dockerStatus(uniqueID);
   //console.log(fs.readdirSync('/root/presto/query/output').length)
-  return(findLipds('/root/presto/userRecons/uniqueID/output'))
+  return(findLipds())
 }
 
 runIt()
