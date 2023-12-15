@@ -31,6 +31,7 @@
         .group {padding: 11px;color: #ccc;font-weight: 900;}
         .ac-tag {display: inline-block;padding: 5px 10px;background-color: #ddd;margin: 3px;}        
     </style>
+      <script src="public/paleoData_variableName.js"></script>
 </head>
 <body>
 <h1>Autocomplete - highlighting</h1>
@@ -40,22 +41,9 @@
     <div id="autocomplete-suggestions"></div>
 </div>
 <script>
-    var list = [
-        {chapter: 'Variables', unit: 'Basics', desc: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptas, architecto earum aspernatur libero unde natus nihil cumque nam neque ad sit veritatis impedit ipsum velit nulla rem maxime quaerat recusandae."},
-        {chapter: 'Data Types', unit: 'Basics'},
-        {chapter: 'Input and Output', unit: 'Basics'},
-        {chapter: 'Constants', unit: 'Basics'},
-        {chapter: 'Comments', unit: 'Basics'},
-        {chapter: 'Prototypes', unit: 'Objects'},
-        {chapter: 'Constructors', unit: 'Objects'},
-        {chapter: 'Getters and Setters', unit: 'Objects'},
-        {chapter: 'Inheritance', unit: 'Objects'},
-        {chapter: 'Offsets', unit: 'Dimensions'},
-        {chapter: 'Bounding Boxes', unit: 'Dimensions'},
-        {chapter: 'Viewport', unit: 'Dimensions'}
-    ];
+    var list = JSON.stringify(variableName);
                         
-    var itemPropName = "chapter",
+    var itemPropName = "lipdName",
         groupBy = "unit", // group by first letter
         sortSuggestions = "asc", sortGroups = "asc",
         matchingExp = 2,
