@@ -43,8 +43,27 @@
     <div id="autocomplete-suggestions"></div>
 </div>
 <script>
-    var list = JSON.stringify(variableName);
-    var hi = "testing..."               
+    var list = [  
+        {
+        "paleoData_pastName": "",
+        "paleoData_pastId": "",
+        "lipdName": "Zalutsch",
+        "synonym": "Zalutsch"
+    },
+    {
+        "paleoData_pastName": "",
+        "paleoData_pastId": "",
+        "lipdName": "Ephedra",
+        "synonym": "Ephedra"
+    },
+    {
+        "paleoData_pastName": "",
+        "paleoData_pastId": "",
+        "lipdName": "Poaceae",
+        "synonym": "Poaceae"
+    }
+               ]
+    //var hi = "testing..."               
     var itemPropName = "paleoData_pastName",
         groupBy = "lipdName", // group by first letter
         sortSuggestions = "asc", sortGroups = "asc",
