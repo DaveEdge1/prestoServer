@@ -35,6 +35,7 @@
 </head>
 <body>
 <h1>Autocomplete - highlighting</h1>
+<p>Am I losing it?</p>
 <p id="test1"></p>
 <div id="autocomplete">
     <div id="ac-tags"></div>
@@ -43,7 +44,7 @@
 </div>
 <script>
     var list = JSON.stringify(variableName);
-         document.getElementById("test1") = list               
+         document.getElementById("test1").innerHTML = list               
     var itemPropName = "paleoData_pastName",
         groupBy = "lipdName", // group by first letter
         sortSuggestions = "asc", sortGroups = "asc",
