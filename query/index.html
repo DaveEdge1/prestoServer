@@ -44,7 +44,7 @@
 </div>
 <script>
     var list = JSON.stringify(variableName);
-         document.getElementById("test1").innerHTML = list               
+    var hi = "testing..."               
     var itemPropName = "paleoData_pastName",
         groupBy = "lipdName", // group by first letter
         sortSuggestions = "asc", sortGroups = "asc",
@@ -164,6 +164,7 @@
     }
 
     inputArea.oninput = function() {
+        document.getElementById("test1").innerHTML = hi
         if (isNavigating) {
             return;
         }
