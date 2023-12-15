@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Autocompleter Highlighting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+<style>#example-logo {display: block;position: fixed;bottom: 0;right: 0;z-index: 10;width: 120px;padding: 15px 20px;font-family: sans-serif;font-size: 11px;background-color: rgba(255,255,255,0.7);text-decoration: none;color: inherit;}#example-logo img {width: 100%;margin-top: 4px}</style>
+    <style>
+        #autocomplete {
+            width: 300px;
+        }
+        input[type="text"] {display: block;border: 1px solid #ddd;box-sizing: border-box;padding: 8px;width: 100%;font-size: 18px;font-family: sans-serif;}
+        #autocomplete-suggestions {background-color: white;border: 1px solid #ddd;border-top: 0;width: 100%;box-sizing: border-box;font-family: sans-serif;display: none;max-height: 180px;overflow-y: auto;position: relative;}
+        ul {list-style-type: none;padding: 0;margin: 0;}
+        li {padding: 8px 25px;font-weight: 100;}
+        #autocomplete-suggestions div {padding: 8px;}
+        .suggestion:hover {background-color: orange;}
+        li.hl {background-color: orange}
+        .code {
+            display: inline-block;
+            padding: 8px;
+            border-right: 1px solid rgba(0,0,0,0.04);
+            width: 10%;
+            text-align: center;
+            margin-right: 10px;
+            font-size: 17px;
+            font-weight: 900;
+        }
+        .suggestion b {font-weight: 600;color: rgb(47, 197, 47);}
+        .group {padding: 11px;color: #ccc;font-weight: 900;}
+        .ac-tag {display: inline-block;padding: 5px 10px;background-color: #ddd;margin: 3px;}        
+    </style>
+</head>
+<body>
+<h1>Autocomplete - highlighting</h1>
+<div id="autocomplete">
+    <div id="ac-tags"></div>
+    <input type="text" id="autocomplete-input" placeholder="Type something...">
+    <div id="autocomplete-suggestions"></div>
+</div>
+<script>
+    var list = [
+        {chapter: 'Variables', unit: 'Basics', desc: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptas, architecto earum aspernatur libero unde natus nihil cumque nam neque ad sit veritatis impedit ipsum velit nulla rem maxime quaerat recusandae."},
+        {chapter: 'Data Types', unit: 'Basics'},
+        {chapter: 'Input and Output', unit: 'Basics'},
+        {chapter: 'Constants', unit: 'Basics'},
+        {chapter: 'Comments', unit: 'Basics'},
+        {chapter: 'Prototypes', unit: 'Objects'},
+        {chapter: 'Constructors', unit: 'Objects'},
+        {chapter: 'Getters and Setters', unit: 'Objects'},
+        {chapter: 'Inheritance', unit: 'Objects'},
+        {chapter: 'Offsets', unit: 'Dimensions'},
+        {chapter: 'Bounding Boxes', unit: 'Dimensions'},
+        {chapter: 'Viewport', unit: 'Dimensions'}
+    ];
+                        
+    var itemPropName = "chapter",
+        groupBy = "unit", // group by first letter
+        sortSuggestions = "asc", sortGroups = "asc",
+        matchingExp = 2,
+        highlight = true,
+        multipleSelections = true;
+
+    var inputArea = document.getElementById("autocomplete-input"),
+        suggestionsBox = document.getElementById("autocomplete-suggestions"),
+        len = list.length,
+        tagCont = document.getElementById("ac-tags"),
+        lastSuggestionIndex, suggestionElements, isNavigating = false, sBoxHeight = 0, selectedRegistry = [];
+
+        function getHighlightedValue(item, index, q) {
+            if (typeof index === "number") {
+                return item.slice(0, index) + '<b>' + item.slice(index, index + q.length) + '</b>' + item.slice(index + q.length)
+            }
+            else {
+                var charArr = item.split("");
+                for (var i = 0; i < index.length; i++) {
+                    charArr[index[i]] = '<b>' + charArr[index[i]] + '</b>';
+                }
+                return charArr.join("");
+            }
+        }
+
+    var matchingFuncs = [
+        function(q, item) {
+            return item.indexOf(q);
+        },
+
+        function(q, item) {
+            return (item.indexOf(q) === 0) ? 0 : -1;
+        },
+
+        function characterSearch(q, item) {
+            var index = 0, indexArr = [];
+            for (var i = 0, len = q.length; i < len; i++) {
+                index = item.indexOf(q.charAt(i), index);
+                if (index === -1) {
+                    return -1;
+                } else {
+                    indexArr.push(index);
+                    index++;
+                }
+            }
+            return indexArr;
+        }
+    ];
+
+    var matchingFunc = matchingFuncs[matchingExp];
+
+    function sortSuggestionsInAsc(a, b) {
+        if (itemPropName) return a[itemPropName] > b[itemPropName];
+        return a > b;
+    }
+    function sortSuggestionsInDesc(a, b) {
+        if (itemPropName) return a[itemPropName] < b[itemPropName];
+        return a < b;
+    }
+
+    if (sortSuggestions) {
+        list.sort(sortSuggestions === "asc" ? sortSuggestionsInAsc : sortSuggestionsInDesc);
+    }
+
+    if (groupBy !== false) {
+        var groups = {};
+        for (var i = 0; i < len; i++) {
+            g = getGroupName(list[i]);
+            if (!groups[g]) {
+                groups[g] = [];
+            }
+            groups[g].push(list[i]);
+        }
+
+        var keys = Object.keys(groups);
+        if (sortGroups) {
+            keys.sort(sortGroups === "asc" ? function (a, b) { return a > b } : function (a, b) { return a < b });
+        }
+
+        list = [];
+        for (var k = 0; k < keys.length; k++) {
+            list = list.concat(groups[keys[k]]);
+        }
+    }
+
+    // creating a native list for the onkeyup handler
+    var nativeList = [];
+    var listForHighlighting = [];
+    function normaliseList() {
+        for (var i = 0; i < len; i++) {
+            nativeList.push(itemPropName ? list[i][itemPropName] : list[i]);
+            if (highlight) {
+                listForHighlighting.push(itemPropName ? list[i][itemPropName] : list[i])
+            }
+        }
+
+    }
+    normaliseList();
+
+    function getGroupName(item) {
+        if (groupBy === 0) {
+            return itemPropName ? item[itemPropName].charAt().toLowerCase() : item.charAt().toLowerCase();
+        }
+        else {
+            return item[groupBy];
+        }
+    }
+
+    function processSuggestion(suggestion, highlightedValue) {
+        return highlightedValue;
+    }
+
+    function hideSuggestionsBox() {
+        suggestionsBox.innerHTML = "";
+        suggestionsBox.style.display = "none";
+    }
+
+    inputArea.oninput = function() {
+        if (isNavigating) {
+            return;
+        }
+
+        var q = this.value,
+        suggestions = [];
+
+        if (q.length === 0) {
+            hideSuggestionsBox();
+            return;
+        }
+
+        suggestionsBox.innerHTML = "";
+
+        var c = '', index, highlightedValue, item, suggestionStr;
+        for (var i = 0; i < list.length; i++) {
+            index = matchingFunc(q.toLowerCase(), nativeList[i].toLowerCase(), i);
+            if (index !== -1) {
+                if (groups) {
+                    _c = getGroupName(list[i]);
+                    if (c !== _c) {
+                        c = _c; // point to the new group
+                        suggestions.push('<li class="group">' + c.toUpperCase() + '</li>')
+                    }
+                }
+                if (highlight) {
+                    item = itemPropName ? list[i][itemPropName] : list[i];
+                    highlightedValue = getHighlightedValue(item, index, q);
+                }
+                suggestionStr = processSuggestion(list[i], highlightedValue);
+                if (multipleSelections) {
+                    suggestionStr = '<input type="checkbox"' + (selectedRegistry[i] ? ' checked' : '') + '> ' + suggestionStr;
+                }
+                suggestions.push('<li class="suggestion" data-index="' + i + '">' + suggestionStr + '</li>');
+            }
+        }
+
+
+        if (suggestions.length === 0) {
+            suggestionsBox.innerHTML = "<div>No results found!</div>";
+        }
+        else {
+            suggestionsBox.innerHTML = '<ul>' + suggestions.join('') + '</ul>';
+            suggestionElements = suggestionsBox.getElementsByClassName("suggestion");
+            lastSuggestionIndex = suggestionElements.length - 1;
+            sIndex = -1;
+        }
+
+        suggestionsBoxClicked = false;
+        suggestionsBox.style.display = "block";
+        suggestionHighlighted = -1;
+        sBoxHeight = suggestionsBox.clientHeight;
+        suggestionsBox.scrollTop = 0;
+    }
+
+    function getSuggestionText(suggestion) {
+        return itemPropName ? suggestion[itemPropName]: suggestion;
+    }
+
+    function selectSuggestion(suggestion) {
+        var i = Number(suggestion.getAttribute("data-index"));
+
+        if (multipleSelections) {
+            // if the current suggestion is unselected, select it
+            if (!selectedRegistry[i]) {
+                suggestion.childNodes[0].checked = true;
+
+                var tag = document.createElement("span");
+                tag.className = "ac-tag";
+                tag.acSuggestionIndex = i;
+                tag.innerHTML = getSuggestionText(list[i]) + '<button class="ac-remove-btn">x</button>';
+                tagCont.appendChild(tag);
+
+                // save the tag's reference in the corresponding index in selectedRegistry
+                selectedRegistry[i] = tag;
+            }
+
+            else {
+                suggestion.childNodes[0].checked = false;
+                selectedRegistry[i].parentNode.removeChild(selectedRegistry[i]);
+                selectedRegistry[i] = false;
+            }
+        }
+
+        else {
+            inputArea.value = getSuggestionText(list[i]);
+            hideSuggestionsBox();
+        }
+    }
+
+    suggestionsBox.onclick = function (e) {
+        // if clicked on a suggestion, select it
+        var t = e.target;
+        while (t !== suggestionsBox) {
+            if (t.nodeName === "LI" && t.classList.contains("suggestion")) {
+                selectSuggestion(t);
+                return
+            }
+            t = t.parentNode;
+        }
+        
+    }
+
+    var suggestionsBoxClicked = false;
+    suggestionsBox.onmousedown = function(e) {
+        suggestionsBoxClicked = true;
+        e.preventDefault();
+        setTimeout(function() {
+            suggestionsBoxClicked = false;
+        }, 0);
+    }
+
+    tagCont.onclick = function (e) {
+        var t = e.target;
+        while (t !== tagCont) {
+            if (t.className === "ac-remove-btn") {
+                t = t.parentNode;
+                selectedRegistry[t.acSuggestionIndex] = false;
+                t.parentNode.removeChild(t);
+                return;
+            }
+            t = t.parentNode;
+        }
+    }
+
+    inputArea.onblur = function () {
+        if (!suggestionsBoxClicked) {
+            suggestionsBox.style.display = "none";
+        }
+    }
+
+    var sIndex = -1;
+
+    function synchroniseSuggestionsBox() {
+        var sOffsetTop = suggestionElements[sIndex].offsetTop,
+            sHeight = suggestionElements[sIndex].clientHeight;
+
+        if ((sOffsetTop + sHeight - suggestionsBox.scrollTop) > sBoxHeight) {
+            suggestionsBox.scrollTop = sOffsetTop + sHeight - sBoxHeight
+        }
+        else if (suggestionsBox.scrollTop > sOffsetTop) {
+            suggestionsBox.scrollTop = sOffsetTop
+        }
+    }
+
+    inputArea.onkeydown = function (e) {
+        isNavigating = false;
+
+        // down key is pressed
+        if (e.keyCode === 40) {
+            e.preventDefault();
+            isNavigating = true;
+            if (sIndex === -1) {
+                suggestionElements[++sIndex].classList.add("hl");
+                suggestionsBox.scrollTop = 0
+            }
+            else if (sIndex === lastSuggestionIndex) {
+                suggestionElements[sIndex].classList.remove("hl");
+                sIndex = -1;
+            }
+            else {
+                suggestionElements[sIndex].classList.remove("hl");
+                suggestionElements[++sIndex].classList.add("hl");
+            }
+            if (sIndex !== -1) synchroniseSuggestionsBox();
+        }
+
+        else if (e.keyCode === 38) {
+            e.preventDefault();
+            isNavigating = true;
+            if (sIndex === -1) {
+                sIndex = lastSuggestionIndex;
+                suggestionElements[sIndex].classList.add("hl");
+            }
+            else if (sIndex === 0) {
+                suggestionElements[sIndex].classList.remove("hl");
+                sIndex = -1;
+                suggestionsBox.scrollTop = 0
+            }
+            else {
+                suggestionElements[sIndex].classList.remove("hl");
+                suggestionElements[--sIndex].classList.add("hl");
+            }
+            if (sIndex !== -1) synchroniseSuggestionsBox();
+        }
+
+        else if (e.keyCode === 13) {
+            isNavigating = true;
+            if (sIndex !== -1) {
+                selectSuggestion(suggestionElements[sIndex]);
+            }
+        }
+    }
+    </script>
+</body>
+</html>
