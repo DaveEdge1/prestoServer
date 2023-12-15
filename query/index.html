@@ -31,7 +31,7 @@
         .group {padding: 11px;color: #ccc;font-weight: 900;}
         .ac-tag {display: inline-block;padding: 5px 10px;background-color: #ddd;margin: 3px;}        
     </style>
-      <script src="public/paleoData_variableName.js"></script>
+      <script src="paleoData_variableName.js"></script>
 </head>
 <body>
 <h1>Autocomplete - highlighting</h1>
@@ -183,7 +183,7 @@
     }
 
     inputArea.oninput = function() {
-        document.getElementById("test1").innerHTML = list.length
+        document.getElementById("test1").innerHTML = variableName.length
         if (isNavigating) {
             return;
         }
