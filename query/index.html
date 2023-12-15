@@ -35,8 +35,6 @@
 </head>
 <body>
 <h1>Autocomplete - highlighting</h1>
-<p>Am I losing it?</p>
-<p id="test1"></p>
 <div id="autocomplete">
     <div id="ac-tags"></div>
     <input type="text" id="autocomplete-input" placeholder="Type something...">
@@ -185,7 +183,6 @@
     }
 
     inputArea.oninput = function() {
-        document.getElementById("test1").innerHTML = list
         if (isNavigating) {
             return;
         }
