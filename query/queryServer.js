@@ -11,6 +11,10 @@ app.get('/', function (req, res) {
 	res.sendFile(path.join(__dirname, 'index.html'))
 });
 
+app.get('/2', function (req, res) {
+	res.sendFile(path.join(__dirname, 'index2.html'))
+});
+
 
 app.listen(PORT, function () {
     console.log(`Express server listening on port ${PORT}`)
