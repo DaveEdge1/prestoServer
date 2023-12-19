@@ -1,3 +1,16 @@
+/*if (process.argv.length === 2) {
+          console.error('Expected at least one argument!');
+          process.exit(1);
+} else {
+        console.log(process.argv[2])
+        var uniqueID = process.argv[2]
+}*/
+
+PORT = process.env.PORT || 3007
+
+var express = require('express'),
+    app = express()
+
 var mysql = require('mysql');
 
 var con = mysql.createConnection({
@@ -7,12 +20,18 @@ var con = mysql.createConnection({
 	  database: "lipdverse"
 });
 
-con.connect(function(err) {
+app.get('/', function (req, res) {
+   //res.send("hi")
+   con.connect(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  var sql = "CREATE TABLE query (paleoData_TSid VARCHAR(255), archiveType VARCHAR(255), paleoData_variableName VARCHAR(255), paleoData_units VARCHAR(255), paleoData_proxy VARCHAR(255), geo_latitude FLOAT(7,4), geo_longitude FLOAT(), geo_elevation FLOAT(), minAge FLOAT(), maxAge FLOAT(), medianResolution FLOAT(), auth VARCHAR(255), datasetId VARCHAR(255), country VARCHAR(255), interp_Vars VARCHAR(255), interp_Details VARCHAR(255), paleoData_mostRecentCompilations VARCHAR(255), interpretation1_seasonality VARCHAR(255))";
-	  con.query(sql, function (err, result) {
+	  con.query("SELECT * FROM query WHERE archiveType = 'Peat' AND interpretation1_seasonality = 'Warmest Month' AND maxAge > 5000 AND (continent = 'Europe' OR continent = 'Asia');", function (err, result, fields) {
 		      if (err) throw err;
-		      console.log("Table created");
+		      res.send(req.query.qstring + JSON.stringify(result));
 		    });
+   });
 });
+
+app.listen(PORT, function () {
+  console.log(`Express server listening on port ${PORT}`)
+})
