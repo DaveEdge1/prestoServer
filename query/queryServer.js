@@ -31,8 +31,8 @@ app.post('/lipdVerse', function(req, res) {
 	//var d = new Date();
 	//var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
 	//var downloadPath = writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID)
-	console.log(JSON.parse(req.body))
-	res.send(JSON.parse(req.body))
+	console.log(req.body)
+	res.send(req.body)
 	//res.download(writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body))
 });
 
