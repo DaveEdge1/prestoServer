@@ -18,4 +18,6 @@
 
 ### Working on selecting multiple values from a list with autocomplete
 * currently running via query/queryServer.js at port 86
-* Needs some fine tuning - should autocomplete based on lipdName only, with pastName parenthetical
+* Autocomplete now functions as it should
+* Form inputs are not taken from the slected checkboxes (maybe because I changed the values from ('selectProp' to 'groupBy')
+* The form currently sends a post request which prints the json form output on the webpage
