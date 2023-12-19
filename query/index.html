@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>LiPDverse Query</title>
+    <title>Autocomplete Lipdverse Query</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
 <style>#example-logo {display: block;position: fixed;bottom: 0;right: 0;z-index: 10;width: 120px;padding: 15px 20px;font-family: sans-serif;font-size: 11px;background-color: rgba(255,255,255,0.7);text-decoration: none;color: inherit;}#example-logo img {width: 100%;margin-top: 4px}</style>
@@ -31,17 +31,17 @@
         .group {padding: 11px;color: #ccc;font-weight: 900;}
         .ac-tag {display: inline-block;padding: 5px 10px;background-color: #ddd;margin: 3px;}        
     </style>
-      <script src="paleoData_variableName.js"></script>
+      <script src="archiveType.js"></script>
 </head>
 <body>
-<h1>Variable Name</h1>
+<h1>Archive Type</h1>
 <div id="autocomplete">
     <div id="ac-tags"></div>
     <input type="text" id="autocomplete-input" placeholder="Type something...">
     <div id="autocomplete-suggestions"></div>
 </div>
 <script>
-    var list = JSON.parse(variableName)
+    var list = JSON.parse(archiveType)
     /*
     var list = [  
         {
@@ -64,8 +64,8 @@
     }
                ]*/
     //var hi = "testing..."               
-    var itemPropName = "lipdName",
-        groupBy = "lipdName",
+    var itemPropName = "synonym",
+        groupBy = "lipdName", // group by first letter
         sortSuggestions = "asc", sortGroups = "asc",
         matchingExp = 2,
         highlight = true,
@@ -155,9 +155,9 @@
     var listForHighlighting = [];
     function normaliseList() {
         for (var i = 0; i < len; i++) {
-            nativeList.push(groupBy ? list[i][groupBy] : list[i]);
+            nativeList.push(itemPropName ? list[i][itemPropName] : list[i]);
             if (highlight) {
-                listForHighlighting.push(groupBy ? list[i][groupBy] : list[i])
+                listForHighlighting.push(itemPropName ? list[i][itemPropName] : list[i])
             }
         }
 
@@ -239,7 +239,7 @@
     }
 
     function getSuggestionText(suggestion) {
-        return groupBy ? suggestion[groupBy]: suggestion;
+        return itemPropName ? suggestion[itemPropName]: suggestion;
     }
 
     function selectSuggestion(suggestion) {
