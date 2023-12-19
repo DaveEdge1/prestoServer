@@ -44,10 +44,6 @@
 </div>
 <script>
 
-    function insertJSON() {
-        document.getElementById("test1").innerHTML = JSON.stringify(list)
-        document.getElementById("test2").innerHTML = JSON.stringify(list1)
-    }
     var list1 = JSON.parse(archiveType)
 
     var list = [  
@@ -70,6 +66,10 @@
         "synonym": "Poaceae"
     }
                ]
+        function insertJSON() {
+        document.getElementById("test1").innerHTML = JSON.stringify(list)
+        document.getElementById("test2").innerHTML = JSON.stringify(list1)
+    }
     //var hi = "testing..."               
     var itemPropName = "synonym",
         groupBy = "lipdName", // group by first letter
