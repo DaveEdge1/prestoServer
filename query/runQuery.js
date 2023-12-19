@@ -6,7 +6,7 @@ var archiveType = [{"lipdName":"Borehole","synonym":"Borehole, borehole"},{"lipd
 queryThenReport = function (){
 	//var queryOut = await shelljs.exec('node /root/presto/query/getLipd.js')
 	
-	console.log(JSON.stringify(archiveType));
+	console.log(JSON.parse(archiveType));
 }
 
 queryThenReport();
