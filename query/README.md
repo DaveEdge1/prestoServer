@@ -1,6 +1,9 @@
 ## Linking the query container with presto form and existing recons
 
 ### Current functionality
+* mysql database for lipdverse query running at port=3306
+  * access for nick and datathrough Rmysql
+  * nodejs access via queryDB.js (port 88)
 * Node app at query/getLipd.js 
 * Accepts a json query file(queryParams.json)
 * queryContainer runs query in lipdR
