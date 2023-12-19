@@ -67,8 +67,27 @@
     }
                ]
         function insertJSON() {
-            var a1 = list
-            var a2 = list1
+            var a1 = [  
+        {
+        "paleoData_pastName": "aa",
+        "paleoData_pastId": "ba",
+        "lipdName": "Zalutsch",
+        "synonym": "Zalutsch"
+    },
+    {
+        "paleoData_pastName": "cv",
+        "paleoData_pastId": "de",
+        "lipdName": "Ephedra",
+        "synonym": "Ephedra"
+    },
+    {
+        "paleoData_pastName": "",
+        "paleoData_pastId": "dc",
+        "lipdName": "Poaceae",
+        "synonym": "Poaceae"
+    }
+               ]
+            var a2 = JSON.parse(archiveType)
         document.getElementById("test1").innerHTML = JSON.stringify(a1)
         document.getElementById("test2").innerHTML = JSON.stringify(a2)
     }
