@@ -67,8 +67,10 @@
     }
                ]
         function insertJSON() {
-        document.getElementById("test1").innerHTML = JSON.stringify(list)
-        document.getElementById("test2").innerHTML = JSON.stringify(list1)
+            var a1 = list
+            var a2 = list1
+        document.getElementById("test1").innerHTML = JSON.stringify(a1)
+        document.getElementById("test2").innerHTML = JSON.stringify(a2)
     }
     //var hi = "testing..."               
     var itemPropName = "synonym",
