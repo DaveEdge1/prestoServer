@@ -155,9 +155,9 @@
     var listForHighlighting = [];
     function normaliseList() {
         for (var i = 0; i < len; i++) {
-            nativeList.push(itemPropName ? list[i][itemPropName] : list[i]);
+            nativeList.push(groupBy ? list[i][groupBy] : list[i]);
             if (highlight) {
-                listForHighlighting.push(itemPropName ? list[i][itemPropName] : list[i])
+                listForHighlighting.push(groupBy ? list[i][groupBy] : list[i])
             }
         }
 
