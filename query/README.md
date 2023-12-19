@@ -18,4 +18,4 @@
 
 ### Working on selecting multiple values from a list with autocomplete
 * currently running via query/queryServer.js at port 86
-* Needs some fine tuning - should not be checking the 'synonyms', but should be able to search on both those, the PAST terms, and the lipdName
+* Needs some fine tuning - should autocomplete based on lipdName only, with pastName parenthetical
