@@ -5,6 +5,12 @@ var express = require('express'),
 
 const path = require("path")
 
+var bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+// in latest body-parser use like below.
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 app.get('/', function (req, res) {
@@ -25,7 +31,8 @@ app.post('/lipdVerse', function(req, res) {
 	//var d = new Date();
 	//var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
 	//var downloadPath = writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID)
-	res.send(req.body)
+	console.log(JSON.parse(req.body))
+	res.send(JSON.parse(req.body))
 	//res.download(writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body))
 });
 
