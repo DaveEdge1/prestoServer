@@ -236,7 +236,7 @@
                     }
                 }
                 if (highlight) {
-                    item = groupBy ? list[i][groupBy] : list[i];
+                    item = itemPropName ? list[i][itemPropName] : list[i];
                     highlightedValue = getHighlightedValue(item, index, q);
                 }
                 suggestionStr = processSuggestion(list[i], highlightedValue);
@@ -266,7 +266,7 @@
     }
 
     function getSuggestionText(suggestion) {
-        return itemPropName ? suggestion[itemPropName]: suggestion;
+        return groupBy ? suggestion[groupBy]: suggestion;
     }
 
     function selectSuggestion(suggestion) {
