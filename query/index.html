@@ -33,9 +33,7 @@
     </style>
       <script src="archiveType.js"></script>
 </head>
-<body onload = "insertJSON()">
-<p id="test1"></p>
-    <p id="test2"></p>
+<body>
 <h1>Archive Type</h1>
 <div id="autocomplete">
     <div id="ac-tags"></div>
@@ -238,7 +236,7 @@
                     }
                 }
                 if (highlight) {
-                    item = itemPropName ? list[i][itemPropName] : list[i];
+                    item = groupBy ? list[i][groupBy] : list[i];
                     highlightedValue = getHighlightedValue(item, index, q);
                 }
                 suggestionStr = processSuggestion(list[i], highlightedValue);
