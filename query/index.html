@@ -34,6 +34,7 @@
       <script src="archiveType.js"></script>
 </head>
 <body>
+<p id="json1"></p>
 <h1>Archive Type</h1>
 <div id="autocomplete">
     <div id="ac-tags"></div>
@@ -183,6 +184,7 @@
     }
 
     inputArea.oninput = function() {
+        document.getElementById("json1")=list
         if (isNavigating) {
             return;
         }
