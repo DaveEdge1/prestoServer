@@ -35,6 +35,7 @@
 </head>
 <body onload = "insertJSON()">
 <p id="test1"></p>
+    <p id="test2"></p>
 <h1>Archive Type</h1>
 <div id="autocomplete">
     <div id="ac-tags"></div>
@@ -42,30 +43,12 @@
     <div id="autocomplete-suggestions"></div>
 </div>
 <script>
+
     function insertJSON() {
-        document.getElementById("test1").innerHTML = JSON.stringify(
-        [  
-        {
-        "paleoData_pastName": "aa",
-        "paleoData_pastId": "ba",
-        "lipdName": "Zalutsch",
-        "synonym": "Zalutsch"
-    },
-    {
-        "paleoData_pastName": "cv",
-        "paleoData_pastId": "de",
-        "lipdName": "Ephedra",
-        "synonym": "Ephedra"
-    },
-    {
-        "paleoData_pastName": "",
-        "paleoData_pastId": "dc",
-        "lipdName": "Poaceae",
-        "synonym": "Poaceae"
+        document.getElementById("test1").innerHTML = JSON.stringify(list)
+        document.getElementById("test2").innerHTML = JSON.stringify(list1)
     }
-               ])
-    }
-    //var list = JSON.parse(archiveType)
+    var list1 = JSON.parse(archiveType)
 
     var list = [  
         {
