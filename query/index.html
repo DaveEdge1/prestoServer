@@ -35,11 +35,16 @@
 </head>
 <body>
 <h1>Archive Type</h1>
-<div id="autocomplete">
+<form id="queryParams" method="POST" action="/lipdVerse">
+    <div id="autocomplete">
     <div id="ac-tags"></div>
     <input type="text" id="autocomplete-input" placeholder="Type something...">
     <div id="autocomplete-suggestions"></div>
 </div>
+    <div class="button-submit">
+<button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
+</div>
+</form>
 <script>
 
     var list = archiveType
