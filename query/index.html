@@ -74,14 +74,14 @@ focus: function() {
 return false;
 },
 select: function( event, ui ) {
-var terms = split( this.lipdName );
+var terms = split( this.value );
 // remove the current input
 terms.pop();
 // add the selected item
 terms.push( ui.item.lipdName );
 // add placeholder to get the comma-and-space at the end
 terms.push( "" );
-this.lipdName = terms.join( ", " );
+this.value = terms.join( ", " );
     
     var selected_label = ui.item.label;
     var selected_value = ui.item.lipdName;
