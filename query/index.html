@@ -172,7 +172,7 @@ return false;
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
                 } else {
-                    console.error("XHR didn't work: ", xhr.status);
+                    $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
             }
         }
