@@ -31,10 +31,10 @@
 <input id="project">
 <br>
 Selected labels:    
-<input type="text" id="labels" name="labels">
+<input type="hidden" id="labels">
 <br>
 Selected values:    
-<input type="hidden" id="values" name="values">   
+<input type="text" id="values" name="values">   
       </div>
     <div class="button-submit">
 <button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
@@ -94,21 +94,6 @@ return val.split( /,\s*/ );
 function extractLast( term ) {
 return split( term ).pop();
 }
-     
-var projects = [
-{
-value: "yahoo",
-label: "Yahoo !"
-},
-{
-value: "bing",
-label: "Bing"
-},
-{
-value: "google",
-label: "Google"
-}
-];
      
 $( "#project" )
  // don't navigate away from the field on tab when selecting an item
