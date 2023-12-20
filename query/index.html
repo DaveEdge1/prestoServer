@@ -160,7 +160,7 @@ return false;
     var $response = document.getElementById("response");
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
-    var params = '?archiveType=' + document.getElementById("values").value;
+    var params = '?archiveType=' + $('#values').val();
     $getReposBtn.onclick = function(){
         var xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
