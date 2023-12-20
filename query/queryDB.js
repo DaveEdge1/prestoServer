@@ -11,9 +11,9 @@ PORT = process.env.PORT || 3007
 var express = require('express'),
     app = express()
 
-var mysql = require('mysql');
+var mysql = require('mysql2');
 
-var con = mysql.createConnection({
+var con = mysql.createPool({
 	  host: "localhost",
 	  user: "dave",
 	  password: "peb0pk0q",
