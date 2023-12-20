@@ -39,16 +39,16 @@ return split( term ).pop();
      
 var projects = [
 {
-value: "yahoo",
-label: "Yahoo !"
+lipdName: "yahoo",
+synonym: "Yahoo !"
 },
 {
-value: "bing",
-label: "Bing"
+lipdName: "bing",
+synonym: "Bing"
 },
 {
-value: "google",
-label: "Google"
+lipdName: "google",
+synonym: "Google"
 }
 ];
      
@@ -78,13 +78,13 @@ var terms = split( this.value );
 // remove the current input
 terms.pop();
 // add the selected item
-terms.push( ui.item.value );
+terms.push( ui.item.lipdName );
 // add placeholder to get the comma-and-space at the end
 terms.push( "" );
 this.value = terms.join( ", " );
     
-    var selected_label = ui.item.label;
-    var selected_value = ui.item.value;
+    var selected_label = ui.item.synonym;
+    var selected_value = ui.item.lipdName;
     
     var labels = $('#labels').val();
     var values = $('#values').val();
