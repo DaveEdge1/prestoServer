@@ -35,7 +35,7 @@ function buildQstring(qs){
 	return(outString)
 }
 
-app.post('/', function (req, res) {
+app.get('/', function (req, res) {
    console.log(req.query.archiveType)
    con.connect(function(err) {
 	  if (err) throw err;
