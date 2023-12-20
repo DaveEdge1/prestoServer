@@ -36,7 +36,7 @@ function buildQstring(qs){
 }
 
 app.post('/', function (req, res) {
-   //res.send("hi")
+   console.log(req.body)
    con.connect(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
