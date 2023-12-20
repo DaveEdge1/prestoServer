@@ -78,13 +78,13 @@ var terms = split( this.value );
 // remove the current input
 terms.pop();
 // add the selected item
-terms.push( ui.item.lipdName );
+terms.push( ui.item.value );
 // add placeholder to get the comma-and-space at the end
 terms.push( "" );
 this.value = terms.join( ", " );
     
-    var selected_label = ui.item.synonym;
-    var selected_value = ui.item.lipdName;
+    var selected_label = ui.item.label;
+    var selected_value = ui.item.value;
     
     var labels = $('#labels').val();
     var values = $('#values').val();
