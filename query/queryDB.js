@@ -20,6 +20,10 @@ var con = mysql.createConnection({
 	  database: "lipdverse"
 });
 
+buildQstring function (qs){
+	qs.length
+}
+
 app.get('/', function (req, res) {
    //res.send("hi")
    con.connect(function(err) {
