@@ -36,13 +36,13 @@ function buildQstring(qs){
 }
 
 app.post('/', function (req, res) {
-   console.log(JSON.parse(req.body))
+   console.log(req.query.archiveType)
    con.connect(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  con.query("SELECT * FROM query WHERE " + buildQstring(req.body) + ";", function (err, result, fields) {
+	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.archiveType) + ";", function (err, result, fields) {
 		      if (err) throw err;
-		      res.send(req.body + JSON.stringify(result));
+		      res.send(req.query.archiveType + JSON.stringify(result));
 		    });
    });
 });
