@@ -37,7 +37,7 @@ Selected values:
 <input type="text" id="values" name="archiveType">   
       </div>
     <div class="button-submit">
-<button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
+<button style="height:50px; width:100px; font-size:20px" on.click="sendPost()" class="btn btn-primary">Submit</button>
 </div>
   </form>
 <div id="map" style="width: 600px; height: 400px;"></div>
@@ -149,4 +149,17 @@ return false;
 
  });     
 
+</script>
+<script>
+function sendPost(){
+var xhr = new XMLHttpRequest(),
+    data = "data%5Btumblelog%5D=drunknight&data%5Bsource%5D=FOLLOW_SOURCE_REBLOG";
+
+xhr.open('POST','https://www.somesite.com/page', false);
+
+// LINE ADDED
+xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+xhr.send(data);
+}
 </script>
