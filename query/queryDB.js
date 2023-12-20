@@ -21,7 +21,19 @@ var con = mysql.createConnection({
 });
 
 buildQstring function (qs){
-	qs.length
+	console.log(qs)
+	console.log(qs['archiveType'])
+	const words = qs['archiveType'].split(',');
+	console.log(words)
+	var outString = 'archiveType = '
+	for (let i = 0; i < words.length; i++) {
+		var outString = outString + ' ' + words[i]
+		if (i < words.length){
+			var outString = outString + ' OR '
+		}
+	}
+	console.log(outstring)
+	return(outString)
 }
 
 app.get('/', function (req, res) {
@@ -29,7 +41,7 @@ app.get('/', function (req, res) {
    con.connect(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  con.query("SELECT * FROM query WHERE archiveType = 'Peat' AND interpretation1_seasonality = 'Warmest Month' AND maxAge > 5000 AND (continent = 'Europe' OR continent = 'Asia');", function (err, result, fields) {
+	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.qstring) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      res.send(req.query.qstring + JSON.stringify(result));
 		    });
