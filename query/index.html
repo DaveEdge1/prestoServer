@@ -16,11 +16,11 @@
      <div id="project-label">Select search engines <b>(multiple)</b> (type "g" or "b" or "y" for a start):</div>
 <input id="project">
 <br>
-Selected labels:    
-<input type="text" id="labels" name="labels">
+Selected synonym:    
+<input type="text" id="synonym" name="synonym">
 <br>
-Selected values:    
-<input type="hidden" id="values" name="values">   
+Selected lipdName:    
+<input type="hidden" id="lipdName" name="lipdName">   
       </div>
     <div class="button-submit">
 <button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
@@ -65,7 +65,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-projects, extractLast( request.term ) ) );
+archiveType, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -86,18 +86,18 @@ this.value = terms.join( ", " );
     var selected_label = ui.item.label;
     var selected_value = ui.item.value;
     
-    var labels = $('#labels').val();
-    var values = $('#values').val();
+    var synonym = $('#synonym').val();
+    var lipdName = $('#lipdName').val();
     
-    if(labels == "")
+    if(synonym == "")
     {
-        $('#labels').val(selected_label);
-        $('#values').val(selected_value);
+        $('#synonym').val(selected_label);
+        $('#lipdName').val(selected_value);
     }
     else    
     {
-        $('#labels').val(labels+","+selected_label);
-        $('#values').val(values+","+selected_value);
+        $('#synonym').val(synonym+","+selected_label);
+        $('#lipdName').val(lipdName+","+selected_value);
     }   
     
 return false;
