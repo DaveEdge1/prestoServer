@@ -23,7 +23,7 @@ var con = mysql.createConnection({
 function buildQstring(qs){
 	console.log(qs)
 	console.log(qs['archiveType'])
-	const words = qs['archiveType'].split(',');
+	const words = qs.split(',');
 	console.log(words)
 	var outString = 'archiveType = '
 	for (let i = 0; i < words.length; i++) {
@@ -41,7 +41,7 @@ app.get('/', function (req, res) {
    con.connect(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.qstring) + ";", function (err, result, fields) {
+	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.archiveType) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      res.send(req.query.qstring + JSON.stringify(result));
 		    });
