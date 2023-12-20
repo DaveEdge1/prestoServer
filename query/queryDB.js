@@ -20,7 +20,7 @@ var con = mysql.createConnection({
 	  database: "lipdverse"
 });
 
-buildQstring function (qs){
+function buildQstring(qs){
 	console.log(qs)
 	console.log(qs['archiveType'])
 	const words = qs['archiveType'].split(',');
