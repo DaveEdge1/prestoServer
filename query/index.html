@@ -39,16 +39,16 @@ return split( term ).pop();
      
 var projects = [
 {
-lipdName: "yahoo",
-synonym: "Yahoo !"
+value: "yahoo",
+label: "Yahoo !"
 },
 {
-lipdName: "bing",
-synonym: "Bing"
+value: "bing",
+label: "Bing"
 },
 {
-lipdName: "google",
-synonym: "Google"
+value: "google",
+label: "Google"
 }
 ];
      
@@ -74,17 +74,17 @@ focus: function() {
 return false;
 },
 select: function( event, ui ) {
-var terms = split( this.lipdName );
+var terms = split( this.value );
 // remove the current input
 terms.pop();
 // add the selected item
-terms.push( ui.item.lipdName );
+terms.push( ui.item.value );
 // add placeholder to get the comma-and-space at the end
 terms.push( "" );
-this.lipdName = terms.join( ", " );
+this.value = terms.join( ", " );
     
-    var selected_label = ui.item.synonym;
-    var selected_value = ui.item.lipdName;
+    var selected_label = ui.item.label;
+    var selected_value = ui.item.value;
     
     var labels = $('#labels').val();
     var values = $('#values').val();
