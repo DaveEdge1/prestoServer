@@ -16,11 +16,11 @@
      <div id="project-label">Select search engines <b>(multiple)</b> (type "g" or "b" or "y" for a start):</div>
 <input id="project">
 <br>
-Selected synonym:    
-<input type="text" id="synonym" name="synonym">
+Selected labels:    
+<input type="text" id="labels" name="labels">
 <br>
-Selected lipdName:    
-<input type="hidden" id="lipdName" name="lipdName">   
+Selected values:    
+<input type="hidden" id="values" name="values">   
       </div>
     <div class="button-submit">
 <button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
@@ -36,7 +36,7 @@ return val.split( /,\s*/ );
 function extractLast( term ) {
 return split( term ).pop();
 }
-/*     
+     
 var projects = [
 {
 value: "yahoo",
@@ -51,7 +51,7 @@ value: "google",
 label: "Google"
 }
 ];
-*/     
+     
 $( "#project" )
  // don't navigate away from the field on tab when selecting an item
 .bind( "keydown", function( event ) {
@@ -65,7 +65,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-archiveType, extractLast( request.term ) ) );
+projects, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -78,26 +78,26 @@ var terms = split( this.value );
 // remove the current input
 terms.pop();
 // add the selected item
-terms.push( ui.item.lipdName );
+terms.push( ui.item.value );
 // add placeholder to get the comma-and-space at the end
 terms.push( "" );
 this.value = terms.join( ", " );
     
-    var selected_label = ui.item.synonym;
-    var selected_value = ui.item.lipdName;
+    var selected_label = ui.item.label;
+    var selected_value = ui.item.value;
     
-    var synonym = $('#synonym').val();
-    var lipdName = $('#lipdName').val();
+    var labels = $('#labels').val();
+    var values = $('#values').val();
     
-    if(synonym == "")
+    if(labels == "")
     {
-        $('#synonym').val(selected_label);
-        $('#lipdName').val(selected_value);
+        $('#labels').val(selected_label);
+        $('#values').val(selected_value);
     }
     else    
     {
-        $('#synonym').val(synonym+","+selected_label);
-        $('#lipdName').val(lipdName+","+selected_value);
+        $('#labels').val(labels+","+selected_label);
+        $('#values').val(values+","+selected_value);
     }   
     
 return false;
