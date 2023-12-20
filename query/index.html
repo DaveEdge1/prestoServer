@@ -250,7 +250,7 @@
                 }
                 suggestionStr = processSuggestion(list[i], highlightedValue);
                 if (multipleSelections) {
-                    suggestionStr = '<input type="checkbox" name="archiveType" value="' + list[i][groupBy] + '"> ' + suggestionStr;
+                    suggestionStr = '<input type="checkbox" value="true" name="' + list[i][groupBy] + '"> ' + suggestionStr;
                 }
                 suggestions.push('<li class="suggestion" data-index="' + i + '">' + suggestionStr + '</li>');
             }
