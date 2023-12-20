@@ -38,7 +38,7 @@
 <form id="queryParams" method="POST" action="/lipdVerse">
     <div id="autocomplete">
     <div id="ac-tags"></div>
-    <input name="archiveType" type="text" id="autocomplete-input" placeholder="Type something...">
+    <input name="ignore" type="text" id="autocomplete-input" placeholder="Type something...">
     <div id="autocomplete-suggestions"></div>
 </div>
     <div>  
@@ -250,7 +250,7 @@
                 }
                 suggestionStr = processSuggestion(list[i], highlightedValue);
                 if (multipleSelections) {
-                    suggestionStr = '<input type="checkbox" name="' + list[i][groupBy] + '"> ' + suggestionStr;
+                    suggestionStr = '<input type="checkbox" name="archiveType" value="' + list[i][groupBy] + '"> ' + suggestionStr;
                 }
                 suggestions.push('<li class="suggestion" data-index="' + i + '">' + suggestionStr + '</li>');
             }
