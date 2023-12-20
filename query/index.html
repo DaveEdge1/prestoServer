@@ -36,7 +36,7 @@ return val.split( /,\s*/ );
 function extractLast( term ) {
 return split( term ).pop();
 }
-     
+/*     
 var projects = [
 {
 value: "yahoo",
@@ -51,7 +51,7 @@ value: "google",
 label: "Google"
 }
 ];
-     
+*/     
 $( "#project" )
  // don't navigate away from the field on tab when selecting an item
 .bind( "keydown", function( event ) {
@@ -83,7 +83,7 @@ terms.push( ui.item.lipdName );
 terms.push( "" );
 this.value = terms.join( ", " );
     
-    var selected_label = ui.item.label;
+    var selected_label = ui.item.synonym;
     var selected_value = ui.item.lipdName;
     
     var synonym = $('#synonym').val();
