@@ -10,6 +10,8 @@ PORT = process.env.PORT || 3007
 
 var express = require('express'),
     app = express()
+var cors = require('cors')
+app.use(cors())
 
 var mysql = require('mysql2');
 
@@ -35,7 +37,7 @@ function buildQstring(qs){
 	return(outString)
 }
 
-app.get('/', function (req, res) {
+app.get('/', function (req, res, next) {
    console.log(req.query.archiveType)
    con.getConnection(function(err) {
 	  if (err) throw err;
