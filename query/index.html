@@ -161,7 +161,7 @@ return false;
 <script>
     console.log('loading event handlers');
     var $response = document.getElementById("response");
-    var vals1 = '?archiveType=' + document.getElementById("values").value;
+    document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
     var params = '?archiveType=' + document.getElementById("values").value;
     $getReposBtn.onclick = function(){
