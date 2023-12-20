@@ -159,7 +159,7 @@ return false;
     console.log('loading event handlers');
     var $response = document.getElementById("response");
     var $getReposBtn = document.getElementById("get-repos");
-    var params = document.getElementById("values");
+    var params = '?archiveType=' + document.getElementById("values");
     $getReposBtn.onclick = function(){
         var xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
@@ -178,8 +178,8 @@ return false;
         xhr.ontimeout = function (){
             console.error("request timedout: ", xhr);
         }
-        xhr.open("post", "http://143.198.98.66:88/", /*async*/ true);
+        xhr.open("get", "http://143.198.98.66:88/" + params, /*async*/ true);
         // xhr.responseType = "text";
-        xhr.send(params);
+        xhr.send();
     }
 </script>
