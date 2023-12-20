@@ -24,11 +24,11 @@ function buildQstring(qs){
 	console.log(qs)
 	const words = qs.split(',');
 	console.log(words)
-	var outString = 'archiveType = '
+	var outString = 'archiveType ='
 	for (let i = 0; i < words.length; i++) {
-		var outString = outString + ' ' + words[i]
+		var outString = outString + ' "' + words[i] + '"'
 		if (i < (words.length-1)){
-			var outString = outString + ' OR '
+			var outString = outString + ' OR'
 		}
 	}
 	console.log(outString)
