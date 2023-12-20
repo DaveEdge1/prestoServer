@@ -27,7 +27,7 @@ Selected values:
 </div>
   </form>
 <script>
-var archiveType = [{"lipdName":"Borehole","synonym":"Borehole, borehole"},{"lipdName":"Coral","synonym":"Coral, coral"},{"lipdName":"FluvialSediment","synonym":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"lipdName":"GlacierIce","synonym":"GlacierIce, ice cores"},{"lipdName":"GroundIce","synonym":"GroundIce, bulk ice"},{"lipdName":"LakeSediment","synonym":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"lipdName":"MarineSediment","synonym":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"lipdName":"Midden","synonym":"Midden, "},{"lipdName":"MolluskShell","synonym":"MolluskShells, bivalve, MolluskShell"},{"lipdName":"Other","synonym":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"lipdName":"Peat","synonym":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"lipdName":"Sclerosponge","synonym":"Sclerosponge, sclerosponge"},{"lipdName":"Shoreline","synonym":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"lipdName":"Speleothem","synonym":"Cave, Speleothem, speleothems"},{"lipdName":"TerrestrialSediment","synonym":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"lipdName":"Wood","synonym":"Wood, tree ring, tree"}]
+var archiveType = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
     
  $(function() {
 function split( val ) {
@@ -65,7 +65,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-projects, extractLast( request.term ) ) );
+archiveType, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
