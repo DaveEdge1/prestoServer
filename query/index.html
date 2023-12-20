@@ -1,6 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Autocomplete Lipdverse Query</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+ <script src="archiveType.js"></script>
+</head>
+<body>
+<h1>Archive Type</h1>
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+ <form id="queryParams" method="POST" action="/lipdVerse">
      <div id="project-label">Select search engines <b>(multiple)</b> (type "g" or "b" or "y" for a start):</div>
 <input id="project">
 <br>
@@ -8,7 +20,12 @@ Selected labels:
 <input type="text" id="labels">
 <br>
 Selected values:    
-<input type="text" id="values">    
+<input type="text" id="values">   
+      </div>
+    <div class="button-submit">
+<button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
+</div>
+  </form>
 <script>
  $(function() {
 function split( val ) {
