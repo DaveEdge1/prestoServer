@@ -159,7 +159,7 @@ return false;
     console.log('loading event handlers');
     var $response = document.getElementById("response");
     var $getReposBtn = document.getElementById("get-repos");
-    var params = '?archiveType=' + document.getElementById("values");
+    var params = '?archiveType=' + document.getElementById("values").value;
     $getReposBtn.onclick = function(){
         var xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
