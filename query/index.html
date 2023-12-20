@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex">
  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 <link rel="stylesheet" href="map.css">
- <script src="archiveType.js"></script>
+ <script src="map.js"></script>
 </head>
 <body onload="makeMap()">
 <h1>Archive Type</h1>
@@ -29,19 +29,6 @@ Selected values:
   </form>
 <div class="map"></div>
 
-<script>
-const duesseldorf = L.latLng(35.2, -111.645);
-const osm = L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
-const map = L.map($('.map')[0], {
-  center: duesseldorf,
-  zoom: 10,
-  layers: [osm]
-});
-
-map.addLayer(L.marker(duesseldorf));
-
-</script>
 
 <script>
 var archiveType = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
