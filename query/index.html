@@ -43,9 +43,6 @@ Selected values:
   <!-- </form> -->
 <div id="map" style="width: 600px; height: 400px;"></div>
     <br>
-		<div class="row">
-        <pre id="vals1"></pre>
-    </div>
 	<div class="row">
         <pre id="response"></pre>
     </div>
@@ -161,9 +158,9 @@ return false;
 <script>
     console.log('loading event handlers');
     var $response = document.getElementById("response");
-    document.getElementById("vals1") = '?archiveType=Wood,Coral' //+ document.getElementById("values").value;
+    //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
-    var params = '?archiveType=' + document.getElementById("values").value;
+    var params = '?archiveType=Wood,Coral'// + document.getElementById("values").value;
     $getReposBtn.onclick = function(){
         var xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
