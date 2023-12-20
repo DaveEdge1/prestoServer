@@ -22,7 +22,6 @@ var con = mysql.createConnection({
 
 function buildQstring(qs){
 	console.log(qs)
-	console.log(qs['archiveType'])
 	const words = qs.split(',');
 	console.log(words)
 	var outString = 'archiveType = '
@@ -32,7 +31,7 @@ function buildQstring(qs){
 			var outString = outString + ' OR '
 		}
 	}
-	console.log(outstring)
+	console.log(outString)
 	return(outString)
 }
 
