@@ -27,7 +27,7 @@ function buildQstring(qs){
 	var outString = 'archiveType = '
 	for (let i = 0; i < words.length; i++) {
 		var outString = outString + ' ' + words[i]
-		if (i < words.length){
+		if (i < (words.length-1)){
 			var outString = outString + ' OR '
 		}
 	}
