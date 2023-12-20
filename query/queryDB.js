@@ -37,7 +37,7 @@ function buildQstring(qs){
 
 app.get('/', function (req, res) {
    console.log(req.query.archiveType)
-   con.connect(function(err) {
+   con.getConnection(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
 	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.archiveType) + ";", function (err, result, fields) {
