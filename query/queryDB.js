@@ -42,7 +42,7 @@ app.get('/', function (req, res) {
 	  console.log("Connected!");
 	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.archiveType) + ";", function (err, result, fields) {
 		      if (err) throw err;
-		      res.json(result);
+		      res.status(200).json(result);
 		    });
    });
 });
