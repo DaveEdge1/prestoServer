@@ -23,14 +23,16 @@ var con = mysql.createPool({
 });
 
 function buildQstring(qs){
-	console.log(qs)
-	const words = qs.split(',');
-	console.log(words)
-	var outString = 'archiveType ='
-	for (let i = 0; i < words.length; i++) {
-		var outString = outString + ' "' + words[i] + '"'
-		if (i < (words.length-1)){
-			var outString = outString + ' OR'
+	for (let j = 0; j < Object.keys(qs).length; j++) {
+		key1 = Object.keys(qs)[j]
+		console.log(key1)
+		const words = qs.split(',');
+		var outString = key1 + ' ='
+		for (let i = 0; i < words.length; i++) {
+			var outString = outString + ' "' + words[i] + '"'
+			if (i < (words.length-1)){
+				var outString = outString + ' OR'
+			}
 		}
 	}
 	console.log(outString)
