@@ -81,7 +81,7 @@ var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
 
-rect.on('edit', function() { console.log(rect.getBounds().getBBoxString()); });
+//rect.on('edit', function() { console.log(rect.getBounds().getBBoxString()); });
 
 // zoom the map to the rectangle bounds
 //map.fitBounds(bounds);
