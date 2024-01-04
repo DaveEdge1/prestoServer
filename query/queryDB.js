@@ -33,7 +33,7 @@ function buildQstring(qs){
 				var outString = outString + ' OR'
 			}
 		}
-	}
+	})
 	console.log(outString)
 	return(outString)
 }
