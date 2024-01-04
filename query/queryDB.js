@@ -27,12 +27,12 @@ function buildQstring(qs){
 	Object.entries(qs).forEach(([key, value]) => {
 		console.log(key + ' : ' + value)
 		const words = value.split(',');
-		var outString = key + ' ='
+		outString = key + ' ='
 		console.log('words.length: ' + words.length)
 		for (let i = 0; i < words.length; i++) {
-			var outString = outString + ' "' + words[i] + '"'
+			outString = outString + ' "' + words[i] + '"'
 			if (i < (words.length-1)){
-				var outString = outString + ' OR'
+				outString = outString + ' OR'
 			}
 		}
 		console.log('sanity: ' + outString)
