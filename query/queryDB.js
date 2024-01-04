@@ -25,29 +25,23 @@ var con = mysql.createPool({
 function buildQstring(qs){
 	var outString = ''
 	Object.entries(qs).forEach(([key, value]) => {
-		console.log(key + ' : ' + value)
 		const words = value.split(',');
 		outString = key + ' ='
-		console.log('words.length: ' + words.length)
 		for (let i = 0; i < words.length; i++) {
 			outString = outString + ' "' + words[i] + '"'
 			if (i < (words.length-1)){
 				outString = outString + ' OR'
 			}
 		}
-		console.log('sanity: ' + outString)
 	})
-	console.log(outString)
+	console.log('mySQL string: ' + outString)
 	return(outString)
 }
 
 app.get('/', function (req, res, next) {
-   console.log(req.query.archiveType)
    con.getConnection(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	   console.log(Object.keys(req.query));
-	   console.log(Object.values(req.query));
 	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      res.status(200).json(result);
