@@ -42,6 +42,7 @@ app.get('/', function (req, res, next) {
    con.getConnection(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
+	   console.log(req.query.length);
 	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query.archiveType) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      res.status(200).json(result);
