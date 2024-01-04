@@ -79,7 +79,7 @@ Selected values:
 // create an orange rectangle
 //L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
 function changeBoxCoord(){
-	document.getElementById("boxCoord").innerHTML = rect.coordinates
+	document.getElementById("boxCoord").innerHTML = Object.keys(rect)
 }
 
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
