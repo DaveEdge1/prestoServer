@@ -24,9 +24,8 @@ var con = mysql.createPool({
 
 function buildQstring(qs){
 	Object.entries(qs).forEach(([key, value]) => {
-		vals = ${value}
-		console.log(${key}: ${value})
-		const words = vals.split(',');
+		console.log('${key}: ${value}')
+		const words = value.split(',');
 		var outString = key1 + ' ='
 		for (let i = 0; i < words.length; i++) {
 			var outString = outString + ' "' + words[i] + '"'
