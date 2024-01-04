@@ -40,7 +40,7 @@
             attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
         
-        var areaSelect = L.areaSelect({width:200, height:250});
+        var areaSelect = areaSelect.setBounds([{lat:59.2272559, lng:17.7606917}, {lat:59.4402838, lng:18.2000673}]);
         areaSelect.on("change", function() {
             var bounds = this.getBounds();
             $("#result .sw").val(bounds.getSouthWest().lat + ", " + bounds.getSouthWest().lng);
@@ -57,6 +57,5 @@
         $("#setDimensions").click(function () {
             areaSelect.setDimensions({width: $('.width').val(), height: $('.height').val()})
         })
-            areaSelect.setBounds([{lat:59.2272559, lng:17.7606917}, {lat:59.4402838, lng:18.2000673}]);
     </script>
 </body>
