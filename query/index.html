@@ -9,13 +9,13 @@
      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
         crossorigin="" />
-    <link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" />
+    <!--link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" /-->
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
         crossorigin=""></script>
 
-    <script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script>
+    <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
 
 	<style>
 		html, body {
@@ -61,9 +61,18 @@ Selected values:
             maxZoom: 18
         }).addTo(map);
 
-        const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
+        //const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
 
-        map.addControl(areaSelection);
+        //map.addControl(areaSelection);
+
+	// define rectangle geographical bounds
+var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
+
+// create an orange rectangle
+L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
+
+// zoom the map to the rectangle bounds
+//map.fitBounds(bounds);
 	
 /*
 	const map = L.map('map').setView([0, 0], 1);
