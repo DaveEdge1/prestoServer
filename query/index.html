@@ -66,10 +66,16 @@ Selected values:
         //map.addControl(areaSelection);
 
 	// define rectangle geographical bounds
-var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
+//var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
 
 // create an orange rectangle
-L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
+//L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
+
+var rect = L.rectangle([[59.9, 29.9], [60.1, 30.1]]);
+map.addLayer(rect);
+rect.editing.enable();
+
+rect.on('edit', function() { console.log(rect.getBounds().getBBoxString()); });
 
 // zoom the map to the rectangle bounds
 //map.fitBounds(bounds);
