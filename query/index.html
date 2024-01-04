@@ -54,6 +54,7 @@ Selected values:
 <button style="height:50px; width:100px; font-size:20px" id="get-repos" class="btn btn-primary">Submit</button>
 	    <br>
 </div>
+<div><p id="boxCoord"></p></div>
   <!-- </form> -->
 <div id="map" style="width: 600px; height: 400px;"></div>
     <br>
@@ -76,6 +77,9 @@ Selected values:
 
 // create an orange rectangle
 //L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
+function changeBoxCoord(){
+	document.getElementById("boxCoord") = rect
+}
 
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
 map.addLayer(rect);
@@ -172,10 +176,9 @@ return false;
 });
 
  });     
-
+changeBoxCoord()
 </script>
 <script>
-    console.log('loading event handlers');
     var $response = document.getElementById("response");
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
