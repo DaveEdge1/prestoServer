@@ -87,7 +87,9 @@ function changeBoxCoord(){
 	NE = regExp.exec(rect._bounds._northEast)[1]
 	North = NE.split(',')[0]
 	East = NE.split(',')[1]
-	document.getElementById("boxCoord").innerHTML = South + ', ' + West + ', ' + North + ', ' + East
+	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
+	document.getElementById("boxCoord").innerHTML = newCoords
+	return newCoords
 }
 
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
@@ -96,7 +98,7 @@ rect.editing.enable();
 
 
 
-rect.on('edit', function() { console.log(rect.getBounds()); });
+rect.on('edit', function() { console.log(changeBoxCoord()); });
 
 // zoom the map to the rectangle bounds
 //map.fitBounds(bounds);
