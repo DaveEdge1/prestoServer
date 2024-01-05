@@ -83,7 +83,7 @@ function changeBoxCoord(){
 	SW = regExp.exec(rect._bounds._southWest)[1]
 	South = SW.split(',')[0]
 	West = SW.split(',')[1]
-	NE = regExp.exec(rect._bounds._northeast)[1]
+	NE = regExp.exec(rect._bounds._northEast)[1]
 	North = NE.split(',')[0]
 	East = NE.split(',')[1]
 	document.getElementById("boxCoord").innerHTML = South + ', ' + West + ', ' + North + ', ' + East
