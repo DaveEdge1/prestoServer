@@ -80,7 +80,7 @@ Selected values:
 // create an orange rectangle
 //L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
 function changeBoxCoord(){
-	document.getElementById("boxCoord").innerHTML = regExp.exec(rect._bounds._southWest);
+	document.getElementById("boxCoord").innerHTML = regExp.exec(rect._bounds._southWest)[1];
 }
 
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
