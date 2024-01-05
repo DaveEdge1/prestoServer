@@ -79,6 +79,7 @@ Selected values:
 
 // create an orange rectangle
 //L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
+
 function changeBoxCoord(){
 	SW = regExp.exec(rect._bounds._southWest)[1]
 	South = SW.split(',')[0]
@@ -93,7 +94,9 @@ var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
 
-//rect.on('edit', function() { console.log(rect.getBounds().getBBoxString()); });
+
+
+rect.on('edit', function() { console.log(rect.getBounds()); });
 
 // zoom the map to the rectangle bounds
 //map.fitBounds(bounds);
