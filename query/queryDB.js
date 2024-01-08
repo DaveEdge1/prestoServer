@@ -34,7 +34,12 @@ function buildQstring(qs){
 		for (const [key, value] of Object.entries(qs)) {
 			const words = value.split(',');
 			console.log('words: ' + words)
-			outString = outString + key + ' ='
+			if (qs.indexOf(key) > 0){
+				console.log('index > 0')
+				outString = outString + ' AND ' + key + ' ='
+			} else {
+				outString = key + ' ='
+			}
 			for (let i = 0; i < words.length; i++) {
 				outString = outString + ' "' + words[i] + '"'
 				if (i < (words.length-1)){
