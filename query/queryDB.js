@@ -48,6 +48,7 @@ function buildQstring(qs){
 				}
 			}
 			console.log('outString: ' + outString)
+			countA = countA + 1;
 		}
 		outString = ' WHERE ' + outString
 		console.log('mySQL string: ' + outString)
