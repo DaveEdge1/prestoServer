@@ -41,6 +41,7 @@ function buildQstring(qs){
 					outString = outString + ' OR'
 				}
 			}
+			console.log('outString: ' + outString)
 		})
 		outString = ' WHERE ' + outString
 		console.log('mySQL string: ' + outString)
