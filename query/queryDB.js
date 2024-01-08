@@ -33,6 +33,7 @@ function buildQstring(qs){
 		var outString = ''
 		Object.entries(qs).forEach(([key, value]) => {
 			const words = value.split(',');
+			console.log('words: ' + words)
 			outString = key + ' ='
 			for (let i = 0; i < words.length; i++) {
 				outString = outString + ' "' + words[i] + '"'
