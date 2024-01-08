@@ -62,6 +62,10 @@ Selected values:
 	<div class="row">
         <pre id="response"></pre>
     </div>
+	<br>
+	<div class="row">
+        <pre id="latlon"></pre>
+    </div>
 <script>
 //initiate leaflet map
 var map = L.map('map').setView([0, 0], 1);
@@ -94,6 +98,11 @@ rect.on('edit', function() { console.log(changeBoxCoord()); });
 </script>
 
 <script>
+var latLon = [{"geo_latitude":72,"geo_longitude":101},{"geo_latitude":61.03,"geo_longitude":-146.59},{"geo_latitude":70.67,"geo_longitude":125.87},{"geo_latitude":68.625,"geo_longitude":-133.87},{"geo_latitude":66.9,"geo_longitude":65.6},{"geo_latitude":67.9,"geo_longitude":-140.7},{"geo_latitude":50.08,"geo_longitude":87.77},{"geo_latitude":49.62,"geo_longitude":88.1},{"geo_latitude":50.87,"geo_longitude":85.23},{"geo_latitude":50.14,"geo_longitude":87.72},{"geo_latitude":50.3,"geo_longitude":87.83},{"geo_latitude":50.27,"geo_longitude":87.83},{"geo_latitude":49.72,"geo_longitude":87.28},{"geo_latitude":50.12,"geo_longitude":87.92},{"geo_latitude":50.68,"geo_longitude":87.97},{"geo_latitude":50.48,"geo_longitude":87.67},{"geo_latitude":33.75,"geo_longitude":107.8},{"geo_latitude":27.45,"geo_longitude":90},{"geo_latitude":27.67,"geo_longitude":90.72},{"geo_latitude":27.58,"geo_longitude":90.65},{"geo_latitude":27.67,"geo_longitude":90.73},{"geo_latitude":27.7,"geo_longitude":90.77},{"geo_latitude":27.7,"geo_longitude":90.68},{"geo_latitude":27.45,"geo_longitude":90.15},{"geo_latitude":27.63,"geo_longitude":90.13},{"geo_latitude":27.58,"geo_longitude":90.65},{"geo_latitude":27.42,"geo_longitude":90.97},{"geo_latitude":27.25,"geo_longitude":89.38},{"geo_latitude":27.45,"geo_longitude":90.15},{"geo_latitude":38,"geo_longitude":-116.5},{"geo_latitude":69,"geo_longitude":25},{"geo_latitude":37.8,"geo_longitude":-115.8},{"geo_latitude":37.8,"geo_longitude":-115.8},{"geo_latitude":37.8,"geo_longitude":-115.8},{"geo_latitude":68,"geo_longitude":20}]
+
+function loadLatLon (){
+	document.getElementById("latlon").innerHTML = latLon
+}
 //archiveType multi-select autocomplete
 var archiveType = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
     
@@ -188,4 +197,5 @@ changeBoxCoord()
         // xhr.responseType = "text";
         xhr.send();
     }
+loadLatLon()
 </script>
