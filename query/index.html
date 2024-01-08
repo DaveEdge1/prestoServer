@@ -117,7 +117,7 @@ function loadLatLon (x1){
 	
   return(geojson)
 }
-updatePoints function(latLon){
+function updatePoints (latLon){
 L.geoJSON([loadLatLon(latLon)], {
 
                 style : function(feature) {
