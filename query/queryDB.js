@@ -23,6 +23,7 @@ var con = mysql.createPool({
 });
 
 function buildQstring(qs){
+	countA = 0;
 	console.log(qs)
 	console.log('key length: ' + Object.keys(qs).length)
 	if (Object.keys(qs).length === 0){
@@ -34,7 +35,7 @@ function buildQstring(qs){
 		for (const [key, value] of Object.entries(qs)) {
 			const words = value.split(',');
 			console.log('words: ' + words)
-			if (qs.indexOf(key) > 0){
+			if (countA > 0){
 				console.log('index > 0')
 				outString = outString + ' AND ' + key + ' ='
 			} else {
