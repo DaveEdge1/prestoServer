@@ -5,6 +5,9 @@
 * mysql database for lipdverse query (running at port=3306)
   * access for nick and dave through Rmysql
   * nodejs access via queryDB.js (port 88, query string used by mySQL)
+    * comlplex query strings are processed as in:
+      * '?archiveType=Wood,Coral&paleoData_proxy=ring%20width,maximum%20latewood%20density'
+      * WHERE (archiveType = "Wood" OR "Coral") AND (paleoData_proxy = "ring width" OR "maximum latewood density")
   * UI access via http://143.198.98.66:86/ (queryServer.js)
     * autocomplete for multiselect inputs (eg. archiveType)
     * leaflet map to select area and display selected datasets
