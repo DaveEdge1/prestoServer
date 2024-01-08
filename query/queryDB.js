@@ -41,7 +41,7 @@ function buildQstring(qs){
 				}
 			}
 		})
-		outString = ' WHERE ' + outString
+		outString = ' AND ' + outString
 		console.log('mySQL string: ' + outString)
 		return(outString)
 
@@ -52,7 +52,7 @@ app.get('/', function (req, res, next) {
    con.getConnection(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  con.query("SELECT geo_latitude AND geo_longitude FROM query" + buildQstring(req.query) + ";", function (err, result, fields) {
+	  con.query("SELECT * FROM query WHERE geo_latitude = '$geo_latitude' AND geo_longitude = '$geo_longitude'" + buildQstring(req.query) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      res.status(200).json(result);
 		    });
