@@ -23,26 +23,34 @@ var con = mysql.createPool({
 });
 
 function buildQstring(qs){
-	var outString = ''
-	Object.entries(qs).forEach(([key, value]) => {
-		const words = value.split(',');
-		outString = key + ' ='
-		for (let i = 0; i < words.length; i++) {
-			outString = outString + ' "' + words[i] + '"'
-			if (i < (words.length-1)){
-				outString = outString + ' OR'
+	if (qs == 'undefined'){
+		console.log('mySQL string is empty')
+		return ''
+	} else {
+		
+		var outString = ''
+		Object.entries(qs).forEach(([key, value]) => {
+			const words = value.split(',');
+			outString = key + ' ='
+			for (let i = 0; i < words.length; i++) {
+				outString = outString + ' "' + words[i] + '"'
+				if (i < (words.length-1)){
+					outString = outString + ' OR'
+				}
 			}
-		}
-	})
-	console.log('mySQL string: ' + outString)
-	return(outString)
+		})
+		outString = ' WHERE ' + outString
+		console.log('mySQL string: ' + outString)
+		return(outString)
+
+	}
 }
 
 app.get('/', function (req, res, next) {
    con.getConnection(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  con.query("SELECT * FROM query WHERE " + buildQstring(req.query) + ";", function (err, result, fields) {
+	  con.query("SELECT * FROM query" + buildQstring(req.query) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      res.status(200).json(result);
 		    });
