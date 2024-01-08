@@ -63,24 +63,15 @@ Selected values:
         <pre id="response"></pre>
     </div>
 <script>
-        var map = L.map('map').setView([0, 0], 1);
-
-        var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-		minZoom: 1
-        }).addTo(map);
-
-	var regExp = /\(([^)]+)\)/;
-        //const areaSelection = new window.leafletAreaSelection.DrawAreaSelection();
-
-        //map.addControl(areaSelection);
-
-	// define rectangle geographical bounds
-//var bounds = [[54.559322, -5.767822], [56.1210604, -3.021240]];
-
-// create an orange rectangle
-//L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map);
-
+//initiate leaflet map
+var map = L.map('map').setView([0, 0], 1);
+var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+	minZoom: 1
+}).addTo(map);
+//regex helper
+var regExp = /\(([^)]+)\)/;
+//extract leaflet rectangle coords
 function changeBoxCoord(){
 	SW = regExp.exec(rect._bounds._southWest)[1]
 	South = SW.split(',')[0]
@@ -92,41 +83,18 @@ function changeBoxCoord(){
 	document.getElementById("boxCoord").innerHTML = newCoords
 	return newCoords
 }
-
+//initiate leaflet rectangle
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
 
 
-
+//update leaflet rectangle
 rect.on('edit', function() { console.log(changeBoxCoord()); });
-
-// zoom the map to the rectangle bounds
-//map.fitBounds(bounds);
-	
-/*
-	const map = L.map('map').setView([0, 0], 1);
-
-	const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-	maxZoom: 18
-	}).addTo(map);
-
-	const marker = L.marker([35.2, -111.7]).addTo(map)
-		.bindPopup('<b>Flagstaff!</b><br />test popup').openPopup();
-
-	function onMapClick(e) {
-		popup
-			.setLatLng(e.latlng)
-			.setContent(`You clicked the map at ${e.latlng.toString()}`)
-			.openOn(map);
-	}
-
-	map.on('click', onMapClick);
-*/
 </script>
 
-
 <script>
+//archiveType multi-select autocomplete
 var archiveType = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
     
  $(function() {
@@ -193,6 +161,7 @@ return false;
 changeBoxCoord()
 </script>
 <script>
+    //send mySQL query to queryDB and show response
     var $response = document.getElementById("response");
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
