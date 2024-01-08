@@ -122,8 +122,29 @@ console.log(Object.values(x1)[0].geo_latitude)
 console.log(Object.values(x1).length)
 
 	document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
+	
   return(geojson)
 }
+
+L.geoJSON([loadLatLon(latLon)], {
+
+                style : function(feature) {
+                    return feature.properties && feature.properties.style;
+                },
+
+                onEachFeature : onEachFeature,
+
+                pointToLayer : function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius : 8,
+                        fillColor : "#ff7800",
+                        color : "#000",
+                        weight : 1,
+                        opacity : 1,
+                        fillOpacity : 0.8
+                    });
+                }
+            }).addTo(map);
 //archiveType multi-select autocomplete
 var archiveType = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
     
@@ -218,5 +239,5 @@ changeBoxCoord()
         // xhr.responseType = "text";
         xhr.send();
     }
-loadLatLon(latLon)
+
 </script>
