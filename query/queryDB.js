@@ -41,7 +41,7 @@ function buildQstring(qs){
 				}
 			}
 		})
-		outString = ' AND ' + outString
+		outString = ' WHERE ' + outString
 		console.log('mySQL string: ' + outString)
 		return(outString)
 
