@@ -223,6 +223,7 @@ changeBoxCoord()
                     // debugger;
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
+			updatePoints(xhr.response)
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
@@ -234,8 +235,6 @@ changeBoxCoord()
         xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
-
-	updatePoints(xhr.response)
     }
 
 </script>
