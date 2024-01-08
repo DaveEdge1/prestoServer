@@ -37,9 +37,9 @@ function buildQstring(qs){
 			console.log('words: ' + words)
 			if (countA > 0){
 				console.log('index > 0')
-				outString = outString + ' AND ' + key + ' ='
+				outString = outString + ' AND (' + key + ' ='
 			} else {
-				outString = key + ' ='
+				outString = '(' + key + ' ='
 			}
 			for (let i = 0; i < words.length; i++) {
 				outString = outString + ' "' + words[i] + '"'
@@ -47,6 +47,7 @@ function buildQstring(qs){
 					outString = outString + ' OR'
 				}
 			}
+			outString = outString + ')'
 			console.log('outString: ' + outString)
 			countA = countA + 1;
 		}
