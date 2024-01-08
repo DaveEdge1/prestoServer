@@ -23,6 +23,7 @@ var con = mysql.createPool({
 });
 
 function buildQstring(qs){
+	console.log(qs)
 	if (qs == 'undefined'){
 		console.log('mySQL string is empty')
 		return ''
