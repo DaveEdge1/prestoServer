@@ -111,7 +111,7 @@ function loadLatLon (x1){
   	lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": null });
-    geojson.features[i].geometry.coordinates.push(lat,lon);
+    geojson.features[i].geometry.coordinates.push(lon,lat);
   	//geojson.features[i].geometry.coordinates.push([lat, lon]);
     }
   
