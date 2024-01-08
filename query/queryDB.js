@@ -31,7 +31,9 @@ function buildQstring(qs){
 	} else {
 		
 		let outString;
-		Object.entries(qs).forEach(([key, value]) => {
+		for (entry in Object.entries(qs)) {
+			key = entry.keys
+			value = entry.values
 			const words = value.split(',');
 			console.log('words: ' + words)
 			outString = key + ' ='
@@ -42,7 +44,7 @@ function buildQstring(qs){
 				}
 			}
 			console.log('outString: ' + outString)
-		})
+		}
 		outString = ' WHERE ' + outString
 		console.log('mySQL string: ' + outString)
 		return(outString)
