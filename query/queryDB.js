@@ -31,9 +31,7 @@ function buildQstring(qs){
 	} else {
 		
 		let outString;
-		for (entry in Object.entries(qs)) {
-			key = entry.keys
-			value = entry.values
+		for (const [key, value] of Object.entries(qs)) {
 			const words = value.split(',');
 			console.log('words: ' + words)
 			outString = key + ' ='
