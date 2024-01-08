@@ -24,7 +24,8 @@ var con = mysql.createPool({
 
 function buildQstring(qs){
 	console.log(qs)
-	if (qs == 'undefined'){
+	console.log('key length: ' + Object.keys(qs).length)
+	if (Object.keys(qs).length === 0){
 		console.log('mySQL string is empty')
 		return ''
 	} else {
