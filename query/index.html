@@ -107,25 +107,17 @@ function loadLatLon (x1){
     "features": [],
 	};
   for (let i = 0; i < Object.values(x1).length; i++) {
-  console.log(i)
-  	lat = Object.values(x1)[i].geo_latitude
+    lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": null });
     geojson.features[i].geometry.coordinates.push(lon,lat);
-  	//geojson.features[i].geometry.coordinates.push([lat, lon]);
-    }
-  
-  //for (const [key,value] of Object.values(x1)) {
-  //console.log(`${value}`);
-//}
-console.log(Object.values(x1)[0].geo_latitude)
-console.log(Object.values(x1).length)
+  }
 
-	document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
+  document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
 	
   return(geojson)
 }
-
+updatePoints function(latLon){
 L.geoJSON([loadLatLon(latLon)], {
 
                 style : function(feature) {
@@ -145,6 +137,8 @@ L.geoJSON([loadLatLon(latLon)], {
                     });
                 }
             }).addTo(map);
+}
+updatePoints(latLon)
 //archiveType multi-select autocomplete
 var archiveType = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
     
@@ -238,6 +232,8 @@ changeBoxCoord()
         xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
+
+	updatePoints(xhr.response)
     }
 
 </script>
