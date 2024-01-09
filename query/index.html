@@ -82,6 +82,7 @@ var colorPal = [{"Borehole":"#000000"},{"MolluskShell":"#004949"},{"GlacierIce":
  {"FluvialSediment":"#490092"},{"LakeSediment":"#006ddb"},{"MarineSediment":"#b66dff"},{"Speleothem":"#6db6ff"},{"Midden":"#b6dbff"},
  {"Peat":"#920000"},{"Sclerosponge":"#924900"},{"Shoreline":"#db6d00"},{"Wood":"#24ff24"},{"TerrestrialSediment":"#ffff6d"}]
 function chooseColor(archiveType){
+	archiveType = archiveType.toString();
 	console.log(archiveType)
 	console.log(colorPal[archiveType])
 	var color1 = Object.keys(colorPal[archiveType])
