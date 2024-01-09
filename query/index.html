@@ -178,6 +178,9 @@ L.geoJSON([loadLatLon(coords)], {
     		},
 */
                 pointToLayer : function(feature, latlng) {
+			
+			console.log(colorPal[feature.properties.archiveType])
+			console.log(Object.keys(colorPal[feature.properties.archiveType]))
                     return L.circleMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
