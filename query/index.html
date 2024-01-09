@@ -147,6 +147,10 @@ L.geoJSON([loadLatLon(coords)], {
 		    layer.bindPopup('<h1>'+feature.properties.archiveType+'</h1><p>'+feature.properties.dataSetName+'</p>');
 		},
 
+	        filter: function(feature, layer) {
+     			return feature.properties.show_on_map;
+    		},
+
                 pointToLayer : function(feature, latlng) {
                     return L.circleMarker(latlng, {
                         radius : 4,
