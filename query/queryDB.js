@@ -44,7 +44,7 @@ function buildQstring(qs){
 			for (let i = 0; i < words.length; i++) {
 				outString = outString + key + ' =' + ' "' + words[i] + '"'
 				if (i < (words.length-1)){
-					outString = outString + ' OR'
+					outString = outString + ' OR '
 				}
 			}
 			outString = outString + ')'
