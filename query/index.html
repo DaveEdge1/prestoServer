@@ -116,7 +116,7 @@ function loadLatLon (x1){
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
     //console.log('lat ' + i + ': ' + lat)
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": null });
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": null} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
   }
 
@@ -133,7 +133,9 @@ L.geoJSON([loadLatLon(coords)], {
                     return feature.properties && feature.properties.style;
                 },
 
-                //onEachFeature : onEachFeature,
+                onEachFeature: function (feature, layer) {
+		    layer.bindPopup('<h1>'+feature.properties.archiveType+'</h1>');
+		}
 
                 pointToLayer : function(feature, latlng) {
                     return L.circleMarker(latlng, {
