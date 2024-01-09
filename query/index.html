@@ -81,6 +81,11 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var colorPal = [{"Borehole":"#000000"},{"MolluskShell":"#004949"},{"GlacierIce":"#009292"},{"GroundIce":"#ff6db6"},{"Coral":"#ffb6db"},
  {"FluvialSediment":"#490092"},{"LakeSediment":"#006ddb"},{"MarineSediment":"#b66dff"},{"Speleothem":"#6db6ff"},{"Midden":"#b6dbff"},
  {"Peat":"#920000"},{"Sclerosponge":"#924900"},{"Shoreline":"#db6d00"},{"Wood":"#24ff24"},{"TerrestrialSediment":"#ffff6d"}]
+function chooseColor(archiveType){
+	var color1 = Object.keys(colorPal[archiveType])
+	console.log(color1)
+	return color1
+}
 /*
 function chooseColor(archiveType){
 	if (archiveType == "#000000"){
@@ -164,8 +169,6 @@ function updatePoints (coords){
 	layerGroup.clearLayers();
 	
 L.geoJSON([loadLatLon(coords)], {
-	console.log(colorPal[feature.properties.archiveType])
-			console.log(Object.keys(colorPal[feature.properties.archiveType]))
 
                 style : function(feature) {
                     return feature.properties && feature.properties.style;
@@ -186,8 +189,8 @@ L.geoJSON([loadLatLon(coords)], {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
                         radius : 4,
-                        fillColor : Object.keys(colorPal[feature.properties.archiveType]),
-                        color : Object.keys(colorPal[feature.properties.archiveType]),
+                        fillColor : chooseColor(feature.properties.archiveType),
+                        color : chooseColor(feature.properties.archiveType),
                         weight : 1,
                         opacity : 0.7,
                         fillOpacity : 0.7
