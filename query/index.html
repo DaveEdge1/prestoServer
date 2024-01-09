@@ -102,6 +102,7 @@ var latLon = [{"geo_latitude":72,"geo_longitude":101},{"geo_latitude":61.03,"geo
 
 function loadLatLon (x1){
 	console.log('loadLatLon input: ' + x1)
+	console.log('loadLatLon input: ' + JSON.stringify(x1))
 	var geojson = {
     "name":"NewFeatureType",
     "type":"FeatureCollection",
@@ -110,7 +111,7 @@ function loadLatLon (x1){
   for (let i = 0; i < Object.values(x1).length; i++) {
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
-    console.log('lat ' + i + ': ' + lat)
+    //console.log('lat ' + i + ': ' + lat)
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": null });
     geojson.features[i].geometry.coordinates.push(lon,lat);
   }
