@@ -78,9 +78,9 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
 }).addTo(map);
-var colorPal = [{"Borehole":"#000000"},{"MolluskShell":"#004949"},{"GlacierIce":"#009292"},{"GroundIce":"#ff6db6"},{"Coral":"#ffb6db"},
- {"FluvialSediment":"#490092"},{"LakeSediment":"#006ddb"},{"MarineSediment":"#b66dff"},{"Speleothem":"#6db6ff"},{"Midden":"#b6dbff"},
- {"Peat":"#920000"},{"Sclerosponge":"#924900"},{"Shoreline":"#db6d00"},{"Wood":"#24ff24"},{"TerrestrialSediment":"#ffff6d"}]
+var colorPal = ["Borehole":"#000000","MolluskShell":"#004949","GlacierIce":"#009292","GroundIce":"#ff6db6","Coral":"#ffb6db",
+ "FluvialSediment":"#490092","LakeSediment":"#006ddb","MarineSediment":"#b66dff","Speleothem":"#6db6ff","Midden":"#b6dbff",
+ "Peat":"#920000","Sclerosponge":"#924900","Shoreline":"#db6d00","Wood":"#24ff24","TerrestrialSediment":"#ffff6d"]
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	console.log(archiveType)
