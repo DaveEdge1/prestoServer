@@ -123,6 +123,7 @@ function loadLatLon (x1){
   return(geojson)
 }
 function updatePoints (coords){
+	layerGroup.clearLayers();
 L.geoJSON([loadLatLon(coords)], {
 
                 style : function(feature) {
