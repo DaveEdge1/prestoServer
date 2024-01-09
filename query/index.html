@@ -85,7 +85,7 @@ function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	console.log(archiveType)
 	console.log(Object.keys(colorPal))
-	var color1 = Object.keys(colorPal[archiveType])
+	var color1 = Object.values(colorPal[archiveType])
 	console.log(color1)
 	return color1
 }
