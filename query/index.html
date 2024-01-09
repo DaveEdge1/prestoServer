@@ -187,7 +187,7 @@ terms.push( ui.item.value );
 // add placeholder to get the comma-and-space at the end
 terms.push( "" );
 this.value = terms.join( ", " );
-    
+    /*
     var selected_label = ui.item.label;
     var selected_value = ui.item.value;
     
@@ -204,7 +204,7 @@ this.value = terms.join( ", " );
         $('#labels').val(labels+","+selected_label);
         $('#values').val(values+","+selected_value);
     }   
-    
+    */
 return false;
 }
 });
@@ -217,7 +217,7 @@ changeBoxCoord()
     var $response = document.getElementById("response");
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
-    function params(){return '?archiveType=' + document.getElementById("values").value};
+    function params(){return '?archiveType=' + document.getElementById("project").value};
     var xhr = new XMLHttpRequest();
     $getReposBtn.onclick = function(){
 	xhr = new XMLHttpRequest();
