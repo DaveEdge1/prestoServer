@@ -92,6 +92,8 @@ var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
 
+//add layer for points
+var layerGroup = L.layerGroup().addTo(map);
 
 //update leaflet rectangle
 rect.on('edit', function() { console.log(changeBoxCoord()); });
@@ -139,7 +141,7 @@ L.geoJSON([loadLatLon(coords)], {
                         fillOpacity : 0.8
                     });
                 }
-            }).addTo(map);
+            }).addTo(layerGroup);
 }
 updatePoints(latLon)
 //archiveType multi-select autocomplete
