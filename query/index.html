@@ -84,7 +84,7 @@ var colorPal = [{"Borehole":"#000000"},{"MolluskShell":"#004949"},{"GlacierIce":
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	console.log(archiveType)
-	console.log(colorPal[archiveType])
+	console.log(Object.keys(colorPal))
 	var color1 = Object.keys(colorPal[archiveType])
 	console.log(color1)
 	return color1
