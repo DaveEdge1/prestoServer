@@ -148,7 +148,7 @@ L.geoJSON([loadLatLon(coords)], {
 		},
 
 	        filter: function(feature, layer) {
-     			return feature.properties.show_on_map;
+     			return feature.properties.archiveType == 'Wood';
     		},
 
                 pointToLayer : function(feature, latlng) {
