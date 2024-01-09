@@ -37,12 +37,12 @@ function buildQstring(qs){
 			console.log('words: ' + words)
 			if (countA > 0){
 				console.log('index > 0')
-				outString = outString + ' AND (' + key + ' ='
+				outString = outString + ' AND ('
 			} else {
-				outString = '(' + key + ' ='
+				outString = '('
 			}
 			for (let i = 0; i < words.length; i++) {
-				outString = outString + ' "' + words[i] + '"'
+				outString = outString + key + ' =' + ' "' + words[i] + '"'
 				if (i < (words.length-1)){
 					outString = outString + ' OR'
 				}
@@ -64,7 +64,7 @@ app.get('/', function (req, res, next) {
 	  console.log("Connected!");
 	  con.query("SELECT geo_latitude, geo_longitude FROM query" + buildQstring(req.query) + ";", function (err, result, fields) {
 		      if (err) throw err;
-		      console.log(result.length);
+		      console.log('Total records returned: ' + result.length);
 		      res.status(200).json(result);
 		    });
    });
