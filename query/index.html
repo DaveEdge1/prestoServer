@@ -243,7 +243,17 @@ changeBoxCoord()
 			  // Expected output: "Success!"
 			});
                 } else {
-                    $response.innerHTML = "XHR didn't work: " + xhr.status;
+		    const promise1 = new Promise((resolve, reject) => {
+			    $response.innerHTML = "XHR didn't work: " + xhr.status;
+			    resolve();
+		    });
+			
+			promise1.then(() => {
+			  xhr = null;
+			  // Expected output: "Success!"
+			});
+			
+                    
                 }
             }
         }
