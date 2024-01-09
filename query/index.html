@@ -228,7 +228,8 @@ changeBoxCoord()
                     // debugger;
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
-			updatePoints(JSON.parse(xhr.response))
+		    updatePoints(JSON.parse(xhr.response))
+			xhr = null;
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
