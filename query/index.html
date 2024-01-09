@@ -218,8 +218,9 @@ changeBoxCoord()
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
     function params(){return '?archiveType=' + document.getElementById("values").value};
+    var xhr = new XMLHttpRequest();
     $getReposBtn.onclick = function(){
-        var xhr = new XMLHttpRequest();
+	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
             console.log(this);
@@ -229,7 +230,7 @@ changeBoxCoord()
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
 		    updatePoints(JSON.parse(xhr.response))
-			xhr = null;
+		    xhr = null;
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
