@@ -111,7 +111,7 @@ function loadLatLon (x1){
   for (let i = 0; i < Object.values(x1).length; i++) {
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
-    //console.log('lat ' + i + ': ' + lat)
+    console.log('lat ' + i + ': ' + lat)
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": null });
     geojson.features[i].geometry.coordinates.push(lon,lat);
   }
@@ -224,7 +224,7 @@ changeBoxCoord()
                     // debugger;
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
-			//updatePoints(xhr.response)
+			updatePoints(xhr.response)
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
