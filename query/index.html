@@ -78,7 +78,13 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
 }).addTo(map);
+var circleIcon = L.icon({
+    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Circle_%28transparent%29.png/800px-Circle_%28transparent%29.png',
 
+    iconSize:     [12, 12], // size of the icon
+    iconAnchor:   [6, 6], // point of the icon which will correspond to marker's location
+    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+});
 var woodIcon = L.icon({
     iconUrl: '/plant-tree-icon.png',
 
@@ -86,6 +92,23 @@ var woodIcon = L.icon({
     iconAnchor:   [4, 9], // point of the icon which will correspond to marker's location
     popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
 });
+var clamIcon = L.icon({
+    iconUrl: '/clam-icon.png',
+
+    iconSize:     [12, 12], // size of the icon
+    iconAnchor:   [6, 6], // point of the icon which will correspond to marker's location
+    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+});
+	
+function chooseIcon(archiveType){
+	if (archiveType == "Wood"){
+		return woodIcon;
+	} else if (archiveType == "MolluskShell"){
+		return clamIcon;
+	} else {
+		return circleIcon;
+	}
+}
 //regex helper
 var regExp = /\(([^)]+)\)/;
 //extract leaflet rectangle coords
@@ -161,7 +184,7 @@ L.geoJSON([loadLatLon(coords)], {
 */
                 pointToLayer : function(feature, latlng) {
                     return L.marker(latlng, {
-			icon: woodIcon
+			icon: chooseIcon(feature.properties.archiveType)
 			/*
                         radius : 4,
                         fillColor : "#ff7800",
