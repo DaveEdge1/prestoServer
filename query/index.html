@@ -96,7 +96,7 @@ rect.editing.enable();
 var layerGroup = L.layerGroup().addTo(map);
 
 //update leaflet rectangle
-rect.on('edit', function() { console.log(changeBoxCoord()); });
+rect.on('edit', function() { changeBoxCoord(); });
 </script>
 
 <script>
@@ -105,7 +105,7 @@ var latLon = [{"geo_latitude":72,"geo_longitude":101},{"geo_latitude":61.03,"geo
 function loadLatLon (x1){
 	var x1 = x1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
-	console.log('loadLatLon input: ' + x1)
+	//console.log('loadLatLon input: ' + x1)
 	//console.log('loadLatLon input: ' + JSON.stringify(x1))
 	var geojson = {
     "name":"NewFeatureType",
