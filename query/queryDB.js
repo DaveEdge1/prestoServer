@@ -64,6 +64,7 @@ app.get('/', function (req, res, next) {
 	  console.log("Connected!");
 	  con.query("SELECT geo_latitude, geo_longitude FROM query" + buildQstring(req.query) + ";", function (err, result, fields) {
 		      if (err) throw err;
+		      console.log(result.length);
 		      res.status(200).json(result);
 		    });
    });
