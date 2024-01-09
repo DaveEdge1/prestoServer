@@ -228,9 +228,20 @@ changeBoxCoord()
                 if (xhr.status === 200){
                     // debugger;
                     // console.log(xhr.response);
-                    $response.innerHTML = xhr.response;
-		    updatePoints(JSON.parse(xhr.response))
-		    xhr = null;
+                    //$response.innerHTML = xhr.response;
+		    //updatePoints(JSON.parse(xhr.response))
+		    //xhr = null;
+
+		    const promise1 = new Promise((resolve, reject) => {
+			    $response.innerHTML = xhr.response;
+		            updatePoints(JSON.parse(xhr.response))
+			    resolve();
+		    });
+			
+			promise1.then(() => {
+			  xhr = null;
+			  // Expected output: "Success!"
+			});
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
