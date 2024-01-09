@@ -123,7 +123,7 @@ function loadLatLon (x1){
   return(geojson)
 }
 function updatePoints (coords){
-	layerGroup.clearLayers();
+	
 L.geoJSON([loadLatLon(coords)], {
 
                 style : function(feature) {
@@ -227,7 +227,8 @@ changeBoxCoord()
                     // debugger;
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
-			updatePoints(JSON.parse(xhr.response))
+			layerGroup.clearLayers();
+			//updatePoints(JSON.parse(xhr.response))
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
