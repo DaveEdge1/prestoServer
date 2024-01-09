@@ -78,72 +78,12 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
 }).addTo(map);
-var circleIcon = L.icon({
-    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Circle_%28transparent%29.png/800px-Circle_%28transparent%29.png',
-
-    iconSize:     [12, 12], // size of the icon
-    iconAnchor:   [6, 6], // point of the icon which will correspond to marker's location
-    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
-});
-var woodIcon = L.icon({
-    iconUrl: '/icons8-tree-64.png',
-
-    iconSize:     [8, 18], // size of the icon
-    iconAnchor:   [4, 9], // point of the icon which will correspond to marker's location
-    popupAnchor:  [4, 9] // point from which the popup should open relative to the iconAnchor
-});
-var clamIcon = L.icon({
-    iconUrl: '/icons8-clam-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-var glacierIcon = L.icon({
-    iconUrl: '/icons8-glacier-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-var iceIcon = L.icon({
-    iconUrl: '/icons8-ice-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-var coralIcon = L.icon({
-    iconUrl: '/icons8-coral-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-var riverIcon = L.icon({
-    iconUrl: '/icons8-river-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-var lakeIcon = L.icon({
-    iconUrl: '/icons8-lake-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-var oceanIcon = L.icon({
-    iconUrl: '/icons8-ocean-100.png',
-
-    iconSize:     [15, 15], // size of the icon
-    iconAnchor:   [7, 7], // point of the icon which will correspond to marker's location
-    popupAnchor:  [7, 7] // point from which the popup should open relative to the iconAnchor
-});
-	
-function chooseIcon(archiveType){
-	if (archiveType == "Wood"){
+var colorPal = [{"Borehole":"#000000"},{"MolluskShell":"#004949"},{"GlacierIce":"#009292"},{"GroundIce":"#ff6db6"},{"Coral":"#ffb6db"},
+ {"FluvialSediment":"#490092"},{"LakeSediment":"#006ddb"},{"MarineSediment":"#b66dff"},{"Speleothem":"#6db6ff"},{"Midden":"#b6dbff"},
+ {"Peat":"#920000"},{"Sclerosponge":"#924900"},{"Shoreline":"#db6d00"},{"Wood":"#24ff24"},{"TerrestrialSediment":"#ffff6d"}]
+/*
+function chooseColor(archiveType){
+	if (archiveType == "#000000"){
 		return woodIcon;
 	} else if (archiveType == "MolluskShell"){
 		return clamIcon;
@@ -163,6 +103,7 @@ function chooseIcon(archiveType){
 		return circleIcon;
 	}
 }
+*/
 //regex helper
 var regExp = /\(([^)]+)\)/;
 //extract leaflet rectangle coords
@@ -237,16 +178,16 @@ L.geoJSON([loadLatLon(coords)], {
     		},
 */
                 pointToLayer : function(feature, latlng) {
-                    return L.marker(latlng, {
-			icon: chooseIcon(feature.properties.archiveType)
-			/*
+                    return L.circleMarker(latlng, {
+			//icon: chooseIcon(feature.properties.archiveType)
+			
                         radius : 4,
-                        fillColor : "#ff7800",
-                        color : getColor2(feature.properties.archiveType),
+                        fillColor : Object.keys(colorPal[feature.properties.archiveType]),
+                        color : Object.keys(colorPal[feature.properties.archiveType]),
                         weight : 1,
-                        opacity : 1,
-                        fillOpacity : 0.8
-			*/
+                        opacity : 0.7,
+                        fillOpacity : 0.7
+			
                     });
                 }
             }).addTo(layerGroup);
