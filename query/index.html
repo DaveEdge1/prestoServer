@@ -116,10 +116,12 @@ function loadLatLon (x1){
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
     aType = Object.values(x1)[i].archiveType
+    dName = Object.values(x1)[i].dataSetName
     //console.log('lat ' + i + ': ' + lat)
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": []} });
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
+    geojson.features[i].properties.dataSetName.push(dName);
   }
 
   document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
@@ -136,7 +138,7 @@ L.geoJSON([loadLatLon(coords)], {
                 },
 
                 onEachFeature: function (feature, layer) {
-		    layer.bindPopup('<h1>'+feature.properties.archiveType+'</h1>');
+		    layer.bindPopup('<h1>'+feature.properties.archiveType+'</h1><p>name: '+feature.properties.dataSetName+'</p>');
 		},
 
                 pointToLayer : function(feature, latlng) {
