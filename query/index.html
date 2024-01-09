@@ -102,7 +102,7 @@ var latLon = [{"geo_latitude":72,"geo_longitude":101},{"geo_latitude":61.03,"geo
 
 function loadLatLon (x1){
 	console.log('loadLatLon input: ' + x1)
-	console.log('loadLatLon input: ' + JSON.stringify(x1))
+	//console.log('loadLatLon input: ' + JSON.stringify(x1))
 	var geojson = {
     "name":"NewFeatureType",
     "type":"FeatureCollection",
@@ -224,7 +224,7 @@ changeBoxCoord()
                     // debugger;
                     // console.log(xhr.response);
                     $response.innerHTML = xhr.response;
-			updatePoints(xhr.response)
+			updatePoints(JSON.parse(xhr.response))
                 } else {
                     $response.innerHTML = "XHR didn't work: " + xhr.status;
                 }
