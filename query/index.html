@@ -117,7 +117,7 @@ function loadLatLon (x1){
     lon = Object.values(x1)[i].geo_longitude
     aType = Object.values(x1)[i].archiveType
     //console.log('lat ' + i + ': ' + lat)
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": null} });
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
   }
