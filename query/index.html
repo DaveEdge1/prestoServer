@@ -281,12 +281,21 @@ changeBoxCoord()
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
     function params(){
 	    x1 = document.getElementById("archiveTypeIn").value
+	    x2 = document.getElementById("variableName").value
 	    console.log(x1.length)
+	    console.log(x2.length)
+	    qstring = '?'
 	    if (x1.length == 0){
-		    return '?'
+		    qstring = qstring
 	    } else {
-		    return '?archiveType=' + document.getElementById("archiveTypeIn").value
+		    qstring = qstring + 'archiveType=' + x1
 	    }
+	    if (x2.length == 0){
+		    qstring = qstring
+	    } else {
+		    qstring = qstring + 'archiveType=' + x2
+	    }
+	    return qstring;
     };
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
@@ -336,5 +345,5 @@ changeBoxCoord()
         xhr.send();
     }
 //$getReposBtn.onclick = sendQuery();
-sendQuery(document.getElementById("archiveTypeIn").value);
+sendQuery();
 </script>
