@@ -281,7 +281,8 @@ changeBoxCoord()
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
     function params(){return '?'};
     var xhr = new XMLHttpRequest();
-    $getReposBtn.onclick = function(){
+    $getReposBtn.onclick = sendQuery();
+    sendQuery = function(){
 	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
@@ -326,5 +327,5 @@ changeBoxCoord()
         // xhr.responseType = "text";
         xhr.send();
     }
-
+sendQuery();
 </script>
