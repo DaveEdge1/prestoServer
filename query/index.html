@@ -279,7 +279,14 @@ changeBoxCoord()
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
-    function params(){return '?'};
+    function params(){
+	    x1 = document.getElementById("archiveTypeIn").value
+	    console.log(x1.length)
+	    if (x1.length == 0){
+		    return '?'
+	    } else {
+		    return '?archiveType=' + document.getElementById("archiveTypeIn").value
+	    };
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	xhr = new XMLHttpRequest();
