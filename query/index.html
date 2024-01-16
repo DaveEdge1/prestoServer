@@ -54,7 +54,7 @@ Selected values:
 <div id="map" style="width: 600px; height: 400px;"></div>
 <br>
 <div class="button-submit">
-<button style="height:50px; width:100px; font-size:20px" id="get-repos" class="btn btn-primary">Update Map</button>
+<button style="height:50px; width:100px; font-size:20px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
 <br>
     <br>
 	<div class="row">
@@ -279,8 +279,8 @@ changeBoxCoord()
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
-    function params(x1){
-	    //x1 = document.getElementById("archiveTypeIn").value
+    function params(){
+	    x1 = document.getElementById("archiveTypeIn").value
 	    console.log(x1.length)
 	    if (x1.length == 0){
 		    return '?'
@@ -289,7 +289,7 @@ changeBoxCoord()
 	    }
     };
     var xhr = new XMLHttpRequest();
-    sendQuery = function(x1){
+    sendQuery = function(){
 	console.log(x1)
 	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
@@ -331,10 +331,10 @@ changeBoxCoord()
         xhr.ontimeout = function (){
             console.error("request timedout: ", xhr);
         }
-        xhr.open("get", "http://143.198.98.66:88/" + params(x1), /*async*/ true);
+        xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
     }
-$getReposBtn.onclick = sendQuery(document.getElementById("archiveTypeIn").value);
+$getReposBtn.onclick = sendQuery();
 sendQuery(document.getElementById("archiveTypeIn").value);
 </script>
