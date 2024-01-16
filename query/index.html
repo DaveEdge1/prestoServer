@@ -279,8 +279,8 @@ changeBoxCoord()
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
-    function params(){
-	    x1 = document.getElementById("archiveTypeIn").value
+    function params(x1){
+	    //x1 = document.getElementById("archiveTypeIn").value
 	    console.log(x1.length)
 	    if (x1.length == 0){
 		    return '?'
@@ -289,7 +289,7 @@ changeBoxCoord()
 	    }
     };
     var xhr = new XMLHttpRequest();
-    sendQuery = function(){
+    sendQuery = function(x1){
 	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
@@ -330,10 +330,10 @@ changeBoxCoord()
         xhr.ontimeout = function (){
             console.error("request timedout: ", xhr);
         }
-        xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
+        xhr.open("get", "http://143.198.98.66:88/" + params(x1), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
     }
-$getReposBtn.onclick = sendQuery();
-sendQuery();
+$getReposBtn.onclick = sendQuery(document.getElementById("archiveTypeIn").value);
+sendQuery(document.getElementById("archiveTypeIn").value);
 </script>
