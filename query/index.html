@@ -277,7 +277,7 @@ changeBoxCoord()
     //send mySQL query to queryDB and show response
     var $response = document.getElementById("response");
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
-    var $getReposBtn = document.getElementById("get-repos");
+    //var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
     function params(){
 	    x1 = document.getElementById("archiveTypeIn").value
@@ -335,6 +335,6 @@ changeBoxCoord()
         // xhr.responseType = "text";
         xhr.send();
     }
-$getReposBtn.onclick = sendQuery();
+//$getReposBtn.onclick = sendQuery();
 sendQuery(document.getElementById("archiveTypeIn").value);
 </script>
