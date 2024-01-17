@@ -43,7 +43,7 @@ function buildQstring(qs){
 				outString = '('
 			}
 			for (let i = 0; i < words.length; i++) {
-				outString = outString + key + ' =' + ' "' + words[i] + '"'
+				outString = outString + key + ' LIKE' + ' "%' + words[i] + '%"'
 				if (i < (words.length-1)){
 					outString = outString + ' OR '
 				}
