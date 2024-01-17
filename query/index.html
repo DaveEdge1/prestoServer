@@ -289,12 +289,12 @@ function rmBlanks(val){
 	return val;
 
 }
-function qString(input1){
-	var x1 = rmBlanks(input1)	
+function qString(objectID){
+	var x1 = rmBlanks(document.getElementById(objectID).value)	
 	    if (x1.length == 0){
 		    return null;
 	    } else {
-		    return Object.keys(input1) + '=' + x1
+		    return objectID + '=' + x1
 	    }
 }
 </script>
@@ -310,7 +310,7 @@ function qString(input1){
 	    console.log(x1)
 	    console.log(x2)
 	    qstring = '?'
-	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value)
+	    qstring = qstring + qString(objectID)
 	    console.log(qstring)
 	    return qstring;
     };
