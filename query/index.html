@@ -168,7 +168,7 @@ function loadLatLon (x1){
     geojson.features[i].properties.dataSetName.push(dName);
   }
 
-  document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
+  //document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
 	
   return(geojson)
 }
@@ -301,7 +301,7 @@ function qString(val1,name1){
 </script>
 <script>
     //send mySQL query to queryDB and show response
-    var $response = document.getElementById("response");
+    //var $response = document.getElementById("response");
     //document.getElementById("vals1") = '?archiveType=' + document.getElementById("values").value;
     //var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
@@ -331,7 +331,7 @@ function qString(val1,name1){
 		    //xhr = null;
 
 		    const promise1 = new Promise((resolve, reject) => {
-			    $response.innerHTML = xhr.response;
+			    //$response.innerHTML = xhr.response;
 		            updatePoints(JSON.parse(xhr.response))
 			    console.log(xhr.response);
 			    resolve();
