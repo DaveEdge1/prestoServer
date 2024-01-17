@@ -289,6 +289,14 @@ function rmBlanks(val){
 	return val;
 
 }
+function qString(input1){
+	var x1 = rmBlanks(input1)	
+	    if (x1.length == 0){
+		    return null;
+	    } else {
+		    return Object.keys(input1) + '=' + x1
+	    }
+}
 </script>
 <script>
     //send mySQL query to queryDB and show response
@@ -297,21 +305,12 @@ function rmBlanks(val){
     //var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
     function params(){
-	    x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
-	    x2 = rmBlanks(document.getElementById("variableName").value)
+	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
+	    var x2 = rmBlanks(document.getElementById("variableName").value)
 	    console.log(x1)
 	    console.log(x2)
 	    qstring = '?'
-	    if (x1.length == 0){
-		    qstring = qstring
-	    } else {
-		    qstring = qstring + 'archiveType=' + x1
-	    }
-	    if (x2.length == 0){
-		    qstring = qstring
-	    } else {
-		    qstring = qstring + 'paleoData_variableName=' + x2
-	    }
+	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value)
 	    console.log(qstring)
 	    return qstring;
     };
