@@ -345,8 +345,8 @@ this.value = terms.join( "," );
 return false;
 }
 });
-});     
-changeBoxCoord()
+});
+	
 function split( val ) {
 return val.split( /,\s*/ );
 }
@@ -387,6 +387,8 @@ function qString(val1,name1){
 	    console.log(x2)
 	    qstring = '?'
 	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name)
+	    qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name)
+	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
 	    console.log(qstring)
 	    return qstring;
     };
@@ -440,4 +442,5 @@ function qString(val1,name1){
     }
 //$getReposBtn.onclick = sendQuery();
 sendQuery();
+changeBoxCoord();
 </script>
