@@ -289,13 +289,13 @@ function rmBlanks(val){
 	return val;
 
 }
-function qString(objectID){
-	console.log(objectID)
-	var x1 = rmBlanks(document.getElementById(objectID).value)	
+function qString(object1){
+	console.log(object1.name)
+	var x1 = rmBlanks(object1.value)	
 	    if (x1.length == 0){
 		    return null;
 	    } else {
-		    return objectID + '=' + x1
+		    return object1.name + '=' + x1
 	    }
 }
 </script>
@@ -311,7 +311,7 @@ function qString(objectID){
 	    console.log(x1)
 	    console.log(x2)
 	    qstring = '?'
-	    qstring = qstring + qString("archiveTypeIn")
+	    qstring = qstring + qString(document.getElementById("archiveTypeIn"))
 	    console.log(qstring)
 	    return qstring;
     };
