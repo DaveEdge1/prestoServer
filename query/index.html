@@ -281,6 +281,8 @@ function rmBlanks(val){
 		    console.log(val)
 		    val = split(val)
 		    console.log(val)
+		    val = val.filter(Boolean)
+		    console.log(val)
 	    	    val = val.join( "," );
 	    }
 	console.log(val)
