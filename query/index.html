@@ -282,8 +282,8 @@ changeBoxCoord()
     function params(){
 	    x1 = document.getElementById("archiveTypeIn").value
 	    x2 = document.getElementById("variableName").value
-	    console.log(x1.length)
-	    console.log(x2.length)
+	    console.log(x1)
+	    console.log(x2)
 	    qstring = '?'
 	    if (x1.length == 0){
 		    qstring = qstring
@@ -316,6 +316,7 @@ changeBoxCoord()
 		    const promise1 = new Promise((resolve, reject) => {
 			    $response.innerHTML = xhr.response;
 		            updatePoints(JSON.parse(xhr.response))
+			    console.log(xhr.response);
 			    resolve();
 		    });
 			
