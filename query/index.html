@@ -272,6 +272,14 @@ return false;
 
  });     
 changeBoxCoord()
+function rmBlanks(val){
+	    if (val.length > 0) {
+		    val = split(val)
+	    	    val = val.join( "," );
+	    }
+	return val;
+
+}
 </script>
 <script>
     //send mySQL query to queryDB and show response
@@ -280,8 +288,8 @@ changeBoxCoord()
     //var $getReposBtn = document.getElementById("get-repos");
     //function params(){return '?archiveType=' + document.getElementById("archiveTypeIn").value};
     function params(){
-	    x1 = document.getElementById("archiveTypeIn").value
-	    x2 = document.getElementById("variableName").value
+	    x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
+	    x2 = rmBlanks(document.getElementById("variableName").value)
 	    console.log(x1)
 	    console.log(x2)
 	    qstring = '?'
