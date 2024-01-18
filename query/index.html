@@ -91,7 +91,7 @@ var colorPal = {"Borehole":"#000000","MolluskShell":"#004949","GlacierIce":"#009
  "FluvialSediment":"#490092","LakeSediment":"#006ddb","MarineSediment":"#b66dff","Speleothem":"#6db6ff","Midden":"#b6dbff",
  "Peat":"#920000","Sclerosponge":"#924900","Shoreline":"#db6d00","Wood":"#24ff24","TerrestrialSediment":"#ffff6d"}
 //initiate leaflet rectangle
-var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
+var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
 
@@ -113,16 +113,18 @@ var regExp = /\(([^)]+)\)/;
 function chooseOpacity(coords){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	rect1 = changeBoxCoord()
-	console.log(coords)
+	//console.log(coords)
 	point = regExp.exec(coords)[1]
 	pointLat = point.split(',')[0]
 	pointLon = point.split(',')[1]
-	console.log(pointLat + pointLon)
-	console.log(rect1.South)
-	console.log(pointLat > rect1.South & pointLat < rect1.North & pointLon > rect1.West & pointLon < rect1.East)
+	//console.log(pointLat + pointLon)
+	//console.log(rect1.South)
+	//console.log(pointLat > rect1.South & pointLat < rect1.North & pointLon > rect1.West & pointLon < rect1.East)
 	if (pointLat > rect1.South & pointLat < rect1.North & pointLon > rect1.West & pointLon < rect1.East){
+		console.log(0.7)
 		return 0.7
 	} else {
+		console.log(0.2)
 		return 0.2
 	}
 }
