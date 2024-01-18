@@ -100,9 +100,13 @@ function chooseColor(archiveType){
 	return color1
 }
 function chooseOpacity(coords){
-	console.log(coords.Lat)
-	console.log(rect._bounds._southWest.Lat)
-	console.log(rect._bounds._southWest.Lat < coords.Lat)
+	rectSW = regExp.exec(rect._bounds._southWest)[1]
+	rectSouth = rectSW.split(',')[0]
+	pointSW = regExp.exec(rect._bounds._southWest)[1]
+	pointSouth = pointSW.split(',')[0]
+	console.log(pointSouth)
+	console.log(rectSouth)
+	console.log(pointSouth < rectSouth)
 	return 0.7
 }
 
