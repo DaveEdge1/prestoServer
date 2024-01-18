@@ -115,7 +115,11 @@ function chooseShape(archiveType){
 	archiveType = archiveType.toString();
 	var shape1 = shapePal[archiveType]
 	console.log(shape1)
-	return shape1
+	if (typeof shape1 !== 'undefined'){
+		return shape1
+	} else {
+		return "x"
+	}
 }
 var regExp = /\(([^)]+)\)/;
 function dec4(x) {
