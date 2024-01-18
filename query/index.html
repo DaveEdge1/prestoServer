@@ -199,7 +199,7 @@ function loadLatLon (x1){
   for (let i = 0; i < Object.values(x1).length; i++) {
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
-    aType = Object.values(x1)[i].archiveType[0]
+    aType = Object.values(x1)[i].archiveType
     dName = Object.values(x1)[i].dataSetName
     //console.log('lat ' + i + ': ' + lat)
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": []} });
