@@ -118,8 +118,8 @@ function chooseOpacity(coords, rect1){
 	//rect1 = changeBoxCoord()
 	//console.log(coords)
 	var point = regExp.exec(coords)[1]
-	var pointLat = dec4(point.split(',')[1])
-	var pointLon = dec4(point.split(',')[0])
+	var pointLat = dec4(point.split(',')[0])
+	var pointLon = dec4(point.split(',')[1])
 	console.log("________________________________________________________")
 	//console.log(pointLat + pointLon)
 	//console.log(pointLat > rect1.South && pointLat < rect1.North)
