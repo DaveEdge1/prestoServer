@@ -122,26 +122,26 @@ function chooseOpacity(coords, rect1){
 	//var pointLat = 30
 	//var pointLon = -95
 	console.log("________________________________________________________")
-	console.log(Math.sign(pointLon))
-	console.log(Math.sign(rect1.West))
+	console.log(Math.sign(+pointLon))
+	console.log(Math.sign(+rect1.West))
 	console.log("coords: " + coords)
-	console.log("rect1: " + rect1.North, rect1.South, rect1.East, rect1.West)
+	console.log("rect1: " + +rect1.North, +rect1.South, +rect1.East, +rect1.West)
 	console.log("pointLat > rect1.South: ")
-	console.log(pointLat + ">" + rect1.South)
-	console.log(pointLat > rect1.South)
+	console.log(+pointLat + ">" + +rect1.South)
+	console.log(+pointLat > +rect1.South)
 	console.log("pointLat < rect1.North: ")
-	console.log(pointLat + "<" + rect1.North)
-	console.log(pointLat < rect1.North)
+	console.log(+pointLat + "<" + +rect1.North)
+	console.log(+pointLat < +rect1.North)
 	console.log("pointLon > rect1.West: ")
-	console.log(pointLon + ">" + rect1.West)
-	console.log(pointLon > rect1.West)
+	console.log(+pointLon + ">" + +rect1.West)
+	console.log(+pointLon > +rect1.West)
 	console.log("pointLon < rect1.East: ")
-	console.log(pointLon + "<" + rect1.East)
-	console.log(pointLon < rect1.East)
+	console.log(+pointLon + "<" + +rect1.East)
+	console.log(+pointLon < +rect1.East)
 
-	if (pointLat > rect1.South && pointLat < rect1.North ){
-		if (pointLon > rect1.West){
-			if (pointLon < rect1.East){
+	if (+pointLat > +rect1.South && +pointLat < +rect1.North ){
+		if (+pointLon > +rect1.West){
+			if (+pointLon < +rect1.East){
 				console.log("!!!!!!!!!!InRect!!!!!!!!!!")
 				return 0.8
 			}
