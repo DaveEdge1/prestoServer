@@ -50,6 +50,7 @@ Selected values:
 
 <h1>LiPDverse Query</h1>
 <div><p id="boxCoord"></p></div>
+<div><p id="datasetCount"></p></div>
   <!-- </form> -->
 <div id="map" style="width: 600px; height: 400px;"></div>
 <br>
@@ -186,6 +187,7 @@ function loadLatLon (x1){
     "type":"FeatureCollection",
     "features": [],
 	};
+	Obect.getElementById("datasetCount").innerHTML = "Total datasets in query: " + Object.values(x1).length
   for (let i = 0; i < Object.values(x1).length; i++) {
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
