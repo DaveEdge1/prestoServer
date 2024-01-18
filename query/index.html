@@ -415,6 +415,7 @@ function qString(val1,name1){
 	    console.log(qstring)
 	    return qstring;
     };
+    var prevResp = {};
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	//console.log(x1)
@@ -426,6 +427,7 @@ function qString(val1,name1){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
 			    //$response.innerHTML = xhr.response;
+			    var prevResp = JSON.parse(xhr.response);
 		            updatePoints(JSON.parse(xhr.response))
 			    console.log(xhr.response);
 			    resolve();
@@ -458,7 +460,7 @@ function qString(val1,name1){
     }
 //update leaflet rectangle
 rect.on('edit', function() { changeBoxCoord();
-			   updatePoints(JSON.parse(xhr.response))});
+			   updatePoints(prevResp)});
 //$getReposBtn.onclick = sendQuery();
 sendQuery();
 changeBoxCoord();
