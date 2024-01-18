@@ -108,11 +108,13 @@ var layerGroup = L.layerGroup().addTo(map);
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	var color1 = colorPal[archiveType]
+	console.log(color1)
 	return color1
 }
 function chooseShape(archiveType){
 	archiveType = archiveType.toString();
 	var shape1 = shapePal[archiveType]
+	console.log(shape1)
 	return shape1
 }
 var regExp = /\(([^)]+)\)/;
