@@ -383,21 +383,21 @@ function split( val ) {
 return val.split( /,\s*/ );
 }
 function rmBlanks(val){
-	console.log(val.length)
+	//console.log(val.length)
 	    if (val.length > 0) {
-		    console.log(val)
+		    //console.log(val)
 		    val = split(val)
-		    console.log(val)
+		    //console.log(val)
 		    val = val.filter(Boolean)
-		    console.log(val)
+		    //console.log(val)
 	    	    val = val.join( "," );
 	    }
-	console.log(val)
+	//console.log(val)
 	return val;
 
 }
 function qString(val1,name1){
-	console.log(name1)
+	//console.log(name1)
 	var x1 = rmBlanks(val1)	
 	    if (x1.length == 0){
 		    return '';
