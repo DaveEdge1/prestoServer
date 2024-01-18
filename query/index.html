@@ -232,7 +232,7 @@ L.geoJSON([loadLatLon(coords)], {
                         fillColor : chooseColor(feature.properties.archiveType),
                         color : chooseColor(feature.properties.archiveType),
                         weight : 1,
-			fillOpacity : chooseOpacity(latlng, changeBoxCoord()),
+			fillOpacity : +chooseOpacity(latlng, changeBoxCoord()),
 			//fillOpacity : 0.5,
 			//opacity : 0.5
 			opacity : 0.05
