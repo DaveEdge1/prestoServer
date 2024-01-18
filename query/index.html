@@ -108,13 +108,13 @@ var layerGroup = L.layerGroup().addTo(map);
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	var color1 = colorPal[archiveType]
-	console.log(color1)
+	//console.log(color1)
 	return color1
 }
 function chooseShape(archiveType){
 	archiveType = archiveType.toString();
 	var shape1 = shapePal[archiveType]
-	console.log(shape1)
+	//console.log(shape1)
 	if (typeof shape1 !== 'undefined'){
 		return shape1
 	} else {
@@ -237,11 +237,11 @@ L.geoJSON([loadLatLon(coords)], {
 */
                 pointToLayer : function(feature, latlng) {
 			//console.log(+chooseOpacity(latlng, changeBoxCoord()));
-			console.log(inRectCount)
-			console.log(feature.properties.archiveType)
+			//console.log(inRectCount)
+			//console.log(feature.properties.archiveType)
 			var col1 = chooseColor(feature.properties.archiveType)
 			var aType = feature.properties.archiveType
-			console.log(aType.length)
+			//console.log(aType.length)
                     return L.shapeMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
