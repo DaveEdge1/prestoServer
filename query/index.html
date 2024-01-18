@@ -113,7 +113,7 @@ function dec4(x) {
   return Number.parseFloat(x).toFixed(4);
 }
 
-function chooseOpacity(coords, rect1){
+function chooseOpacity(coords, rect1,datasetName){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	//rect1 = changeBoxCoord()
 	var point = regExp.exec(coords)[1]
@@ -123,6 +123,7 @@ function chooseOpacity(coords, rect1){
 	//var pointLon = -95
 
 	console.log("________________________________________________________")
+	console.log(datasetName)
 	console.log(Math.sign(+pointLon))
 	console.log(Math.sign(+rect1.West))
 	console.log("coords: " + coords)
@@ -221,7 +222,7 @@ L.geoJSON([loadLatLon(coords)], {
     		},
 */
                 pointToLayer : function(feature, latlng) {
-			console.log(+chooseOpacity(latlng, changeBoxCoord()));
+			//console.log(+chooseOpacity(latlng, changeBoxCoord()));
 			
                     return L.circleMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
@@ -230,7 +231,7 @@ L.geoJSON([loadLatLon(coords)], {
                         fillColor : chooseColor(feature.properties.archiveType),
                         color : chooseColor(feature.properties.archiveType),
                         weight : 1,
-			fillOpacity : +chooseOpacity(latlng, changeBoxCoord()),
+			fillOpacity : +chooseOpacity(latlng, changeBoxCoord(),feature.properties.dataSetName),
 			//fillOpacity : 0.5,
 			//opacity : 0.5
 			opacity : 0.05
