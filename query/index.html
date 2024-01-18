@@ -114,7 +114,7 @@ function dec4(x) {
   return Number.parseFloat(x).toFixed(4);
 }
 
-function chooseOpacity(coords, rect1,datasetName){
+function chooseOpacity(coords, rect1,inRectCount){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	//rect1 = changeBoxCoord()
 	var point = regExp.exec(coords)[1]
@@ -144,7 +144,7 @@ function chooseOpacity(coords, rect1,datasetName){
 	*/
 
 	if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
-		//console.log("!!!!!!!!!!InRect!!!!!!!!!!")
+		inRectCount = inRectCount + 1
 		return 0.8
 	} else {
 		return 0.05
@@ -187,7 +187,7 @@ function loadLatLon (x1){
     "type":"FeatureCollection",
     "features": [],
 	};
-	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + Object.values(x1).length
+	
   for (let i = 0; i < Object.values(x1).length; i++) {
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
@@ -205,6 +205,7 @@ function loadLatLon (x1){
   return(geojson)
 }
 function updatePoints (coords){
+	var inRectCount = 0;
 	layerGroup.clearLayers();
 	
 L.geoJSON([loadLatLon(coords)], {
@@ -231,7 +232,7 @@ L.geoJSON([loadLatLon(coords)], {
                         fillColor : chooseColor(feature.properties.archiveType),
                         color : chooseColor(feature.properties.archiveType),
                         weight : 1,
-			fillOpacity : +chooseOpacity(latlng, changeBoxCoord(),feature.properties.dataSetName),
+			fillOpacity : +chooseOpacity(latlng, changeBoxCoord(), inRectCount),
 			//fillOpacity : 0.5,
 			//opacity : 0.5
 			opacity : 0.05
@@ -239,6 +240,7 @@ L.geoJSON([loadLatLon(coords)], {
                     });
                 }
             }).addTo(layerGroup);
+	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 	
 
