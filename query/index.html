@@ -228,7 +228,7 @@ L.geoJSON([loadLatLon(coords)], {
                 pointToLayer : function(feature, latlng) {
 			//console.log(+chooseOpacity(latlng, changeBoxCoord()));
 			
-                    return L.circleMarker(latlng, {
+                    return L.shapeMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
                         radius : 4,
@@ -236,8 +236,7 @@ L.geoJSON([loadLatLon(coords)], {
                         color : chooseColor(feature.properties.archiveType),
                         weight : 1,
 			fillOpacity : +chooseOpacity(latlng, changeBoxCoord()),
-			//fillOpacity : 0.5,
-			//opacity : 0.5
+			shape : "diamond",
 			opacity : 0.1
 			
                     });
