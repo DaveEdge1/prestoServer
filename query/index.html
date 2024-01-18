@@ -123,13 +123,13 @@ function chooseOpacity(coords, rect1){
 	console.log(pointLon > rect1.West & pointLon < rect1.East)
 	console.log(pointLon + rect1.West + rect1.East)
 	if (pointLat > rect1.South & pointLat < rect1.North){
-		if (pointLon > rect1.West){
+		if (pointLon < rect1.East){
 			console.log(0.8)
 			return 0.8
 		}
 	} else {
-		console.log(0.1)
-		return 0.21
+		console.log(0.05)
+		return 0.05
 	}
 }
 
@@ -210,7 +210,7 @@ L.geoJSON([loadLatLon(coords)], {
                         color : chooseColor(feature.properties.archiveType),
                         weight : 1,
 			fillOpacity : chooseOpacity(latlng, changeBoxCoord()),
-			opacity : 0.2
+			opacity : 0.05
 			
                     });
                 }
