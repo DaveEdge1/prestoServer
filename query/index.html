@@ -121,6 +121,7 @@ function chooseOpacity(coords, rect1){
 	var pointLon = dec4(point.split(',')[1])
 	//var pointLat = 30
 	//var pointLon = -95
+	/*
 	console.log("________________________________________________________")
 	console.log(Math.sign(+pointLon))
 	console.log(Math.sign(+rect1.West))
@@ -138,6 +139,7 @@ function chooseOpacity(coords, rect1){
 	console.log("pointLon < rect1.East: ")
 	console.log(+pointLon + "<" + +rect1.East)
 	console.log(+pointLon < +rect1.East)
+ 	*/
 
 	if (+pointLat > +rect1.South && +pointLat < +rect1.North ){
 		if (+pointLon > +rect1.West){
@@ -223,7 +225,7 @@ L.geoJSON([loadLatLon(coords)], {
     		},
 */
                 pointToLayer : function(feature, latlng) {
-			
+			console.log(+chooseOpacity(latlng, changeBoxCoord()));
 			
                     return L.circleMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
