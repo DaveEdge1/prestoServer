@@ -116,23 +116,19 @@ function dec4(x) {
 function chooseOpacity(coords, rect1){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	//rect1 = changeBoxCoord()
+	console.log("________________________________________________________")
 	console.log("coords: " + coords)
 	console.log("rect1: " + rect1.North, rect1.South, rect1.East, rect1.West)
+	console.log("pointLat > rect1.South: " + pointLat > rect1.South)
+	console.log("pointLat < rect1.North: " + pointLat < rect1.North)
+	console.log("pointLon > rect1.West: " + pointLon > rect1.West)
+	console.log("pointLon < rect1.East: " + pointLon < rect1.East)
 	var point = regExp.exec(coords)[1]
 	var pointLat = dec4(point.split(',')[0])
 	var pointLon = dec4(point.split(',')[1])
-	console.log("________________________________________________________")
-	console.log(coords)
 	if (pointLat > rect1.South && pointLat < rect1.North ){
-		console.log("within N-S")
-		if (pointLon < rect1.West){
-			console.log("pointLon < rect1.West")
-			console.log(pointLon > rect1.West)
-			console.log(pointLon < rect1.West)
+		if (pointLon > rect1.West){
 			if (pointLon < rect1.East){
-				console.log("pointLon < rect1.East")
-				console.log(pointLon < rect1.East)
-				console.log(pointLon > rect1.East)
 				console.log("!!InRect!!")
 				return 0.8
 			}
