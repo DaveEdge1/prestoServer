@@ -102,8 +102,8 @@ function chooseColor(archiveType){
 var regExp = /\(([^)]+)\)/;
 	
 function chooseOpacity(coords){
-	rectSW = regExp.exec(rect._bounds._southWest)[1]
-	rectSouth = rectSW.split(',')[0]
+	//rectSW = regExp.exec(rect._bounds._southWest)[1]
+	rectSouth = changeBoxCoord()[1]
 	pointSW = regExp.exec(coords)[1]
 	pointSouth = pointSW.split(',')[0]
 	console.log(pointSouth)
@@ -124,7 +124,7 @@ function changeBoxCoord(){
 	East = NE.split(',')[1]
 	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
 	document.getElementById("boxCoord").innerHTML = newCoords
-	return newCoords
+	return {South,West,North,East}
 }
 //initiate leaflet rectangle
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
