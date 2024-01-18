@@ -109,17 +109,22 @@ function chooseColor(archiveType){
 	return color1
 }
 var regExp = /\(([^)]+)\)/;
-	
+
 function chooseOpacity(coords){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	rect1 = changeBoxCoord()
 	console.log(coords)
-	pointSW = regExp.exec(coords)[1]
-	pointSouth = pointSW.split(',')[0]
-	console.log(pointSouth)
+	point = regExp.exec(coords)[1]
+	pointLat = point.split(',')[0]
+	pointLon = point.split(',')[1]
+	console.log(pointLat + pointLon)
 	console.log(rect1.South)
-	console.log(pointSouth < rect1.South)
-	return 0.7
+	console.log(pointLat > rect1.South & pointLat < rect1.North & pointLon > rect1.West & pointLon < rect1.East)
+	if (pointLat > rect1.South & pointLat < rect1.North & pointLon > rect1.West & pointLon < rect1.East){
+		return 0.7
+	} else {
+		return 0.2
+	}
 }
 
 //regex helper
