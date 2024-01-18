@@ -187,7 +187,7 @@ function loadLatLon (x1){
     "type":"FeatureCollection",
     "features": [],
 	};
-	Obect.getElementById("datasetCount").innerHTML = "Total datasets in query: " + Object.values(x1).length
+	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + Object.values(x1).length
   for (let i = 0; i < Object.values(x1).length; i++) {
     lat = Object.values(x1)[i].geo_latitude
     lon = Object.values(x1)[i].geo_longitude
