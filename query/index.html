@@ -100,7 +100,7 @@ var shapePal = {"Borehole":"arrowhead","MolluskShell":"arrowhead","GlacierIce":"
 var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
-    var legend = L.control.Legend({
+/*    var legend = L.control.Legend({
             position: "bottomleft",
             collapsed: false,
             symbolWidth: 24,
@@ -167,7 +167,7 @@ rect.editing.enable();
                 weight: 2
             }]
         })
-map.addLayer(legend);
+map.addLayer(legend);*/
 //add layer for points
 var layerGroup = L.layerGroup().addTo(map);
 
@@ -286,7 +286,7 @@ function loadLatLon (x1){
 let inRectCount = 0;
 function updatePoints (coords){
 	inRectCount = 0;
-	//layerGroup.clearLayers();
+	layerGroup.clearLayers();
 	
 L.geoJSON([loadLatLon(coords)], {
 
