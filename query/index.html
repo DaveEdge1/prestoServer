@@ -114,7 +114,7 @@ function dec4(x) {
   return Number.parseFloat(x).toFixed(4);
 }
 
-function chooseOpacity(coords, rect1,inRectCount){
+function chooseOpacity(coords, rect1){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	//rect1 = changeBoxCoord()
 	var point = regExp.exec(coords)[1]
@@ -232,7 +232,7 @@ L.geoJSON([loadLatLon(coords)], {
                         fillColor : chooseColor(feature.properties.archiveType),
                         color : chooseColor(feature.properties.archiveType),
                         weight : 1,
-			fillOpacity : +chooseOpacity(latlng, changeBoxCoord(), inRectCount),
+			fillOpacity : +chooseOpacity(latlng, changeBoxCoord()),
 			//fillOpacity : 0.5,
 			//opacity : 0.5
 			opacity : 0.05
