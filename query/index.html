@@ -118,15 +118,13 @@ function chooseOpacity(coords, rect1){
 	pointLat = point.split(',')[0]
 	pointLon = point.split(',')[1]
 	//console.log(pointLat + pointLon)
-	console.log(pointLat + pointLon)
-	console.log(pointLat > rect1.South & pointLat < rect1.North)
-	console.log(pointLon > rect1.West & pointLon < rect1.East)
-	console.log(pointLon + rect1.West + rect1.East)
-	if (pointLat > rect1.South & pointLat < rect1.North){
-		if (pointLon < rect1.East){
-			console.log(0.8)
-			return 0.8
-		}
+	//console.log(pointLat + pointLon)
+	//console.log(pointLat > rect1.South && pointLat < rect1.North)
+	//console.log(pointLon > rect1.West && pointLon < rect1.East)
+	//console.log(pointLon + rect1.West + rect1.East)
+	if (pointLat > rect1.South && pointLat < rect1.North && pointLon > rect1.West && pointLon < rect1.East){
+		console.log(0.8)
+		return 0.8
 	} else {
 		console.log(0.05)
 		return 0.05
