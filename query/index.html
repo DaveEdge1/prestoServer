@@ -109,14 +109,17 @@ function chooseColor(archiveType){
 	return color1
 }
 var regExp = /\(([^)]+)\)/;
+function dec4(x) {
+  return Number.parseFloat(x).toFixed(4);
+}
 
 function chooseOpacity(coords, rect1){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
 	//rect1 = changeBoxCoord()
 	//console.log(coords)
-	point = regExp.exec(coords)[1]
-	pointLat = point.split(',')[0]
-	pointLon = point.split(',')[1]
+	var point = regExp.exec(coords)[1]
+	var pointLat = dec4(point.split(',')[0])
+	var pointLon = dec4(point.split(',')[1])
 	//console.log(pointLat + pointLon)
 	//console.log(pointLat + pointLon)
 	console.log(pointLat > rect1.South && pointLat < rect1.North)
@@ -138,12 +141,12 @@ function chooseOpacity(coords, rect1){
 
 //extract leaflet rectangle coords
 function changeBoxCoord(){
-	SW = regExp.exec(rect._bounds._southWest)[1]
-	South = SW.split(',')[0]
-	West = SW.split(',')[1]
-	NE = regExp.exec(rect._bounds._northEast)[1]
-	North = NE.split(',')[0]
-	East = NE.split(',')[1]
+	var SW = regExp.exec(rect._bounds._southWest)[1]
+	var South = dec4(SW.split(',')[0])
+	var West = dec4(SW.split(',')[1])
+	var NE = regExp.exec(rect._bounds._northEast)[1]
+	var North = dec4(NE.split(',')[0])
+	var East = dec4(NE.split(',')[1])
 	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
 	document.getElementById("boxCoord").innerHTML = newCoords
 	return {"South":South,"West":West,"North":North,"East":East}
