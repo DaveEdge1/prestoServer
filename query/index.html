@@ -124,8 +124,8 @@ function chooseOpacity(coords, rect1){
 	console.log(coords)
 	if (pointLat > rect1.South && pointLat < rect1.North ){
 		console.log("within N-S")
-		if (pointLon > rect1.West){
-			console.log("pointLon > rect1.West")
+		if (pointLon < rect1.West){
+			console.log("pointLon < rect1.West")
 			console.log(pointLon > rect1.West)
 			console.log(pointLon < rect1.West)
 			if (pointLon > rect1.East){
