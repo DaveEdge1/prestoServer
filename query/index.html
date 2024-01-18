@@ -90,6 +90,15 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var colorPal = {"Borehole":"#000000","MolluskShell":"#004949","GlacierIce":"#009292","GroundIce":"#ff6db6","Coral":"#ffb6db",
  "FluvialSediment":"#490092","LakeSediment":"#006ddb","MarineSediment":"#b66dff","Speleothem":"#6db6ff","Midden":"#b6dbff",
  "Peat":"#920000","Sclerosponge":"#924900","Shoreline":"#db6d00","Wood":"#24ff24","TerrestrialSediment":"#ffff6d"}
+//initiate leaflet rectangle
+var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
+map.addLayer(rect);
+rect.editing.enable();
+
+//add layer for points
+var layerGroup = L.layerGroup().addTo(map);
+
+
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	//console.log(archiveType)
@@ -127,16 +136,9 @@ function changeBoxCoord(){
 	document.getElementById("boxCoord").innerHTML = newCoords
 	return {"South":South,"West":West,"North":North,"East":East}
 }
-//initiate leaflet rectangle
-var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
-map.addLayer(rect);
-rect.editing.enable();
-
-//add layer for points
-var layerGroup = L.layerGroup().addTo(map);
-
 //update leaflet rectangle
 rect.on('edit', function() { changeBoxCoord(); });
+
 </script>
 
 <script>
