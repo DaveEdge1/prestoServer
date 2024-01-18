@@ -411,13 +411,13 @@ function qString(val1,name1){
     function params(){
 	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
 	    var x2 = rmBlanks(document.getElementById("variableName").value)
-	    console.log(x1)
-	    console.log(x2)
+	    //console.log(x1)
+	    //console.log(x2)
 	    qstring = '?'
 	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name)
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
-	    console.log(qstring)
+	    //console.log(qstring)
 	    return qstring;
     };
     var prevResp = {};
