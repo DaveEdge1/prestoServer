@@ -103,7 +103,7 @@ var regExp = /\(([^)]+)\)/;
 	
 function chooseOpacity(coords){
 	//rectSW = regExp.exec(rect._bounds._southWest)[1]
-	rectSouth = changeBoxCoord()[1]
+	rectSouth = changeBoxCoord().South
 	pointSW = regExp.exec(coords)[1]
 	pointSouth = pointSW.split(',')[0]
 	console.log(pointSouth)
