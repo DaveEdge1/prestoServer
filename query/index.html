@@ -204,8 +204,9 @@ function loadLatLon (x1){
 	
   return(geojson)
 }
+let inRectCount = 0;
 function updatePoints (coords){
-	var inRectCount = 0;
+	inRectCount = 0;
 	layerGroup.clearLayers();
 	
 L.geoJSON([loadLatLon(coords)], {
