@@ -236,7 +236,8 @@ L.geoJSON([loadLatLon(coords)], {
 			console.log(inRectCount)
 			console.log(feature.properties.archiveType)
 			var col1 = chooseColor(feature.properties.archiveType)
-			console.log(col1)
+			var aType = feature.properties.archiveType
+			console.log(aType.length)
                     return L.shapeMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
