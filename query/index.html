@@ -100,7 +100,7 @@ var shapePal = {"Borehole":"arrowhead","MolluskShell":"arrowhead","GlacierIce":"
 var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
 rect.editing.enable();
-    const legend = L.control.Legend({
+    var legend = L.control.Legend({
             position: "bottomleft",
             collapsed: false,
             symbolWidth: 24,
