@@ -153,7 +153,8 @@ function changeBoxCoord(){
 	var East = dec4(NE.split(',')[1])
 	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
 	document.getElementById("boxCoord").innerHTML = newCoords
-	return {"South":South,"West":West,"North":North,"East":East}
+	return {"South":0,"West":-90,"North":45,"East":0}
+	//return {"South":South,"West":West,"North":North,"East":East}
 }
 //update leaflet rectangle
 rect.on('edit', function() { changeBoxCoord(); });
