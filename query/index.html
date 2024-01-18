@@ -121,7 +121,7 @@ function chooseOpacity(coords, rect1,datasetName){
 	var pointLon = dec4(point.split(',')[1])
 	//var pointLat = 30
 	//var pointLon = -95
-
+	/*
 	console.log("________________________________________________________")
 	console.log(datasetName)
 	console.log(Math.sign(+pointLon))
@@ -140,10 +140,10 @@ function chooseOpacity(coords, rect1,datasetName){
 	console.log("pointLon < rect1.East: ")
 	console.log(+pointLon + "<" + +rect1.East)
 	console.log(+pointLon < +rect1.East)
-
+	*/
 
 	if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
-		console.log("!!!!!!!!!!InRect!!!!!!!!!!")
+		//console.log("!!!!!!!!!!InRect!!!!!!!!!!")
 		return 0.8
 	} else {
 		return 0.05
@@ -155,19 +155,18 @@ function chooseOpacity(coords, rect1,datasetName){
 //extract leaflet rectangle coords
 function changeBoxCoord(){
 	var SW = regExp.exec(rect._bounds._southWest)[1]
-	//var South = dec4(SW.split(',')[0])
-	//var West = dec4(SW.split(',')[1])
-	var South = dec4(0)
-	var West = dec4(-90)
+	var South = dec4(SW.split(',')[0])
+	var West = dec4(SW.split(',')[1])
+	//var South = dec4(0)
+	//var West = dec4(-90)
 	var NE = regExp.exec(rect._bounds._northEast)[1]
-	//var North = dec4(NE.split(',')[0])
-	//var East = dec4(NE.split(',')[1])
-	var North = dec4(45)
-	var East = dec4(0)
+	var North = dec4(NE.split(',')[0])
+	var East = dec4(NE.split(',')[1])
+	//var North = dec4(45)
+	//var East = dec4(0)
 	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
 	document.getElementById("boxCoord").innerHTML = newCoords
 	return {"South":South,"West":West,"North":North,"East":East}
-	//return {"South":South,"West":West,"North":North,"East":East}
 }
 //update leaflet rectangle
 rect.on('edit', function() { changeBoxCoord(); });
