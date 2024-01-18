@@ -124,7 +124,7 @@ function changeBoxCoord(){
 	East = NE.split(',')[1]
 	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
 	document.getElementById("boxCoord").innerHTML = newCoords
-	return {South,West,North,East}
+	return {"South":South,"West":West,"North":North,"East":East}
 }
 //initiate leaflet rectangle
 var rect = L.rectangle([[25, -110], [35, -90]], { draggable: true });
