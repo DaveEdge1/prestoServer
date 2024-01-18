@@ -231,7 +231,8 @@ L.geoJSON([loadLatLon(coords)], {
 */
                 pointToLayer : function(feature, latlng) {
 			//console.log(+chooseOpacity(latlng, changeBoxCoord()));
-			
+			console.log(inRectCount)
+			console.log(feature.properties.archiveType)
                     return L.shapeMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
