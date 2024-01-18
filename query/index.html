@@ -158,7 +158,8 @@ var legend = L.control.Legend({
                 fillColor: "#FF0000",
                 weight: 2
             }]
-        }).addTo(map);
+        })
+map.addLayer(legend);
 
 //add layer for points
 var layerGroup = L.layerGroup().addTo(map);
