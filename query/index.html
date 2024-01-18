@@ -235,12 +235,14 @@ L.geoJSON([loadLatLon(coords)], {
 			//console.log(+chooseOpacity(latlng, changeBoxCoord()));
 			console.log(inRectCount)
 			console.log(feature.properties.archiveType)
+			var col1 = chooseColor(feature.properties.archiveType)
+			console.log(col1)
                     return L.shapeMarker(latlng, {
 			//icon: chooseIcon(feature.properties.archiveType)
 			
                         radius : 4,
-                        fillColor : chooseColor(feature.properties.archiveType),
-                        color : chooseColor(feature.properties.archiveType),
+                        fillColor : col1,
+                        color : col1,
                         weight : 1,
 			fillOpacity : +chooseOpacity(latlng, changeBoxCoord()),
 			shape : chooseShape(feature.properties.archiveType),
