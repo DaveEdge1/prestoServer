@@ -99,6 +99,8 @@ function chooseColor(archiveType){
 	//console.log(color1)
 	return color1
 }
+var regExp = /\(([^)]+)\)/;
+	
 function chooseOpacity(coords){
 	rectSW = regExp.exec(rect._bounds._southWest)[1]
 	rectSouth = rectSW.split(',')[0]
@@ -111,7 +113,7 @@ function chooseOpacity(coords){
 }
 
 //regex helper
-var regExp = /\(([^)]+)\)/;
+
 //extract leaflet rectangle coords
 function changeBoxCoord(){
 	SW = regExp.exec(rect._bounds._southWest)[1]
