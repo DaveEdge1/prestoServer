@@ -198,7 +198,7 @@
     L.Control.Legend = L.Control.extend({
         options: {
             position: "topleft",
-            title: "Legend",
+            //title: "Legend",
             legends: [],
             symbolWidth: 24,
             symbolHeight: 24,
@@ -225,11 +225,11 @@
 
             this._contents = L.DomUtil.create("section", "leaflet-legend-contents", this._container);
             this._link = L.DomUtil.create("a", "leaflet-legend-toggle", this._container);
-            this._link.title = "Legend";
+            //this._link.title = "Legend";
             this._link.href = "#";
 
-            var title = L.DomUtil.create("h3", "leaflet-legend-title", this._contents);
-            title.innerText = this.options.title || "Legend";
+            //var title = L.DomUtil.create("h3", "leaflet-legend-title", this._contents);
+            //title.innerText = this.options.title || "Legend";
 
             var len = this.options.legends.length;
             var colSize = Math.ceil(len / this.options.column);
