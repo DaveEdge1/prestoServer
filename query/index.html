@@ -542,6 +542,15 @@ function qString(val1,name1){
 //$getReposBtn.onclick = sendQuery();
 sendQuery();
 changeBoxCoord();
+var legend = L.control({position: 'bottomright',
+			legends: [{
+				label: "Marker1",
+				type: "image",
+				url: "marker/marker-red.png",
+				}]
+		       });
+
+legend.addTo(map);
 	//update leaflet rectangle
 rect.on('edit', function() {
 	changeBoxCoord();
