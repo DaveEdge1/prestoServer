@@ -280,21 +280,21 @@ let inRectCount = 0;
 var borehole = L.icon({
     iconUrl: 'http://143.198.98.66:86/borehole.png',
 
-    iconSize:     [20, 20], // size of the icon
+    iconSize:     [5, 5], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var glacierIce = L.icon({
     iconUrl: 'http://143.198.98.66:86/glacierIce.png',
 
-    iconSize:     [20, 20], // size of the icon
+    iconSize:     [5, 5], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var groundIce = L.icon({
     iconUrl: 'http://143.198.98.66:86//groundIce.png',
 
-    iconSize:     [20, 20], // size of the icon
+    iconSize:     [5, 5], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
@@ -617,13 +617,10 @@ const legend = L.control.Legend({
             opacity: 1,
             column: 5,
             legends: [{
-    label: "Borehole",
-    type: "polygon",
-    sides: 4,
-    color: "#FFD600",
-    fillColor: "#FFD600",
-    weight: 2
-}, {
+                label: "Borehole",
+                type: "image",
+                url: "/borehole.png"
+            }, {
     label: "MolluskShell",
     type: "polygon",
     sides: 3,
@@ -632,18 +629,12 @@ const legend = L.control.Legend({
     weight: 2
 }, {
     label: "GlacierIce",
-    type: "polygon",
-    sides: 4,
-    color: "#86CDFA",
-    fillColor: "#86CDFA",
-    weight: 2
+    type: "image",
+    url: "/glacierIce.png"
 }, {
     label: "GroundIce",
-    type: "polygon",
-    sides: 4,
-    color: "#ff6db6",
-    fillColor: "#ff6db6",
-    weight: 2
+    type: "image",
+    url: "/groundIce.png"
 }, {
     label: "Coral",
     type: "polygon",
