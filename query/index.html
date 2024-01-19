@@ -607,8 +607,11 @@ const legend = L.control.Legend({
             column: 5,
             legends: [{
                 label: "Borehole",
-                type: "image",
-                url: "/borehole.png"
+                type: "polygon",
+                sides: "4",
+		color: "#FFD600",
+		fillColor: "#FFD600",
+    		weight: 2
             }, {
     label: "MolluskShell",
     type: "polygon",
