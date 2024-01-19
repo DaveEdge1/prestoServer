@@ -555,17 +555,15 @@ changeBoxCoord();
 
 var legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
-
-	    console.log(archiveType.map(function(d) { return d['value']; }));
     var div = L.DomUtil.create('div', 'info legend');
     labels = ['<strong>Categories</strong>'],
-    categories = ['Road Surface','Signage','Line Markings','Roadside Hazards','Other'];
+    categories = archiveType.map(function(d) { return d['value']; });
 
     for (var i = 0; i < categories.length; i++) {
 
             div.innerHTML += 
             labels.push(
-                '<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' +
+                '<i class="circle" style="background:' + chooseColor(categories[i]) + '"></i> ' +
             (categories[i] ? categories[i] : '+'));
 
         }
