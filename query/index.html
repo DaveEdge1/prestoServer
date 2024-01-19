@@ -93,7 +93,7 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FF8B00","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
  "FluvialSediment":"#4169E0","LakeSediment":"#40826D","MarineSediment":"#8A4513","Speleothem":"#FF1492","Midden":"#824E2B",
  "Peat":"#8A9A5B","Sclerosponge":"#D2042D","Shoreline":"#BCC4AB","Wood":"#32CC32","TerrestrialSediment":"#d2b48c"}
-var shapePal = {"Borehole":"snowflake","MolluskShell":"triangle","GlacierIce":"snowflake","GroundIce":"snowflake","Coral":"triangle",
+var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snowflake","GroundIce":"snowflake","Coral":"triangle",
  "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"square",
  "Peat":"square","Sclerosponge":"triangle","Shoreline":"square","Wood":"triangle","TerrestrialSediment":"circle"}
 //initiate leaflet rectangle
@@ -277,13 +277,7 @@ function loadLatLon (x1){
   return(geojson)
 }
 let inRectCount = 0;
-var borehole = L.icon({
-    iconUrl: 'http://143.198.98.66:86/borehole.png',
 
-    iconSize:     [10, 10], // size of the icon
-    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
-    popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
-});
 var glacierIce = L.icon({
     iconUrl: 'http://143.198.98.66:86/glacierIce.png',
 
@@ -324,12 +318,7 @@ L.geoJSON([loadLatLon(coords)], {
 			var aType = feature.properties.archiveType
 			//console.log(aType.length)
 			var shape1 = chooseShape(feature.properties.archiveType)
-			if (aType == "borehole"){
-				console.log("found a borehole")
-				return L.marker(latlng, {
-					icon: borehole
-				});
-			} else if (aType == "GroundIce"){
+			if (aType == "GroundIce"){
 				return L.marker(latlng, {
 					icon: groundIce
 				});
