@@ -92,7 +92,7 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FF8B00","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
  "FluvialSediment":"#4169E0","LakeSediment":"#BCC4AB","MarineSediment":"#8A4513","Speleothem":"#FF1492","Midden":"#824E2B",
- "Peat":"#2F4F4F","Sclerosponge":"#D2042D","Shoreline":"#32CC32","Wood":"#32CC32","TerrestrialSediment":"#d2b48c"}
+ "Peat":"#2F4F4F","Sclerosponge":"#D2042D","Shoreline":"#BCC4AB","Wood":"#32CC32","TerrestrialSediment":"#d2b48c"}
 var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"square","GroundIce":"square","Coral":"triangle",
  "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"square",
  "Peat":"square","Sclerosponge":"triangle","Shoreline":"square","Wood":"triangle","TerrestrialSediment":"circle"}
@@ -667,8 +667,8 @@ const legend = L.control.Legend({
     label: "Shoreline",
     type: "polygon",
     sides: 4,
-    color: "#32CC32",
-    fillColor: "#32CC32",
+    color: "#BCC4AB",
+    fillColor: "#BCC4AB",
     weight: 2
 }, {
     label: "Wood",
