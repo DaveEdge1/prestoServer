@@ -317,7 +317,7 @@ L.geoJSON([loadLatLon(coords)], {
                 },
 
                 onEachFeature: function (feature, layer) {
-		    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p>Archive Type: '+feature.properties.archiveType+'</p><p>URL: '+feature.properties.datasetId+'</p><p>Proxies: '+feature.properties.paleoData_proxy+'</p><p>Mix/Max Age: '+feature.properties.minAge+' - '+feature.properties.minAge+'</p>');
+		    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p>Archive Type: '+feature.properties.archiveType+'</p><p>URL: https://lipdverse.org/data/'+feature.properties.datasetId+'/</p><p>Proxies: '+feature.properties.paleoData_proxy+'</p><p>Mix/Max Age: '+feature.properties.minAge+' - '+feature.properties.minAge+'</p>');
 		},
 /*
 	        filter: function(feature, layer) {
