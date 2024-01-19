@@ -557,14 +557,14 @@ var legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'info legend');
     labels = ['<strong>Categories</strong>'],
-    categories = archiveType.map(function(d) { return d['value']; });
+    Archive_Type = archiveType.map(function(d) { return d['value']; });
 
-    for (var i = 0; i < categories.length; i++) {
+    for (var i = 0; i < Archive_Type.length; i++) {
 
             div.innerHTML += 
             labels.push(
-                '<i class="circle" style="background:' + chooseColor(categories[i]) + '"></i> ' +
-            (categories[i] ? categories[i] : '+'));
+                '<i class="circle" style="background:' + chooseColor(Archive_Type[i]) + '"></i> ' +
+            (Archive_Type[i] ? Archive_Type[i] : '+'));
 
         }
         div.innerHTML = labels.join('<br>');
