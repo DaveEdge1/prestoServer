@@ -64,7 +64,7 @@ app.get('/', function (req, res, next) {
    con.getConnection(function(err) {
 	  if (err) throw err;
 	  console.log("Connected!");
-	  con.query("SELECT dataSetName, archiveType, geo_latitude, geo_longitude FROM dataSetQuery" + buildQstring(req.query) + ";", function (err, result, fields) {
+	  con.query("SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId FROM dataSetQuery" + buildQstring(req.query) + ";", function (err, result, fields) {
 		      if (err) throw err;
 		      console.log('Total records returned: ' + result.length);
 		      res.status(200).json(result);
