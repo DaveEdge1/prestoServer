@@ -555,7 +555,7 @@ changeBoxCoord();
 var legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
 
-	    console.log(archiveType.value)
+	    console.log(Object.values(archiveType))
     var div = L.DomUtil.create('div', 'info legend');
     labels = ['<strong>Categories</strong>'],
     categories = ['Road Surface','Signage','Line Markings','Roadside Hazards','Other'];
