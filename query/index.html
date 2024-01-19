@@ -265,11 +265,19 @@ function loadLatLon (x1){
     lon = Object.values(x1)[i].geo_longitude
     aType = Object.values(x1)[i].archiveType
     dName = Object.values(x1)[i].dataSetName
+    dID = Object.values(x1)[i].datasetId
+    proxy = Object.values(x1)[i].paleoData_proxy
+    minAge = Object.values(x1)[i].minAge
+    maxAge = Object.values(x1)[i].maxAge
     //console.log('lat ' + i + ': ' + lat)
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": []} });
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
     geojson.features[i].properties.dataSetName.push(dName);
+    geojson.features[i].properties.dataSetName.push(dID);
+    geojson.features[i].properties.dataSetName.push(proxy);
+    geojson.features[i].properties.dataSetName.push(minAge);
+    geojson.features[i].properties.dataSetName.push(maxAge);
   }
 
   //document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
@@ -317,7 +325,7 @@ L.geoJSON([loadLatLon(coords)], {
                 },
 
                 onEachFeature: function (feature, layer) {
-		    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p>Archive Type: '+feature.properties.archiveType+'</p><p>URL: https://lipdverse.org/data/'+feature.properties.datasetId+'/</p><p>Proxies: '+feature.properties.paleoData_proxy+'</p><p>Mix/Max Age: '+feature.properties.minAge+' - '+feature.properties.minAge+'</p>');
+		    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p>Archive Type: '+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId'">Dataset URL</a><br>Proxies: '+feature.properties.paleoData_proxy+'<br>Mix/Max Age: '+feature.properties.minAge+' - '+feature.properties.minAge+'</p>');
 		},
 /*
 	        filter: function(feature, layer) {
