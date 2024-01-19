@@ -266,7 +266,7 @@ function loadLatLon (x1){
     aType = Object.values(x1)[i].archiveType
     dName = Object.values(x1)[i].dataSetName
     dID = Object.values(x1)[i].datasetId
-    proxy = Object.values(x1)[i].paleoData_proxy
+    proxy1 = Object.values(x1)[i].paleoData_proxy
     minAge = Object.values(x1)[i].minAge
     maxAge = Object.values(x1)[i].maxAge
     //console.log('lat ' + i + ': ' + lat)
@@ -274,10 +274,10 @@ function loadLatLon (x1){
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
     geojson.features[i].properties.dataSetName.push(dName);
-    geojson.features[i].properties.dataSetName.push(dID);
-    geojson.features[i].properties.dataSetName.push(proxy);
-    geojson.features[i].properties.dataSetName.push(minAge);
-    geojson.features[i].properties.dataSetName.push(maxAge);
+    geojson.features[i].properties.datasetId.push(dID);
+    geojson.features[i].properties.paleoData_proxy.push(proxy1);
+    geojson.features[i].properties.minAge.push(minAge);
+    geojson.features[i].properties.maxAge.push(maxAge);
   }
 
   //document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
