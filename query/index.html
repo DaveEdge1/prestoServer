@@ -573,24 +573,11 @@ var legend = L.control({position: 'bottomleft'});
     legend.addTo(map);*/
 const legend = L.control.Legend({
             position: "bottomleft",
-            collapsed: false,
+            collapsed: true,
             symbolWidth: 24,
             opacity: 1,
             column: 2,
             legends: [{
-                label: "Dotted line",
-                type: "polyline",
-                color: "#0000FF",
-                fillColor: "#0000FF",
-                dashArray: [5, 5],
-                weight: 2
-            }, {
-                label: "Rectangle",
-                type: "rectangle",
-                color: "#FF0000",
-                fillColor: "#FF0000",
-                weight: 2
-            }, {
                 label: "Square",
                 type: "polygon",
                 sides: 4,
