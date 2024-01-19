@@ -538,11 +538,12 @@ function qString(val1,name1){
         // xhr.responseType = "text";
         xhr.send();
     }
-//update leaflet rectangle
-rect.on('edit', function() { changeBoxCoord();
-			   sendQuery()
-			   });
+
 //$getReposBtn.onclick = sendQuery();
 sendQuery();
 changeBoxCoord();
+	//update leaflet rectangle
+rect.on('edit', function() { changeBoxCoord();
+			   prevResp()
+			   });
 </script>
