@@ -32,8 +32,8 @@
 			margin: 0;
 		}
 		.leaflet-container {
-			height: 400px;
-			width: 600px;
+			height: 600px;
+			width: 900px;
 			max-width: 100%;
 			max-height: 100%;
 		}
@@ -54,10 +54,10 @@ Selected values:
 <div><p id="boxCoord"></p></div>
 <div><p id="datasetCount"></p></div>
   <!-- </form> -->
-<div id="map" style="width: 600px; height: 400px;"></div>
+<div id="map" style="width: 900px; height: 600px;"></div>
 <br>
 <div class="button-submit">
-<button style="height:50px; width:100px; font-size:20px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
+<button style="height:30px; width:200px; font-size:18px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
 <br>
     <br>
 	<div class="row">
@@ -93,9 +93,9 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FF8B00","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
  "FluvialSediment":"#4169E0","LakeSediment":"#BCC4AB","MarineSediment":"#8A4513","Speleothem":"#FF1492","Midden":"#824E2B",
  "Peat":"#2F4F4F","Sclerosponge":"#D2042D","Shoreline":"#32CC32","Wood":"#32CC32","TerrestrialSediment":"#d2b48c"}
-var shapePal = {"Borehole":"arrowhead","MolluskShell":"arrowhead","GlacierIce":"square","GroundIce":"arrowhead","Coral":"arrowhead-down",
- "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"arrowhead-down","Midden":"square",
- "Peat":"square","Sclerosponge":"triangle-down","Shoreline":"triangle-down","Wood":"triangle","TerrestrialSediment":"circle"}
+var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"square","GroundIce":"square","Coral":"triangle",
+ "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"square",
+ "Peat":"square","Sclerosponge":"triangle","Shoreline":"square","Wood":"triangle","TerrestrialSediment":"circle"}
 //initiate leaflet rectangle
 var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
@@ -580,111 +580,111 @@ const legend = L.control.Legend({
             opacity: 1,
             column: 5,
             legends: [{
-                label: "Borehole",
-                type: "polygon",
-                sides: 5,
-                color: "#FFD600",
-                fillColor: "#FFD600",
-                weight: 2
-            }, {
-                label: "MolluskShell",
-                type: "polygon",
-                sides: 5,
-                color: "#FF8B00",
-                fillColor: "#FF8B00",
-                weight: 2
-            }, {
-                label: "GlacierIce",
-                type: "polygon",
-                sides: 4,
-                color: "#86CDFA",
-                fillColor: "#86CDFA",
-                weight: 2
-            }, {
-                label: "GroundIce",
-                type: "polygon",
-                sides: 5,
-                color: "#ff6db6",
-                fillColor: "#ff6db6",
-                weight: 2
-            }, {
-                label: "Coral",
-                type: "polygon",
-                sides: 6,
-                color: "#FF8B00",
-                fillColor: "#FF8B00",
-                weight: 2
-            }, {
-                label: "FluvialSediment",
-                type: "circle",
-                radius: 6,
-                color: "#4169E0",
-                fillColor: "#4169E0",
-                weight: 2
-            }, {
-                label: "LakeSediment",
-                type: "circle",
-                radius: 6,
-                color: "#BCC4AB",
-                fillColor: "#BCC4AB",
-                weight: 2
-            }, {
-                label: "MarineSediment",
-                type: "circle",
-                radius: 6,
-                color: "#8A4513",
-                fillColor: "#8A4513",
-                weight: 2
-            }, {
-                label: "Speleothem",
-                type: "polygon",
-                sides: 6,
-                color: "#FF1492",
-                fillColor: "#FF1492",
-                weight: 2
-            }, {
-                label: "Midden",
-                type: "polygon",
-                sides: 4,
-                color: "#824E2B",
-                fillColor: "#824E2B",
-                weight: 2
-            }, {
-                label: "Peat",
-                type: "polygon",
-                sides: 4,
-                color: "#2F4F4F",
-                fillColor: "#2F4F4F",
-                weight: 2
-            }, {
-                label: "Sclerosponge",
-                type: "polygon",
-                sides: 7,
-                color: "#D2042D",
-                fillColor: "#D2042D",
-                weight: 2
-            }, {
-                label: "Shoreline",
-                type: "polygon",
-                sides: 7,
-                color: "#32CC32",
-                fillColor: "#32CC32",
-                weight: 2
-            }, {
-                label: "Wood",
-                type: "polygon",
-                sides: 3,
-                color: "#32CC32",
-                fillColor: "#32CC32",
-                weight: 2
-            }, {
-                label: "TerrestrialSediment",
-                type: "circle",
-                radius: 6,
-                color: "#d2b48c",
-                fillColor: "#d2b48c",
-                weight: 2
-            }]
+    label: "Borehole",
+    type: "polygon",
+    sides: 4,
+    color: "#FFD600",
+    fillColor: "#FFD600",
+    weight: 2
+}, {
+    label: "MolluskShell",
+    type: "polygon",
+    sides: 3,
+    color: "#FF8B00",
+    fillColor: "#FF8B00",
+    weight: 2
+}, {
+    label: "GlacierIce",
+    type: "polygon",
+    sides: 4,
+    color: "#86CDFA",
+    fillColor: "#86CDFA",
+    weight: 2
+}, {
+    label: "GroundIce",
+    type: "polygon",
+    sides: 4,
+    color: "#ff6db6",
+    fillColor: "#ff6db6",
+    weight: 2
+}, {
+    label: "Coral",
+    type: "polygon",
+    sides: 3,
+    color: "#FF8B00",
+    fillColor: "#FF8B00",
+    weight: 2
+}, {
+    label: "FluvialSediment",
+    type: "circle",
+    radius: 6,
+    color: "#4169E0",
+    fillColor: "#4169E0",
+    weight: 2
+}, {
+    label: "LakeSediment",
+    type: "circle",
+    radius: 6,
+    color: "#BCC4AB",
+    fillColor: "#BCC4AB",
+    weight: 2
+}, {
+    label: "MarineSediment",
+    type: "circle",
+    radius: 6,
+    color: "#8A4513",
+    fillColor: "#8A4513",
+    weight: 2
+}, {
+    label: "Speleothem",
+    type: "polygon",
+    sides: 4,
+    color: "#FF1492",
+    fillColor: "#FF1492",
+    weight: 2
+}, {
+    label: "Midden",
+    type: "polygon",
+    sides: 4,
+    color: "#824E2B",
+    fillColor: "#824E2B",
+    weight: 2
+}, {
+    label: "Peat",
+    type: "polygon",
+    sides: 4,
+    color: "#2F4F4F",
+    fillColor: "#2F4F4F",
+    weight: 2
+}, {
+    label: "Sclerosponge",
+    type: "polygon",
+    sides: 3,
+    color: "#D2042D",
+    fillColor: "#D2042D",
+    weight: 2
+}, {
+    label: "Shoreline",
+    type: "polygon",
+    sides: 4,
+    color: "#32CC32",
+    fillColor: "#32CC32",
+    weight: 2
+}, {
+    label: "Wood",
+    type: "polygon",
+    sides: 3,
+    color: "#32CC32",
+    fillColor: "#32CC32",
+    weight: 2
+}, {
+    label: "TerrestrialSediment",
+    type: "circle",
+    radius: 6,
+    color: "#d2b48c",
+    fillColor: "#d2b48c",
+    weight: 2
+}]
         })
         .addTo(map);
 	//update leaflet rectangle
