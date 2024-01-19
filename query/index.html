@@ -325,16 +325,26 @@ L.geoJSON([loadLatLon(coords)], {
 			//console.log(aType.length)
 			var shape1 = chooseShape(feature.properties.archiveType)
 			if (aType == "borehole"){
+				console.log("found a borehole")
 				return L.marker(latlng, {
-					icon: borehole
+					icon: borehole,
+					    iconSize:     [4, 4], // size of the icon
+					    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
+					    popupAnchor:  [2, 2]
 				});
 			} else if (aType == "groundIce"){
 				return L.marker(latlng, {
-					icon: groundIce
+					icon: groundIce,
+					    iconSize:     [4, 4], // size of the icon
+					    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
+					    popupAnchor:  [2, 2]
 				});
 			} else if (aType == "glacierIce"){
 				return L.marker(latlng, {
-					icon: glacierIce
+					icon: glacierIce,
+					    iconSize:     [4, 4], // size of the icon
+					    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
+					    popupAnchor:  [2, 2]
 				});
 			} else {
 		                    return L.shapeMarker(latlng, {
