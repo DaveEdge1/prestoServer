@@ -278,23 +278,23 @@ function loadLatLon (x1){
 }
 let inRectCount = 0;
 var borehole = L.icon({
-    iconUrl: '/borehole.png',
+    iconUrl: 'http://143.198.98.66:86/borehole.png',
 
-    iconSize:     [4, 4], // size of the icon
+    iconSize:     [20, 20], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var glacierIce = L.icon({
-    iconUrl: '/glacierIce.png',
+    iconUrl: 'http://143.198.98.66:86/glacierIce.png',
 
-    iconSize:     [4, 4], // size of the icon
+    iconSize:     [20, 20], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var groundIce = L.icon({
-    iconUrl: '/groundIce.png',
+    iconUrl: 'http://143.198.98.66:86//groundIce.png',
 
-    iconSize:     [4, 4], // size of the icon
+    iconSize:     [20, 20], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
@@ -327,24 +327,15 @@ L.geoJSON([loadLatLon(coords)], {
 			if (aType == "borehole"){
 				console.log("found a borehole")
 				return L.marker(latlng, {
-					icon: borehole,
-					    iconSize:     [4, 4], // size of the icon
-					    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
-					    popupAnchor:  [2, 2]
+					icon: borehole
 				});
 			} else if (aType == "groundIce"){
 				return L.marker(latlng, {
-					icon: groundIce,
-					    iconSize:     [4, 4], // size of the icon
-					    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
-					    popupAnchor:  [2, 2]
+					icon: groundIce
 				});
 			} else if (aType == "glacierIce"){
 				return L.marker(latlng, {
-					icon: glacierIce,
-					    iconSize:     [4, 4], // size of the icon
-					    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
-					    popupAnchor:  [2, 2]
+					icon: glacierIce
 				});
 			} else {
 		                    return L.shapeMarker(latlng, {
