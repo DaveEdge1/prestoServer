@@ -292,6 +292,20 @@ var groundIce = L.icon({
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
+var glacierIceOpac = L.icon({
+    iconUrl: 'http://143.198.98.66:86/glacierIceOpac.png',
+
+    iconSize:     [10, 10], // size of the icon
+    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
+    popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
+});
+var groundIceOpac = L.icon({
+    iconUrl: 'http://143.198.98.66:86//groundIceOpac.png',
+
+    iconSize:     [10, 10], // size of the icon
+    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
+    popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
+});
 function updatePoints (coords){
 	inRectCount = 0;
 	layerGroup.clearLayers();
@@ -326,6 +340,14 @@ L.geoJSON([loadLatLon(coords)], {
 			} else if (aType == "GlacierIce" && Opac1 == 0.8){
 				return L.marker(latlng, {
 					icon: glacierIce
+				});
+			} else if (aType == "GroundIce" && Opac1 == 0.1){
+				return L.marker(latlng, {
+					icon: groundIceOpac
+				});
+			} else if (aType == "GlacierIce" && Opac1 == 0.1){
+				return L.marker(latlng, {
+					icon: glacierIceOpac
 				});
 			} else {
 		                    return L.shapeMarker(latlng, {
