@@ -548,7 +548,8 @@ var legend = L.control({position: 'bottomright',
 				type: "image",
 				url: "marker/marker-red.png",
 				}]
-		       }).addTo(map);
+		       })
+map.addLayer(legend);
 	//update leaflet rectangle
 rect.on('edit', function() {
 	changeBoxCoord();
