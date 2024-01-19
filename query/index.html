@@ -543,7 +543,9 @@ function qString(val1,name1){
 sendQuery();
 changeBoxCoord();
 	//update leaflet rectangle
-rect.on('edit', function() { changeBoxCoord();
-			   updatePoints(prevResp)
-			   });
+rect.on('edit', function() {
+	console.log(prevResp)
+	changeBoxCoord();
+	updatePoints(prevResp)
+	});
 </script>
