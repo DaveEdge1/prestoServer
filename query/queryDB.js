@@ -40,9 +40,6 @@ function buildQstring(qs){
 			}
 			if (totalWordLen == 0){
 				outString = outString + key
-				if (i < (words.length-1)){
-						outString = outString + ' OR '
-					}
 			} else {
 				for (let i = 0; i < words.length; i++) {
 					outString = outString + key + ' LIKE' + ' "%' + words[i] + '%"'
