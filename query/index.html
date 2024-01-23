@@ -185,10 +185,14 @@ Selected values:
 <script>
 
 function updateFilters(){
-	console.log(document.getElementById("ageSliderOn").checked)
+	var filters1 = "{ages:" + document.getElementById("ageSliderOn").checked + "}"
 	if (document.getElementById("ageSliderOn").checked){
 		document.getElementById("timeSliderDiv").style.display = "inline-block";
+	} else {
+		document.getElementById("timeSliderDiv").style.display = "none";
 	}
+	console.log(filters1)
+	return(filters1)
 }
 
 //initiate leaflet map
