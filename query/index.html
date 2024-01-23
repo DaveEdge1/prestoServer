@@ -191,8 +191,22 @@ function updateBoundingBox(){
 	rect.editing.disable();
 	var latMin = document.getElementById("lat_min").value
 	var latMax = document.getElementById("lat_max").value
+	if (latMin > latMax){
+		if (latMin < 90){
+			latMax = latMin + .001
+		} else {
+			latMin = latMax - .001
+		}
+	}
 	var lonMin = document.getElementById("lon_min").value
 	var lonMax = document.getElementById("lon_max").value
+	if (lonMin > lonMax){
+		if (lonMin < 180){
+			lonMax = lonMin + .001
+		} else {
+			lonMin = lonMax - .001
+		}
+	}
 	rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
 	rect.editing.enable();
 }
