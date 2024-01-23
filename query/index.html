@@ -185,7 +185,8 @@ Selected values:
 <script>
 
 function updateFilters(){
-	if (ageSliderOn){
+	console.log(getElementById("ageSliderOn").checked)
+	if (getElementById("ageSliderOn").checked){
 		getElementById("timeSliderDiv").style.display = "inline-block";
 	}
 }
