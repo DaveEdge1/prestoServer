@@ -189,8 +189,8 @@ var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
 function updateBoundingBox(){
 	rect.editing.disable();
-	var latMin = document.getElementById("lat_min").value
-	var latMax = document.getElementById("lat_max").value
+	var latMin = +document.getElementById("lat_min").value
+	var latMax = +document.getElementById("lat_max").value
 	if (latMin > latMax){
 		if (latMin < 90){
 			latMax = latMin + .001
@@ -200,8 +200,8 @@ function updateBoundingBox(){
 			document.getElementById("lat_min").value = latMin
 		}
 	}
-	var lonMin = document.getElementById("lon_min").value
-	var lonMax = document.getElementById("lon_max").value
+	var lonMin = +document.getElementById("lon_min").value
+	var lonMax = +document.getElementById("lon_max").value
 	if (lonMin > lonMax){
 		if (lonMin < 180){
 			lonMax = lonMin + .001
