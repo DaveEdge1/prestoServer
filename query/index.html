@@ -121,7 +121,8 @@ Selected values:
 <button type="button" class="collapsible">Slider</button>
 <div class="content">
 <br>
-<div style= "vertical-align: middle; height: 50px;" class="form-group"> 
+<div style= "vertical-align: middle; height: 50px;" class="form-group">
+<input type="checkbox" id="ageSliderOn" value="TRUE">
 <label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>
@@ -253,28 +254,6 @@ function chooseOpacity(coords, rect1){
 	var point = regExp.exec(coords)[1]
 	var pointLat = dec4(point.split(',')[0])
 	var pointLon = dec4(point.split(',')[1])
-	//var pointLat = 30
-	//var pointLon = -95
-	/*
-	console.log("________________________________________________________")
-	console.log(datasetName)
-	console.log(Math.sign(+pointLon))
-	console.log(Math.sign(+rect1.West))
-	console.log("coords: " + coords)
-	console.log("rect1: " + +rect1.North, +rect1.South, +rect1.East, +rect1.West)
-	console.log("pointLat > rect1.South: ")
-	console.log(+pointLat + ">" + +rect1.South)
-	console.log(+pointLat > +rect1.South)
-	console.log("pointLat < rect1.North: ")
-	console.log(+pointLat + "<" + +rect1.North)
-	console.log(+pointLat < +rect1.North)
-	console.log("pointLon > rect1.West: ")
-	console.log(+pointLon + ">" + +rect1.West)
-	console.log(+pointLon > +rect1.West)
-	console.log("pointLon < rect1.East: ")
-	console.log(+pointLon + "<" + +rect1.East)
-	console.log(+pointLon < +rect1.East)
-	*/
 
 	if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
 		inRectCount = inRectCount + 1
@@ -618,9 +597,10 @@ function qString(val1,name1){
 	    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
 	    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
 	    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
-     	    */
+     	    
 	    qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
 	    qstring = qstring + '& maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value
+     		*/
 	    //console.log(qstring)
 	    return qstring;
     };
