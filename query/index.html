@@ -141,6 +141,34 @@ Selected values:
 <hr class="solid">
 <hr class="solid">
 </div>
+<div class="content">
+<br>
+<br>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label" for="geo_proxy_coords">coordinate bounds for assimilating proxies </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>
+</div>
+<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles</p>
+<div class="mapall-container">
+<canvas id="canvas" width="1080" height="540" style="margin-right:10px; background: url(/SimpleWorldsingle180.png)"></canvas>
+<div class="map-numeric">
+<label style="font-size:16px; margin-right:8px;">Latitude</label>
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="0.001" onchange="updateRect(180);">
+<label style="margin-right:8px;">min</label>
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateRect(180);">
+<label style="margin-right:30px;">max</label>
+<label style="font-size:16px; margin-right:8px;">Longitude</label>
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateRect(180);">
+<label style="margin-right:8px;">min</label>
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateRect(180);">
+<label>max</label>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
 </form>
 <script src="/slider.js"></script>
 </body>
