@@ -151,14 +151,14 @@ Selected values:
 <div class="mapall-container">
 <div class="map-numeric">
 <label style="font-size:16px; margin-right:8px;">Latitude</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="15" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="45" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:30px;">max</label>
 <label style="font-size:16px; margin-right:8px;">Longitude</label>
 <input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="-90" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
 <label>max</label>
 </div>
 </div>
@@ -188,8 +188,12 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
 var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
 function updateBoundingBox(){
+	rect.editing.disable();
 	var latMin = document.getElementById("lat_min").value
-	rect.setBounds([[latMin, -180], [45, -90]]);
+	var latMax = document.getElementById("lat_max").value
+	var lonMin = document.getElementById("lon_min").value
+	var lonMax = document.getElementById("lon_max").value
+	rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
 	rect.editing.enable();
 }
 	
