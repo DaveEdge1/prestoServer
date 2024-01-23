@@ -274,7 +274,10 @@ function changeBoxCoord(){
 	//var North = dec4(45)
 	//var East = dec4(0)
 	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
-	document.getElementById("boxCoord").innerHTML = newCoords
+	document.getElementById("lat_min").value = South
+	document.getElementById("lat_max").value = North
+	document.getElementById("lon_min").value = West
+	document.getElementById("lon_max").value = East
 	return {"South":South,"West":West,"North":North,"East":East}
 }
 
