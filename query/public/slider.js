@@ -99,7 +99,7 @@ function changeSlider(input, slider) {
 	fillSingleSlider(slider)
 }
 
-/*
+
 var val1 = 0;
 
 
@@ -134,7 +134,7 @@ function uncheckAll(divid, checkCycle) {
 				    }
 			    }
 }
-*/
+
 const time_range_to_reconstruct_fromSilder = document.getElementById("time_range_to_reconstruct_fromSilder");
 const time_range_to_reconstruct_toSilder = document.getElementById("time_range_to_reconstruct_toSilder");
 const time_range_to_reconstruct_fromInput = document.getElementById("time_range_to_reconstruct_fromInput");
