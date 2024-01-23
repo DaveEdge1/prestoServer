@@ -187,68 +187,8 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
 //initiate leaflet rectangle
 var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
-rect.editing.enable();
-/*
-var legend = L.control.Legend({
-            position: "bottomleft",
-            collapsed: false,
-            symbolWidth: 24,
-            opacity: 1,
-            column: 2,
-            legends: [{
-                label: "Circle",
-                type: "circle",
-                radius: 6,
-                color: "blue",
-                fillColor: "#FF0000",
-                fillOpacity: 0.6,
-                weight: 2,
-                layers: [marker],
-                inactive: true,
-            }, {
-                label: "Real line",
-                type: "polyline",
-                color: "#FF0000",
-                fillColor: "#FF0000",
-                weight: 2,
-                layers: polyline
-            }, {
-                label: "Dotted line",
-                type: "polyline",
-                color: "#0000FF",
-                fillColor: "#0000FF",
-                dashArray: [5, 5],
-                weight: 2
-            }, {
-                label: "Rectangle",
-                type: "rectangle",
-                color: "#FF0000",
-                fillColor: "#FF0000",
-                weight: 2
-            }, {
-                label: "Square",
-                type: "polygon",
-                sides: 4,
-                color: "#FF0000",
-                fillColor: "#FF0000",
-                weight: 2
-            }, {
-                label: "Regular triangle",
-                type: "polygon",
-                sides: 3,
-                color: "#FF0000",
-                fillColor: "#FF0000",
-                weight: 2
-            }, {
-                label: "Regular polygon",
-                type: "polygon",
-                sides: 5,
-                color: "#FF0000",
-                fillColor: "#FF0000",
-                weight: 2
-            }]
-        }).addTo(map);
-*/
+
+	
 //add layer for points
 var layerGroup = L.layerGroup().addTo(map);
 
