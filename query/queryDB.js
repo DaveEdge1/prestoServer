@@ -30,6 +30,7 @@ function buildQstring(qs){
 		for (const [key, value] of Object.entries(qs)) {
 			const words = value.split(',');
 			console.log('words: ' + words)
+			console.log('words length: ' + words.length)
 			if (countA > 0){
 				console.log('index > 0')
 				outString = outString + ' AND ('
