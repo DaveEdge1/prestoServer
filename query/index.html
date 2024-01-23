@@ -187,7 +187,7 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
 //initiate leaflet rectangle
 var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
 map.addLayer(rect);
-
+rect.editing.enable();
 	
 //add layer for points
 var layerGroup = L.layerGroup().addTo(map);
