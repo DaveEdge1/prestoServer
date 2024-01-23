@@ -613,10 +613,12 @@ function qString(val1,name1){
 	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name)
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
+	    /*
 	    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
 	    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
 	    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
 	    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
+     	    */
 	    qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
 	    qstring = qstring + '& maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value
 	    //console.log(qstring)
