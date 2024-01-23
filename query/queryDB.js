@@ -38,12 +38,20 @@ function buildQstring(qs){
 			} else {
 				outString = '('
 			}
-			for (let i = 0; i < words.length; i++) {
-				outString = outString + key + ' LIKE' + ' "%' + words[i] + '%"'
+			if (totalWordLen == 0){
+				outString = outString + key
 				if (i < (words.length-1)){
-					outString = outString + ' OR '
+						outString = outString + ' OR '
+					}
+			} else {
+				for (let i = 0; i < words.length; i++) {
+					outString = outString + key + ' LIKE' + ' "%' + words[i] + '%"'
+					if (i < (words.length-1)){
+						outString = outString + ' OR '
+					}
 				}
 			}
+			
 			outString = outString + ')'
 			console.log('outString: ' + outString)
 			countA = countA + 1;
