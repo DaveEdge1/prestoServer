@@ -31,6 +31,8 @@ function buildQstring(qs){
 			const words = value.split(',');
 			console.log('words: ' + words)
 			console.log('words length: ' + words.length)
+			console.log('typeof words: ' + typeof words)
+			console.log('typeof words[0]: ' + typeof words[0])
 			if (countA > 0){
 				console.log('index > 0')
 				outString = outString + ' AND ('
