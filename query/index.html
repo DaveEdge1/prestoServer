@@ -194,8 +194,10 @@ function updateBoundingBox(){
 	if (latMin > latMax){
 		if (latMin < 90){
 			latMax = latMin + .001
+			document.getElementById("lat_max").value = latMax
 		} else {
 			latMin = latMax - .001
+			document.getElementById("lat_min").value = latMin
 		}
 	}
 	var lonMin = document.getElementById("lon_min").value
@@ -203,8 +205,10 @@ function updateBoundingBox(){
 	if (lonMin > lonMax){
 		if (lonMin < 180){
 			lonMax = lonMin + .001
+			document.getElementById("lon_max").value = lonMax
 		} else {
 			lonMin = lonMax - .001
+			document.getElementById("lon_min").value = lonMin
 		}
 	}
 	rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
