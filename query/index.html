@@ -188,7 +188,14 @@ Selected values:
 <hr class="solid">
 <hr class="solid">
 <br>
-<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<div style="width: 10%; vertical-align: middle; float: left;">
+	<br><br><br>
+	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>
+	<br>
+	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>
+	<br><br><br>
+</div>
+<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
 <label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
 <span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>
@@ -209,7 +216,7 @@ Selected values:
 <script src="/slider.js"></script>
 </body>
 <script>
-let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '"}')
+let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
 	
 	if (document.getElementById("ageSliderOn").checked){
@@ -227,6 +234,14 @@ function updateFilters(){
 	if (!document.getElementById("coordsOn").checked) {
 		document.getElementById("coordsDiv").style.visibility = "hidden";
 		filters1['coords'] = 'false'
+	}
+	if (document.getElementById("resolutionOn").checked){
+		document.getElementById("resolutionDiv").style.visibility = "visible";
+		filters1['resolution'] = 'true'
+	}
+	if (!document.getElementById("resolutionOn").checked) {
+		document.getElementById("resolutionDiv").style.visibility = "hidden";
+		filters1['resolution'] = 'false'
 	}
 	console.log(filters1)
 	return(filters1)
@@ -655,9 +670,9 @@ function qString(val1,name1){
 		    qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
 		    qstring = qstring + '& maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value
 	    }
-
-	    qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
-
+	    if (JSON.parse(filters1['resolution'])){
+	    	qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
+	    }
 	    //console.log(qstring)
 	    return qstring;
     };
