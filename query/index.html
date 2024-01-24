@@ -712,7 +712,8 @@ function qString(val1,name1){
 	    if (JSON.parse(filters1['terrestrial'])){
 	    	qstring = qstring + '& isTerrestrial=' + document.getElementsByName("isTerrestrial")[0].value
 	    }
-	    //console.log(qstring)
+	    console.log("isTerrestrial)[0]" + document.getElementsByName("isTerrestrial")[0].value)
+	    console.log("isTerrestrial)[1]" + document.getElementsByName("isTerrestrial")[1].value)
 	    return qstring;
     };
     let prevResp = {};
