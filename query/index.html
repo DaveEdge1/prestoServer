@@ -190,10 +190,10 @@ function updateFilters(){
 	
 	if (document.getElementById("ageSliderOn").checked){
 		document.getElementById("timeSliderDiv").style.visibility = "visible";
-		filters1.ages = true
+		filters1['ages'] = true
 	} else {
 		document.getElementById("timeSliderDiv").style.visibility = "hidden";
-		filters1.ages = false
+		filters1['ages'] = false
 	}
 	console.log(filters1)
 	return(filters1)
