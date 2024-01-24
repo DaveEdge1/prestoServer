@@ -212,11 +212,37 @@ Selected values:
 <hr class="solid">
 <br>
 </div>
+<br>
+<div style="width: 10%; vertical-align: middle; float: left;">
+	<br><br><br>
+	<label id="isTerrestrialOn_label" for="resolutionOn">Filter by Land/Sea</label>
+	<br>
+	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();'>
+	<br><br><br>
+</div>
+<div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
+<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label" for="resolution">Terrestrial or Marine</label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">Select only terrestrial/marine data (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</span>
+</div>
+<div class="radio_container">
+<div class="radio_control">
+<input type="radio" id="Terrestrial" name="isTerrestrial" value="1">
+<label for="Terrestrial">Terrestrial</label><br>
+<input type="radio" id="Marine" name="isTerrestrial" value="0">
+<label for="Marine">Marine</label><br>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
 </form>
 <script src="/slider.js"></script>
 </body>
 <script>
-let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
+let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
 	
 	if (document.getElementById("ageSliderOn").checked){
@@ -242,6 +268,14 @@ function updateFilters(){
 	if (!document.getElementById("resolutionOn").checked) {
 		document.getElementById("resolutionDiv").style.visibility = "hidden";
 		filters1['resolution'] = 'false'
+	}
+	if (document.getElementById("isTerrestrialOn").checked){
+		document.getElementById("isTerrestrialDiv").style.visibility = "visible";
+		filters1['terrestrial'] = 'true'
+	}
+	if (!document.getElementById("isTerrestrialOn").checked) {
+		document.getElementById("isTerrestrialDiv").style.visibility = "hidden";
+		filters1['terrestrial'] = 'false'
 	}
 	console.log(filters1)
 	return(filters1)
@@ -673,7 +707,9 @@ function qString(val1,name1){
 	    if (JSON.parse(filters1['resolution'])){
 	    	qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
 	    }
-	    qstring = qstring + '& isTerrestrial=1'
+	    if (JSON.parse(filters1['terrestrial'])){
+	    	qstring = qstring + '& isTerrestrial=' + document.getElementByName("isTerrestrial").value
+	    }
 	    //console.log(qstring)
 	    return qstring;
     };
