@@ -144,3 +144,8 @@ time_range_to_reconstruct_fromSilder.oninput = () => controlFromSlider(time_rang
 time_range_to_reconstruct_toSilder.oninput = () => controlToSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_toInput);
 time_range_to_reconstruct_fromInput.onchange = () => controlFromInput(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
 time_range_to_reconstruct_toInput.onchange = () => controlToInput(time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
+const resolutionmaxSilder = document.getElementById("resolutionSilder");
+const resolutionmaxInput = document.getElementById("resolutionInput");
+resolutionmaxSilder.oninput = () => changeInput(resolutionmaxSilder, resolutionmaxInput);
+resolutionmaxInput.onchange = () => changeSlider(resolutionmaxInput, resolutionmaxSilder);
+fillSingleSlider(resolutionmaxSilder)
