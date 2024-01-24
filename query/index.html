@@ -710,9 +710,9 @@ function qString(val1,name1){
 	    	qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
 	    }
 	    if (JSON.parse(filters1['terrestrial'])){
-	    	qstring = qstring + '& isTerrestrial=' + document.getElementById("Terrestrial").checked
+	    	qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
 	    }
-	    console.log(document.getElementById("Terrestrial").checked)
+	    console.log(+document.getElementById("Terrestrial").checked)
 	    return qstring;
     };
     let prevResp = {};
