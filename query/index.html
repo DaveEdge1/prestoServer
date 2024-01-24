@@ -712,7 +712,7 @@ function qString(val1,name1){
 	    if (JSON.parse(filters1['terrestrial'])){
 	    	qstring = qstring + '& isTerrestrial=' + document.getElementById("Terrestrial").checked
 	    }
-	    console.log("document.getElementById("Terrestrial").checked" + document.getElementById("Terrestrial").checked)
+	    console.log(document.getElementById("Terrestrial").checked)
 	    return qstring;
     };
     let prevResp = {};
