@@ -709,7 +709,7 @@ function qString(val1,name1){
 	    	qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
 	    }
 	    if (JSON.parse(filters1['terrestrial'])){
-	    	qstring = qstring + '& isTerrestrial=' + document.getElementsByName("isTerrestrial").value
+	    	qstring = qstring + '& isTerrestrial=' + document.getElementsByName("isTerrestrial")[0].value
 	    }
 	    //console.log(qstring)
 	    return qstring;
