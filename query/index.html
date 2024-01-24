@@ -185,13 +185,15 @@ Selected values:
 <script src="/slider.js"></script>
 </body>
 <script>
-
+let filters1 = "{ages:" + document.getElementById("ageSliderOn").checked + "}"
 function updateFilters(){
-	var filters1 = "{ages:" + document.getElementById("ageSliderOn").checked + "}"
+	
 	if (document.getElementById("ageSliderOn").checked){
-		document.getElementById("timeSliderDiv").style.visibility = "visible";;
+		document.getElementById("timeSliderDiv").style.visibility = "visible";
+		filters1.ages = true
 	} else {
 		document.getElementById("timeSliderDiv").style.visibility = "hidden";
+		filters1.ages = false
 	}
 	console.log(filters1)
 	return(filters1)
