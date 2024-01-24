@@ -188,6 +188,23 @@ Selected values:
 <hr class="solid">
 <hr class="solid">
 <br>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="resolutionSilder" type="range" value="100" min="1" max="1000" step="1"/>
+<br>
+<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
 </form>
 <script src="/slider.js"></script>
 </body>
