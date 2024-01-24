@@ -185,7 +185,7 @@ Selected values:
 <script src="/slider.js"></script>
 </body>
 <script>
-let filters1 = "{ages:" + document.getElementById("ageSliderOn").checked + "}"
+let filters1 = JSON.parse("{ages:" + document.getElementById("ageSliderOn").checked + "}")
 function updateFilters(){
 	
 	if (document.getElementById("ageSliderOn").checked){
