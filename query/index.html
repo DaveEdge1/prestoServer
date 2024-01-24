@@ -639,6 +639,8 @@ function qString(val1,name1){
 		    qstring = qstring + '& maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value
 	    }
 
+	    qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
+
 	    //console.log(qstring)
 	    return qstring;
     };
