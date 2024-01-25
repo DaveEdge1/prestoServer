@@ -9,13 +9,13 @@
 
 .leaflet-legend-column {
   float: left;
-  margin-left: 20px;
+  margin-left: 10px;
 }
 
 
 .leaflet-legend-item {
   display: table;
-  margin: 20px 0  !important;
+  margin: 8px 0  !important;
 }
 
 .leaflet-legend-item span {
