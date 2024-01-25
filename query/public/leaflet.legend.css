@@ -15,7 +15,7 @@
 
 .leaflet-legend-item {
   display: table;
-  margin: 2px 0;
+  margin: 2px 0  !important;
 }
 
 .leaflet-legend-item span {
