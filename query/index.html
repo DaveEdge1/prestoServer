@@ -92,7 +92,7 @@ Selected values:
 <br>
 <br>
 <div class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continentIn">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continentIn">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>
 </div>
@@ -105,7 +105,7 @@ Selected values:
 <br>
 <br>
 <div class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="countryIn">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="countryIn">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>
 </div>
@@ -186,11 +186,11 @@ Selected values:
 	<br><br><br>
 	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>
 	<br>
-	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();'>
+	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' checked>
 	<br><br><br>
 </div>
 <div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
-<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label" for="geo_proxy_coords">coordinate bounds for assimilating proxies </label>
+<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label" for="geo_proxy_coords">Coordinate bounds for assimilating proxies </label>
 <div style= "vertical-align: middle; height: 50px;" class="hover-text">?
 <span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>
 </div>
@@ -247,7 +247,7 @@ Selected values:
 	<br><br><br>
 </div>
 <div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
-<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label" for="resolution">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label" for="resolution">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
 <span class="tooltip-text">Select only terrestrial/marine data</span>
 </div>
@@ -487,7 +487,13 @@ var groundIceOpac = L.icon({
 function updatePoints (coords){
 	inRectCount = 0;
 	layerGroup.clearLayers();
-	rectCoord = changeBoxCoord();
+	if (!document.getElementById("coordsOn").checked) {
+		rectCoord = return {"South":-90,"West":-360,"North":90,"East":360}
+		rect.setBounds([[-90, -360], [90, 360]]);
+		rect.editing.disable();
+	} else {
+		rectCoord = changeBoxCoord();
+	}
 L.geoJSON([loadLatLon(coords)], {
 
                 style : function(feature) {
