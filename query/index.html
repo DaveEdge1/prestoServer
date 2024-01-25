@@ -452,7 +452,7 @@ function loadLatLon (x1){
     geojson.features[i].properties.maxAge.push(maxAge);
   }
 
-  //document.getElementById("latlon").innerHTML = JSON.stringify(geojson)
+  console.log(geojson.features[0])
 	
   return(geojson)
 }
