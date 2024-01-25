@@ -281,17 +281,13 @@
 											       color: black;
 											       background-color: transparent;
 										       }
-										       /*#myinput {
-											       -webkit-appearance: none;
-											         appearance: none;
-											         background: linear-gradient(to right, #82CFD0 0%, #82CFD0 50%, #fff 50%, #fff 100%);
-												   border: solid 1px #82CFD0;
-												     border-radius: 8px;
-												       height: 7px;
-												         width: 1000px;
-													  position: absolute;
-													   outline: none;
-													    background-color: #C6C6C6;
-													     pointer-events: none;
-													     transition: background 450ms ease-in;
-												       }*/
+										       .legend {
+  padding: 6px 8px;
+  font: 14px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  /*box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);*/
+  /*border-radius: 5px;*/
+  line-height: 24px;
+  color: #555;
+}
