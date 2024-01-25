@@ -74,7 +74,7 @@ Selected values:
 <span id="response"></span>
 <br>
 <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()">
-<button type="button" class="collapsible">Multi-selects</button>
+<button type="button" class="collapsible">Material and Interpretation Filters</button>
 <div class="content">
 <br>
 <br>
@@ -85,32 +85,6 @@ Selected values:
 </div>
 <br>
 <input style="width:80%;" name="archiveType" id="archiveTypeIn">
-</div>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-<br>
-<div class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continentIn">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>
-<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
-<span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>
-</div>
-<br>
-<input style="width:80%;" name="continent" id="continentIn">
-</div>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
-<br>
-<div class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="countryIn">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
-<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
-<span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>
-</div>
-<br>
-<input style="width:80%;" name="country" id="countryIn">
 </div>
 <br>
 <hr class="solid">
@@ -131,7 +105,7 @@ Selected values:
 <br>
 <br>
 <div class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="variableName_label" for="proxy">Proxy</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose proxy(ies) (Begin typing for suggestions)</span>
 </div>
@@ -142,9 +116,8 @@ Selected values:
 <hr class="solid">
 <hr class="solid">
 <br>
-<br>
 </div>
-<button type="button" class="collapsible">Slider</button>
+<button type="button" class="collapsible">Temporal Filters</button>
 <div class="content">
 <br>
 <div style="width: 10%; vertical-align: middle; float: left;">
@@ -184,6 +157,60 @@ Selected values:
 <br>
 <div style="width: 10%; vertical-align: middle; float: left;">
 	<br><br><br>
+	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>
+	<br>
+	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>
+	<br><br><br>
+</div>
+<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
+<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="resolutionSilder" type="range" value="100" min="1" max="1000" step="1"/>
+<br>
+<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>
+</div>
+</div>
+</div>
+<br><br><br><br><br><br><br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<button type="button" class="collapsible">Location Filters</button>
+<div class="content">
+<br>
+<div class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continentIn">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>
+</div>
+<br>
+<input style="width:80%;" name="continent" id="continentIn">
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+<br>
+<div class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="countryIn">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>
+</div>
+<br>
+<input style="width:80%;" name="country" id="countryIn">
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+<br>
+<div style="width: 10%; vertical-align: middle; float: left;">
+	<br><br><br>
 	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>
 	<br>
 	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' checked>
@@ -216,32 +243,7 @@ Selected values:
 <br>
 <div style="width: 10%; vertical-align: middle; float: left;">
 	<br><br><br>
-	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>
-	<br>
-	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>
-	<br><br><br>
-</div>
-<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
-<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>
-<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>
-</div>
-<div class="range_container">
-<div class="sliders_control">
-<input id="resolutionSilder" type="range" value="100" min="1" max="1000" step="1"/>
-<br>
-<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>
-</div>
-</div>
-</div>
-<br><br><br><br><br><br><br>
-<hr class="solid">
-<hr class="solid">
-<br>
-<br>
-<div style="width: 10%; vertical-align: middle; float: left;">
-	<br><br><br>
-	<label id="isTerrestrialOn_label" for="resolutionOn">Filter by Land/Sea</label>
+	<label id="isTerrestrialOn_label" for="isTerrestrialOn">Filter by Land/Sea</label>
 	<br>
 	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();'>
 	<br><br><br>
