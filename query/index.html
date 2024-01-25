@@ -407,6 +407,12 @@ function changeBoxCoord(){
 	//var newCoords = South + ', ' + West + ', ' + North + ', ' + East
 	var rectWidth = +(East-West)
 	rect.editing.disable();
+	if (North > 90){
+		rect.setBounds([[South, West], [90, East]]);
+	}
+	if (South < -90){
+		rect.setBounds([[-90, West], [North, East]]);
+	}
 	if (rectWidth > 360){
 		if (West < -360){
 			var newWest = +(+East - 360)
@@ -417,6 +423,7 @@ function changeBoxCoord(){
 		}
 		
 	}
+	
 		
 	document.getElementById("lat_min").value = South
 	document.getElementById("lat_max").value = North
