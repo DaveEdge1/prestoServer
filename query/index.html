@@ -495,9 +495,10 @@ function updatePoints (coords){
 		//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
 		updateBoundingBox();
 		rectCoord = {"South":-90,"West":-360,"North":90,"East":360};
-		console.log("completed 'no coords' section")
+		rect.editing.disable();
 		
 	} else {
+		rect.editing.enable();
 		rectCoord = changeBoxCoord();
 	}
 L.geoJSON([loadLatLon(coords)], {
