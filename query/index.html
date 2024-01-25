@@ -433,6 +433,7 @@ function loadLatLon (x1){
 	};
 var numdata = +Object.values(x1).length
 var numPoints = +(numdata * 2)
+	console.log(numdata)
 	
   for (let i = 0; i < numPoints; i++) {
     if (i > numdata){
@@ -440,6 +441,7 @@ var numPoints = +(numdata * 2)
     } else {
 	    ii = i
     }
+    console.log(ii)
     var ptLon = +Object.values(x1)[ii].geo_longitude
     if (i < numdata){
 	    lat = Object.values(x1)[ii].geo_latitude
