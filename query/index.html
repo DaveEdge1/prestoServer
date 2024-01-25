@@ -404,7 +404,8 @@ function changeBoxCoord(){
 	var East = dec4(NE.split(',')[1])
 	//var North = dec4(45)
 	//var East = dec4(0)
-	var newCoords = South + ', ' + West + ', ' + North + ', ' + East
+	//var newCoords = South + ', ' + West + ', ' + North + ', ' + East
+	console.log(East-West)
 	document.getElementById("lat_min").value = South
 	document.getElementById("lat_max").value = North
 	document.getElementById("lon_min").value = West
