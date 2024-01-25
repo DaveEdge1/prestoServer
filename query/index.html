@@ -1009,7 +1009,8 @@ const legend = L.control.Legend({
 }]
         })
         .addTo(map);
-rect.on('edit' {
+rect.on('edit' function() {
+  
   changeBoxCoord();
   updatePoints(prevResp);
 });
