@@ -405,11 +405,22 @@ function changeBoxCoord(){
 	//var North = dec4(45)
 	//var East = dec4(0)
 	//var newCoords = South + ', ' + West + ', ' + North + ', ' + East
-	console.log(East-West)
+	var rectWidth = +(East-West)
+	rect.editing.disable();
+	if (rectWidth > 360){
+		if (West < -360){
+			var newWest = =(East - 360)
+			rect.setBounds([[South, newWest], [North, East]]);
+		} else {
+			var newEast = =(West + 360)
+			rect.setBounds([[South, West], [North, newEast]]);
+		}
+		
 	document.getElementById("lat_min").value = South
 	document.getElementById("lat_max").value = North
 	document.getElementById("lon_min").value = West
 	document.getElementById("lon_max").value = East
+	rect.editing.enable();
 	return {"South":South,"West":West,"North":North,"East":East}
 }
 
