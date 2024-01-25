@@ -408,16 +408,32 @@ function changeBoxCoord(){
 	var rectWidth = +(East-West)
 	rect.editing.disable();
 	if (North > 90){
-		rect.setBounds([[South, West], [90, East]]);
+		if (South > 90) {
+			rect.setBounds([[80, West], [90, East]]);
+		} else {
+			rect.setBounds([[South, West], [90, East]]);
+		}
 	}
 	if (South < -90){
-		rect.setBounds([[-90, West], [North, East]]);
+		if (North < -90) {
+			rect.setBounds([[-90, West], [-80, East]]);
+		} else {
+			rect.setBounds([[-90, West], [North, East]]);
+		}
 	}
 	if (West < -360){
-		rect.setBounds([[South, -360], [North, East]]);
+		if (East < -360) {
+			rect.setBounds([[South, -360], [North, -350]]);
+		} else {
+			rect.setBounds([[South, -360], [North, East]]);
+		}
 	}
 	if (East > 360){
-		rect.setBounds([[South, West], [North, 360]]);
+		if (West > 360) {
+			rect.setBounds([[South, 350], [North, 360]]);
+		} else {
+			rect.setBounds([[South, West], [North, 360]]);
+		}
 	}
 	if (rectWidth > 360){
 		if (West < -360){
