@@ -494,6 +494,7 @@ function updatePoints (coords){
 		document.getElementById("lon_max").value = 360
 		rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
 		updateBoundingBox();
+		map.removeLayer(rect);
 		
 		
 	} else {
