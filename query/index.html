@@ -413,6 +413,12 @@ function changeBoxCoord(){
 	if (South < -90){
 		rect.setBounds([[-90, West], [North, East]]);
 	}
+	if (West < -360){
+		rect.setBounds([[South, -360], [North, East]]);
+	}
+	if (East > 360){
+		rect.setBounds([[South, West], [North, 360]]);
+	}
 	if (rectWidth > 360){
 		if (West < -360){
 			var newWest = +(+East - 360)
