@@ -492,10 +492,10 @@ function updatePoints (coords){
 		document.getElementById("lat_max").value = 90
 		document.getElementById("lon_min").value = -360
 		document.getElementById("lon_max").value = 360
-		rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
+		//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
 		updateBoundingBox();
 		map.removeLayer(rect);
-		
+		console.log("completed 'no coords' section")
 		
 	} else {
 		rectCoord = changeBoxCoord();
