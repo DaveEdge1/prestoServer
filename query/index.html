@@ -411,10 +411,13 @@ function changeBoxCoord(){
 		if (West < -360){
 			var newWest = +(East - 360)
 			rect.setBounds([[South, newWest], [North, East]]);
+			console.log(East, newWest)
 		} else {
 			var newEast = +(West + 360)
 			rect.setBounds([[South, West], [North, newEast]]);
+			console.log(newEast, West)
 		}
+		
 	}
 		
 	document.getElementById("lat_min").value = South
