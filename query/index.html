@@ -320,7 +320,7 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
  "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"square",
  "Peat":"square","Sclerosponge":"triangle","Shoreline":"square","Wood":"triangle","TerrestrialSediment":"circle"}
 //initiate leaflet rectangle
-var rect = L.rectangle([[15, -180], [45, -90]], { draggable: true });
+var rect = L.rectangle([[15, -180], [45, -90]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });
 map.addLayer(rect);
 function updateBoundingBox(){
 	rect.editing.disable();
@@ -492,7 +492,8 @@ function updatePoints (coords){
 		document.getElementById("lat_max").value = 90
 		document.getElementById("lon_min").value = -360
 		document.getElementById("lon_max").value = 360
-		updateBoundingBox()
+		updateBoundingBox();
+		rect.editing.disable();
 	} else {
 		rectCoord = changeBoxCoord();
 	}
@@ -818,12 +819,14 @@ function qString(val1,name1){
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
+	    /*
 	    if (JSON.parse(filters1['coords'])){
 		    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
 		    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
 		    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
 		    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
 	    }
+     	    */
 	    if (JSON.parse(filters1['ages'])){
 		    
 		    qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
