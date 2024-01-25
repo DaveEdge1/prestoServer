@@ -435,23 +435,28 @@ var numdata = +Object.values(x1).length
 var numPoints = +(numdata * 2)
 	
   for (let i = 0; i < numPoints; i++) {
-    var ptLon = +Object.values(x1)[i].geo_longitude
-    if (i < numPoints){
-	    lat = Object.values(x1)[i].geo_latitude
-    	    lon = Object.values(x1)[i].geo_longitude
-    } else if (i >= numPoints && ptLon < 0) {
-	    lat = Object.values(x1)[i].geo_latitude
+    if (i > numdata){
+	    ii = i - numdata
+    } else {
+	    ii = i
+    }
+    var ptLon = +Object.values(x1)[ii].geo_longitude
+    if (i < numdata){
+	    lat = Object.values(x1)[ii].geo_latitude
+    	    lon = Object.values(x1)[ii].geo_longitude
+    } else if (i >= numdata && ptLon < 0) {
+	    lat = Object.values(x1)[ii].geo_latitude
     	    lon = (ptLon - 180)
     } else {
-	    lat = Object.values(x1)[i].geo_latitude
+	    lat = Object.values(x1)[ii].geo_latitude
     	    lon = (ptLon + 180)
     }
-    aType = Object.values(x1)[i].archiveType
-    dName = Object.values(x1)[i].dataSetName
-    dID = Object.values(x1)[i].datasetId
-    proxy1 = Object.values(x1)[i].paleoData_proxy
-    minAge = Object.values(x1)[i].minAge
-    maxAge = Object.values(x1)[i].maxAge
+    aType = Object.values(x1)[ii].archiveType
+    dName = Object.values(x1)[ii].dataSetName
+    dID = Object.values(x1)[ii].datasetId
+    proxy1 = Object.values(x1)[ii].paleoData_proxy
+    minAge = Object.values(x1)[ii].minAge
+    maxAge = Object.values(x1)[ii].maxAge
     //console.log('lat ' + i + ': ' + lat)
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
