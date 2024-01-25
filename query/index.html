@@ -492,8 +492,10 @@ function updatePoints (coords){
 		document.getElementById("lat_max").value = 90
 		document.getElementById("lon_min").value = -360
 		document.getElementById("lon_max").value = 360
+		rect = L.rectangle({fillOpacity:0});
 		updateBoundingBox();
-		rect.editing.disable();
+		
+		
 	} else {
 		rectCoord = changeBoxCoord();
 	}
