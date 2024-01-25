@@ -409,10 +409,10 @@ function changeBoxCoord(){
 	rect.editing.disable();
 	if (rectWidth > 360){
 		if (West < -360){
-			var newWest = =(East - 360)
+			var newWest = +(East - 360)
 			rect.setBounds([[South, newWest], [North, East]]);
 		} else {
-			var newEast = =(West + 360)
+			var newEast = +(West + 360)
 			rect.setBounds([[South, West], [North, newEast]]);
 		}
 		
