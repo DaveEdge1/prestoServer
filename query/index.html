@@ -92,7 +92,20 @@ Selected values:
 <br>
 <br>
 <div class="form-group"> 
-<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="country">Country</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continentIn">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>
+</div>
+<br>
+<input style="width:80%;" name="continent" id="continentIn">
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+<br>
+<div class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="countryIn">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>
 </div>
@@ -234,9 +247,9 @@ Selected values:
 	<br><br><br>
 </div>
 <div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
-<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label" for="resolution">Terrestrial or Marine</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label" for="resolution">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">Select only terrestrial/marine data (based on <a href="https://jakubnowosad.com/spData/reference/world.html">these polygons</a>)</span>
+<span class="tooltip-text">Select only terrestrial/marine data</span>
 </div>
 <div class="radio_container">
 <div class="radio_control">
@@ -712,6 +725,49 @@ return false;
 }
 });
 });
+
+ $(function() {
+function split( val ) {
+return val.split( /,\s*/ );
+}
+function extractLast( term ) {
+return split( term ).pop();
+}
+     
+$( "#continentIn" )
+ // don't navigate away from the field on tab when selecting an item
+.bind( "keydown", function( event ) {
+if ( event.keyCode === $.ui.keyCode.TAB &&
+$( this ).autocomplete( "instance" ).menu.active ) {
+event.preventDefault();
+}
+})
+.autocomplete({
+minLength: 0,
+source: function( request, response ) {
+// delegate back to autocomplete, but extract the last term
+response( $.ui.autocomplete.filter(
+continent, extractLast( request.term ) ) );
+},
+
+//    source:projects,    
+focus: function() {
+// prevent value inserted on focus
+return false;
+},
+select: function( event, ui ) {
+var terms = split( this.value );
+// remove the current input
+terms.pop();
+// add the selected item
+terms.push( ui.item.value );
+// add placeholder to get the comma-and-space at the end
+terms.push( "" );
+this.value = terms.join( "," );
+return false;
+}
+});
+});
 	
 function split( val ) {
 return val.split( /,\s*/ );
@@ -753,6 +809,7 @@ function qString(val1,name1){
 	    qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name)
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
+	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
 	    if (JSON.parse(filters1['coords'])){
 		    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
 		    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
