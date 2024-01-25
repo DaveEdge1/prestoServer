@@ -1009,9 +1009,10 @@ const legend = L.control.Legend({
 }]
         })
         .addTo(map);
-rect.on('edit', function() {
-	changeBoxCoord();
-	updatePoints(prevResp)
-	});
+rect.on('edit', setTimeout(() => {
+  changeBoxCoord();
+  updatePoints(prevResp);
+}, "500")
+       );
 updateBoundingBox();
 </script>
