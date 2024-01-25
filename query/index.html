@@ -359,13 +359,11 @@ var layerGroup = L.layerGroup().addTo(map);
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	var color1 = colorPal[archiveType]
-	//console.log(color1)
 	return color1
 }
 function chooseShape(archiveType){
 	archiveType = archiveType.toString();
 	var shape1 = shapePal[archiveType]
-	//console.log(shape1)
 	if (typeof shape1 !== 'undefined'){
 		return shape1
 	} else {
@@ -424,8 +422,6 @@ function changeBoxCoord(){
 function loadLatLon (x1){
 	var x1 = x1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
-	//console.log('loadLatLon input: ' + x1)
-	//console.log('loadLatLon input: ' + JSON.stringify(x1))
 	var geojson = {
     "name":"NewFeatureType",
     "type":"FeatureCollection",
@@ -433,7 +429,6 @@ function loadLatLon (x1){
 	};
 var numdata = +Object.values(x1).length
 var numPoints = +(numdata * 2)
-	console.log(numdata)
 	
   for (let i = 0; i < numPoints; i++) {
     if (i >= numdata){
@@ -441,7 +436,6 @@ var numPoints = +(numdata * 2)
     } else {
 	    ii = i
     }
-    console.log(ii)
     var ptLon = +Object.values(x1)[ii].geo_longitude
     if (i < numdata){
 	    lat = Object.values(x1)[ii].geo_latitude
@@ -459,7 +453,6 @@ var numPoints = +(numdata * 2)
     proxy1 = Object.values(x1)[ii].paleoData_proxy
     minAge = Object.values(x1)[ii].minAge
     maxAge = Object.values(x1)[ii].maxAge
-    //console.log('lat ' + i + ': ' + lat)
     geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
@@ -470,7 +463,6 @@ var numPoints = +(numdata * 2)
     geojson.features[i].properties.maxAge.push(maxAge);
   }
 
-  console.log(geojson.features[0])
 	
   return(geojson)
 }
@@ -536,12 +528,8 @@ L.geoJSON([loadLatLon(coords)], {
     		},
 */
                 pointToLayer : function(feature, latlng) {
-			//console.log(+chooseOpacity(latlng, changeBoxCoord()));
-			//console.log(inRectCount)
-			//console.log(feature.properties.archiveType)
 			var col1 = chooseColor(feature.properties.archiveType)
 			var aType = feature.properties.archiveType
-			//console.log(aType.length)
 			var shape1 = chooseShape(feature.properties.archiveType)
 			var Opac1 = +chooseOpacity(latlng, rectCoord)
 			if (aType == "GroundIce" && Opac1 == 0.8){
@@ -806,21 +794,15 @@ function split( val ) {
 return val.split( /,\s*/ );
 }
 function rmBlanks(val){
-	//console.log(val.length)
 	    if (val.length > 0) {
-		    //console.log(val)
 		    val = split(val)
-		    //console.log(val)
 		    val = val.filter(Boolean)
-		    //console.log(val)
 	    	    val = val.join( "," );
 	    }
-	//console.log(val)
 	return val;
 
 }
 function qString(val1,name1){
-	//console.log(name1)
 	var x1 = rmBlanks(val1)	
 	    if (x1.length == 0){
 		    return '';
@@ -832,11 +814,8 @@ function qString(val1,name1){
 <script>
     //send mySQL query to queryDB and show response
     function params(){
-	    console.log(filters1)
 	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
 	    var x2 = rmBlanks(document.getElementById("variableName").value)
-	    //console.log(x1)
-	    //console.log(x2)
 	    qstring = '?'
 	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name)
@@ -862,13 +841,11 @@ function qString(val1,name1){
 	    if (JSON.parse(filters1['terrestrial'])){
 	    	qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
 	    }
-	    console.log(+document.getElementById("Terrestrial").checked)
 	    return qstring;
     };
     let prevResp = {};
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
-	//console.log(x1)
 	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
@@ -879,7 +856,6 @@ function qString(val1,name1){
 			    //$response.innerHTML = xhr.response;
 			    prevResp = JSON.parse(xhr.response);
 		            updatePoints(JSON.parse(xhr.response))
-			    //console.log(xhr.response);
 			    resolve();
 		    });
 			promise1.then(() => {
@@ -922,25 +898,6 @@ changeBoxCoord();
            d > 10   ? '#FED976' :
                       '#FFEDA0';
 }
-/*
-var legend = L.control({position: 'bottomleft'});
-    legend.onAdd = function (map) {
-    var div = L.DomUtil.create('div', 'info legend');
-    labels = ['<strong>Archive Type</strong>'],
-    Archive_Type = archiveType.map(function(d) { return d['value']; });
-
-    for (var i = 0; i < Archive_Type.length; i++) {
-
-            div.innerHTML += 
-            labels.push(
-                '<i class="circle" style="background:' + chooseColor(Archive_Type[i]) + '"></i> ' +
-            (Archive_Type[i] ? Archive_Type[i] : '+'));
-
-        }
-        div.innerHTML = labels.join('<br>');
-    return div;
-    };
-    legend.addTo(map);*/
 const legend = L.control.Legend({
             position: "bottomleft",
 	    //title: "",
@@ -1051,7 +1008,6 @@ const legend = L.control.Legend({
 }]
         })
         .addTo(map);
-	//update leaflet rectangle
 rect.on('edit', function() {
 	changeBoxCoord();
 	updatePoints(prevResp)
