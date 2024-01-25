@@ -442,10 +442,10 @@ var numPoints = +(numdata * 2)
     	    lon = Object.values(x1)[ii].geo_longitude
     } else if (i >= numdata && ptLon < 0) {
 	    lat = Object.values(x1)[ii].geo_latitude
-    	    lon = (ptLon - 180)
+    	    lon = (ptLon + 360)
     } else {
 	    lat = Object.values(x1)[ii].geo_latitude
-    	    lon = (ptLon + 180)
+    	    lon = (ptLon - 360)
     }
     aType = Object.values(x1)[ii].archiveType
     dName = Object.values(x1)[ii].dataSetName
