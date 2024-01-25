@@ -411,11 +411,9 @@ function changeBoxCoord(){
 		if (West < -360){
 			var newWest = +(+East - 360)
 			rect.setBounds([[South, newWest], [North, East]]);
-			console.log(East, newWest)
 		} else {
 			var newEast = +(+West + 360)
 			rect.setBounds([[South, West], [North, newEast]]);
-			console.log(newEast, West)
 		}
 		
 	}
@@ -436,6 +434,7 @@ function changeBoxCoord(){
 
 
 function loadLatLon (a1){
+	console.log("load start")
 	var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
 	var geojson = {
@@ -479,7 +478,7 @@ var numPoints = +(numdata * 2)
     geojson.features[i].properties.maxAge.push(maxAge);
   }
 
-	
+	console.log("load done")
   return(geojson)
 }
 let inRectCount = 0;
