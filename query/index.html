@@ -431,10 +431,21 @@ function loadLatLon (x1){
     "type":"FeatureCollection",
     "features": [],
 	};
+var numdata = +Object.values(x1).length
+var numPoints = +(numdata * 2)
 	
-  for (let i = 0; i < Object.values(x1).length; i++) {
-    lat = Object.values(x1)[i].geo_latitude
-    lon = Object.values(x1)[i].geo_longitude
+  for (let i = 0; i < numPoints; i++) {
+    var ptLon = +Object.values(x1)[i].geo_longitude
+    if (i < numPoints){
+	    lat = Object.values(x1)[i].geo_latitude
+    	    lon = Object.values(x1)[i].geo_longitude
+    } else if (i >= numPoints && ptLon < 0) {
+	    lat = Object.values(x1)[i].geo_latitude
+    	    lon = (ptLon - 180)
+    } else {
+	    lat = Object.values(x1)[i].geo_latitude
+    	    lon = (ptLon + 180)
+    }
     aType = Object.values(x1)[i].archiveType
     dName = Object.values(x1)[i].dataSetName
     dID = Object.values(x1)[i].datasetId
