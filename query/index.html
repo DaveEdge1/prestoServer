@@ -345,7 +345,7 @@ var opts = {
   radius: 45, // The radius of the inner circle
   scale: 1, // Scales overall size of the spinner
   corners: 1, // Corner roundness (0..1)
-  speed: 1, // Rounds per second
+  speed: 10, // Rounds per second
   rotate: 0, // The rotation offset
   animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
   direction: 1, // 1: clockwise, -1: counterclockwise
@@ -365,7 +365,6 @@ var spinner = new Spinner(opts).spin(target);
 	
 let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
-	spinner.spin();
 	if (document.getElementById("ageSliderOn").checked){
 		document.getElementById("timeSliderDiv").style.visibility = "visible";
 		filters1['ages'] = 'true'
@@ -547,7 +546,6 @@ function changeBoxCoord(){
 
 
 function loadLatLon (a1){
-	spinner.spin();
 	var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
 	var geojson = {
