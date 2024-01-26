@@ -596,7 +596,7 @@ var groundIceOpac = L.icon({
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
-let AllPoints = {};
+//let AllPoints = {};
 function updatePoints (coords){
 	inRectCount = 0;
 	layerGroup.clearLayers();
@@ -614,7 +614,7 @@ function updatePoints (coords){
 		rect.editing.enable();
 		rectCoord = changeBoxCoord();
 	}
- L.geoJSON([AllPoints], {
+ L.geoJSON([loadLatlon(coords)], {
 
                 style : function(feature) {
                     return feature.properties && feature.properties.style;
@@ -960,7 +960,7 @@ function qString(val1,name1){
 		    const promise1 = new Promise((resolve, reject) => {
 			    //$response.innerHTML = xhr.response;
 			    prevResp = updateRes(JSON.parse(xhr.response));
-		            //updatePoints(prevResp)
+		            updatePoints(prevResp)
 			    resolve();
 		    });
 			promise1.then(() => {
@@ -991,7 +991,7 @@ function qString(val1,name1){
     }
 
 //$getReposBtn.onclick = sendQuery();
-
+/*
 firstRun = function (){
 	//a1 = loadLatLon(prevResp);
 	b1 = sendQuery();
@@ -999,7 +999,7 @@ firstRun = function (){
 	updatePoints(b1);
 	return(a1)
 }
-AllPoints = firstRun();
+AllPoints = firstRun();*/
 changeBoxCoord();
 	function getColor(d) {
     return d > 1000 ? '#800026' :
@@ -1119,8 +1119,8 @@ const legend = L.control.Legend({
     fillColor: "#32CC32",
     weight: 2
 }]
-        })
-        .addTo(map);
+        }).addTo(map);
+sendQuery();
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   changeBoxCoord();
