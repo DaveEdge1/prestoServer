@@ -77,6 +77,14 @@ Selected values:
 <button type="button" class="collapsible">Location Filters</button>
 <div class="content">
 <br>
+<div style="width: 10%; vertical-align: middle; float: left;">
+	<br><br><br>
+	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>
+	<br>
+	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' checked>
+	<br><br><br>
+</div>
+<br>
 <div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
 <label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label" for="geo_proxy_coords">Coordinate bounds for assimilating proxies </label>
 <div style= "vertical-align: middle; height: 50px;" class="hover-text">?
@@ -126,15 +134,6 @@ Selected values:
 <br>
 <hr class="solid">
 <hr class="solid">
-<br>
-<br>
-<div style="width: 10%; vertical-align: middle; float: left;">
-	<br><br><br>
-	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>
-	<br>
-	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' checked>
-	<br><br><br>
-</div>
 <br>
 <div style="width: 10%; vertical-align: middle; float: left;">
 	<br><br><br>
