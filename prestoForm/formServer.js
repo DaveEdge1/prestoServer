@@ -21,6 +21,8 @@ app.use(bodyParser.urlencoded({
 
 app.use(express.json());
 
+app.set('trust proxy', true);
+
 //const jsdom = require("jsdom");
 //const { JSDOM } = jsdom;
 //const { document } = (new JSDOM.fromFile("/root/prestoForm/index.html")).window;
@@ -107,6 +109,7 @@ app.get('/down', function (req, res) {
 });
 
 app.get('/', function (req, res) {
+	console.log(req.ip)
 	res.sendFile("/root/presto/prestoForm/index.html")
 });
 
