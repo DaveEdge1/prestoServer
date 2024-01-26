@@ -28,8 +28,7 @@
 	<script src="/leaflet-svg-shape-markers.min.js"></script>
 	<script src="/leaflet.legend.js"></script>
 	<script type="module" src="https://spin.js.org/spin.js"></script>
-	<script type="module" src="/leaflet.spin.js"></script>
-	<script src="/leaflet.spin.min.js"></script>
+	
     <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
 
 	<style>
@@ -52,6 +51,8 @@
 	</style>
 </head>
 <body>
+	<script src="/leaflet.spin.js"></script>
+	<script src="/leaflet.spin.min.js"></script>
 <div class="wide" id="all">
 <div class="top-bar py-0" id="topBar" style="background: #555"></div>
 <!-- Navbar Sticky-->
@@ -339,6 +340,7 @@ Selected values:
       </footer>
 
 <script>
+	
 let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
 	
