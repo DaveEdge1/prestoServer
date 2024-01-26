@@ -9,7 +9,8 @@
 
 .leaflet-legend-column {
   float: left;
-  margin-left: 40px;
+  margin-left: 25px;
+  margin-right: 25px;
 }
 
 
@@ -50,7 +51,7 @@
 
 .leaflet-legend-item i {
   display: inline-block;
-  padding: 0px 12px 0px 0px  !important;
+  padding: 0px 15px 0px 0px  !important;
   position: relative;
   vertical-align: middle;
 }
