@@ -956,7 +956,7 @@ function qString(val1,name1){
 		    const promise1 = new Promise((resolve, reject) => {
 			    //$response.innerHTML = xhr.response;
 			    prevResp = JSON.parse(xhr.response);
-		            updatePoints(prevResp)
+		            //updatePoints(prevResp)
 			    resolve();
 		    });
 			promise1.then(() => {
@@ -989,8 +989,10 @@ function qString(val1,name1){
 //$getReposBtn.onclick = sendQuery();
 
 firstRun = function (){
-	a1 = loadLatLon(prevResp);
+	//a1 = loadLatLon(prevResp);
 	sendQuery();
+	a1 = loadLatLon(prevResp);
+	updatePoints(prevResp);
 	return(a1)
 }
 AllPoints = firstRun();
