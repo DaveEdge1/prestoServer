@@ -595,6 +595,7 @@ var groundIceOpac = L.icon({
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
+let AllPoints = {};
 function updatePoints (coords){
 	inRectCount = 0;
 	layerGroup.clearLayers();
@@ -612,7 +613,7 @@ function updatePoints (coords){
 		rect.editing.enable();
 		rectCoord = changeBoxCoord();
 	}
-L.geoJSON([loadLatLon(coords)], {
+AllPoints = L.geoJSON([loadLatLon(coords)], {
 
                 style : function(feature) {
                     return feature.properties && feature.properties.style;
@@ -662,7 +663,8 @@ L.geoJSON([loadLatLon(coords)], {
 		                    });
 			}
                 }
-            }).addTo(layerGroup);
+            })
+	pts.addTo(layerGroup);
 	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 	
@@ -943,6 +945,7 @@ function qString(val1,name1){
 	    return qstring;
     };
     let prevResp = {};
+    
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	xhr = new XMLHttpRequest();
@@ -986,11 +989,7 @@ function qString(val1,name1){
 
 //$getReposBtn.onclick = sendQuery();
 
-const firstSet = function (){
-	sendQuery();
-	return prevResp;
-}
-AllPoints = firstSet();
+sendQuery();
 changeBoxCoord();
 	function getColor(d) {
     return d > 1000 ? '#800026' :
@@ -1118,4 +1117,5 @@ rect.on('edit', function() {
   updatePoints(prevResp);
 });
 updateBoundingBox();
+origpoints = AllPoints;
 </script>
