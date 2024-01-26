@@ -623,6 +623,7 @@ var groundIceOpac = L.icon({
 });
 //let AllPoints = {};
 function updatePoints (coords){
+	spinner.stop();
 	spinner.spin();
 	inRectCount = 0;
 	layerGroup.clearLayers();
