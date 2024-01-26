@@ -1,4 +1,3 @@
-
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -30,12 +29,16 @@ var defaults = {
     shadow: '0 0 1px transparent',
     position: 'absolute',
 };
-(function () {
+var Spinner = /** @class */ (function () {
     function Spinner(opts) {
         if (opts === void 0) { opts = {}; }
         this.opts = __assign(__assign({}, defaults), opts);
     }
-
+    /**
+     * Adds the spinner to the given target element. If this instance is already
+     * spinning, it is automatically removed from its previous target by calling
+     * stop() internally.
+     */
     Spinner.prototype.spin = function (target) {
         this.stop();
         this.el = document.createElement('div');
@@ -55,7 +58,10 @@ var defaults = {
         drawLines(this.el, this.opts);
         return this;
     };
-
+    /**
+     * Stops and removes the Spinner.
+     * Stopped spinners may be reused by calling spin() again.
+     */
     Spinner.prototype.stop = function () {
         if (this.el) {
             if (typeof requestAnimationFrame !== 'undefined') {
@@ -73,18 +79,25 @@ var defaults = {
     };
     return Spinner;
 }());
-
+export { Spinner };
+/**
+ * Sets multiple style properties at once.
+ */
 function css(el, props) {
     for (var prop in props) {
         el.style[prop] = props[prop];
     }
     return el;
 }
-
+/**
+ * Returns the line color from the given string or array.
+ */
 function getColor(color, idx) {
     return typeof color == 'string' ? color : color[idx % color.length];
 }
-
+/**
+ * Internal method that draws the individual lines.
+ */
 function drawLines(el, opts) {
     var borderRadius = (Math.round(opts.corners * opts.width * 500) / 1000) + 'px';
     var shadow = 'none';
@@ -154,7 +167,9 @@ function parseBoxShadow(boxShadow) {
     }
     return shadows;
 }
-
+/**
+ * Modify box-shadow x/y offsets to counteract rotation
+ */
 function normalizeShadow(shadows, degrees) {
     var normalized = [];
     for (var _i = 0, shadows_1 = shadows; _i < shadows_1.length; _i++) {
