@@ -958,7 +958,7 @@ function qString(val1,name1){
 			    //$response.innerHTML = xhr.response;
 			    prevResp = JSON.parse(xhr.response);
 		            //updatePoints(prevResp)
-			    resolve();
+			    resolve(prevResp);
 		    });
 			promise1.then(() => {
 			  xhr = null;
@@ -967,7 +967,7 @@ function qString(val1,name1){
                 } else {
 		    const promise1 = new Promise((resolve, reject) => {
 			    $response.innerHTML = "XHR didn't work: " + xhr.status;
-			    resolve();
+			    resolve(xhr.status);
 		    });
 			
 			promise1.then(() => {
@@ -985,7 +985,7 @@ function qString(val1,name1){
         xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
-	return(prevResp)
+	return(promise1)
     }
 
 //$getReposBtn.onclick = sendQuery();
