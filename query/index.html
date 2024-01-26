@@ -419,7 +419,7 @@ let rect = L.rectangle([[-90, -180], [90, 180]], { color: "#ff7800", opacity:0.1
 map.addLayer(rect);
 
 var southWest = L.latLng(-90, -360),
-var northEast = L.latLng(90, 360);
+northEast = L.latLng(90, 360);
 var bounds = L.latLngBounds(southWest, northEast);
 
 map.setMaxBounds(bounds);
