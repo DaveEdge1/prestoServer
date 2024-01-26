@@ -27,7 +27,6 @@
 	
 	<script src="/leaflet-svg-shape-markers.min.js"></script>
 	<script src="/leaflet.legend.js"></script>
-	<script type="module" src="https://spin.js.org/spin.js"></script>
 	
     <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
 
@@ -51,8 +50,6 @@
 	</style>
 </head>
 <body>
-	<script src="/leaflet.spin.js"></script>
-	<script src="/leaflet.spin.min.js"></script>
 <div class="wide" id="all">
 <div class="top-bar py-0" id="topBar" style="background: #555"></div>
 <!-- Navbar Sticky-->
@@ -382,7 +379,6 @@ function updateFilters(){
 
 //initiate leaflet map
 var map = L.map('map', {attributionControl: false}).setView([0, 0], 1);
-map.spin(true);
 var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
@@ -670,7 +666,6 @@ function updatePoints (coords){
 			}
                 }
             }).addTo(layerGroup);
-	map.spin(false);
 	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 	
