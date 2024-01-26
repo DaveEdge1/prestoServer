@@ -378,8 +378,8 @@ function updateFilters(){
 }
 
 //initiate leaflet map
-var map = L.map('map', {attributionControl: false}).setView([0, 0], 1);
-map.spin(true);
+var map = L.map('map', {attributionControl: false, spin: true}).setView([0, 0], 1);
+//map.spin(true);
 var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
