@@ -614,7 +614,7 @@ function updatePoints (coords){
 		rect.editing.enable();
 		rectCoord = changeBoxCoord();
 	}
- L.geoJSON([loadLatlon(coords)], {
+ L.geoJSON([loadLatLon(coords)], {
 
                 style : function(feature) {
                     return feature.properties && feature.properties.style;
