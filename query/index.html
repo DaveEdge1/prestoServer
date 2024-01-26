@@ -390,7 +390,7 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
  "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"square",
  "Peat":"square","Sclerosponge":"triangle","Shoreline":"square","Wood":"triangle","TerrestrialSediment":"circle"}
 //initiate leaflet rectangle
-let rect = L.rectangle([[15, -180], [45, -90]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });
+let rect = L.rectangle([[-90, -180], [90, 180]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });
 map.addLayer(rect);
 function updateBoundingBox(){
 	rect.editing.disable();
