@@ -984,15 +984,16 @@ function qString(val1,name1){
         xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
+	return(prevResp)
     }
 
 //$getReposBtn.onclick = sendQuery();
 
 firstRun = function (){
 	//a1 = loadLatLon(prevResp);
-	sendQuery();
-	a1 = loadLatLon(prevResp);
-	updatePoints(prevResp);
+	b1 = sendQuery();
+	a1 = loadLatLon(b1);
+	updatePoints(b1);
 	return(a1)
 }
 AllPoints = firstRun();
