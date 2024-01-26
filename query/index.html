@@ -520,7 +520,6 @@ function changeBoxCoord(){
 
 
 function loadLatLon (a1){
-	console.log(a1)
 	var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
 	var geojson = {
@@ -954,7 +953,7 @@ function qString(val1,name1){
 	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
-            console.log(this);
+            //console.log(this);
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
