@@ -112,7 +112,7 @@ Selected values:
 <h1 style="text-align: center; font-size:40px"><img src="/img/lipdverse_logo_text.png" alt="LiPDverse Logo" width="200" height="45"> Query</h1>
 <br><br>
   <!-- </form> -->
-<div class="leaflet-container" id="map" style="width: 1000px; height: 600px;"></div>
+<div class="leaflet-container" id="map" style="width: 1200px; height: 650px;"></div>
 <br>
 <div style="width: 1200px; margin: auto; border-width:3px; border-style:groove; border-color:#899877; border-radius: 10px;"><p style="text-align: center; font-size:14px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" id="Instructions">The map above offers a preview of the data returned by the LiPDverse Query. Each point represents a dataset with one or more paleoclimate proxy time series. Provide queries below and click <b>Update Map</b> to view available data. When you are satisfied with your query, click <b>Submit</b> at the bottom of the page to continue.</p></div>
 <br>
@@ -418,8 +418,8 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
 let rect = L.rectangle([[-90, -180], [90, 180]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });
 map.addLayer(rect);
 
-var southWest = L.latLng(-90, -360),
-northEast = L.latLng(90, 360);
+var southWest = L.latLng(-100, -360),
+northEast = L.latLng(100, 360);
 var bounds = L.latLngBounds(southWest, northEast);
 
 map.setMaxBounds(bounds);
