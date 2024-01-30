@@ -318,6 +318,9 @@ Selected values:
 <br>
 </div>
 </form>
+<!--form action="http://146.190.152.170/date/" method="post" target="myIframe">
+    <button name="foo" value=getDatasetIds()>Send IDs</button>
+</form-->
 <br><br><br><br>
 <script src="/slider.js"></script>
 </body>
@@ -988,6 +991,11 @@ function qString(val1,name1){
     updateRes = function(a1){
 	    return(a1)
     }
+
+    getDatasetIds = function(prevResp){
+	    allIds <- prevResp.map(function(d) { return d['datasetId']; });
+	    console.log(allIds);
+    }
     
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
@@ -1002,6 +1010,7 @@ function qString(val1,name1){
 			    prevResp = updateRes(JSON.parse(xhr.response));
 		            updatePoints(prevResp)
 			    resolve();
+			    getDatasetIds();
 		    });
 			promise1.then(() => {
 			  xhr = null;
