@@ -995,7 +995,7 @@ function qString(val1,name1){
     getDatasetIds = function(resp){
 	    console.log("Dataset IDs: ");
 	    console.log(resp.length)
-	    allIds <- resp.map(value => value.datasetId);
+	    allIds <- Object.values(resp)
 	    console.log(allIds);
     }
     
