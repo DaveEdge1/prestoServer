@@ -1080,7 +1080,7 @@ function qString(val1,name1){
 	//let formData = new FormData([{"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}]); // creates an object, optionally fill from <form>
 	//formData.append(name, value); // appends a field
         xhr.open("post", "http://146.190.152.170/date/", /*async*/ true);
-	xhr.setRequestHeader("Content-type: application/json");
+	xhr.setRequestHeader("Content-type", "application/json");
         // xhr.responseType = "text";
         xhr.send({"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"});
     }
