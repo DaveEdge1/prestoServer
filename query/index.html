@@ -1061,7 +1061,7 @@ function qString(val1,name1){
 			});
                 } else {
 		    const promise1 = new Promise((resolve, reject) => {
-			    document.getElementById("dataAvailframe") = "XHR didn't work: " + xhr.status; = "XHR didn't work: " + xhr.status;
+			    document.getElementById("dataAvailframe") = = "XHR didn't work: " + xhr.status;
 			    resolve();
 		    });
 			
