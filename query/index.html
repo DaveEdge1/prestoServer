@@ -320,8 +320,8 @@ Selected values:
 <br>
 </div>
 </form>
-<form action="getAvailPlot()" target="dataAvailframe" name="dsIds">
-    <button name="foo">Send IDs</button>
+<form onsubmit="getAvailPlot()" target="dataAvailframe" name="dsIds">
+    <input type="submit">
 </form>
 <br><br><br><br>
 <script src="/slider.js"></script>
@@ -1079,7 +1079,7 @@ function qString(val1,name1){
         }
 	let formData = new FormData({"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}); // creates an object, optionally fill from <form>
 	//formData.append(name, value); // appends a field
-        xhr.open("post", "http://146.190.152.170/date", /*async*/ true);
+        xhr.open("post", "http://146.190.152.170/date/", /*async*/ true);
         // xhr.responseType = "text";
         xhr.send(formData);
     }
