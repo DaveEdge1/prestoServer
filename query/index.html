@@ -118,6 +118,8 @@ Selected values:
 <br>
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
+<iframe name="dataAvailframe" src="getdatasetIds()"></iframe>
+<br>
 <div class="button-submit">
 <button style="height:40px; width:200px; font-size:18px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
 </div>
@@ -318,9 +320,9 @@ Selected values:
 <br>
 </div>
 </form>
-<!--form action="http://146.190.152.170/date/" method="post" target="myIframe">
+<form action="http://146.190.152.170/date/" method="post" target="dataAvailframe">
     <button name="foo" value=getDatasetIds()>Send IDs</button>
-</form-->
+</form>
 <br><br><br><br>
 <script src="/slider.js"></script>
 </body>
