@@ -992,8 +992,8 @@ function qString(val1,name1){
 	    return(a1)
     }
 
-    getDatasetIds = function(prevResp){
-	    allIds <- prevResp.map(function(d) { return d['datasetId']; });
+    getDatasetIds = function(resp){
+	    allIds <- resp.map(function(d) { return d['datasetId']; });
 	    console.log(allIds);
     }
     
@@ -1010,7 +1010,7 @@ function qString(val1,name1){
 			    prevResp = updateRes(JSON.parse(xhr.response));
 		            updatePoints(prevResp)
 			    resolve();
-			    getDatasetIds();
+			    getDatasetIds(prevResp);
 		    });
 			promise1.then(() => {
 			  xhr = null;
