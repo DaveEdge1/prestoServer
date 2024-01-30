@@ -320,8 +320,8 @@ Selected values:
 <br>
 </div>
 </form>
-<form action="http://146.190.152.170/date" method="post" target="dataAvailframe" name="dsIds" enctype="application/json">
-    <button name="foo" value=getDatasetIds()>Send IDs</button>
+<form action="getAvailPlot()" target="dataAvailframe" name="dsIds">
+    <button name="foo">Send IDs</button>
 </form>
 <br><br><br><br>
 <script src="/slider.js"></script>
@@ -993,15 +993,16 @@ function qString(val1,name1){
     updateRes = function(a1){
 	    return(a1)
     }
-
+/*
     getDatasetIds = function(resp){
 	    //console.log("Dataset IDs: ");
 	    //console.log(resp.length)
 	    var allIds = resp.map(function(d) { return d['datasetId']; });
 	    //console.log(allIds);
-	    return {"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}
+	    let formData = new FormData({"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"});
+	    return formData
     }
-    
+  */  
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	xhr = new XMLHttpRequest();
@@ -1015,7 +1016,6 @@ function qString(val1,name1){
 			    prevResp = updateRes(JSON.parse(xhr.response));
 		            updatePoints(prevResp)
 			    resolve();
-			    getDatasetIds(prevResp);
 		    });
 			promise1.then(() => {
 			  xhr = null;
@@ -1044,6 +1044,45 @@ function qString(val1,name1){
         xhr.send();
     }
 
+	getAvailPlot = function(){
+	xhr = new XMLHttpRequest();
+        xhr.timeout = 5000;
+        xhr.onreadystatechange = function(e){
+            //console.log(this);
+            if (xhr.readyState === 4){
+                if (xhr.status === 200){
+		    const promise1 = new Promise((resolve, reject) => {
+			    //$response.innerHTML = xhr.response;
+			    resolve();
+		    });
+			promise1.then(() => {
+			  xhr = null;
+			  // Expected output: "Success!"
+			});
+                } else {
+		    const promise1 = new Promise((resolve, reject) => {
+			    $response.innerHTML = "XHR didn't work: " + xhr.status;
+			    resolve();
+		    });
+			
+			promise1.then(() => {
+			  xhr = null;
+			  // Expected output: "Success!"
+			});
+			
+                    
+                }
+            }
+        }
+        xhr.ontimeout = function (){
+            console.error("request timedout: ", xhr);
+        }
+	let formData = new FormData({"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}); // creates an object, optionally fill from <form>
+	//formData.append(name, value); // appends a field
+        xhr.open("post", "http://146.190.152.170/date", /*async*/ true);
+        // xhr.responseType = "text";
+        xhr.send(formData);
+    }
 //$getReposBtn.onclick = sendQuery();
 /*
 firstRun = function (){
