@@ -118,7 +118,7 @@ Selected values:
 <br>
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
-<iframe name="dataAvailframe" src="getDatasetIds()"></iframe>
+<iframe name="dataAvailframe" id="dataAvailframe" src=""></iframe>
 <br>
 <div class="button-submit">
 <button style="height:40px; width:200px; font-size:18px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
@@ -995,10 +995,11 @@ function qString(val1,name1){
     }
 
     getDatasetIds = function(resp){
-	    console.log("Dataset IDs: ");
-	    console.log(resp.length)
+	    //console.log("Dataset IDs: ");
+	    //console.log(resp.length)
 	    var allIds = resp.map(function(d) { return d['datasetId']; });
-	    console.log(allIds);
+	    //console.log(allIds);
+	    getElementById("dataAvailframe").src = ""
     }
     
     var xhr = new XMLHttpRequest();
