@@ -119,7 +119,7 @@ Selected values:
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
 <div id="iframediv" style="width: 1200px; margin: auto;">
-	<iframe name="dataAvailframe" id="dataAvailframe" src=""></iframe>
+	<img id="dataAvail" alt="data Availability Plot" src="" />
 </div>
 <br>
 <div class="button-submit">
@@ -322,7 +322,7 @@ Selected values:
 <br>
 </div>
 </form>
-<form onsubmit="getAvailPlot()" target="dataAvailframe" name="dsIds">
+<form onsubmit="getAvailPlot()" name="dsIds">
     <input type="submit">
 </form>
 <br><br><br><br>
@@ -1054,7 +1054,7 @@ function qString(val1,name1){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
-			    document.getElementById("iframediv").innerHTML = xhr.response;
+			    document.getElementById("dataAvail").src = xhr.response;
 			    resolve();
 		    });
 			promise1.then(() => {
