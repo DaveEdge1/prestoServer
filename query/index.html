@@ -1097,7 +1097,7 @@ let jsbody = '{"datasetId":""}';
 	console.log(dataString)
         jsbody = '{"datasetId":'+ dataString + '}';
         console.log(jsbody);
-	xhr.send(jsbody);
+	xhr.send("'"+jsbody+"'");
     }
 //$getReposBtn.onclick = sendQuery();
 /*
