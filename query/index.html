@@ -1053,7 +1053,7 @@ function qString(val1,name1){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
 			    console.log("Changing image source")
-			    document.getElementById("dataAvail").src = 'data:image/jpeg;base64,' + btoa(unescape(encodeURIComponent(xhr.response)));
+			    document.getElementById("dataAvail").src = 'data:image/png;base64,' + btoa(unescape(encodeURIComponent(xhr.response)));
 			    console.log("Changed")
 			    resolve();
 		    });
