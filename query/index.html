@@ -1054,7 +1054,9 @@ function qString(val1,name1){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
+			    console.log("Changing image source")
 			    document.getElementById("dataAvail").src = xhr.response;
+			    console.log("Changed")
 			    resolve();
 		    });
 			promise1.then(() => {
