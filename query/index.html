@@ -1046,7 +1046,8 @@ function qString(val1,name1){
         // xhr.responseType = "text";
         xhr.send();
     }
-
+let dsidArray = prevResp.map(function(d) { return d['datasetId']; })
+let jsbody = '{"datasetId":""}';
 	getAvailPlot = function(){
 	xhr = new XMLHttpRequest();
         xhr.timeout = 5000;
@@ -1086,14 +1087,14 @@ function qString(val1,name1){
 	//formData.append(name, value); // appends a field
         xhr.open("post", "http://146.190.152.170/date/", /*async*/ true);
 	xhr.setRequestHeader("Content-type", "application/json");
-	var dsidArray = prevResp.map(function(d) { return d['datasetId']; })
+	dsidArray = prevResp.map(function(d) { return d['datasetId']; })
 	dsidArray = dsidArray.map(function(e){
   		return JSON.stringify(e);
 	});
 
 	dataString = dsidArray.join(",");
 	console.log(dataString)
-        var jsbody = '{"datasetId":'+ dataString + '}';
+        jsbody = '{"datasetId":'+ dataString + '}';
         console.log(jsbody);
 	xhr.send('{"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe"}');
     }
