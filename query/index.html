@@ -1090,7 +1090,7 @@ let jsbody = '{"datasetId":""}';
 	xhr.setRequestHeader("Content-type", "application/json");
 	dsidArray = prevResp.map(function(d) { return d['datasetId']; })
 	dsidArray = dsidArray.map(function(e){
-  		return JSON.stringify(e);
+  		return (e);
 	});
 
 	dataString = dsidArray.join(",");
