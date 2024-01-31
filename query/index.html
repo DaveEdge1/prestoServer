@@ -1014,7 +1014,7 @@ function qString(val1,name1){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
-			    //$response.innerHTML = xhr.response;
+			    console.log("ping mysql")
 			    prevResp = updateRes(JSON.parse(xhr.response));
 		            updatePoints(prevResp)
 			    resolve();
