@@ -323,7 +323,9 @@ Selected values:
 <br>
 </div>
 </form>
-<button type="button" onclick="getAvailPlot()">
+<div>
+	<button type="button" onclick="getAvailPlot()">
+</div>
 <br><br><br><br>
 <script src="/slider.js"></script>
 </body>
@@ -1084,7 +1086,7 @@ function qString(val1,name1){
 	//formData.append(name, value); // appends a field
         xhr.open("post", "http://146.190.152.170/date/", /*async*/ true);
 	xhr.setRequestHeader("Content-type", "application/json");
-        // xhr.responseType = "text";
+        console.log(prevresp.map(function(d) { return d['datasetId']; }));
         xhr.send('{"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}');
     }
 //$getReposBtn.onclick = sendQuery();
