@@ -1054,7 +1054,7 @@ function qString(val1,name1){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
-			    document.getElementById("iframediv").innerHTML = JSON.stringify(xhr.response);
+			    document.getElementById("iframediv").innerHTML = xhr.response;
 			    resolve();
 		    });
 			promise1.then(() => {
