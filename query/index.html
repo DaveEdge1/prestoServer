@@ -1088,7 +1088,7 @@ function qString(val1,name1){
 	xhr.setRequestHeader("Content-type", "application/json");
         var jsbody = '{"datasetId":'+ JSON.stringify(prevResp.map(function(d) { return d['datasetId']; })) + '}';
         console.log(jsbody);
-		xhr.send(jsbody);
+	xhr.send('{"datasetid":"FWILEwpIgD2aF0mcUYwt,FUaBgZ21oNrq7EodemYC,ffaauJnqTsnDUdKXjaRq"}');
     }
 //$getReposBtn.onclick = sendQuery();
 /*
