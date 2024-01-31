@@ -1095,7 +1095,7 @@ let jsbody = '{"datasetId":""}';
 
 	dataString = dsidArray.join(",");
 	console.log(dataString)
-        jsbody = '{"datasetId":'+ dataString + '}';
+        jsbody = '{"datasetId":"'+ dataString + '"}';
         console.log(jsbody);
 	xhr.send("'"+jsbody+"'");
     }
