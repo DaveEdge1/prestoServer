@@ -19,6 +19,7 @@
         crossorigin=""></script>
 	<link rel="stylesheet" href="/slider.css">
 
+	<script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.6/base64.min.js"></script>
 	<!--script src="leaflet-src.js"></script-->
 	<script src="/Leaflet.draw.js"></script>
 	<script src="/Leaflet.Draw.Event.js"></script>
@@ -1053,7 +1054,7 @@ function qString(val1,name1){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
 			    console.log("Changing image source")
-			    document.getElementById("dataAvail").src = 'data:image/png;base64,' + btoa(unescape(encodeURIComponent(xhr.response)));
+			    document.getElementById("dataAvail").src = 'data:image/png;base64,' + Base64.decode(xhr.response);
 			    console.log("Changed")
 			    resolve();
 		    });
