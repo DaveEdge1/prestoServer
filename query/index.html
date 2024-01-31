@@ -118,7 +118,9 @@ Selected values:
 <br>
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
-<iframe name="dataAvailframe" id="dataAvailframe" src=""></iframe>
+<div id="iframediv" style="width: 1200px; margin: auto;">
+	<iframe name="dataAvailframe" id="dataAvailframe" src=""></iframe>
+</div>
 <br>
 <div class="button-submit">
 <button style="height:40px; width:200px; font-size:18px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
@@ -1023,7 +1025,7 @@ function qString(val1,name1){
 			});
                 } else {
 		    const promise1 = new Promise((resolve, reject) => {
-			    document.getElementById("dataAvailframe").innerHTML = "XHR didn't work: " + xhr.status;
+			    console.log("XHR didn't work: " + xhr.status;)
 			    resolve();
 		    });
 			
@@ -1052,7 +1054,7 @@ function qString(val1,name1){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
-			    //$response.innerHTML = xhr.response;
+			    document.getElementById("iframediv").innerHTML = JSON.stringify(xhr.response);
 			    resolve();
 		    });
 			promise1.then(() => {
