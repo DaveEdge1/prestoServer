@@ -159,7 +159,7 @@
             var r = Math.min(x0, y0) - linelWeight;
             var a = 360 / this._legend.sides;
             ctx.translate(x0,y0)
-            ctx.rotate(45 * Math.PI / 180);
+            ctx.rotate(15 * Math.PI / 180);
             ctx.beginPath();
             for (var i = 0; i <= this._legend.sides; i++) {
                 var x1 = x0 + r * Math.cos(((a * i + (90 - a / 2)) * Math.PI) / 180);
