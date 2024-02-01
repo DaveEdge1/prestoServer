@@ -151,6 +151,7 @@
         class PolygonRSymbol extends GeometricSymbol {
         _drawSymbol() {
             var ctx = (this._ctx = this._canvas.getContext("2d"));
+            ctx.rotate(180 * Math.PI / 180);
 
             var linelWeight = this._legend.weight || 3;
             var x0 = this._control.options.symbolWidth / 2;
@@ -167,7 +168,6 @@
                     ctx.lineTo(x1, y1);
                 }
             }
-            ctx.rotate(180);
         }
     }
 
