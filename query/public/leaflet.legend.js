@@ -152,7 +152,7 @@
         _drawSymbol() {
             var ctx = (this._ctx = this._canvas.getContext("2d"));
 
-            ctx.rotate(10 * Math.PI / 180);
+            ctx.rotate(45 * Math.PI / 180);
             var linelWeight = this._legend.weight || 3;
             var x0 = this._control.options.symbolWidth / 2;
             var y0 = this._control.options.symbolHeight / 2;
