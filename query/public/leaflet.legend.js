@@ -159,7 +159,7 @@
             ctx.beginPath();
             if (this._legend.sides == 3){
                 var rot1 = 60
-            } else if {this._legend.sides == 4){
+            } else if (this._legend.sides == 4){
                 var rot1 = 45
             }
             
