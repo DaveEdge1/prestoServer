@@ -158,10 +158,9 @@
             var y0 = this._control.options.symbolHeight / 2;
             var r = Math.min(x0, y0) - linelWeight;
             var a = 360 / this._legend.sides;
-            ctx.translate(x0,y0)
-            ctx.rotate(15 * Math.PI / 180);
+            ctx.moveTo(0,this._control.options.symbolHeight );
             ctx.beginPath();
-            for (var i = 0; i <= this._legend.sides; i++) {
+            for (var i = 1; i <= this._legend.sides; i++) {
                 var x1 = x0 + r * Math.cos(((a * i + (90 - a / 2)) * Math.PI) / 180);
                 var y1 = y0 + r * Math.sin(((a * i + (90 - a / 2)) * Math.PI) / 180);
                 if (i == 0) {
