@@ -152,13 +152,14 @@
         _drawSymbol() {
             var ctx = (this._ctx = this._canvas.getContext("2d"));
 
-            ctx.rotate(45 * Math.PI / 180);
+            
             var linelWeight = this._legend.weight || 3;
             var x0 = this._control.options.symbolWidth / 2;
             var y0 = this._control.options.symbolHeight / 2;
             var r = Math.min(x0, y0) - linelWeight;
             var a = 360 / this._legend.sides;
-            
+            ctx.translate(x0,y0)
+            ctx.rotate(45 * Math.PI / 180);
             ctx.beginPath();
             for (var i = 0; i <= this._legend.sides; i++) {
                 var x1 = x0 + r * Math.cos(((a * i + (90 - a / 2)) * Math.PI) / 180);
