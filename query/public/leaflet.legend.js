@@ -157,7 +157,7 @@
             var r = Math.min(x0, y0) - linelWeight;
             var a = 360 / this._legend.sides;
             ctx.beginPath();
-            var rot1 = 360/(4*2);
+            var rot1 = 360/(this._legend.sides*2);
             
             for (var i = 0; i <= this._legend.sides; i++) {
                 var x1 = x0 + r * Math.cos(((a * i + (90 - a / 2) + rot1) * Math.PI) / 180);
