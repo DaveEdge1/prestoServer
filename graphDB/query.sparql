@@ -1,0 +1,15 @@
+PREFIX le: <http://linked.earth/ontology#>
+
+    SELECT ?values
+    WHERE {
+        ?ds a le:Dataset .
+    	?ds le:includesPaleoData ?data .
+        ?data le:foundInMeasurementTable ?table .
+        ?table le:includesVariable ?var .
+    	?var le:hasVariableID "lcR2qVlStBRg39xKaWD".
+        ?var le:hasValues ?values .
+    	
+    
+    
+}
+LIMIT 100
