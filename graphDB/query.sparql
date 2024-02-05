@@ -9,8 +9,5 @@ PREFIX le: <http://linked.earth/ontology#>
 	?var le:hasVariableID ?hasVariableID .
 		FILTER (regex(?hasVariableID, "Asia_163") || regex(?hasVariableID, "Asia_022")) .
 	?var le:hasValues ?values .
-    	
-    
-    
 }
 LIMIT 100

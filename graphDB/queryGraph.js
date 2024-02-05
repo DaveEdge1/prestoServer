@@ -43,8 +43,7 @@ jsonToSparql = function(jsonQuery){
 }
 
 
-
-
+    let prevResp = '';
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	xhr = new XMLHttpRequest();
@@ -54,7 +53,9 @@ jsonToSparql = function(jsonQuery){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 			const promise1 = new Promise((resolve, reject) => {
-				                            console.log(xhr.responseText);
+				                            //console.log(xhr.responseText);
+							    prevResp = xhr.responseText.split(/\r\n/);
+							    console.log(prevResp) 
 				                            resolve();
 				                    });
 
@@ -86,7 +87,8 @@ jsonToSparql = function(jsonQuery){
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         //jsbody = {"query=PREFIX+le%3A+%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0D%0A%0D%0A++++SELECT+%3Fvalues%0D%0A++++WHERE+%7B%0D%0A+++++++%3Fds+a+le%3ADataset+.%0D%0A++++%09%3Fds+le%3AincludesPaleoData+%3Fdata+.%0D%0A++++++++%3Fdata+le%3AfoundInMeasurementTable+%3Ftable+.%0D%0A++++++++%3Ftable+le%3AincludesVariable+%3Fvar+.%0D%0A%09%3Fvar+le%3AhasVariableID+%3FhasVariableID+.%0D%0A%09%09FILTER+%28regex%28%3FhasVariableID%2C+%22Asia_163%22%29+%7C%7C+regex%28%3FhasVariableID%2C+%22Asia_022%22%29%29+.%0D%0A%09%3Fvar+le%3AhasValues+%3Fvalues+.%0D%0A++++%09%0D%0A++++%0D%0A++++%0D%0A%7D%0D%0ALIMIT+100%0D%0A"};
         jsbody = 'query=' + "PREFIX%20le%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0A%0A%20%20%20%20SELECT%20%3Fvalues%0A%20%20%20%20WHERE%20%7B%0A%20%20%20%20%20%20%20%20%3Fds%20a%20le%3ADataset%20.%0A%20%20%20%20%20%20%20%20%3Fds%20le%3AincludesPaleoData%20%3Fdata%20.%0A%20%20%20%20%20%20%20%20%3Fdata%20le%3AfoundInMeasurementTable%20%3Ftable%20.%0A%20%20%20%20%20%20%20%20%3Ftable%20le%3AincludesVariable%20%3Fvar%20.%0A%20%20%20%20%20%20%20%20%3Fvar%20le%3AhasVariableID%20%3FhasVariableID%20.%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20FILTER%20%28regex%28%3FhasVariableID%2C%20%22Asia_163%22%29%20%7C%7C%20regex%28%3FhasVariableID%2C%20%22Asia_022%22%29%29%20.%0A%20%20%20%20%20%20%20%20%3Fvar%20le%3AhasValues%20%3Fvalues%20.%0A%0A%0A%0A%7D%0ALIMIT%20100";
-	    console.log(jsbody);
+	    jsbody = 'query=' + parseSparql("query.sparql", parse=false)
+	    //console.log(jsbody);
 	xhr.send(jsbody);
     };
 sendQuery();
