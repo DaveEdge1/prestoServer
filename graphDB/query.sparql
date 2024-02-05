@@ -6,8 +6,9 @@ PREFIX le: <http://linked.earth/ontology#>
     	?ds le:includesPaleoData ?data .
         ?data le:foundInMeasurementTable ?table .
         ?table le:includesVariable ?var .
-    	?var le:hasVariableID "lcR2qVlStBRg39xKaWD".
-        ?var le:hasValues ?values .
+	?var le:hasVariableID ?hasVariableID .
+		FILTER (regex(?hasVariableID, "Asia_163") || regex(?hasVariableID, "Asia_022")) .
+	?var le:hasValues ?values .
     	
     
     

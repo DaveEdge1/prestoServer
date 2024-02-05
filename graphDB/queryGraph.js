@@ -2,15 +2,26 @@
 var SparqlParser = require('sparqljs').Parser;
 var fs = require('fs');
 var SparqlGenerator = require('sparqljs').Generator;
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
+//var request = require('request');
+//var querystring = require('querystring');
 
 let query1 = ""
 
-parseSparql = function(sparqlFile){
+parseSparql = function(sparqlFile, parse=false){
 	var query1 = fs.readFileSync(sparqlFile,'utf8')
 	console.log("original sparql:")
 	console.log(query1)
-	var parser = new SparqlParser();
-	var parsedQuery = parser.parse(query1);
+
+	if (parse == true){
+		var parser = new SparqlParser();
+		var parsedQuery = parser.parse(query1);
+	} else {
+		var parsedQuery = encodeURI(query1);
+		console.log("URI: ")
+		console.log(parsedQuery)
+	}
 	//var retString = JSON.stringify(parsedQuery)
 	//return retString
 	return parsedQuery
@@ -42,16 +53,15 @@ jsonToSparql = function(jsonQuery){
             //console.log(this);
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
-		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("ping mysql")
-			    prevResp = updateRes(JSON.parse(xhr.response));
-		            updatePoints(prevResp)
-			    resolve();
-		    });
-			promise1.then(() => {
-			  xhr = null;
-			  // Expected output: "Success!"
-			});
+			const promise1 = new Promise((resolve, reject) => {
+				                            console.log(xhr.responseText);
+				                            resolve();
+				                    });
+
+			                        promise1.then(() => {
+						         xhr = null;
+							                          //Expected output: "Success!"
+						});
                 } else {
 		    const promise1 = new Promise((resolve, reject) => {
 			    console.log("XHR didn't work: " + xhr.status);
@@ -70,9 +80,27 @@ jsonToSparql = function(jsonQuery){
         xhr.ontimeout = function (){
             console.error("request timedout: ", xhr);
         }
-        xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
-        // xhr.responseType = "text";
-        jsbody = '{"datasetId":"'+ dataString + '"}';
-        console.log(jsbody);
-	xhr.send(jsbody);
-    }
+	xhr.open("post", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3", false);
+        //xhr.open("get", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3?" + "query=PREFIX+le%3A+%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0D%0A%0D%0A++++SELECT+%3Fvalues%0D%0A++++WHERE+%7B%0D%0A+++++++%3Fds+a+le%3ADataset+.%0D%0A++++%09%3Fds+le%3AincludesPaleoData+%3Fdata+.%0D%0A++++++++%3Fdata+le%3AfoundInMeasurementTable+%3Ftable+.%0D%0A++++++++%3Ftable+le%3AincludesVariable+%3Fvar+.%0D%0A%09%3Fvar+le%3AhasVariableID+%3FhasVariableID+.%0D%0A%09%09FILTER+%28regex%28%3FhasVariableID%2C+%22Asia_163%22%29+%7C%7C+regex%28%3FhasVariableID%2C+%22Asia_022%22%29%29+.%0D%0A%09%3Fvar+le%3AhasValues+%3Fvalues+.%0D%0A++++%09%0D%0A++++%0D%0A++++%0D%0A%7D%0D%0ALIMIT+100%0D%0A", /*async*/ false);
+        //xhr.responseType = "text";
+	xhr.setRequestHeader("Accept", "application/sparql-resuts+json");
+        //jsbody = {"query=PREFIX+le%3A+%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0D%0A%0D%0A++++SELECT+%3Fvalues%0D%0A++++WHERE+%7B%0D%0A+++++++%3Fds+a+le%3ADataset+.%0D%0A++++%09%3Fds+le%3AincludesPaleoData+%3Fdata+.%0D%0A++++++++%3Fdata+le%3AfoundInMeasurementTable+%3Ftable+.%0D%0A++++++++%3Ftable+le%3AincludesVariable+%3Fvar+.%0D%0A%09%3Fvar+le%3AhasVariableID+%3FhasVariableID+.%0D%0A%09%09FILTER+%28regex%28%3FhasVariableID%2C+%22Asia_163%22%29+%7C%7C+regex%28%3FhasVariableID%2C+%22Asia_022%22%29%29+.%0D%0A%09%3Fvar+le%3AhasValues+%3Fvalues+.%0D%0A++++%09%0D%0A++++%0D%0A++++%0D%0A%7D%0D%0ALIMIT+100%0D%0A"};
+        jsbody = "query=PREFIX+le%3A+%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0D%0A%0D%0A++++SELECT+%3Fvalues%0D%0A++++WHERE+%7B%0D%0A+++++++%3Fds+a+le%3ADataset+.%0D%0A++++%09%3Fds+le%3AincludesPaleoData+%3Fdata+.%0D%0A++++++++%3Fdata+le%3AfoundInMeasurementTable+%3Ftable+.%0D%0A++++++++%3Ftable+le%3AincludesVariable+%3Fvar+.%0D%0A%09%3Fvar+le%3AhasVariableID+%3FhasVariableID+.%0D%0A%09%09FILTER+%28regex%28%3FhasVariableID%2C+%22Asia_163%22%29+%7C%7C+regex%28%3FhasVariableID%2C+%22Asia_022%22%29%29+.%0D%0A%09%3Fvar+le%3AhasValues+%3Fvalues+.%0D%0A++++%09%0D%0A++++%0D%0A++++%0D%0A%7D%0D%0ALIMIT+100%0D%0A"
+	    console.log(jsbody);
+	xhr.send(JSONstringify(jsbody));
+sendQuery();
+//
+//var myquery2 = querystring.stringify({query: 'PREFIX le: <http://linked.earth/ontology#> SELECT ?values WHERE { ?ds a le:Dataset . ?ds le:includesPaleoData ?data . ?data le:foundInMeasurementTable ?table . ?table le:includesVariable ?var . ?var le:hasVariableID ?hasVariableID . FILTER (regex(?hasVariableID, "Asia_163") || regex(?hasVariableID, "Asia_022")) . ?var le:hasValues ?values . } LIMIT 100'})
+
+//request.get({header: "application/x-www-form-urlencoded", url:'https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3'+ myquery2 }, function (error, response, body) {
+//	  if (!error && response.statusCode == 200) {
+//		     // Show the HTML for the Google homepage.
+//		  console.log('successful update');
+//		  console.log(body);
+//		    } 
+//		      else
+//		        {
+//		           console.log(response.statusCode)
+//		              console.warn(error);
+//		                }
+//		               });
