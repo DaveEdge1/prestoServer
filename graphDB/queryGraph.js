@@ -6,8 +6,24 @@ var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 //var request = require('request');
 //var querystring = require('querystring');
-
-let query1 = ""
+var TSIDs = ["Asia_163", "Asia_022", "S2LR1f792pGT8l"];
+console.log(TSIDs.length);
+sparqlConstr = function(TSIDs){
+	var query1st = fs.readFileSync('queryHalf1.sparql','utf8');
+	var query2nd = fs.readFileSync('queryHalf2.sparql','utf8');
+	//var queryWhole = query1st + '                FILTER (?hasVariableID = "Asia_163" || ?hasVariableID = "Asia_022" || ?hasVariableID = "S2LR1f792pGT8l") .' + query2nd
+	var filterString = '                FILTER (';
+	filterString +=  '?hasVariableID = "' + TSIDs[0] + '" ';
+	if (TSIDs.length > 0){
+		for (var i=0; i<TSIDs.length; i++){
+			filterString +=  '|| ?hasVariableID = "' + TSIDs[i] + '" ';
+		}
+	}
+	filterString += ')';
+	var queryWhole = query1st + filterString + query2nd
+	console.log(queryWhole);
+	return encodeURI(queryWhole);
+}
 
 parseSparql = function(sparqlFile, parse=false){
 	var query1 = fs.readFileSync(sparqlFile,'utf8')
@@ -17,10 +33,26 @@ parseSparql = function(sparqlFile, parse=false){
 	if (parse == true){
 		var parser = new SparqlParser();
 		var parsedQuery = parser.parse(query1);
+		console.log("JSON query:");
+		JSquery = JSON.parse(JSON.stringify(parsedQuery)).where;
+		//console.log(JSON.stringify(JSquery));
+		//console.log(Object.values(JSquery));
+		//console.log(Object.values(JSquery)[1]);
+		//console.log(Object.values(JSquery)[1].expression);
+		console.log(Object.values(JSquery)[1].expression.args);
+		console.log(Object.values(JSquery)[1].expression.args[0].args);
+		console.log(Object.values(JSquery)[1].expression.args[0].args[0].args);
+		console.log(Object.values(JSquery)[1].expression.args[0].args[1].args);
+		console.log(Object.values(JSquery)[1].expression.args[1].args);
+		//console.log(Object.values(JSquery)[1].expression.args[1]);
+		//console.log(Object.values(JSquery)[0].expression.arg[1].args);
+		//console.log(Object.values(JSquery)[1].expression.args[1].args);
+		//console.log(Object.values(JSquery)[1].expression.args[2].args);
+		//console.log(Object.values(JSquery)[1].expression.args[2].args);
 	} else {
 		var parsedQuery = encodeURI(query1);
-		console.log("URI: ")
-		console.log(parsedQuery)
+		console.log("URI: ");
+		console.log(parsedQuery);
 	}
 	//var retString = JSON.stringify(parsedQuery)
 	//return retString
@@ -42,7 +74,6 @@ jsonToSparql = function(jsonQuery){
 	return generatedQuery;
 }
 
-
     let prevResp = '';
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
@@ -53,10 +84,18 @@ jsonToSparql = function(jsonQuery){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 			const promise1 = new Promise((resolve, reject) => {
-				                            //console.log(xhr.responseText);
-							    prevResp = xhr.responseText.split(/\r\n/);
-							    console.log(prevResp) 
-				                            resolve();
+							    prevResp = xhr.responseText.substring(19);
+							    prevResp = prevResp.replaceAll("NaN", "null");
+							    prevResp = '"' + prevResp
+							    prevResp = prevResp.replaceAll(',"[','":[');
+							    prevResp = prevResp.replaceAll(']"', '],"');
+							    prevResp = prevResp.replaceAll(/[\r\n]/g, "");
+							    prevResp = prevResp.substring(0, prevResp.length-2);
+							    prevResp = "{" + prevResp + "}";
+							    prevResp = JSON.parse(prevResp);
+							    //console.dir(prevResp.S2LR1f792pGT8l, {'maxArrayLength': null});
+				                            console.log(prevResp);
+							    resolve();
 				                    });
 
 			                        promise1.then(() => {
@@ -82,28 +121,16 @@ jsonToSparql = function(jsonQuery){
             console.error("request timedout: ", xhr);
         }
 	xhr.open("POST", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3", false);
-        //xhr.open("get", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3?" + "query=PREFIX+le%3A+%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0D%0A%0D%0A++++SELECT+%3Fvalues%0D%0A++++WHERE+%7B%0D%0A+++++++%3Fds+a+le%3ADataset+.%0D%0A++++%09%3Fds+le%3AincludesPaleoData+%3Fdata+.%0D%0A++++++++%3Fdata+le%3AfoundInMeasurementTable+%3Ftable+.%0D%0A++++++++%3Ftable+le%3AincludesVariable+%3Fvar+.%0D%0A%09%3Fvar+le%3AhasVariableID+%3FhasVariableID+.%0D%0A%09%09FILTER+%28regex%28%3FhasVariableID%2C+%22Asia_163%22%29+%7C%7C+regex%28%3FhasVariableID%2C+%22Asia_022%22%29%29+.%0D%0A%09%3Fvar+le%3AhasValues+%3Fvalues+.%0D%0A++++%09%0D%0A++++%0D%0A++++%0D%0A%7D%0D%0ALIMIT+100%0D%0A", /*async*/ false);
         //xhr.responseType = "text";
 	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        //jsbody = {"query=PREFIX+le%3A+%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0D%0A%0D%0A++++SELECT+%3Fvalues%0D%0A++++WHERE+%7B%0D%0A+++++++%3Fds+a+le%3ADataset+.%0D%0A++++%09%3Fds+le%3AincludesPaleoData+%3Fdata+.%0D%0A++++++++%3Fdata+le%3AfoundInMeasurementTable+%3Ftable+.%0D%0A++++++++%3Ftable+le%3AincludesVariable+%3Fvar+.%0D%0A%09%3Fvar+le%3AhasVariableID+%3FhasVariableID+.%0D%0A%09%09FILTER+%28regex%28%3FhasVariableID%2C+%22Asia_163%22%29+%7C%7C+regex%28%3FhasVariableID%2C+%22Asia_022%22%29%29+.%0D%0A%09%3Fvar+le%3AhasValues+%3Fvalues+.%0D%0A++++%09%0D%0A++++%0D%0A++++%0D%0A%7D%0D%0ALIMIT+100%0D%0A"};
-        jsbody = 'query=' + "PREFIX%20le%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0A%0A%20%20%20%20SELECT%20%3Fvalues%0A%20%20%20%20WHERE%20%7B%0A%20%20%20%20%20%20%20%20%3Fds%20a%20le%3ADataset%20.%0A%20%20%20%20%20%20%20%20%3Fds%20le%3AincludesPaleoData%20%3Fdata%20.%0A%20%20%20%20%20%20%20%20%3Fdata%20le%3AfoundInMeasurementTable%20%3Ftable%20.%0A%20%20%20%20%20%20%20%20%3Ftable%20le%3AincludesVariable%20%3Fvar%20.%0A%20%20%20%20%20%20%20%20%3Fvar%20le%3AhasVariableID%20%3FhasVariableID%20.%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20FILTER%20%28regex%28%3FhasVariableID%2C%20%22Asia_163%22%29%20%7C%7C%20regex%28%3FhasVariableID%2C%20%22Asia_022%22%29%29%20.%0A%20%20%20%20%20%20%20%20%3Fvar%20le%3AhasValues%20%3Fvalues%20.%0A%0A%0A%0A%7D%0ALIMIT%20100";
-	    jsbody = 'query=' + parseSparql("query.sparql", parse=false)
+	xhr.setRequestHeader("Accept", "application/sparql-resuts+json");
+	    //jsbody = 'query=' + parseSparql("query.sparql", parse=false)
+	    jsbody = 'query=' + sparqlConstr(TSIDs);
 	    //console.log(jsbody);
 	xhr.send(jsbody);
     };
-sendQuery();
-//
-//var myquery2 = querystring.stringify({query: 'PREFIX le: <http://linked.earth/ontology#> SELECT ?values WHERE { ?ds a le:Dataset . ?ds le:includesPaleoData ?data . ?data le:foundInMeasurementTable ?table . ?table le:includesVariable ?var . ?var le:hasVariableID ?hasVariableID . FILTER (regex(?hasVariableID, "Asia_163") || regex(?hasVariableID, "Asia_022")) . ?var le:hasValues ?values . } LIMIT 100'})
 
-//request.get({header: "application/x-www-form-urlencoded", url:'https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3'+ myquery2 }, function (error, response, body) {
-//	  if (!error && response.statusCode == 200) {
-//		     // Show the HTML for the Google homepage.
-//		  console.log('successful update');
-//		  console.log(body);
-//		    } 
-//		      else
-//		        {
-//		           console.log(response.statusCode)
-//		              console.warn(error);
-//		                }
-//		               });
+//sparqlConstr();
+//parseSparql("query.sparql", parse=true)
+sendQuery();
+

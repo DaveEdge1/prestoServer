@@ -1,0 +1,9 @@
+PREFIX le: <http://linked.earth/ontology#>
+
+    SELECT ?variableID ?values
+    WHERE {
+        ?ds a le:Dataset .
+        ?ds le:includesPaleoData ?data .
+        ?data le:foundInMeasurementTable ?table .
+        ?table le:includesVariable ?var .
+        ?var le:hasVariableID ?hasVariableID .
