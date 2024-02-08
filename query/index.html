@@ -1117,8 +1117,7 @@ function grabCSV() {
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
 			var js1 = jsonToData(resp1)
 			var csv1 = js1.asCSV
-				document.getElementById("timeSeries").innerHTML = csv1
-			});
+			document.getElementById("timeSeries").innerHTML = csv1
 			return true
 		});
 	});
