@@ -329,6 +329,9 @@ Selected values:
 <div>
 	<button style="font-size: 16px;" type="button" onclick="grabCSV()">Get CSV</button>
 </div>
+<div>
+	<p id="timeSeries"></p>
+</div>
 <br><br><br><br>
 <script src="/slider.js"></script>
 </body>
@@ -1098,7 +1101,7 @@ retTimeSeries = function(TSIDs){
 }
 
 function grabCSV() {
-	getTSIDs().then(reso => {
+	document.getElementById("timeSeries").innerHTML = getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
 		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
 		console.log("Total time series: " + IDs.length);
