@@ -1111,8 +1111,9 @@ function grabCSV() {
 		//console.log("sparql server input: ")
 		//console.log(tsJSON)
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
-			var forged = resp1.parseJSON
-			document.getElementById("timeSeries").innerHTML = forged.asCSV
+			resp1.parseJSON().then(resp1 => {
+				document.getElementById("timeSeries").innerHTML = resp1.asCSV
+			});
 			return true
 		});
 	});
