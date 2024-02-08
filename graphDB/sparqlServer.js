@@ -6,9 +6,11 @@ var express = require('express'),
 	    app = express()
 
 const path = require("path")
-
 var bodyParser = require('body-parser');
+var cors = require('cors');
+
 app.use(bodyParser.json());
+app.use(cors({origin: 'http://143.198.98.66:86'}));
 
 sparqlConstr = function(TSIDs){
 	                var query1st = fs.readFileSync('queryHalf1.sparql','utf8');
