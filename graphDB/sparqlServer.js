@@ -30,6 +30,7 @@ sparqlConstr = function(TSIDs){
 	                filterString += ')';
 	                var queryWhole = query1st + filterString + query2nd
 	                //console.log(queryWhole);
+			/*
 			fs.writeFile("newQuery.sparql", queryWhole, (err) => {
 		  		if (err)
 		    			console.log(err);
@@ -37,6 +38,7 @@ sparqlConstr = function(TSIDs){
 		    			console.log("File written successfully\n");
   				}
 			});
+   			*/
 	                return encodeURI(queryWhole);
 }
 
