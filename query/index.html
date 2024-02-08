@@ -1099,7 +1099,8 @@ retTimeSeries = function(TSIDs){
 
 function grabCSV() {
 	getTSIDs().then(reso => {
-		var tsJSON = '{"TSIDs":[' + reso + ']'
+		var IDs = reso.map(function(d) { return d['paleoData_TSid']; })
+		var tsJSON = '{"TSIDs": ' + IDs + '}'
 		console.log("sparql server input: ")
 		console.log(tsJSON)
 		return retTimeSeries(tsJSON)
