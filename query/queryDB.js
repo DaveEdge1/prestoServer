@@ -79,6 +79,25 @@ app.get('/', function (req, res, next) {
    });
 });
 
+app.get('/TS', function (req, res, next) {
+   var con = mysql.createPool({
+	  connectionLimit : 100,
+	  host: "localhost",
+	  user: "dave",
+	  password: "peb0pk0q",
+	  database: "lipdverse"
+});
+   con.getConnection(function(err) {
+	  if (err) throw err;
+	  console.log("Connected!");
+	  con.query("SELECT paleoData_TSid FROM query" + buildQstring(req.query) + ";", function (err, result, fields) {
+		      if (err) throw err;
+		      console.log('Total records returned: ' + result.length);
+		      res.status(200).json(result);
+		    });
+   });
+});
+
 app.listen(PORT, function () {
   console.log(`Express server listening on port ${PORT}`)
 })
