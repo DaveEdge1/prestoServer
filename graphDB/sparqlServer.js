@@ -29,7 +29,14 @@ sparqlConstr = function(TSIDs){
 				                                }
 	                filterString += ')';
 	                var queryWhole = query1st + filterString + query2nd
-	                console.log(queryWhole);
+	                //console.log(queryWhole);
+			fs.writeFile("newQuery.sparql", queryWhole, (err) => {
+		  		if (err)
+		    			console.log(err);
+		  		else {
+		    			console.log("File written successfully\n");
+  				}
+			});
 	                return encodeURI(queryWhole);
 }
 
@@ -64,6 +71,7 @@ sendQuery = function(TSIDs){
 		xhr.open("POST", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3", true);
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		jsbody = 'query=' + sparqlConstr(TSIDs);
+
 		xhr.send(jsbody);
 		});
 }
