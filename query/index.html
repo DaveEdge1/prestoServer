@@ -1109,7 +1109,7 @@ function grabCSV() {
 		//console.log("sparql server input: ")
 		//console.log(tsJSON)
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
-			document.getElementById("timeSeries").innerHTML = JSON.parse(TS1)
+			document.getElementById("timeSeries").innerHTML = JSON.parse(resp1)
 			return true
 		});
 	});
