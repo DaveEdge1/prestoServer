@@ -1111,7 +1111,7 @@ function grabCSV() {
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
 			document.getElementById("timeSeries").innerHTML = JSON.parse(TS1)
 			return true
-		}
+		});
 	});
 }
 	
