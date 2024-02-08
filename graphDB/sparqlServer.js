@@ -46,6 +46,7 @@ sendQuery = function(TSIDs){
 				prevResp = prevResp.replaceAll(/[\r\n]/g, "");
 				prevResp = prevResp.substring(0, prevResp.length-2);
 				prevResp = "{" + prevResp + "}";
+				prevResp = prevResp.replaceAll('""', '"');
 				prevResp = JSON.parse(prevResp);
 				console.log(prevResp);
 				resolve(JSON.stringify(prevResp));
