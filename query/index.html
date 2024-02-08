@@ -1086,7 +1086,7 @@ retTimeSeries = function(TSIDs){
 			}
 			if (xhr.status === 200){
 				//console.log("time series: ");
-				//console.log(xhr.responseText);
+				console.log(xhr.responseText);
 				resolve(xhr.responseText);
 			} else {
 				var resp1 = "XHR didn't work: " + xhr.status;
@@ -1108,9 +1108,10 @@ function grabCSV() {
 		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
 		//console.log("sparql server input: ")
 		//console.log(tsJSON)
-		var TS1 = retTimeSeries(tsJSON)
-		document.getElementById("timeSeries").innerHTML = JSON.stringify(TS1)
-		return TS1
+		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
+			document.getElementById("timeSeries").innerHTML = JSON.parse(TS1)
+			return true
+		}
 	});
 }
 	
