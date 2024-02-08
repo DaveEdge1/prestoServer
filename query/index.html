@@ -1120,10 +1120,13 @@ function grabCSV() {
 		//console.log("sparql server input: ")
 		//console.log(tsJSON)
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
+			document.getElementById("timeSeries").innerHTML = resp1.asCSV
+			/*
 			jsonToData(resp1).then(resp2 => {
 				var csv1 = resp2.asCSV
 				document.getElementById("timeSeries").innerHTML = csv1
 			});
+   			*/
 			return true
 		});
 	});
