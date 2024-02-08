@@ -36,7 +36,7 @@ sparqlConstr = function(TSIDs){
 //var xhr = new XMLHttpRequest();
 sendQuery = function(TSIDs){
 	    xhr = new XMLHttpRequest();
-	    //xhr.timeout = 2000;
+	    xhr.timeout = 99999;
 		return new Promise((resolve, reject) => {
 	    	xhr.onreadystatechange = (e) => {
 			if (xhr.readyState !== 4) {
