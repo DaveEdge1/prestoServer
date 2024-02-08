@@ -1082,8 +1082,8 @@ retTimeSeries = function(TSIDs){
 				return;
 			}
 			if (xhr.status === 200){
-				console.log("time series: ");
-				console.log(xhr.responseText);
+				//console.log("time series: ");
+				//console.log(xhr.responseText);
 				resolve(xhr.responseText);
 			} else {
 				var resp1 = "XHR didn't work: " + xhr.status;
@@ -1101,9 +1101,10 @@ function grabCSV() {
 	getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
 		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
+		console.log("Total time series: " + IDs.length);
 		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
-		console.log("sparql server input: ")
-		console.log(tsJSON)
+		//console.log("sparql server input: ")
+		//console.log(tsJSON)
 		return retTimeSeries(tsJSON)
 	});
 }
