@@ -61,7 +61,7 @@ sendQuery = function(TSIDs){
 				resolve(resp1);
 			}
 		};
-		xhr.open("POST", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3", false);
+		xhr.open("POST", "https://linkedearth.graphdb.mint.isi.edu/repositories/LiPDVerse3", true);
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 		jsbody = 'query=' + sparqlConstr(TSIDs);
 		xhr.send(jsbody);
