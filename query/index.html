@@ -1101,14 +1101,16 @@ retTimeSeries = function(TSIDs){
 }
 
 function grabCSV() {
-	document.getElementById("timeSeries").innerHTML = getTSIDs().then(reso => {
+	getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
 		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
 		console.log("Total time series: " + IDs.length);
 		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
 		//console.log("sparql server input: ")
 		//console.log(tsJSON)
-		return retTimeSeries(tsJSON)
+		var TS1 = retTimeSeries(tsJSON)
+		document.getElementById("timeSeries").innerHTML = JSON.stringify(TS1)
+		return TS1
 	});
 }
 	
