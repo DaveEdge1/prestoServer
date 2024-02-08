@@ -9,7 +9,12 @@ const path = require("path")
 var bodyParser = require('body-parser');
 var cors = require('cors');
 
-app.use(bodyParser.json());
+//app.use(bodyParser.json());
+ app.use(bodyParser.json({
+    parameterLimit: 100000,
+    limit: '50mb',
+    extended: true
+  }));
 app.use(cors({origin: 'http://143.198.98.66:86'}));
 
 sparqlConstr = function(TSIDs){
