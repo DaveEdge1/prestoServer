@@ -324,7 +324,10 @@ Selected values:
 </div>
 </form>
 <div>
-	<button type="button" onclick="getAvailPlot()">
+	<button style="font-size: 16px;" type="button" onclick="getAvailPlot()">Make Plot</button>
+</div>
+<div>
+	<button style="font-size: 16px;" type="button" onclick="grabCSV()">Get CSV</button>
 </div>
 <br><br><br><br>
 <script src="/slider.js"></script>
@@ -1046,6 +1049,63 @@ function qString(val1,name1){
         // xhr.responseType = "text";
         xhr.send();
     }
+
+getTSIDs = function(TSIDs){
+	    xhr = new XMLHttpRequest();
+	    //xhr.timeout = 2000;
+		return new Promise((resolve, reject) => {
+	    	xhr.onreadystatechange = (e) => {
+			if (xhr.readyState !== 4) {
+				return;
+			}
+			if (xhr.status === 200){
+				console.log("TSIDs: ");
+				console.log(xhr.responseText);
+				resolve(xhr.responseText);
+			} else {
+				var resp1 = "XHR didn't work: " + xhr.status;
+				console.log(resp1);
+				resolve();
+			}
+		};
+		xhr.open("get", "http://143.198.98.66:88/TS" + params(), /*async*/ true);
+		xhr.send();
+		});
+}
+
+retTimeSeries = function(TSIDs){
+	    xhr = new XMLHttpRequest();
+	    //xhr.timeout = 2000;
+		return new Promise((resolve, reject) => {
+	    	xhr.onreadystatechange = (e) => {
+			if (xhr.readyState !== 4) {
+				return;
+			}
+			if (xhr.status === 200){
+				console.log("time series: ");
+				console.log(xhr.responseText);
+				resolve(xhr.responseText);
+			} else {
+				var resp1 = "XHR didn't work: " + xhr.status;
+				console.log(resp1);
+				resolve();
+			}
+		};
+		xhr.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
+		xhr.setRequestHeader("Content-type", "application/json");
+		xhr.send(TSIDs);
+		});
+}
+
+function grabCSV() {
+	getTSIDs().then(reso => {
+		var tsJSON = '{"TSIDs":[' + reso + ']'
+		console.log("sparql server input: ")
+		console.log(tsJSON)
+		return retTimeSeries(tsJSON)
+	});
+}
+	
 let dsidArray = [];
 let dataString = ""
 let jsbody = '{"datasetId":""}';
