@@ -325,9 +325,9 @@ Selected values:
 <br>
 </div>
 </form>
-<div>
+<!--div>
 	<button style="font-size: 16px;" type="button" onclick="getAvailPlot()">Make Plot</button>
-</div>
+</div-->
 <div>
 	<button style="font-size: 16px;" type="button" onclick="grabCSV()">Get CSV</button>
 </div>
@@ -1177,7 +1177,7 @@ function grabCSV() {
 	
 let dsidArray = [];
 let dataString = ""
-let jsbody = '{"datasetId":""}';
+let jsbody = '{"datasetId":""}';/*
 	getAvailPlot = function(){
 	xhr = new XMLHttpRequest();
         xhr.timeout = 5000;
@@ -1227,7 +1227,7 @@ let jsbody = '{"datasetId":""}';
         jsbody = '{"datasetId":"'+ dataString + '"}';
         console.log(jsbody);
 	xhr.send(jsbody);
-    }
+    }*/
 //$getReposBtn.onclick = sendQuery();
 /*
 firstRun = function (){
