@@ -1064,8 +1064,8 @@ getTSIDs = function(TSIDs){
 				return;
 			}
 			if (xhr.status === 200){
-				console.log("TSIDs: ");
-				console.log(xhr.responseText);
+				//console.log("TSIDs: ");
+				//console.log(xhr.responseText);
 				resolve(xhr.responseText);
 			} else {
 				var resp1 = "XHR didn't work: " + xhr.status;
@@ -1106,7 +1106,7 @@ function writeCSV(json1){
 	json1 = JSON.parse(json1)
 	console.log(json1)
 	var keys1 = Object.keys(json1)
-	console.log(keys1)
+	console.log(keys1.length)
 	var numKeys = keys1.length;
 	var len1 = 0;
 	var lenMax = 0;
