@@ -478,7 +478,12 @@ var layerGroup = L.layerGroup().addTo(map);
 function chooseColor(archiveType){
 	archiveType = archiveType.toString();
 	var color1 = colorPal[archiveType]
-	return color1
+	if (typeof color1 !== 'undefined'){
+		return color1
+	} else {
+		console.log(archiveType)
+		return "black"
+	}
 }
 function chooseShape(archiveType){
 	archiveType = archiveType.toString();
@@ -487,7 +492,7 @@ function chooseShape(archiveType){
 		return shape1
 	} else {
 		console.log(archiveType)
-		return "x"
+		return "diamond"
 	}
 }
 var regExp = /\(([^)]+)\)/;
