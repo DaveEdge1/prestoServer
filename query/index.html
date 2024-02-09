@@ -1106,8 +1106,10 @@ function writeCSV(json1){
 	json1 = JSON.parse(JSON.parse(json1))
 	//console.log(typeof json1)
 	var keys1 = Object.keys(json1)
-	var alertText = "Preparing csv file with " + keys1.length + " records"
-	alert(alertText);
+	if (keys1.length > 100){
+		var alertText = "Preparing csv file with " + keys1.length + " records"
+		alert(alertText);
+	}
 	//console.log(keys1.length)
 	var numKeys = keys1.length;
 	var len1 = 0;
@@ -1152,6 +1154,10 @@ function grabCSV() {
 		console.log("Total time series: " + IDs.length);
 		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
+			if (resp1.length > 100000){
+				var alertText = "Sorry, too many records to compile here"
+				alert(alertText);
+			}
 			downloadCurrentDocument(resp1);
 			return true
 		});
