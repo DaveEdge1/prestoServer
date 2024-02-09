@@ -970,7 +970,7 @@ function qString(val1,name1){
 </script>
 <script>
     //send mySQL query to queryDB and show response
-    function params(){
+    function params(useCoords=false){
 	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
 	    var x2 = rmBlanks(document.getElementById("variableName").value)
 	    qstring = '?'
@@ -979,14 +979,14 @@ function qString(val1,name1){
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
-	    /*
-	    if (JSON.parse(filters1['coords'])){
-		    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
-		    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
-		    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
-		    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
+	    if (useCoords=true){
+		    if (JSON.parse(filters1['coords'])){
+			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
+			    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
+			    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
+			    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
+		    }
 	    }
-     	    */
 	    if (JSON.parse(filters1['ages'])){
 		    
 		    qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
@@ -1023,7 +1023,7 @@ function qString(val1,name1){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("query: " + params())
+			    console.log("query: " + params(useCoords=false))
 			    prevResp = updateRes(JSON.parse(xhr.response));
 		            updatePoints(prevResp)
 			    resolve();
@@ -1050,7 +1050,7 @@ function qString(val1,name1){
         xhr.ontimeout = function (){
             console.error("request timedout: ", xhr);
         }
-        xhr.open("get", "http://143.198.98.66:88/" + params(), /*async*/ true);
+        xhr.open("get", "http://143.198.98.66:88/" + params(useCoords=false), /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
     }
@@ -1073,7 +1073,7 @@ getTSIDs = function(TSIDs){
 				resolve();
 			}
 		};
-		xhr.open("get", "http://143.198.98.66:88/TS" + params(), /*async*/ true);
+		xhr.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
 		xhr.send();
 		});
 }
