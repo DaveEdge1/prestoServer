@@ -1106,6 +1106,8 @@ function writeCSV(json1){
 	json1 = JSON.parse(JSON.parse(json1))
 	//console.log(typeof json1)
 	var keys1 = Object.keys(json1)
+	var alertText = "Preparing csv file with " + keys1.length + " records"
+	alert(alertText);
 	//console.log(keys1.length)
 	var numKeys = keys1.length;
 	var len1 = 0;
