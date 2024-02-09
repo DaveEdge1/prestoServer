@@ -1135,7 +1135,7 @@ function writeCSV(json1){
 }
 
 function downloadCurrentDocument(resp1) {
-  var base64doc = btoa(writeCSV(resp1)),
+  var base64doc = encodeURI(writeCSV(resp1)),
       a = document.createElement('a'),
       e = new MouseEvent('click');
 
