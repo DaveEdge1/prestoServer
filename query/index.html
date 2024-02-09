@@ -1153,8 +1153,8 @@ function grabCSV() {
 	getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
 		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-		if (IDs.length > 1000){
-			var alertText = "Sorry," + IDs.length + " is too many records to compile here"
+		if (IDs.length > 300){
+			var alertText = "Sorry, " + IDs.length + " is too many records to compile here"
 			alert(alertText);
 		} else {
 			console.log("Total time series: " + IDs.length);
