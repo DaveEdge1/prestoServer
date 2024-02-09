@@ -1104,9 +1104,9 @@ retTimeSeries = function(TSIDs){
 
 function writeCSV(json1){
 	json1 = JSON.parse(JSON.parse(json1))
-	console.log(typeof json1)
+	//console.log(typeof json1)
 	var keys1 = Object.keys(json1)
-	console.log(keys1.length)
+	//console.log(keys1.length)
 	var numKeys = keys1.length;
 	var len1 = 0;
 	var lenMax = 0;
@@ -1116,7 +1116,7 @@ function writeCSV(json1){
 	lenMax = len1
 	}
 	}
-	console.log(lenMax)
+	//console.log(lenMax)
 	
 	var string1 = keys1.join(", ") + "\n"
 	for (let j=0; j<lenMax; j++){
@@ -1134,6 +1134,16 @@ function writeCSV(json1){
 	return string1
 }
 
+function downloadCurrentDocument(resp1) {
+  var base64doc = btoa(writeCSV(resp1)),
+      a = document.createElement('a'),
+      e = new MouseEvent('click');
+
+  a.download = 'PrestoTS.csv';
+  a.href = 'data:text/csv;charset=utf-8,' + base64doc;
+  a.dispatchEvent(e);
+}
+
 function grabCSV() {
 	getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
@@ -1145,6 +1155,7 @@ function grabCSV() {
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
 			console.log(typeof resp1)
 			document.getElementById("timeSeries").innerHTML = writeCSV(resp1)
+			downloadCurrentDocument(resp1);
 			/*
 			jsonToData(resp1).then(resp2 => {
 				var csv1 = resp2.asCSV
