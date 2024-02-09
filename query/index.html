@@ -424,7 +424,7 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
 }).addTo(map);
-var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FF1492","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
+var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FFD600","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
  "FluvialSediment":"#4169E0","LakeSediment":"#D2042D","MarineSediment":"#8A4513","Speleothem":"#FF1492","Midden":"#824E2B",
  "Peat":"#8A9A5B","Sclerosponge":"#D2042D","Shoreline":"#40826D","Wood":"#32CC32","TerrestrialSediment":"#d2b48c"}
 var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snowflake","GroundIce":"snowflake","Coral":"triangle-down",
@@ -1311,8 +1311,8 @@ const legend = L.control.Legend({
     label: "MolluskShell",
     type: "polygon",
     sides: 3,
-    color: "#FF1492",
-    fillColor: "#FF1492",
+    color: "#FFD600",
+    fillColor: "#FFD600",
     weight: 2
 }, {
     label: "Peat",
