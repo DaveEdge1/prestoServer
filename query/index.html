@@ -1151,19 +1151,17 @@ function grabCSV() {
 	getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
 		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-		console.log("Total time series: " + IDs.length);
-		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
-		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
-			if (resp1.length > 1000000){
-				console.log(resp1.length)
-				var alertText = "Sorry, too many records to compile here"
-				alert(alertText);
-				return false
-			} else {
-				downloadCurrentDocument(resp1);
-				return true
-			}
-		});
+		if (IDs.length > 1000){
+			var alertText = "Sorry," + IDs.length + " is too many records to compile here"
+			alert(alertText);
+		} else {
+			console.log("Total time series: " + IDs.length);
+			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
+			var TS1 = retTimeSeries(tsJSON).then(resp1 => {
+			downloadCurrentDocument(resp1);
+			return true
+			});
+		}
 	});
 }
 
