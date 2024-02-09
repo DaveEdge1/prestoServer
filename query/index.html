@@ -424,12 +424,12 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
 }).addTo(map);
-var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FF8B00","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
+var colorPal = {"Borehole":"#FFD600","MolluskShell":"#FF1492","GlacierIce":"#86CDFA","GroundIce":"#ff6db6","Coral":"#FF8B00",
  "FluvialSediment":"#4169E0","LakeSediment":"#40826D","MarineSediment":"#8A4513","Speleothem":"#FF1492","Midden":"#824E2B",
  "Peat":"#8A9A5B","Sclerosponge":"#D2042D","Shoreline":"#40826D","Wood":"#32CC32","TerrestrialSediment":"#d2b48c"}
-var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snowflake","GroundIce":"snowflake","Coral":"triangle",
- "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"square",
- "Peat":"square","Sclerosponge":"triangle","Shoreline":"square","Wood":"triangle","TerrestrialSediment":"circle"}
+var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snowflake","GroundIce":"snowflake","Coral":"triangle-down",
+ "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"diamond",
+ "Peat":"triangle-down","Sclerosponge":"triangle","Shoreline":"diamond","Wood":"triangle","TerrestrialSediment":"circle"}
 //initiate leaflet rectangle
 let rect = L.rectangle([[-90, -180], [90, 180]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });
 map.addLayer(rect);
@@ -1305,12 +1305,12 @@ const legend = L.control.Legend({
     label: "MolluskShell",
     type: "polygon",
     sides: 3,
-    color: "#FF8B00",
-    fillColor: "#FF8B00",
+    color: "#FF1492",
+    fillColor: "#FF1492",
     weight: 2
 }, {
     label: "Peat",
-    type: "polygon",
+    type: "polygonR",
     sides: 4,
     color: "#8A9A5B",
     fillColor: "#8A9A5B",
@@ -1324,7 +1324,7 @@ const legend = L.control.Legend({
     weight: 2
 }, {
     label: "Shoreline",
-    type: "polygon",
+    type: "polygonR",
     sides: 4,
     color: "#40826D",
     fillColor: "#40826D",
