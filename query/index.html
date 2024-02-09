@@ -121,9 +121,9 @@ Selected values:
 <br>
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
-<div id="iframediv" style="width: 1200px; margin: auto;">
+<!--div id="iframediv" style="width: 1200px; margin: auto;">
 	<img id="dataAvail" alt="data Availability Plot" src="" />
-</div>
+</div-->
 <br>
 <div class="button-submit">
 <button style="height:40px; width:200px; font-size:18px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
@@ -1174,10 +1174,10 @@ function grabCSV() {
 }
 
 
-	
+/*	
 let dsidArray = [];
 let dataString = ""
-let jsbody = '{"datasetId":""}';/*
+let jsbody = '{"datasetId":""}';
 	getAvailPlot = function(){
 	xhr = new XMLHttpRequest();
         xhr.timeout = 5000;
@@ -1215,7 +1215,7 @@ let jsbody = '{"datasetId":""}';/*
         }
 	//let formData = new FormData([{"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}]); // creates an object, optionally fill from <form>
 	//formData.append(name, value); // appends a field
-        xhr.open("post", "http://146.190.152.170/date/", /*async*/ true);
+        xhr.open("post", "http://146.190.152.170/date/", true);
 	xhr.setRequestHeader("Content-type", "application/json");
 	dsidArray = prevResp.map(function(d) { return d['datasetId']; })
 	dsidArray = dsidArray.map(function(e){
