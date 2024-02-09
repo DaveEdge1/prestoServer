@@ -1103,9 +1103,8 @@ retTimeSeries = function(TSIDs){
 }
 
 function writeCSV(json1){
-	console.log(Object.keys(json1).length)
 	json1 = JSON.parse(json1)
-	console.log(json1)
+	console.log(typeof resp1)
 	var keys1 = Object.keys(json1)
 	console.log(keys1.length)
 	var numKeys = keys1.length;
@@ -1144,7 +1143,7 @@ function grabCSV() {
 		//console.log("sparql server input: ")
 		//console.log(tsJSON)
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
-			console.log(Object.keys(resp1).length)
+			console.log(typeof resp1)
 			document.getElementById("timeSeries").innerHTML = writeCSV(resp1)
 			/*
 			jsonToData(resp1).then(resp2 => {
