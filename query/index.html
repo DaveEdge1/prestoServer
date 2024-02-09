@@ -728,7 +728,12 @@ function updatePoints (coords){
                 }
             }).addTo(layerGroup);
 	spinner.stop();
-	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
+	getTSIDs().then(reso => {
+		var resoJSON = JSON.parse(reso);
+		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; });
+		document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount + "\nTotal time series in query: " + IDs
+	});
+	//document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 	
 
@@ -1062,7 +1067,7 @@ function qString(val1,name1){
         xhr.send();
     }
 
-getTSIDs = function(TSIDs){
+getTSIDs = function(){
 	    xhr = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
