@@ -1154,12 +1154,15 @@ function grabCSV() {
 		console.log("Total time series: " + IDs.length);
 		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
 		var TS1 = retTimeSeries(tsJSON).then(resp1 => {
-			if (resp1.length > 100000){
+			if (resp1.length > 1000000){
+				console.log(resp1.length)
 				var alertText = "Sorry, too many records to compile here"
 				alert(alertText);
+				return false
+			} else {
+				downloadCurrentDocument(resp1);
+				return true
 			}
-			downloadCurrentDocument(resp1);
-			return true
 		});
 	});
 }
