@@ -728,12 +728,7 @@ function updatePoints (coords){
                 }
             }).addTo(layerGroup);
 	spinner.stop();
-	getTSIDs().then(reso => {
-		var resoJSON = JSON.parse(reso);
-		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; });
-		document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount + "\nTotal time series in query: " + IDs
-	});
-	//document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
+	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 	
 
