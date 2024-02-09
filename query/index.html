@@ -1103,6 +1103,7 @@ retTimeSeries = function(TSIDs){
 }
 
 function writeCSV(json1){
+	json1 = JSON.parse(json1)
 	console.log(json1)
 	var keys1 = Object.keys(json1)
 	console.log(keys1)
