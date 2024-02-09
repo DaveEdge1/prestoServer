@@ -1088,7 +1088,7 @@ retTimeSeries = function(TSIDs){
 			}
 			if (xhr.status === 200){
 				//console.log("time series: ");
-				console.log(xhr.responseText);
+				//console.log(xhr.responseText);
 				resolve(xhr.responseText);
 			} else {
 				var resp1 = "XHR didn't work: " + xhr.status;
@@ -1102,18 +1102,9 @@ retTimeSeries = function(TSIDs){
 		});
 }
 
-jsonToData = function(js1){
-	return new Promise((resolve, reject) => {
-	var df1 = js1.parseJSON
-	console.log("data-forge json to data frame: ")
-	console.log(df1);
-	resolve(df1);
-	});
-}
-
 function writeCSV(json1){
 	var keys1 = Object.keys(json1)
-
+	console.log(keys1)
 	var numKeys = keys1.length;
 	var len1 = 0;
 	var lenMax = 0;
