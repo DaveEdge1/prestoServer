@@ -1219,7 +1219,7 @@ function getLipds(){
 		var resoJSON = JSON.parse(reso);
 		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
 		console.log("Total time series: " + IDs.length);
-		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"uniqueID":"' + document.getElementById('uniqueID').value + '"}'
+		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"uniqueID":"' + document.getElementById('uniqueID').value + '", "language":'  + document.getElementById('language').value }'
 		console.log("json body sent to 'getLipds': " + tsJSON)
 		compileLipds(tsJSON);
 	});
