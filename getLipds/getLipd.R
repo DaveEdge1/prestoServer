@@ -1,6 +1,7 @@
 args = commandArgs(trailingOnly=TRUE)
-if (length(args) != 2){
-	stop("TSIDs and user ID required")
+print(paste0("args: ", args))
+if (length(args) != 3){
+	stop("TSIDs, uniqueID, and language required")
 }
 TSIDs <- unlist(strsplit(args[1], split = ","))
 if (length(TSIDs) < 1){
@@ -29,5 +30,9 @@ if (length(dsPick) == 1){
 	D <- as.multiLipd(tts)
 }
 
-destPath <- paste0("../userRecons/", args[2], ".rds") 
-saveRDS(D, destPath)
+if (args[3] == "R"){
+	destPath <- file.path(args[2], "lipd.rds") 
+	saveRDS(D, destPath)
+} else {
+	writeLipd(D, args[2])
+}
