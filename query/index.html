@@ -362,6 +362,9 @@ popQueryVariable()
 	<button class="btn btn-primary" style="font-size: 16px;" type="button" onclick="grabCSV()">Download CSV of Time Series</button>
 </div>
 <div>
+	<button class="btn btn-primary" style="font-size: 16px;" type="button" onclick="getLipds()">Compile the Lipd Files</button>
+</div>
+<div>
 	<p id="timeSeries"></p>
 </div>
 <br><br><br><br>
@@ -1091,6 +1094,30 @@ function qString(val1,name1){
         xhr.send();
     }
 
+compileLipds = function(postBody){
+	    xhr = new XMLHttpRequest();
+	    //xhr.timeout = 2000;
+		return new Promise((resolve, reject) => {
+	    	xhr.onreadystatechange = (e) => {
+			if (xhr.readyState !== 4) {
+				return;
+			}
+			if (xhr.status === 200){
+				//console.log("time series: ");
+				//console.log(xhr.responseText);
+				resolve(xhr.responseText);
+			} else {
+				var resp1 = "XHR didn't work: " + xhr.status;
+				console.log(resp1);
+				resolve();
+			}
+		};
+		xhr.open("post", "http://143.198.98.66:90/lipds", /*async*/ true);
+		xhr.setRequestHeader("Content-type", "application/json");
+		xhr.send(postBody);
+		});
+}
+
 getTSIDs = function(){
 	    xhr = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
@@ -1185,6 +1212,17 @@ function downloadCurrentDocument(resp1) {
   a.dispatchEvent(e);
 }
 
+function getLipds(){
+	getTSIDs().then(reso => {
+		var resoJSON = JSON.parse(reso);
+		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
+		console.log("Total time series: " + IDs.length);
+		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"uniqueID":"' + document.getElementById('uniqueID').value + '"}'
+		console.log("json body sent to 'getLipds': " + tsJSON)
+		compileLipds(tsJSON);
+	});
+}
+	
 function grabCSV() {
 	getTSIDs().then(reso => {
 		var resoJSON = JSON.parse(reso);
