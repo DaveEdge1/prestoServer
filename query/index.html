@@ -121,6 +121,32 @@ Selected values:
 <br>
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
+<script>
+    function getQueryVariable(variable)
+    {
+           var query = window.location.search.substring(1);
+           var vars = query.split("&");
+           for (var i=0;i<vars.length;i++) {
+                   var pair = vars[i].split("=");
+                   if(pair[0] == variable){
+                     return pair[1];}
+           }
+           return(false);
+    }
+</script>
+<script>
+    function popQueryVariable(){
+    document.getElementById('recon').value = getQueryVariable("recon");
+    document.getElementById('user').value = getQueryVariable("user");
+    document.getElementById('domain').value = getQueryVariable("domain");
+    document.getElementById('uniqueID').value = getQueryVariable("uniqueID");
+    }
+</script>
+
+<input id="recon" name="recon" type="hidden" value="">
+<input id="user" name="user" type="hidden" value="">
+<input id="domain" name="domain" type="hidden" value="">
+<input id="uniqueID" name="uniqueID" type="hidden" value="">
 <!--div id="iframediv" style="width: 1200px; margin: auto;">
 	<img id="dataAvail" alt="data Availability Plot" src="" />
 </div-->
