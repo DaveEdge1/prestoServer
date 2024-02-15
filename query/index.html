@@ -367,6 +367,14 @@ popQueryVariable()
 <div class="button-submit">
 	<button class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds()">Proceed with selected Proxies</button>
 </div>
+<script>
+	var lang1 = document.getElementById('language').value
+	if (typeof lang1 == 'undefined'){
+		console.log("undefined")
+	} else {
+		console.log(lang1)
+	}
+</script>
 <div>
 	<p id="timeSeries"></p>
 </div>
