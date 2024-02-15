@@ -372,11 +372,11 @@ popQueryVariable()
 	if (recon1 == 'false'){
 		console.log("recon undefined, using downloads pathway")
 		document.getElementById('proceedButton').innerHTML = "Download selected Proxies"
-		document.getElementById('proceedButton').onclick = "getLipds('download').then(reso1 => location.href = 'www.google.com');"
+		document.getElementById('proceedButton').onclick = getLipds('download').then(reso1 => location.href = reso1);
 	} else {
 		console.log(lang1)
 		document.getElementById('proceedButton').innerHTML = "Use selected Proxies"
-		document.getElementById('proceedButton').onclick = "getLipds('reconstruct')"
+		document.getElementById('proceedButton').onclick = getLipds('download').then(reso1 => location.href = reso1);
 	}
 </script>
 <div>
