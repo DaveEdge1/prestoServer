@@ -1460,7 +1460,7 @@ if (recon1 == 'false'){
 	document.getElementById('proceedButton').innerHTML = "Download selected Proxies"
 	document.getElementById('proceedButton').onclick = function () { getLipds('download').then(reso1 => location.href = reso1)};
 } else {
-	console.log(lang1)
+	console.log(recon1)
 	document.getElementById('proceedButton').innerHTML = "Use selected Proxies"
 	document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct').then(reso1 => location.href = reso1)};
 }
