@@ -372,7 +372,7 @@ popQueryVariable()
 	if (recon1 == 'false'){
 		console.log("recon undefined, using downloads pathway")
 		document.getElementById('proceedButton').innerHTML = "Download selected Proxies"
-		document.getElementById('proceedButton').onclick = "getLipds('download')"
+		document.getElementById('proceedButton').onclick = "getLipds('download').then(reso1 => location.href = 'www.google.com');"
 	} else {
 		console.log(lang1)
 		document.getElementById('proceedButton').innerHTML = "Use selected Proxies"
@@ -1227,14 +1227,23 @@ function downloadCurrentDocument(resp1) {
   a.dispatchEvent(e);
 }
 
-function getLipds(){
-	getTSIDs().then(reso => {
-		var resoJSON = JSON.parse(reso);
-		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-		console.log("Total time series: " + IDs.length);
-		var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-		console.log("json body sent to 'getLipds': " + tsJSON)
-		compileLipds(tsJSON);
+function getLipds(loc1){
+	return new Promise((resolve, reject) => {
+		getTSIDs().then(reso => {
+			var resoJSON = JSON.parse(reso);
+			var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
+			console.log("Total time series: " + IDs.length);
+			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
+			console.log("json body sent to 'getLipds': " + tsJSON)
+			compileLipds(tsJSON);
+		});
+		if (loc1 == "donwload"){
+			resolve("www.google.com")
+		} else if (loc1 == "reconstruct"){
+			resolve("www.yahoo.com")
+		} else {
+			resolve("https://paleopresto.com/")
+		}
 	});
 }
 	
