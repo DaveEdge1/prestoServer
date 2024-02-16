@@ -1,0 +1,113 @@
+{
+  "compilation": {
+    "value": [
+      "temp12k"
+    ],
+    "default": [
+      "temp12k"
+    ],
+    "complexity": "experimental",
+    "URL": "https://lipdverse.org/project/"
+  },
+  "archives": {
+    "value": [
+      "Borehole",
+      "Coral",
+      "FluvialSediment",
+      "GlacierIce",
+      "GroundIce",
+      "LakeSediment",
+      "MarineSediment",
+      "Midden",
+      "MolluskShell",
+      "Other",
+      "Peat",
+      "Sclerosponge",
+      "Shoreline",
+      "Speleothem",
+      "TerrestrialSediment",
+      "Wood"
+    ],
+    "default": [
+      "Borehole",
+      "Coral",
+      "FluvialSediment",
+      "GlacierIce",
+      "GroundIce",
+      "LakeSediment",
+      "MarineSediment",
+      "Midden",
+      "MolluskShell",
+      "Other",
+      "Peat",
+      "Sclerosponge",
+      "Shoreline",
+      "Speleothem",
+      "TerrestrialSediment",
+      "Wood"
+    ],
+    "options": [
+      "Borehole",
+      "Coral",
+      "FluvialSediment",
+      "GlacierIce",
+      "GroundIce",
+      "LakeSediment",
+      "MarineSediment",
+      "Midden",
+      "MolluskShell",
+      "Other",
+      "Peat",
+      "Sclerosponge",
+      "Shoreline",
+      "Speleothem",
+      "TerrestrialSediment",
+      "Wood"
+    ],
+    "complexity": "standard",
+  },
+  "seasonality": {
+    "value": [
+      "annual",
+      "summerOnly",
+      "winterOnly"
+    ],
+    "default": [
+      "annual",
+      "summerOnly",
+      "winterOnly"
+    ],
+    "complexity": "standard",
+  },
+  "resolution_max": {
+    "value": 200,
+    "default": 200,
+    "limits": [
+      10,
+      1000
+    ],
+    "precision": 10,
+    "complexity": "standard",
+  },
+  "coords": {
+    "value": [
+      -90,
+      90,
+      -180,
+      180
+    ],
+    "default": [
+      -90,
+      90,
+      -180,
+      180
+    ],
+    "limits": [
+      -90,
+      90,
+      -180,
+      180
+    ],
+    "complexity": "standard",
+  }
+}
