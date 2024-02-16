@@ -1503,10 +1503,14 @@ grabParams().then(reso => {
 			updateFilters();
 			if (typeof reso[key].value == 'number'){
 				var inputID = key + "Input"
+				var sliderID = key+"Slider"
 				document.getElementById(inputID).value = reso[key].default
 				document.getElementById(inputID).min = reso[key].limits[0]
 				document.getElementById(inputID).max = reso[key].limits[1]
 				document.getElementById(inputID).step = reso[key].precision
+				document.getElementById(sliderID).min = reso[key].limits[0]
+				document.getElementById(sliderID).max = reso[key].limits[1]
+				document.getElementById(sliderID).step = reso[key].precision
 			}
 			
 		}
