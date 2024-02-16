@@ -38,15 +38,18 @@
 		
 		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
 		function reconParams(){
+			return new Promise((resolve,reject) => {
 			fetch(jsonPath)
 		     .then(function(res){
 		         return res.json()
-		     });
-		}
-		var params1 = reconParams().then(function(data){
-			     console.log("data: " + data)
-			     return data
 		     })
+		     .then(function(data){
+			     console.log("data: " + data)
+			     resolve(data)
+		     })
+			})
+		}
+		var params1 = reconParams()
 	</script>
 	
     <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
