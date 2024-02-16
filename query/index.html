@@ -32,6 +32,20 @@
 	<script src="/spin.js"></script>
 
 	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>
+
+	<script type="text/javascript">
+		const urlParams = new URLSearchParams(window.location.search);
+		var reconParams = ''
+		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
+		   fetch(jsonPath)
+		     .then(function(res){
+		         return res.json()
+		     })
+		     .then(function(data){
+			reconParams = data
+			
+		      })
+	</script>
 	
     <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
 
@@ -1453,6 +1467,7 @@ rect.on('edit', function() {
   updatePoints(prevResp);
 });
 updateBoundingBox();
+console.log("reconParams: " + reconParams)
 
 var recon1 = document.getElementById('recon').value
 if (recon1 == 'false'){
