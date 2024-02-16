@@ -41,7 +41,7 @@
 	  		const response = await fetch(jsonPath);
 	  		let params1 = await response.json();
 	  		console.log("params1: " + Object.keys(params1));
-			resolve(params1)
+			return params1
 		}
 		/*
 		fetch(jsonPath)
