@@ -40,7 +40,7 @@
 		async function grabParams() {
 	  		const response = await fetch(jsonPath);
 	  		params1 = await response.json();
-	  		console.log("params1: " + JSON.stringify(params1));
+	  		console.log("params1: " + Object.keys(params1));
 		}
 		grabParams()
 		/*
