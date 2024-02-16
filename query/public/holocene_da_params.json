@@ -22,7 +22,7 @@
     ],
     "complexity": "standard"
   },
-  "resolution_max": {
+  "resolution": {
     "value": 200,
     "default": 200,
     "limits": [
