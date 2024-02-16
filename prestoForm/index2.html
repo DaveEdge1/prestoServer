@@ -129,7 +129,7 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	</div>
         </form>
 	<br><br>
-	<form onsubmit="goToQuery()">
+	<form onsubmit="goToQuery(event)">
 		<div class="button-submit" style="text-align:center">
     		<input type="submit" value="Go to Query (experimental)" />
 		</div>
@@ -166,8 +166,9 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 			}
 	</script>
 	<script>
-		function goToQuery(){
-			"http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R"
+		function goToQuery(e){
+			e.preventDefault();
+			window.location.replace("http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R");
 	</script>
 </html>
 
