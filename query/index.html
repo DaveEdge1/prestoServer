@@ -1495,8 +1495,8 @@ grabParams().then(reso => {
 	console.log("filterkeys: " + filterkeys)
 	Object.keys(reso).forEach(function(key,index) {
 		console.log(key)
-		var findFilter =  key.search(filterkeys)
-		console.log(findFilter)
+		var findFilter =  filters1[key]
+		console.log(typeof findFilter)
 	})
 });
 </script>
