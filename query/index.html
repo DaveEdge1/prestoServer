@@ -37,11 +37,11 @@
 		const urlParams = new URLSearchParams(window.location.search);
 		
 		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
-		var reconParams = fetch(jsonPath)
+		function reconParams() = fetch(jsonPath)
 		     .then(function(res){
 		         return res.json()
-		     })
-		     .then(function(data){
+		     });
+		var params1 = reconParams().then(function(data){
 			     console.log("data: " + data)
 			     return data
 		     })
@@ -1467,7 +1467,7 @@ rect.on('edit', function() {
   updatePoints(prevResp);
 });
 updateBoundingBox();
-console.log("reconParams: " + reconParams)
+console.log("reconParams: " + params1)
 
 var recon1 = document.getElementById('recon').value
 if (recon1 == 'false'){
