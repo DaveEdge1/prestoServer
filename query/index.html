@@ -44,7 +44,7 @@
 		         return res.json()
 		     })
 		     .then(function(data){
-			     console.log("data: " + data)
+			     console.log("data: " + JSON.stringify(data))
 			     resolve(data)
 		     })
 			})
@@ -1472,7 +1472,7 @@ rect.on('edit', function() {
   updatePoints(prevResp);
 });
 updateBoundingBox();
-console.log("reconParams: " + params1)
+console.log("reconParams: " + JSON.stringify(params1))
 
 var recon1 = document.getElementById('recon').value
 if (recon1 == 'false'){
