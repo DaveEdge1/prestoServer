@@ -186,7 +186,8 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	<script>
 		function goToQuery(e){
 			var email1 = document.getElementById('useremail').value
-			console.log(email1.search(".+@example\.com"))
+			var regex1 = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+			console.log(email1.search(regex1))
 			/*
 			e.preventDefault();
 			const urlParams = new URLSearchParams(window.location.search);
