@@ -1491,9 +1491,9 @@ if (recon1 == 'false'){
 
 grabParams().then(reso => {
 	//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
-	for (ii in Object.keys(reso)){
-		console.log(ii)
-		var findFilter =  ii.search(filters1)
+	Object.keys(reso).forEach(function(key,index) {
+		console.log(key)
+		var findFilter =  key.search(Object.keys(filters1))
 		console.log(findFilter)
 	}
 });
