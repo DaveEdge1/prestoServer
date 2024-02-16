@@ -1502,7 +1502,8 @@ grabParams().then(reso => {
 			document.getElementById(docID).checked = 'true'
 			updateFilters();
 			if (typeof reso[key].value == 'number'){
-				document.getElementById(resolutionInput).value = reso[key].value
+				var inputID = key + "Input"
+				document.getElementById(inputID).value = reso[key].value
 			}
 			
 		}
