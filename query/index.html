@@ -37,10 +37,12 @@
 		const urlParams = new URLSearchParams(window.location.search);
 		
 		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
-		function reconParams() = fetch(jsonPath)
+		function reconParams(){
+			fetch(jsonPath)
 		     .then(function(res){
 		         return res.json()
 		     });
+		}
 		var params1 = reconParams().then(function(data){
 			     console.log("data: " + data)
 			     return data
