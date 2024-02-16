@@ -1501,6 +1501,8 @@ grabParams().then(reso => {
 			var docID = key+"On"
 			document.getElementById(docID).checked = 'true'
 			updateFilters();
+			console.log(typeof reso.key.value)
+			
 		}
 	})
 });
