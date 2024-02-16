@@ -35,16 +35,12 @@
 
 	<script type="text/javascript">
 		const urlParams = new URLSearchParams(window.location.search);
-		var reconParams = ''
+		
 		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
-		   fetch(jsonPath)
+		var reconParams = fetch(jsonPath)
 		     .then(function(res){
 		         return res.json()
 		     })
-		     .then(function(data){
-			reconParams = data
-			
-		      })
 	</script>
 	
     <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
