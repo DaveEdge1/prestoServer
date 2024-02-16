@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+	.required-field::after {
+  		content: "*";
+  		color: red;
+  		margin-left:2px
+	}
+</style>
   <head>
       <!-- Google tag (gtag.js) -->
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-0HKY5GT1N7"></script>
@@ -124,9 +131,11 @@
         </div>
 	<br>
         <div class="form-group">
-          <label for="Email">Email</label>
-          <input type="email" required pattern=".+@example\.com" class="form-control" id="useremail" aria-describedby="emailHelp" name="useremail" placeholder="Enter your email address (eg. John.Doe@vsmu.edu)">
-        </div>
+		<div class="required-field">
+          		<label for="Email">Email</label>
+          		<input type="email" required pattern=".+@example\.com" class="form-control" id="useremail" aria-describedby="emailHelp" name="useremail" placeholder="Enter your email address (eg. John.Doe@vsmu.edu)">
+		</div>
+	</div>
 	<p>*Your name and email will not be stored or shared in any way</p>
 	<div class="radio-group" id="config" style="padding:24px 24px; border-radius:16px;">
 	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="GUI" name="optradio" checked="true"><span style="font-weight:900">Edit Parameters In Browser Window</span>
