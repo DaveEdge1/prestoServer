@@ -52,15 +52,14 @@
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 
         <script type="text/javascript">
-		var reconTable = {}
+		var language = ''
 		   fetch('/reconsTable.json')
 		     .then(function(res){
 		         return res.json()
 		     })
 		     .then(function(data){
 			const urlParams = new URLSearchParams(window.location.search);
-		        reconTable = data
-			console.log(data[urlParams.get('recon')].language)
+			language = data[urlParams.get('recon')].language
 		      })
 		
 	</script>
@@ -188,7 +187,7 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 			e.preventDefault();
 			const urlParams = new URLSearchParams(window.location.search);
 			//window.location.href="http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R";
-			window.location.href="http://143.198.98.66:86/?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&user=' + document.getElementById('useremail').value.split('@')[0] + '&domain=' + document.getElementById('useremail').value.split('@')[1] + '&language=R'
+			window.location.href="http://143.198.98.66:86/?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&user=' + document.getElementById('useremail').value.split('@')[0] + '&domain=' + document.getElementById('useremail').value.split('@')[1] + '&language=' + language
 			return false;
 		}
 	</script>
