@@ -80,7 +80,7 @@ function fillSingleSlider(controlSlider) {
 }								      
 
 function setToggleAccessible(currentTarget) {
-	  //const toSlider = document.getelementById('time_range_to_reconstruct_toSilder');
+	  //const toSlider = document.getelementById('time_range_to_reconstruct_toSlider');
 	  if (Number(currentTarget.value) <= 0 ) {
 		      currentTarget.style.zIndex = 2;
 		    } else {
@@ -134,18 +134,18 @@ function uncheckAll(divid, checkCycle) {
 			    }
 }
 
-const time_range_to_reconstruct_fromSilder = document.getElementById("time_range_to_reconstruct_fromSilder");
-const time_range_to_reconstruct_toSilder = document.getElementById("time_range_to_reconstruct_toSilder");
+const time_range_to_reconstruct_fromSlider = document.getElementById("time_range_to_reconstruct_fromSlider");
+const time_range_to_reconstruct_toSlider = document.getElementById("time_range_to_reconstruct_toSlider");
 const time_range_to_reconstruct_fromInput = document.getElementById("time_range_to_reconstruct_fromInput");
 const time_range_to_reconstruct_toInput = document.getElementById("time_range_to_reconstruct_toInput");
-fillSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, "#C6C6C6", "#896A67", time_range_to_reconstruct_toSilder);
-setToggleAccessible(time_range_to_reconstruct_toSilder);
-time_range_to_reconstruct_fromSilder.oninput = () => controlFromSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput);
-time_range_to_reconstruct_toSilder.oninput = () => controlToSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_toInput);
-time_range_to_reconstruct_fromInput.onchange = () => controlFromInput(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
-time_range_to_reconstruct_toInput.onchange = () => controlToInput(time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
-const resolutionmaxSilder = document.getElementById("resolutionSilder");
+fillSlider(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_toSlider, "#C6C6C6", "#896A67", time_range_to_reconstruct_toSlider);
+setToggleAccessible(time_range_to_reconstruct_toSlider);
+time_range_to_reconstruct_fromSlider.oninput = () => controlFromSlider(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_toSlider, time_range_to_reconstruct_fromInput);
+time_range_to_reconstruct_toSlider.oninput = () => controlToSlider(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_toSlider, time_range_to_reconstruct_toInput);
+time_range_to_reconstruct_fromInput.onchange = () => controlFromInput(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSlider);
+time_range_to_reconstruct_toInput.onchange = () => controlToInput(time_range_to_reconstruct_toSlider, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSlider);
+const resolutionmaxSlider = document.getElementById("resolutionSlider");
 const resolutionmaxInput = document.getElementById("resolutionInput");
-resolutionmaxSilder.oninput = () => changeInput(resolutionmaxSilder, resolutionmaxInput);
-resolutionmaxInput.onchange = () => changeSlider(resolutionmaxInput, resolutionmaxSilder);
-fillSingleSlider(resolutionmaxSilder)
+resolutionmaxSlider.oninput = () => changeInput(resolutionmaxSlider, resolutionmaxInput);
+resolutionmaxInput.onchange = () => changeSlider(resolutionmaxInput, resolutionmaxSlider);
+fillSingleSlider(resolutionmaxSlider)
