@@ -1497,6 +1497,11 @@ grabParams().then(reso => {
 		console.log(key)
 		var findFilter =  filters1[key]
 		console.log(typeof findFilter)
+		if (typeof findFilter != 'undefined'){
+			var docID = key+"On"
+			document.getElementById(docID).checked = 'true'
+			updateFilters();
+		}
 	})
 });
 </script>
