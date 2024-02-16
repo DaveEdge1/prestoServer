@@ -184,20 +184,31 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	</footer>
 
 	<script>
+		function validateEmail(){
+			var email1 = document.getElementById('useremail').value
+			var regex1 = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+			var validate1 = email1.search(regex1)
+			return(validate1)
+		}
+	</script>
+
+	<script>
 		        function EvaluateForm2(){
+				if (validateEmail() == 0){
 				//document.getElementById('tableForm2').action = "/manualORdefault"}
 	            		const urlParams = new URLSearchParams(window.location.search);
 				//document.getElementById('tableForm2').action = "/manualORdefault"
 	            		document.getElementById('tableForm2').action = "/manualORdefault?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&email=' + document.getElementById('useremail').value + '&parampath=' + document.getElementById('GUI').value
+				} else {
+					alert("invalid email")
+				}
 			}
 	</script>
 
 	<script>
 		function goToQuery(e){
-			var email1 = document.getElementById('useremail').value
-			var regex1 = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-			var validate1 = email1.search(regex1)
-			if (validate1 == 0){
+			
+			if (validateEmail() == 0){
 				e.preventDefault();
 				const urlParams = new URLSearchParams(window.location.search);
 				//window.location.href="http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R";
