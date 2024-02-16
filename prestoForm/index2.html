@@ -128,6 +128,11 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 		<button style="height:100%; width:200px; font-size:16px; text-align:center" Style="submit" class="btn btn-primary">Submit</button>
 	</div>
         </form>
+	<form action="goToQuery()">
+		<div class="button-submit" style="text-align:center">
+    		<input type="submit" value="Go to Query (experimental)" />
+		</div>
+	</form>
 	</section>
 	</div>
 	</div>
@@ -158,6 +163,10 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 				//document.getElementById('tableForm2').action = "/manualORdefault"
 	            		document.getElementById('tableForm2').action = "/manualORdefault?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&email=' + document.getElementById('useremail').value + '&parampath=' + document.getElementById('GUI').value
 			}
+	</script>
+	<script>
+		function goToQuery(){
+			"http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R"
 	</script>
 </html>
 
