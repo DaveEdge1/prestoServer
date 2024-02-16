@@ -185,11 +185,14 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 
 	<script>
 		function goToQuery(e){
+			var email1 = document.getElementById('useremail').value
+			console.log(email1.search(".+@example\.com"))
+			/*
 			e.preventDefault();
 			const urlParams = new URLSearchParams(window.location.search);
 			//window.location.href="http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R";
 			window.location.href="http://143.198.98.66:86/?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&user=' + document.getElementById('useremail').value.split('@')[0] + '&domain=' + document.getElementById('useremail').value.split('@')[1] + '&language=' + language
-			return false;
+			return false;*/
 		}
 	</script>
 </html>
