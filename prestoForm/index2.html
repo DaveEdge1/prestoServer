@@ -58,8 +58,9 @@
 		         return res.json()
 		     })
 		     .then(function(data){
-		          reconTable = data
-			console.log(data)
+			const urlParams = new URLSearchParams(window.location.search);
+		        reconTable = data
+			console.log(data[urlParams.get('recon')])
 		      })
 		
 	</script>
