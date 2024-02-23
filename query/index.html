@@ -1095,6 +1095,41 @@ function qString(val1,name1){
 }
 </script>
 <script>
+var compVals = compilations.map(function(d) { return d.value })
+
+host2 = compVals.map(function(aa) {
+    var splitup = aa.split("-")
+    var indexLast = splitup.length - 1
+    if (indexLast == 0){
+    	return null
+    } else{
+    	return splitup[indexLast]
+    }
+  })
+
+arrayGrep = function (arr1, arr2, selectedString){
+var indices = [];
+for (var i=0; i < arr1.length; i++){
+	if (arr1.at(i).includes(selectedString)){
+    indices.push(i)
+  }
+}
+var arr3 = indices.map(i => arr2[i]);
+arr3 = arr3.filter(n => n)
+arr3 = arr3.sort()
+return arr3.at(-1)
+}
+
+//if true, return the compilation versions
+grabLatest = function(selectedString){
+	//if pulling latest, return the compilation versions
+	if(Object.is(host2[compVals.indexOf(selectedString)],null)){
+  	return arrayGrep(compVals, compVals, selectedString)
+  } else {
+  	//otherwise, preserve version entered
+  	return selectedString
+  }
+}
     //send mySQL query to queryDB and show response
     function params(useCoords=false){
 	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
@@ -1105,7 +1140,7 @@ function qString(val1,name1){
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
-	    qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name)
+	    qstring = qstring + '&' + qString(grabLatest(document.getElementById("compilationIn").value),document.getElementById("compilationIn").name)
 	    if (useCoords=true){
 		    if (JSON.parse(filters1['coords'])){
 			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
