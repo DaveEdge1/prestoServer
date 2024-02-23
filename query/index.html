@@ -1185,6 +1185,7 @@ grabLatest = function(selectedString){
   */  
     var xhr = new XMLHttpRequest();
     sendQuery = function(){
+	var param1 = params(useCoords=false)
 	xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
@@ -1192,12 +1193,13 @@ grabLatest = function(selectedString){
             if (xhr.readyState === 4){
                 if (xhr.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("query: " + params(useCoords=false))
+			    console.log("query: " + param1)
 			    prevResp = updateRes(JSON.parse(xhr.response));
-		            updatePoints(prevResp)
+		            
 			    resolve();
 		    });
 			promise1.then(() => {
+			  updatePoints(prevResp)
 			  xhr = null;
 			  // Expected output: "Success!"
 			});
@@ -1219,7 +1221,7 @@ grabLatest = function(selectedString){
         xhr.ontimeout = function (){
             console.error("request timedout: ", xhr);
         }
-        xhr.open("get", "http://143.198.98.66:88/" + params(useCoords=false), /*async*/ true);
+        xhr.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
         // xhr.responseType = "text";
         xhr.send();
     }
