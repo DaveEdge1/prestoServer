@@ -1080,6 +1080,7 @@ function rmBlanks(val){
 	    if (val.length > 0) {
 		    val = split(val)
 		    val = val.filter(Boolean)
+		    val = val.map(element => grabLatest(element))
 	    	    val = val.join( "," );
 	    }
 	return val;
