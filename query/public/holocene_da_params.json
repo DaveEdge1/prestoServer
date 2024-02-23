@@ -1,10 +1,10 @@
 {
   "compilation": {
     "value": [
-      "temp12k"
+      "Temp12k"
     ],
     "default": [
-      "temp12k"
+      "Temp12k"
     ],
     "complexity": "experimental",
     "URL": "https://lipdverse.org/project/"
