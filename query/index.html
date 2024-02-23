@@ -1555,9 +1555,11 @@ grabParams().then(reso => {
 	var filterkeys = Object.keys(filters1)
 	console.log("filterkeys: " + filterkeys)
 	Object.keys(reso).forEach(function(key,index) {
-		console.log(key)
+		console.log("key: " + key)
 		var findFilter =  filters1[key]
-		console.log(typeof findFilter)
+		var inputFinder = typeof document.getElementById(key)
+		console.log("findFilter: " + typeof findFilter)
+		console.log("inputFinder: " + inputFinder)
 		if (typeof findFilter != 'undefined'){
 			var docID = key+"On"
 			document.getElementById(docID).checked = 'true'
@@ -1574,6 +1576,8 @@ grabParams().then(reso => {
 				document.getElementById(sliderID).step = reso[key].precision
 			}
 			
+		} else if (typeof document.getElementById(key).value != 'undefined'){
+			console.log("found an input option")
 		}
 	})
 });
