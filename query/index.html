@@ -1576,7 +1576,7 @@ grabParams().then(reso => {
 				document.getElementById(sliderID).step = reso[key].precision
 			}
 			
-		} else if (typeof document.getElementById(key).value != 'undefined'){
+		} else if (typeof inputFinder != 'undefined'){
 			console.log("found an input option")
 		}
 	})
