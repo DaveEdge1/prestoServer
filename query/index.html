@@ -1589,38 +1589,41 @@ if (recon1 == 'false'){
 
 
 grabParams().then(reso => {
-	//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
-	var filterkeys = Object.keys(filters1)
-	console.log("filterkeys: " + filterkeys)
-	Object.keys(reso).forEach(function(key,index) {
-		console.log("key: " + key)
-		var findFilter =  filters1[key]
-		var inputId = key + 'In'
-		var inputFinder = document.getElementById(inputId)
-		console.log("findFilter: " + typeof findFilter)
-		console.log("inputFinder: " + inputFinder)
-		if (typeof findFilter != 'undefined'){
-			var docID = key+"On"
-			document.getElementById(docID).checked = 'true'
-			updateFilters();
-			if (typeof reso[key].value == 'number'){
-				var inputID = key + "Input"
-				var sliderID = key+"Slider"
-				document.getElementById(inputID).value = reso[key].default
-				document.getElementById(inputID).min = reso[key].limits[0]
-				document.getElementById(inputID).max = reso[key].limits[1]
-				document.getElementById(inputID).step = reso[key].precision
-				document.getElementById(sliderID).min = reso[key].limits[0]
-				document.getElementById(sliderID).max = reso[key].limits[1]
-				document.getElementById(sliderID).step = reso[key].precision
+	return new Promise((resolve, reject) => {
+		//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
+		var filterkeys = Object.keys(filters1)
+		console.log("filterkeys: " + filterkeys)
+		Object.keys(reso).forEach(function(key,index) {
+			console.log("key: " + key)
+			var findFilter =  filters1[key]
+			var inputId = key + 'In'
+			var inputFinder = document.getElementById(inputId)
+			console.log("findFilter: " + typeof findFilter)
+			console.log("inputFinder: " + inputFinder)
+			if (typeof findFilter != 'undefined'){
+				var docID = key+"On"
+				document.getElementById(docID).checked = 'true'
+				updateFilters();
+				if (typeof reso[key].value == 'number'){
+					var inputID = key + "Input"
+					var sliderID = key+"Slider"
+					document.getElementById(inputID).value = reso[key].default
+					document.getElementById(inputID).min = reso[key].limits[0]
+					document.getElementById(inputID).max = reso[key].limits[1]
+					document.getElementById(inputID).step = reso[key].precision
+					document.getElementById(sliderID).min = reso[key].limits[0]
+					document.getElementById(sliderID).max = reso[key].limits[1]
+					document.getElementById(sliderID).step = reso[key].precision
+					
+				}
+				resolve()
+			} else if (!(Object.is(inputFinder, undefined) || Object.is(inputFinder, null))){
+				document.getElementById(inputId).value = reso[key].default
+				resolve()
 			}
-			
-		} else if (!(Object.is(inputFinder, undefined) || Object.is(inputFinder, null))){
-			document.getElementById(inputId).value = reso[key].default
-		}
-	})
+		})
+	}).then(reso77 = > sendQuery())
 });
-sendQuery();
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   changeBoxCoord();
