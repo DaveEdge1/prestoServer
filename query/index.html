@@ -1086,7 +1086,6 @@ function rmBlanks(val){
 
 }
 function qString(val1,name1){
-	console.log(val1)
 	var x1 = rmBlanks(val1)	
 	    if (x1.length == 0){
 		    return '';
@@ -1146,7 +1145,7 @@ grabLatest = function(selectedString){
 	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name)
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
-	    qstring = qstring + '&' + qString(grabLatest(document.getElementById("compilationIn").value),document.getElementById("compilationIn").name)
+	    qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name)
 	    if (useCoords=true){
 		    if (JSON.parse(filters1['coords'])){
 			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
