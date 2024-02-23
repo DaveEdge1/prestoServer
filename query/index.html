@@ -1125,10 +1125,12 @@ return arr3.at(-1)
 grabLatest = function(selectedString){
 	//if pulling latest, return the compilation versions
 	if(Object.is(host2[compVals.indexOf(selectedString)],null)){
-  	return arrayGrep(compVals, compVals, selectedString)
-  } else {
-  	//otherwise, preserve version entered
-  	return selectedString
+		var ret1 = arrayGrep(compVals, compVals, selectedString)
+		console.log(ret1)
+  		return ret1
+  	} else {
+  		//otherwise, preserve version entered
+  		return selectedString
   }
 }
     //send mySQL query to queryDB and show response
