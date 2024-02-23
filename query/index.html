@@ -1574,13 +1574,7 @@ const legend = L.control.Legend({
     weight: 2
 }]
         }).addTo(map);
-sendQuery();
-rect.on('edit', function() {
-  //setTimeout(function () {}, 100);
-  changeBoxCoord();
-  updatePoints(prevResp);
-});
-updateBoundingBox();
+
 
 var recon1 = document.getElementById('recon').value
 if (recon1 == 'false'){
@@ -1626,5 +1620,12 @@ grabParams().then(reso => {
 		}
 	})
 });
+sendQuery();
+rect.on('edit', function() {
+  //setTimeout(function () {}, 100);
+  changeBoxCoord();
+  updatePoints(prevResp);
+});
+updateBoundingBox();
 </script>
 </html>
