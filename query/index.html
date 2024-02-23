@@ -1557,7 +1557,8 @@ grabParams().then(reso => {
 	Object.keys(reso).forEach(function(key,index) {
 		console.log("key: " + key)
 		var findFilter =  filters1[key]
-		var inputFinder = typeof document.getElementById(key + 'In').value
+		var inputId = key + 'In'
+		var inputFinder = document.getElementById(inputId)
 		console.log("findFilter: " + typeof findFilter)
 		console.log("inputFinder: " + inputFinder)
 		if (typeof findFilter != 'undefined'){
@@ -1577,7 +1578,7 @@ grabParams().then(reso => {
 			}
 			
 		} else if (typeof inputFinder != 'undefined'){
-			document.getElementById(key + 'In').value = reso[key].default
+			document.getElementById(inputId).value = reso[key].default
 		}
 	})
 });
