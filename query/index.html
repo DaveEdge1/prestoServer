@@ -1577,7 +1577,7 @@ grabParams().then(reso => {
 			}
 			
 		} else if (typeof inputFinder != 'undefined'){
-			console.log("found an input option")
+			document.getElementById(key) = reso[key].default
 		}
 	})
 });
