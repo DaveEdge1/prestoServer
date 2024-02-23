@@ -1125,7 +1125,9 @@ return arr3.at(-1)
 grabLatest = function(selectedString){
 	console.log("selectedString: " + selectedString)
 	//if pulling latest, return the compilation versions
+	console.log("!!!test if getting latest!!!: " + Object.is(host2[compVals.indexOf(selectedString)],null))
 	if(Object.is(host2[compVals.indexOf(selectedString)],null)){
+		console.log("recognized choice of LATEST compilation")
 		var ret1 = arrayGrep(compVals, compVals, selectedString)
 		console.log("ret1: " + ret1)
   		return ret1
