@@ -1160,6 +1160,7 @@ grabLatest = function(selectedString){
 	    if (JSON.parse(filters1['terrestrial'])){
 	    	qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
 	    }
+	    console.log(qstring)
 	    return qstring;
     };
     let prevResp = {};
