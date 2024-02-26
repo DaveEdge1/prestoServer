@@ -1205,7 +1205,7 @@ grabLatest = function(selectedString){
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name)
-	    qstring = qstring + '&' + qString(document.getElementById("seasonalityIn").value,document.getElementById("seasonalityIn").name)
+	    qstring = qstring + '&' + qString(document.getElementById("seasonality").value,document.getElementById("seasonality").name)
 	    if (useCoords=true){
 		    if (JSON.parse(filters1['coords'])){
 			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
