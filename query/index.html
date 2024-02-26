@@ -316,18 +316,18 @@ popQueryVariable()
 </div>
 <div class="range_container">
 <div class="sliders_control">
-<input id="months_range_fromSlider" type="range" value="100" min="0" max="12000" step="600"/>
-<input id="months_range_toSlider" type="range" value="600" min="0" max="12000" step="600"/>
+<input id="months_range_fromSlider" type="range" value="1" min="1" max="24" step="1"/>
+<input id="months_range_toSlider" type="range" value="12" min="1" max="24" step="1"/>
 </div>
 <br>
 <div class="form_control">
 <div class="form_control_container">
 <div class="form_control_container__time">Min</div>
-<input class="form_control_container__time__input" name="months_range" type="number" id="months_range_fromInput" value="100" min="0" max="12000" step="1"/>
+<input class="form_control_container__time__input" name="months_range" type="number" id="months_range_fromInput" value="1" min="1" max="24" step="1"/>
 </div>
 <div class="form_control_container">
 <div class="form_control_container__time">Max</div>
-<input class="form_control_container__time__input" name="months_range" type="number" id="months_range_toInput" value="600" min="0" max="12000" step="1"/>
+<input class="form_control_container__time__input" name="months_range" type="number" id="months_range_toInput" value="12" min="1" max="24" step="1"/>
 </div>
 </div>
 </div>
@@ -501,7 +501,7 @@ var opts = {
 var target = document.getElementById('map');
 var spinner = new Spinner(opts).spin(target);
 	
-let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
+let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
 	if (document.getElementById("ageSliderOn").checked){
 		document.getElementById("timeSliderDiv").style.visibility = "visible";
@@ -534,6 +534,14 @@ function updateFilters(){
 	if (!document.getElementById("isTerrestrialOn").checked) {
 		document.getElementById("isTerrestrialDiv").style.visibility = "hidden";
 		filters1['terrestrial'] = 'false'
+	}
+	if (document.getElementById("seasonMonthsOn").checked){
+		document.getElementById("seasonMonthsOn").style.visibility = "visible";
+		filters1['seasonality'] = 'true'
+	}
+	if (!document.getElementById("seasonMonthsOn").checked) {
+		document.getElementById("seasonMonthsOn").style.visibility = "hidden";
+		filters1['seasonality'] = 'false'
 	}
 	sendQuery();
 	return(filters1)
