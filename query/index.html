@@ -536,11 +536,11 @@ function updateFilters(){
 		filters1['terrestrial'] = 'false'
 	}
 	if (document.getElementById("seasonMonthsOn").checked){
-		document.getElementById("seasonMonthsOn").style.visibility = "visible";
+		document.getElementById("monthSliderDiv").style.visibility = "visible";
 		filters1['seasonality'] = 'true'
 	}
 	if (!document.getElementById("seasonMonthsOn").checked) {
-		document.getElementById("seasonMonthsOn").style.visibility = "hidden";
+		document.getElementById("monthSliderDiv").style.visibility = "hidden";
 		filters1['seasonality'] = 'false'
 	}
 	sendQuery();
