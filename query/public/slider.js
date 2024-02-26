@@ -59,9 +59,9 @@ function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
 	  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
 	  if (from > to) {
 		      fromSlider.value = to;
-		      fromInput.value = monthText[allNumeric[to]];
+		      fromInput.value = monthText[allNumeric[to-1]-1];
 		    } else {
-			        fromInput.value = monthText[allNumeric[from]];
+			        fromInput.value = monthText[allNumeric[from-1]-1];
 			      }
 }
 
@@ -71,9 +71,9 @@ function seasonalityToSlider(fromSlider, toSlider, toInput) {
 	  setToggleAccessible(toSlider);
 	  if (from <= to) {
 		      toSlider.value = to;
-		      toInput.value = monthText[allNumeric[to]];
+		      toInput.value = monthText[allNumeric[to-1]-1];
 		    } else {
-			        toInput.value = monthText[allNumeric[from]];
+			        toInput.value = monthText[allNumeric[from-1]-1];
 			        toSlider.value = from;
 			      }
 }
