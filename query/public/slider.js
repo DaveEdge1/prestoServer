@@ -1,4 +1,9 @@
 //Credit to Predrag Davidovic for the dual slider: "https://medium.com/@predragdavidovic10/native-dual-range-slider-html-css-javascript-91e778134816"
+const seasonality = [{"value":1,"label":"Jan"},{"value":2,"label":"Feb"},{"value":3,"label":"Mar"},{"value":4,"label":"Apr"},{"value":5,"label":"May"},{"value":6,"label":"Jun"},{"value":7,"label":"Jul"},{"value":8,"label":"Aug"},{"value":9,"label":"Sep"},{"value":10,"label":"Oct"},{"value":11,"label":"Nov"},{"value":12,"label":"Dec"},{"value":13,"label":"Jan"},{"value":14,"label":"Feb"},{"value":15,"label":"Mar"},{"value":16,"label":"Apr"},{"value":17,"label":"May"},{"value":18,"label":"Jun"},{"value":19,"label":"Jul"},{"value":20,"label":"Aug"},{"value":21,"label":"Sep"},{"value":22,"label":"Oct"},{"value":23,"label":"Nov"},{"value":24,"label":"Dec"}] 
+
+const allNumeric = seasonality.map(function(d) { return d.value; });
+const monthText = seasonality.map(function(d) { return d.label; });
+
 const color1 = '#896A67'
 const color2 = '#C6C6C6'
 var mapMax = 0;
@@ -45,6 +50,30 @@ function controlToSlider(fromSlider, toSlider, toInput) {
 		      toInput.value = to;
 		    } else {
 			        toInput.value = from;
+			        toSlider.value = from;
+			      }
+}
+
+function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
+	  const [from, to] = getParsed(fromSlider, toSlider);
+	  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  if (from > to) {
+		      fromSlider.value = to;
+		      fromInput.value = monthText[allNumeric[to]-1];
+		    } else {
+			        fromInput.value = monthText[allNumeric[from]-1];
+			      }
+}
+
+function seasonalityToSlider(fromSlider, toSlider, toInput) {
+	  const [from, to] = getParsed(fromSlider, toSlider);
+	  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  setToggleAccessible(toSlider);
+	  if (from <= to) {
+		      toSlider.value = to;
+		      toInput.value = monthText[allNumeric[to]-1];
+		    } else {
+			        toInput.value = monthText[allNumeric[from]-1];
 			        toSlider.value = from;
 			      }
 }
@@ -136,14 +165,12 @@ function uncheckAll(divid, checkCycle) {
 
 const months_range_fromSlider = document.getElementById("months_range_fromSlider");
 const months_range_toSlider = document.getElementById("months_range_toSlider");
-const months_range_fromInput = document.getElementById("months_range_fromInput");
-const months_range_toInput = document.getElementById("months_range_toInput");
+const months_range_fromInput = document.getElementById("months_range_fromInput_text");
+const months_range_toInput = document.getElementById("months_range_toInput_text");
 fillSlider(months_range_fromSlider, months_range_toSlider, "#C6C6C6", "#896A67", months_range_toSlider);
 setToggleAccessible(months_range_toSlider);
-months_range_fromSlider.oninput = () => controlFromSlider(months_range_fromSlider, months_range_toSlider, months_range_fromInput);
-months_range_toSlider.oninput = () => controlToSlider(months_range_fromSlider, months_range_toSlider, months_range_toInput);
-months_range_fromInput.onchange = () => controlFromInput(months_range_fromSlider, months_range_fromInput, months_range_toInput, months_range_toSlider);
-months_range_toInput.onchange = () => controlToInput(months_range_toSlider, months_range_fromInput, months_range_toInput, months_range_toSlider);
+months_range_fromSlider.oninput = () => seasonalityFromSlider(months_range_fromSlider, months_range_toSlider, months_range_fromInput);
+months_range_toSlider.oninput = () => seasonalityToSlider(months_range_fromSlider, months_range_toSlider, months_range_toInput);
 
 const time_range_to_reconstruct_fromSlider = document.getElementById("time_range_to_reconstruct_fromSlider");
 const time_range_to_reconstruct_toSlider = document.getElementById("time_range_to_reconstruct_toSlider");
