@@ -301,6 +301,38 @@ popQueryVariable()
 <input style="width:80%;" name="interpretation1_seasonality" id="seasonality1">
 </div>
 <br>
+<br>
+<div style="width: 10%; vertical-align: middle; float: left;">
+	<br><br><br>
+	<label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>
+	<br>
+	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();'>
+	<br><br><br>
+</div>
+<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
+<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Time interval of data coverage</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="months_range_fromSlider" type="range" value="100" min="0" max="12000" step="600"/>
+<input id="months_range_toSlider" type="range" value="600" min="0" max="12000" step="600"/>
+</div>
+<br>
+<div class="form_control">
+<div class="form_control_container">
+<div class="form_control_container__time">Min</div>
+<input class="form_control_container__time__input" name="months_range" type="number" id="months_range_fromInput" value="100" min="0" max="12000" step="1"/>
+</div>
+<div class="form_control_container">
+<div class="form_control_container__time">Max</div>
+<input class="form_control_container__time__input" name="months_range" type="number" id="months_range_toInput" value="600" min="0" max="12000" step="1"/>
+</div>
+</div>
+</div>
+</div>
+<br><br><br><br><br><br><br>
 <hr class="solid">
 <hr class="solid">
 <br>
