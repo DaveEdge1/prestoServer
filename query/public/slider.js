@@ -133,6 +133,17 @@ function uncheckAll(divid, checkCycle) {
 				    }
 			    }
 }
+months_range_fromSlider
+const months_range_fromSlider = document.getElementById("months_range_fromSlider");
+const months_range_toSlider = document.getElementById("months_range_toSlider");
+const months_range_fromInput = document.getElementById("months_range_fromInput");
+const months_range_toInput = document.getElementById("months_range_toInput");
+fillSlider(months_range_fromSlider, months_range_toSlider, "#C6C6C6", "#896A67", months_range_toSlider);
+setToggleAccessible(months_range_toSlider);
+months_range_fromSlider.oninput = () => controlFromSlider(months_range_fromSlider, months_range_toSlider, months_range_fromInput);
+months_range_toSlider.oninput = () => controlToSlider(months_range_fromSlider, months_range_toSlider, months_range_toInput);
+months_range_fromInput.onchange = () => controlFromInput(months_range_fromSlider, months_range_fromInput, months_range_toInput, months_range_toSlider);
+months_range_toInput.onchange = () => controlToInput(months_range_toSlider, months_range_fromInput, months_range_toInput, months_range_toSlider);
 
 const time_range_to_reconstruct_fromSlider = document.getElementById("time_range_to_reconstruct_fromSlider");
 const time_range_to_reconstruct_toSlider = document.getElementById("time_range_to_reconstruct_toSlider");
