@@ -1242,10 +1242,10 @@ grabLatest = function(selectedString){
 	    return formData
     }
   */  
-    var xhr = new XMLHttpRequest();
+    //var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	var param1 = params(useCoords=false)
-	xhr = new XMLHttpRequest();
+	var xhr = new XMLHttpRequest();
         xhr.timeout = 2000;
         xhr.onreadystatechange = function(e){
             //console.log(this);
@@ -1286,7 +1286,7 @@ grabLatest = function(selectedString){
     }
 
 compileLipds = function(postBody){
-	    xhr = new XMLHttpRequest();
+	    var xhr = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
 	    	xhr.onreadystatechange = (e) => {
@@ -1310,7 +1310,7 @@ compileLipds = function(postBody){
 }
 
 getTSIDs = function(){
-	    xhr = new XMLHttpRequest();
+	    var xhr = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
 	    	xhr.onreadystatechange = (e) => {
@@ -1333,7 +1333,7 @@ getTSIDs = function(){
 }
 
 retTimeSeries = function(TSIDs){
-	    xhr = new XMLHttpRequest();
+	    var xhr = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
 	    	xhr.onreadystatechange = (e) => {
