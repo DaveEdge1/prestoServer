@@ -133,7 +133,7 @@ function uncheckAll(divid, checkCycle) {
 				    }
 			    }
 }
-months_range_fromSlider
+
 const months_range_fromSlider = document.getElementById("months_range_fromSlider");
 const months_range_toSlider = document.getElementById("months_range_toSlider");
 const months_range_fromInput = document.getElementById("months_range_fromInput");
