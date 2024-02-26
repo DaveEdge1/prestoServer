@@ -293,6 +293,19 @@ popQueryVariable()
 <div class="content">
 <br>
 <div class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality">Seasonality</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose seasonality(ies) (Begin typing for suggestions)</span>
+</div>
+<br>
+<input style="width:80%;" name="interpretation1_seasonality" id="seasonality">
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+<br>
+<div class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="archiveType_label" for="archiveType">Archive Type</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose archive type(s) (Begin typing for suggestions)</span>
@@ -814,6 +827,7 @@ var paleoData_proxy = [{"value":"10Be","label":"10Be"},{"value":"accumulation ra
 var continent = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 var country = [{"value":"Afghanistan","label":"Afghanistan"},{"value":"Aland","label":"Aland"},{"value":"Albania","label":"Albania"},{"value":"Algeria","label":"Algeria"},{"value":"Antarctica","label":"Antarctica"},{"value":"Argentina","label":"Argentina"},{"value":"Armenia","label":"Armenia"},{"value":"Australia","label":"Australia"},{"value":"Austria","label":"Austria"},{"value":"Belarus","label":"Belarus"},{"value":"Belgium","label":"Belgium"},{"value":"Belize","label":"Belize"},{"value":"Bermuda","label":"Bermuda"},{"value":"Bhutan","label":"Bhutan"},{"value":"Bolivia","label":"Bolivia"},{"value":"Botswana","label":"Botswana"},{"value":"Brazil","label":"Brazil"},{"value":"Bulgaria","label":"Bulgaria"},{"value":"Burundi","label":"Burundi"},{"value":"Canada","label":"Canada"},{"value":"Cayman Islands","label":"Cayman Islands"},{"value":"Chad","label":"Chad"},{"value":"Chile","label":"Chile"},{"value":"China","label":"China"},{"value":"Colombia","label":"Colombia"},{"value":"Cook Islands","label":"Cook Islands"},{"value":"Costa Rica","label":"Costa Rica"},{"value":"Cuba","label":"Cuba"},{"value":"Czech Republic","label":"Czech Republic"},{"value":"Democratic Republic of the Congo","label":"Democratic Republic of the Congo"},{"value":"Denmark","label":"Denmark"},{"value":"Djibouti","label":"Djibouti"},{"value":"Dominican Republic","label":"Dominican Republic"},{"value":"Ecuador","label":"Ecuador"},{"value":"Egypt","label":"Egypt"},{"value":"Estonia","label":"Estonia"},{"value":"Ethiopia","label":"Ethiopia"},{"value":"Faroe Islands","label":"Faroe Islands"},{"value":"Finland","label":"Finland"},{"value":"France","label":"France"},{"value":"French Polynesia","label":"French Polynesia"},{"value":"Georgia","label":"Georgia"},{"value":"Germany","label":"Germany"},{"value":"Ghana","label":"Ghana"},{"value":"Greece","label":"Greece"},{"value":"Greenland","label":"Greenland"},{"value":"Guam","label":"Guam"},{"value":"Guatemala","label":"Guatemala"},{"value":"Haiti","label":"Haiti"},{"value":"Hungary","label":"Hungary"},{"value":"Iceland","label":"Iceland"},{"value":"India","label":"India"},{"value":"Indonesia","label":"Indonesia"},{"value":"Iran","label":"Iran"},{"value":"Ireland","label":"Ireland"},{"value":"Israel","label":"Israel"},{"value":"Italy","label":"Italy"},{"value":"Jamaica","label":"Jamaica"},{"value":"Japan","label":"Japan"},{"value":"Jordan","label":"Jordan"},{"value":"Kazakhstan","label":"Kazakhstan"},{"value":"Kenya","label":"Kenya"},{"value":"Kyrgyzstan","label":"Kyrgyzstan"},{"value":"Laos","label":"Laos"},{"value":"Lebanon","label":"Lebanon"},{"value":"Libya","label":"Libya"},{"value":"Lithuania","label":"Lithuania"},{"value":"Luxembourg","label":"Luxembourg"},{"value":"Macedonia","label":"Macedonia"},{"value":"Madagascar","label":"Madagascar"},{"value":"Malawi","label":"Malawi"},{"value":"Malaysia","label":"Malaysia"},{"value":"Mali","label":"Mali"},{"value":"Malta","label":"Malta"},{"value":"Mauritania","label":"Mauritania"},{"value":"Mexico","label":"Mexico"},{"value":"Mongolia","label":"Mongolia"},{"value":"Morocco","label":"Morocco"},{"value":"Namibia","label":"Namibia"},{"value":"Nauru","label":"Nauru"},{"value":"Nepal","label":"Nepal"},{"value":"Netherlands","label":"Netherlands"},{"value":"New Zealand","label":"New Zealand"},{"value":"Nicaragua","label":"Nicaragua"},{"value":"Niger","label":"Niger"},{"value":"Nigeria","label":"Nigeria"},{"value":"Norway","label":"Norway"},{"value":"Oman","label":"Oman"},{"value":"Pakistan","label":"Pakistan"},{"value":"Papua New Guinea","label":"Papua New Guinea"},{"value":"Peru","label":"Peru"},{"value":"Poland","label":"Poland"},{"value":"Portugal","label":"Portugal"},{"value":"Romania","label":"Romania"},{"value":"Russia","label":"Russia"},{"value":"Saudi Arabia","label":"Saudi Arabia"},{"value":"Senegal","label":"Senegal"},{"value":"Seychelles","label":"Seychelles"},{"value":"Slovakia","label":"Slovakia"},{"value":"Slovenia","label":"Slovenia"},{"value":"South Africa","label":"South Africa"},{"value":"South Korea","label":"South Korea"},{"value":"South Sudan","label":"South Sudan"},{"value":"Spain","label":"Spain"},{"value":"Sudan","label":"Sudan"},{"value":"Sweden","label":"Sweden"},{"value":"Switzerland","label":"Switzerland"},{"value":"Syria","label":"Syria"},{"value":"Taiwan","label":"Taiwan"},{"value":"Tajikistan","label":"Tajikistan"},{"value":"Thailand","label":"Thailand"},{"value":"The Bahamas","label":"The Bahamas"},{"value":"Togo","label":"Togo"},{"value":"Tunisia","label":"Tunisia"},{"value":"Turkey","label":"Turkey"},{"value":"Uganda","label":"Uganda"},{"value":"Ukraine","label":"Ukraine"},{"value":"United Kingdom","label":"United Kingdom"},{"value":"United Republic of Tanzania","label":"United Republic of Tanzania"},{"value":"United States of America","label":"United States of America"},{"value":"Uzbekistan","label":"Uzbekistan"},{"value":"Vanuatu","label":"Vanuatu"},{"value":"Venezuela","label":"Venezuela"},{"value":"Vietnam","label":"Vietnam"},{"value":"West Bank","label":"West Bank"},{"value":"Western Sahara","label":"Western Sahara"},{"value":"Yemen","label":"Yemen"},{"value":"Zambia","label":"Zambia"}]
 var compilations = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}] 
+var seasonality = [{"value":"Annual","label":"Annual"},{"value":"Apr","label":"Apr"},{"value":"Apr-Aug","label":"Apr-Aug"},{"value":"Apr-Dec","label":"Apr-Dec"},{"value":"Apr-Feb","label":"Apr-Feb"},{"value":"Apr-Jan","label":"Apr-Jan"},{"value":"Apr-Jul","label":"Apr-Jul"},{"value":"Apr-Jun","label":"Apr-Jun"},{"value":"Apr-Mar","label":"Apr-Mar"},{"value":"Apr-May","label":"Apr-May"},{"value":"Apr-Nov","label":"Apr-Nov"},{"value":"Apr-Oct","label":"Apr-Oct"},{"value":"Apr-Sep","label":"Apr-Sep"},{"value":"Aug","label":"Aug"},{"value":"Aug-Apr","label":"Aug-Apr"},{"value":"Aug-Dec","label":"Aug-Dec"},{"value":"Aug-Feb","label":"Aug-Feb"},{"value":"Aug-Jan","label":"Aug-Jan"},{"value":"Aug-Jul","label":"Aug-Jul"},{"value":"Aug-Jun","label":"Aug-Jun"},{"value":"Aug-Mar","label":"Aug-Mar"},{"value":"Aug-May","label":"Aug-May"},{"value":"Aug-Nov","label":"Aug-Nov"},{"value":"Aug-Oct","label":"Aug-Oct"},{"value":"Aug-Sep","label":"Aug-Sep"},{"value":"Coldest Month","label":"Coldest Month"},{"value":"Dec-Apr","label":"Dec-Apr"},{"value":"Dec-Aug","label":"Dec-Aug"},{"value":"Dec-Feb","label":"Dec-Feb"},{"value":"Dec-Jan","label":"Dec-Jan"},{"value":"Dec-Jul","label":"Dec-Jul"},{"value":"Dec-Jun","label":"Dec-Jun"},{"value":"Dec-Mar","label":"Dec-Mar"},{"value":"Dec-May","label":"Dec-May"},{"value":"Dec-Oct","label":"Dec-Oct"},{"value":"Dec-Sep","label":"Dec-Sep"},{"value":"Fall","label":"Fall"},{"value":"Feb","label":"Feb"},{"value":"Feb-Apr","label":"Feb-Apr"},{"value":"Feb-Aug","label":"Feb-Aug"},{"value":"Feb-Dec","label":"Feb-Dec"},{"value":"Feb-Jul","label":"Feb-Jul"},{"value":"Feb-Jun","label":"Feb-Jun"},{"value":"Feb-Mar","label":"Feb-Mar"},{"value":"Feb-May","label":"Feb-May"},{"value":"Feb-Nov","label":"Feb-Nov"},{"value":"Feb-Oct","label":"Feb-Oct"},{"value":"Feb-Sep","label":"Feb-Sep"},{"value":"Growing Season","label":"Growing Season"},{"value":"Jan","label":"Jan"},{"value":"Jan-Apr","label":"Jan-Apr"},{"value":"Jan-Aug","label":"Jan-Aug"},{"value":"Jan-Feb","label":"Jan-Feb"},{"value":"Jan-Jul","label":"Jan-Jul"},{"value":"Jan-Jun","label":"Jan-Jun"},{"value":"Jan-Mar","label":"Jan-Mar"},{"value":"Jan-May","label":"Jan-May"},{"value":"Jan-Nov","label":"Jan-Nov"},{"value":"Jan-Oct","label":"Jan-Oct"},{"value":"Jan-Sep","label":"Jan-Sep"},{"value":"Jul","label":"Jul"},{"value":"Jul-Apr","label":"Jul-Apr"},{"value":"Jul-Aug","label":"Jul-Aug"},{"value":"Jul-Dec","label":"Jul-Dec"},{"value":"Jul-Feb","label":"Jul-Feb"},{"value":"Jul-Jan","label":"Jul-Jan"},{"value":"Jul-Jun","label":"Jul-Jun"},{"value":"Jul-Mar","label":"Jul-Mar"},{"value":"Jul-May","label":"Jul-May"},{"value":"Jul-Nov","label":"Jul-Nov"},{"value":"Jul-Oct","label":"Jul-Oct"},{"value":"Jul-Sep","label":"Jul-Sep"},{"value":"Jun","label":"Jun"},{"value":"Jun-Apr","label":"Jun-Apr"},{"value":"Jun-Aug","label":"Jun-Aug"},{"value":"Jun-Dec","label":"Jun-Dec"},{"value":"Jun-Feb","label":"Jun-Feb"},{"value":"Jun-Jan","label":"Jun-Jan"},{"value":"Jun-Jul","label":"Jun-Jul"},{"value":"Jun-Mar","label":"Jun-Mar"},{"value":"Jun-Nov","label":"Jun-Nov"},{"value":"Jun-Oct","label":"Jun-Oct"},{"value":"Jun-Sep","label":"Jun-Sep"},{"value":"Mar","label":"Mar"},{"value":"Mar-Apr","label":"Mar-Apr"},{"value":"Mar-Aug","label":"Mar-Aug"},{"value":"Mar-Dec","label":"Mar-Dec"},{"value":"Mar-Jan","label":"Mar-Jan"},{"value":"Mar-Jul","label":"Mar-Jul"},{"value":"Mar-Jun","label":"Mar-Jun"},{"value":"Mar-May","label":"Mar-May"},{"value":"Mar-Nov","label":"Mar-Nov"},{"value":"Mar-Oct","label":"Mar-Oct"},{"value":"Mar-Sep","label":"Mar-Sep"},{"value":"May","label":"May"},{"value":"May-Apr","label":"May-Apr"},{"value":"May-Aug","label":"May-Aug"},{"value":"May-Dec","label":"May-Dec"},{"value":"May-Feb","label":"May-Feb"},{"value":"May-Jan","label":"May-Jan"},{"value":"May-Jul","label":"May-Jul"},{"value":"May-Jun","label":"May-Jun"},{"value":"May-Mar","label":"May-Mar"},{"value":"May-Nov","label":"May-Nov"},{"value":"May-Oct","label":"May-Oct"},{"value":"May-Sep","label":"May-Sep"},{"value":"deleteMe","label":"deleteMe"},{"value":"Nov-Apr","label":"Nov-Apr"},{"value":"Nov-Aug","label":"Nov-Aug"},{"value":"Nov-Dec","label":"Nov-Dec"},{"value":"Nov-Feb","label":"Nov-Feb"},{"value":"Nov-Jan","label":"Nov-Jan"},{"value":"Nov-Jul","label":"Nov-Jul"},{"value":"Nov-Jun","label":"Nov-Jun"},{"value":"Nov-Mar","label":"Nov-Mar"},{"value":"Nov-May","label":"Nov-May"},{"value":"Nov-Oct","label":"Nov-Oct"},{"value":"Nov-Sep","label":"Nov-Sep"},{"value":"Oct-Apr","label":"Oct-Apr"},{"value":"Oct-Aug","label":"Oct-Aug"},{"value":"Oct-Dec","label":"Oct-Dec"},{"value":"Oct-Feb","label":"Oct-Feb"},{"value":"Oct-Jan","label":"Oct-Jan"},{"value":"Oct-Jul","label":"Oct-Jul"},{"value":"Oct-Jun","label":"Oct-Jun"},{"value":"Oct-Mar","label":"Oct-Mar"},{"value":"Oct-May","label":"Oct-May"},{"value":"Oct-Nov","label":"Oct-Nov"},{"value":"Oct-Sep","label":"Oct-Sep"},{"value":"Sep-Apr","label":"Sep-Apr"},{"value":"Sep-Aug","label":"Sep-Aug"},{"value":"Sep-Dec","label":"Sep-Dec"},{"value":"Sep-Feb","label":"Sep-Feb"},{"value":"Sep-Jan","label":"Sep-Jan"},{"value":"Sep-Jul","label":"Sep-Jul"},{"value":"Sep-Jun","label":"Sep-Jun"},{"value":"Sep-Mar","label":"Sep-Mar"},{"value":"Sep-May","label":"Sep-May"},{"value":"Sep-Nov","label":"Sep-Nov"},{"value":"Sep-Oct","label":"Sep-Oct"},{"value":"Spr-Sum","label":"Spr-Sum"},{"value":"Spring","label":"Spring"},{"value":"subannual","label":"subannual"},{"value":"Summer","label":"Summer"},{"value":"Warmest Month","label":"Warmest Month"},{"value":"Wet Season","label":"Wet Season"},{"value":"Win-Spr","label":"Win-Spr"},{"value":"Winter","label":"Winter"}]
 	
 $(function() {
 function split( val ) {
@@ -1072,6 +1086,50 @@ return false;
 }
 });
 });
+
+
+ $(function() {
+function split( val ) {
+return val.split( /,\s*/ );
+}
+function extractLast( term ) {
+return split( term ).pop();
+}
+     
+$( "#seasonalityIn" )
+ // don't navigate away from the field on tab when selecting an item
+.bind( "keydown", function( event ) {
+if ( event.keyCode === $.ui.keyCode.TAB &&
+$( this ).autocomplete( "instance" ).menu.active ) {
+event.preventDefault();
+}
+})
+.autocomplete({
+minLength: 0,
+source: function( request, response ) {
+// delegate back to autocomplete, but extract the last term
+response( $.ui.autocomplete.filter(
+seasonality, extractLast( request.term ) ) );
+},
+
+//    source:projects,    
+focus: function() {
+// prevent value inserted on focus
+return false;
+},
+select: function( event, ui ) {
+var terms = split( this.value );
+// remove the current input
+terms.pop();
+// add the selected item
+terms.push( ui.item.value );
+// add placeholder to get the comma-and-space at the end
+terms.push( "" );
+this.value = terms.join( "," );
+return false;
+}
+});
+});
 	
 function split( val ) {
 return val.split( /,\s*/ );
@@ -1147,6 +1205,7 @@ grabLatest = function(selectedString){
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name)
+	    qstring = qstring + '&' + qString(document.getElementById("seasonalityIn").value,document.getElementById("seasonalityIn").name)
 	    if (useCoords=true){
 		    if (JSON.parse(filters1['coords'])){
 			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
