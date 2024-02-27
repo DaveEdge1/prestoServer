@@ -59,8 +59,8 @@ function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
 	  if (from < (to-11)) {
 		fromSlider.value = to-11;
 		fromInput.value = monthText[allNumeric[to-12]-1];
-	  	fillSlider((to-11), toSlider, '#C6C6C6', color1, toSlider);
-		setToggleAccessible((to-11));
+	  	fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+		setToggleAccessible(fromSlider);
 	  } else {
 		fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
 		if (from > to) {
@@ -75,14 +75,13 @@ function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
 function seasonalityToSlider(fromSlider, toSlider, toInput) {
 	  var [from, to] = getParsed(fromSlider, toSlider);
 	  if ((from+11) < to) {
-		toSlider.value = from+11
 		to = from+11
-	  	fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
-	  	setToggleAccessible(toSlider);
 		toSlider.value = to;
 		toInput.value = monthText[allNumeric[to-1]-1];
+	  	fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  	setToggleAccessible(toSlider);
 	  } else {
-		fillSlider(fromSlider, to, '#C6C6C6', color1, toSlider);
+		fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
 	  	setToggleAccessible(toSlider);
 	  	if (from <= to) {
 			toSlider.value = to;
