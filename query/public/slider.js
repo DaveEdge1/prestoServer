@@ -77,7 +77,7 @@ function seasonalityToSlider(fromSlider, toSlider, toInput) {
 	  if ((from+11) < to) {
 		toSlider.value = from+11
 		to = from+11
-	  	fillSlider(fromSlider, to, '#C6C6C6', color1, toSlider);
+	  	fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
 	  	setToggleAccessible(toSlider);
 		toSlider.value = to;
 		toInput.value = monthText[allNumeric[to-1]-1];
