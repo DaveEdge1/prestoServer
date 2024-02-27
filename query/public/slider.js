@@ -68,6 +68,7 @@ function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
 		   } else {
 			      fromInput.value = monthText[allNumeric[from-1]-1];
 		   }
+	  }
 }
 
 function seasonalityToSlider(fromSlider, toSlider, toInput) {
