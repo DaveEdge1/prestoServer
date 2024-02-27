@@ -1234,6 +1234,26 @@ grabLatest = function(selectedString){
   		return selectedString
   }
 }
+getAllMonths = function(startSpan,endSpan){
+	var monthText = seasonality2.map(function(d) { return d.label; });
+	var allMonths = [];
+  startSpan=startSpan-1
+  //var spanMax = (endSpan-startSpan)+1
+  for (var i=startSpan; i < endSpan; i++){
+    var startmonth = monthText[i]
+    var monthSpan = endSpan - i
+    for (var ii=0; ii < monthSpan; ii++){
+      var endMonth = monthText[(ii+i)]
+      if (startmonth==endMonth){
+        allMonths.push(startmonth)
+      } else {
+        allMonths.push(startmonth + "-" + endMonth)
+      }
+    }
+  }
+  return(allMonths)
+}
+console.log(getAllMonths(5,10))
     //send mySQL query to queryDB and show response
     function params(useCoords=false){
 	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
