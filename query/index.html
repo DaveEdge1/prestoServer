@@ -40,7 +40,7 @@
 		async function grabParams() {
 	  		const response = await fetch(jsonPath);
 	  		let params1 = await response.json();
-	  		console.log("params1: " + Object.keys(params1));
+	  		//console.log("params1: " + Object.keys(params1));
 			return params1
 		}
 		/*
@@ -1208,7 +1208,7 @@ function qString(val1,name1,isCompilation){
 </script>
 <script>
 var compVals = compilations.map(function(d) { return d.value })
-console.log(compVals)
+//console.log(compVals)
 host2 = compVals.map(function(aa) {
     var splitup = aa.split("-")
     var indexLast = splitup.length - 1
@@ -1218,7 +1218,7 @@ host2 = compVals.map(function(aa) {
     	return splitup[indexLast]
     }
   })
-console.log(host2)
+//console.log(host2)
 arrayGrep = function (arr1, arr2, selectedString){
 var indices = [];
 for (var i=0; i < arr1.length; i++){
@@ -1267,7 +1267,7 @@ getAllMonths = function(startSpan,endSpan){
   allMonths = allMonths.join(",")
   return(allMonths)
 }
-console.log(getAllMonths(5,10))
+//console.log(getAllMonths(5,10))
     //send mySQL query to queryDB and show response
     function params(useCoords=false){
 	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
@@ -1716,11 +1716,11 @@ const legend = L.control.Legend({
 
 var recon1 = document.getElementById('recon').value
 if (recon1 == 'false'){
-	console.log("recon undefined, using downloads pathway")
+	//console.log("recon undefined, using downloads pathway")
 	document.getElementById('proceedButton').innerHTML = "Download selected Proxies"
 	document.getElementById('proceedButton').onclick = function () { getLipds('download').then(reso1 => location.href = reso1)};
 } else {
-	console.log(recon1)
+	//console.log(recon1)
 	document.getElementById('proceedButton').innerHTML = "Use selected Proxies"
 	document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct').then(reso1 => location.href = reso1)};
 }
@@ -1732,7 +1732,7 @@ grabParams().then(reso => {
 		var filterkeys = Object.keys(filters1)
 		//console.log("filterkeys: " + filterkeys)
 		Object.keys(reso).forEach(function(key,index) {
-			console.log("key: " + key)
+			//console.log("key: " + key)
 			var findFilter =  filters1[key]
 			var inputId = key + 'In'
 			var inputFinder = document.getElementById(inputId)
