@@ -1251,6 +1251,7 @@ getAllMonths = function(startSpan,endSpan){
       }
     }
   }
+  allMonths = allMonths.join(",")
   return(allMonths)
 }
 console.log(getAllMonths(5,10))
@@ -1265,7 +1266,9 @@ console.log(getAllMonths(5,10))
 	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name)
 	    qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name)
-	    qstring = qstring + '&' + qString(document.getElementById("seasonality1").value,document.getElementById("seasonality1").name)
+	    if (!JSON.parse(filters1['seasonality'])){
+	    	qstring = qstring + '&' + qString(document.getElementById("seasonality1").value,document.getElementById("seasonality1").name)
+	    }
 	    if (useCoords=true){
 		    if (JSON.parse(filters1['coords'])){
 			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
@@ -1284,6 +1287,9 @@ console.log(getAllMonths(5,10))
 	    }
 	    if (JSON.parse(filters1['terrestrial'])){
 	    	qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
+	    }
+	    if (JSON.parse(filters1['seasonality'])){
+		    qstring = qstring + '& ' + qString(document.getElementById("seasonality1").value,document.getElementById("seasonality1").name) + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value)
 	    }
 	    console.log(qstring)
 	    return qstring;
