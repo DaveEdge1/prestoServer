@@ -1304,7 +1304,7 @@ getAllMonths = function(startSpan,endSpan){
 	    if (JSON.parse(filters1['seasonality'])){
 		    qstring = qstring + '& ' + document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value))
 	    }
-	    console.log(qstring)
+	    //console.log(qstring)
 	    return qstring;
     };
     let prevResp = {};
