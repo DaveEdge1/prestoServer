@@ -76,7 +76,7 @@ function seasonalityToSlider(fromSlider, toSlider, toInput) {
 	  var [from, to] = getParsed(fromSlider, toSlider);
 	  if ((from+11) < to) {
 		toSlider.value = from+11
-		to = getParsed(toSlider)
+		to = from+11
 	  	fillSlider(fromSlider, to, '#C6C6C6', color1, toSlider);
 	  	setToggleAccessible(toSlider);
 		toSlider.value = to;
