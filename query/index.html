@@ -1196,13 +1196,14 @@ function qString(val1,name1,isCompilation){
 	if (isCompilation){
 		var x1 = rmBlanksCompilation(val1)
 	} else {
-		var x1 = rmBlanks(val1)	
-		if (x1.length == 0){
-			return '';
-		} else {
-		    return name1 + '=' + x1;
-	    	}
+		var x1 = rmBlanks(val1)
 	}
+	if (x1.length == 0){
+		return '';
+	} else {
+	    return name1 + '=' + x1;
+	}
+
 }
 </script>
 <script>
