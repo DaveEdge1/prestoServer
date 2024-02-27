@@ -60,7 +60,7 @@ function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
 		fromSlider.value = to-11;
 		fromInput.value = monthText[allNumeric[to-12]-1];
 	  	fillSlider((to-11), toSlider, '#C6C6C6', color1, toSlider);
-	  else {
+	  } else {
 		  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
 		  if (from > to) {
 			      fromSlider.value = to;
