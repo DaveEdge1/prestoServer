@@ -1730,14 +1730,14 @@ grabParams().then(reso => {
 	return new Promise((resolve, reject) => {
 		//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
 		var filterkeys = Object.keys(filters1)
-		//console.log("filterkeys: " + filterkeys)
+		console.log("filterkeys: " + filterkeys)
 		Object.keys(reso).forEach(function(key,index) {
-			//console.log("key: " + key)
+			console.log("key: " + key)
 			var findFilter =  filters1[key]
 			var inputId = key + 'In'
 			var inputFinder = document.getElementById(inputId)
-			//console.log("findFilter: " + typeof findFilter)
-			//console.log("inputFinder: " + inputFinder)
+			console.log("findFilter: " + typeof findFilter)
+			console.log("inputFinder: " + inputFinder)
 			if (typeof findFilter != 'undefined'){
 				var docID = key+"On"
 				document.getElementById(docID).checked = 'true'
