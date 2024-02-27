@@ -1,8 +1,8 @@
 //Credit to Predrag Davidovic for the dual slider: "https://medium.com/@predragdavidovic10/native-dual-range-slider-html-css-javascript-91e778134816"
-const seasonality = [{"value":1,"label":"Jan"},{"value":2,"label":"Feb"},{"value":3,"label":"Mar"},{"value":4,"label":"Apr"},{"value":5,"label":"May"},{"value":6,"label":"Jun"},{"value":7,"label":"Jul"},{"value":8,"label":"Aug"},{"value":9,"label":"Sep"},{"value":10,"label":"Oct"},{"value":11,"label":"Nov"},{"value":12,"label":"Dec"},{"value":13,"label":"Jan"},{"value":14,"label":"Feb"},{"value":15,"label":"Mar"},{"value":16,"label":"Apr"},{"value":17,"label":"May"},{"value":18,"label":"Jun"},{"value":19,"label":"Jul"},{"value":20,"label":"Aug"},{"value":21,"label":"Sep"},{"value":22,"label":"Oct"},{"value":23,"label":"Nov"},{"value":24,"label":"Dec"}] 
+const seasonality2 = [{"value":1,"label":"Jan"},{"value":2,"label":"Feb"},{"value":3,"label":"Mar"},{"value":4,"label":"Apr"},{"value":5,"label":"May"},{"value":6,"label":"Jun"},{"value":7,"label":"Jul"},{"value":8,"label":"Aug"},{"value":9,"label":"Sep"},{"value":10,"label":"Oct"},{"value":11,"label":"Nov"},{"value":12,"label":"Dec"},{"value":13,"label":"Jan"},{"value":14,"label":"Feb"},{"value":15,"label":"Mar"},{"value":16,"label":"Apr"},{"value":17,"label":"May"},{"value":18,"label":"Jun"},{"value":19,"label":"Jul"},{"value":20,"label":"Aug"},{"value":21,"label":"Sep"},{"value":22,"label":"Oct"},{"value":23,"label":"Nov"},{"value":24,"label":"Dec"}] 
 
-const allNumeric = seasonality.map(function(d) { return d.value; });
-const monthText = seasonality.map(function(d) { return d.label; });
+const allNumeric = seasonality2.map(function(d) { return d.value; });
+const monthText = seasonality2.map(function(d) { return d.label; });
 
 const color1 = '#896A67'
 const color2 = '#C6C6C6'
