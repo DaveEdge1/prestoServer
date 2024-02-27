@@ -56,16 +56,18 @@ function controlToSlider(fromSlider, toSlider, toInput) {
 
 function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
 	  const [from, to] = getParsed(fromSlider, toSlider);
-	  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
-	  if (from > to) {
-		      fromSlider.value = to;
-		      fromInput.value = monthText[allNumeric[to-1]-1];
-	   } else if (from < (to-11)) {
-		      fromSlider.value = to-11;
-		      fromInput.value = monthText[allNumeric[to-12]-1];
-	   } else {
-		      fromInput.value = monthText[allNumeric[from-1]-1];
-	   }
+	  if (from < (to-11)) {
+		fromSlider.value = to-11;
+		fromInput.value = monthText[allNumeric[to-12]-1];
+	  	fillSlider((to-11), toSlider, '#C6C6C6', color1, toSlider);
+	  else {
+		  fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+		  if (from > to) {
+			      fromSlider.value = to;
+			      fromInput.value = monthText[allNumeric[to-1]-1];
+		   } else {
+			      fromInput.value = monthText[allNumeric[from-1]-1];
+		   }
 }
 
 function seasonalityToSlider(fromSlider, toSlider, toInput) {
