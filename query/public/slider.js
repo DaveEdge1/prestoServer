@@ -76,9 +76,9 @@ function seasonalityToSlider(fromSlider, toSlider, toInput) {
 	  const [from, to] = getParsed(fromSlider, toSlider);
 	  if ((from+11) < to) {
 	  	fillSlider(fromSlider, (from+11), '#C6C6C6', color1, toSlider);
-	  	//setToggleAccessible((from+11));
-		toSlider.value = (to-12);
-		toInput.value = monthText[allNumeric[to-12]-1];
+	  	setToggleAccessible((from+11));
+		toSlider.value = (from+11);
+		toInput.value = monthText[allNumeric[from+11]-1];
 	  } else {
 		fillSlider(fromSlider, to, '#C6C6C6', color1, toSlider);
 	  	setToggleAccessible(to);
