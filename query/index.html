@@ -1289,7 +1289,7 @@ console.log(getAllMonths(5,10))
 	    	qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
 	    }
 	    if (JSON.parse(filters1['seasonality'])){
-		    qstring = qstring + '& ' + document.getElementById("seasonality1").name + "=" + document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value)
+		    qstring = qstring + '& ' + document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value))
 	    }
 	    console.log(qstring)
 	    return qstring;
