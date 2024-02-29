@@ -1429,9 +1429,9 @@ retTimeSeries = function(TSIDs){
 				resolve(xhr3.status);
 			}
 		};
-		xhr.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
-		xhr.setRequestHeader("Content-type", "application/json");
-		xhr.send(TSIDs);
+		xhr3.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
+		xhr3.setRequestHeader("Content-type", "application/json");
+		xhr3.send(TSIDs);
 		});
 }
 
