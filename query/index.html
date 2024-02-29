@@ -1324,31 +1324,31 @@ getAllMonths = function(startSpan,endSpan){
     //var xhr = new XMLHttpRequest();
     sendQuery = function(){
 	var param1 = params(useCoords=false)
-	var xhr = new XMLHttpRequest();
-        xhr.timeout = 2000;
-        xhr.onreadystatechange = function(e){
+	var xhr0 = new XMLHttpRequest();
+        xhr0.timeout = 2000;
+        xhr0.onreadystatechange = function(e){
             //console.log(this);
-            if (xhr.readyState === 4){
-                if (xhr.status === 200){
+            if (xhr0.readyState === 4){
+                if (xhr0.status === 200){
 		    const promise1 = new Promise((resolve, reject) => {
 			    console.log("query: " + param1)
-			    prevResp = updateRes(JSON.parse(xhr.response));
+			    prevResp = updateRes(JSON.parse(xhr0.response));
 		            
 			    resolve();
 		    });
 			promise1.then(() => {
 			  updatePoints(prevResp)
-			  xhr = null;
+			  xhr0 = null;
 			  // Expected output: "Success!"
 			});
                 } else {
 		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("XHR didn't work: " + xhr.status);
+			    console.log("XHR didn't work: " + xhr0.status);
 			    resolve();
 		    });
 			
 			promise1.then(() => {
-			  xhr = null;
+			  xhr0 = null;
 			  // Expected output: "Success!"
 			});
 			
@@ -1356,28 +1356,28 @@ getAllMonths = function(startSpan,endSpan){
                 }
             }
         }
-        xhr.ontimeout = function (){
-            console.error("request timedout: ", xhr);
+        xhr0.ontimeout = function (){
+            console.error("request timedout: ", xhr0);
         }
-        xhr.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
+        xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
         // xhr.responseType = "text";
-        xhr.send();
+        xhr0.send();
     }
 
 compileLipds = function(postBody){
-	    var xhr = new XMLHttpRequest();
+	    var xhr1 = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
-	    	xhr.onreadystatechange = (e) => {
-			if (xhr.readyState !== 4) {
+	    	xhr1.onreadystatechange = (e) => {
+			if (xhr1.readyState !== 4) {
 				return;
 			}
-			if (xhr.status === 200){
+			if (xhr1.status === 200){
 				//console.log("time series: ");
 				//console.log(xhr.responseText);
-				resolve(xhr.responseText);
+				resolve(xhr1.responseText);
 			} else {
-				var resp1 = "XHR didn't work: " + xhr.status;
+				var resp1 = "XHR didn't work: " + xhr1.status;
 				console.log(resp1);
 				resolve();
 			}
@@ -1389,44 +1389,44 @@ compileLipds = function(postBody){
 }
 
 getTSIDs = function(){
-	    var xhr = new XMLHttpRequest();
+	    var xhr2 = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
-	    	xhr.onreadystatechange = (e) => {
-			if (xhr.readyState !== 4) {
+	    	xhr2.onreadystatechange = (e) => {
+			if (xhr2.readyState !== 4) {
 				return;
 			}
-			if (xhr.status === 200){
+			if (xhr2.status === 200){
 				//console.log("TSIDs: ");
 				//console.log(xhr.responseText);
-				resolve(xhr.responseText);
+				resolve(xhr2.responseText);
 			} else {
-				var resp1 = "XHR didn't work: " + xhr.status;
+				var resp1 = "XHR didn't work: " + xhr2.status;
 				console.log(resp1);
 				resolve();
 			}
 		};
-		xhr.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
-		xhr.send();
+		xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
+		xhr2.send();
 		});
 }
 
 retTimeSeries = function(TSIDs){
-	    var xhr = new XMLHttpRequest();
+	    var xhr3 = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
-	    	xhr.onreadystatechange = (e) => {
-			if (xhr.readyState !== 4) {
+	    	xhr3.onreadystatechange = (e) => {
+			if (xhr3.readyState !== 4) {
 				return;
 			}
-			if (xhr.status === 200){
+			if (xhr3.status === 200){
 				//console.log("time series: ");
 				//console.log(xhr.responseText);
-				resolve(xhr.responseText);
+				resolve(xhr3.responseText);
 			} else {
 				//var resp1 = xhr.status;
-				console.log(xhr.status);
-				resolve(xhr.status);
+				console.log(xhr3.status);
+				resolve(xhr3.status);
 			}
 		};
 		xhr.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
