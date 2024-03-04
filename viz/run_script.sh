@@ -12,7 +12,7 @@ data_dir='/root/presto/userRecons/17095846334578667_HoloceneDA/'
 
 # Set directories (these only need to be set once.)
 output_dir='/root/presto/userRecons/17095846334578667/'  # The output files will be saved here
-web_data_dir='/root/presto/userRecons/17095846334578667/web_assets/'  # This directory contains an html template and supporting files.
+web_data_dir='/root/presto/viz/web_assets/'  # This directory contains an html template and supporting files.
 
 # Run scripts
 echo "=== Processing reconstruction ==="
