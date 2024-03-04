@@ -336,7 +336,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	var configLoc = updateParams(uniqueID, recon)
 	var stdout = new streams.WritableStream()
 	var stderr = new streams.WritableStream()
-	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
+	var dirname = '/root/presto/userRecons/' + uniqueID + '_' + recon + '/';
 	//var dockerSuccess = countNetcdf(dirname)
 	/*
 	let options = {
@@ -384,8 +384,8 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
-	  await zipIt('/root/presto/userRecons/' + uniqueID)
-	  removeZipped('/root/presto/userRecons/' + uniqueID)
+	  await zipIt('/root/presto/userRecons/' + uniqueID + '_' + recon)
+	  //removeZipped('/root/presto/userRecons/' + uniqueID)
 	
 
         /*
