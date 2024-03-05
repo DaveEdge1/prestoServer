@@ -145,7 +145,7 @@ app.get('/', function (req, res) {
 
 
 app.post('/sendReconRequest', function(req, res) {
-        //console.log(userInfo)
+        console.log(req.query.uniqueID)
 	//console.log(req.body)
 	//var d = new Date();
 	//var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
