@@ -107,7 +107,7 @@ for line in lines_template:
 #%% OUTPUT
 
 # Output the visualizer template
-with open(output_dir_full+'visualizer_'+dataset_txt+'.html','w') as f:
+with open(output_dir_full+'visualizer.html','w') as f:
     for line in lines_output:
         f.write(line)
 
