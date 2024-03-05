@@ -13,7 +13,7 @@ setPage = function(dir1){
 	
 
 app.get("/:reconID", (req, res) => {
-	res.send(setPage("/root/presto/userRecons/" + req.params.reconID + '/viz/'));
+	res.sendFile(setPage("/root/presto/userRecons/" + req.params.reconID + '/viz/'));
 })
 
 app.listen(PORT, function () {
