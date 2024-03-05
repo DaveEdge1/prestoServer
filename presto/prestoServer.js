@@ -224,7 +224,7 @@ dockerStatus = async function (uniqueID) {
 			await sleep(5000)
                         docker_status = shelljs.exec('docker ps -a').stdout
                 }
-                console.log('constainer removed')
+                console.log('container removed')
                 return 'done'
         }
 }
@@ -357,17 +357,14 @@ runRecon = async function(uniqueID, user, domain, recon) {
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	}
 	//var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' ' + reconParams(recon).conTag
-	console.log('here1')
 	async function startContainer(launchText) {
 	  console.log('running container...');
-
-	  console.log('container function running')
 	  console.log(launchText)
 	  var { stdout, stderr } = exec(launchText);
 	  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 	  stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
 
-		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
+	  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 
 	  await sleep(1000)
 	  await dockerStatus(uniqueID);
@@ -382,7 +379,6 @@ runRecon = async function(uniqueID, user, domain, recon) {
 		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
 	  }
           */
-	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 	  await zipIt('/root/presto/userRecons/' + uniqueID)
