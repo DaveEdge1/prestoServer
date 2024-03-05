@@ -7,11 +7,13 @@
 # This script can be run on Monsoon with the command: sbatch run_script.sh.
 
 # Set directory for reconstruction data
-data_dir='/root/presto/userRecons/17095846334578667_HoloceneDA/'
-#data_dir='/projects/pd_lab/data/paleoclimate_reconstructions/presto_reconstructions/1705603319440696_GraphEM/test-run-graphem-cfg/'
+# data_dir='/root/presto/userRecons/17095846334578667_HoloceneDA/'
+data_dir="/root/presto/userRecons/$1/"
 
 # Set directories (these only need to be set once.)
-output_dir='/root/presto/userRecons/17095846334578667/'  # The output files will be saved here
+# output_dir='/root/presto/userRecons/17095846334578667/'  # The output files will be saved here
+output_dir="/root/presto/userRecons/$1/"
+
 web_data_dir='/root/presto/viz/web_assets/'  # This directory contains an html template and supporting files.
 
 # Run scripts
