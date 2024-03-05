@@ -334,11 +334,10 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	console.log('container: ', reconParams(recon).conTag)
 	
 	
-	var reconName = uniqueID + '_' + recon
 	var stdout = new streams.WritableStream()
 	var stderr = new streams.WritableStream()
-	var dirname = '/root/presto/userRecons/' + reconName + '/';
-	var configLoc = updateParams(reconName, recon)
+	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
+	var configLoc = updateParams(uniqueID, recon)
 	//var dockerSuccess = countNetcdf(dirname)
 	/*
 	let options = {
@@ -353,9 +352,9 @@ runRecon = async function(uniqueID, user, domain, recon) {
 		}
         */
 	if (recon == 'holocene_da'){
-		var launchText = 'docker run --rm --name ' + reconName + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
 	} else {
-		var launchText = 'docker run --rm --name ' + reconName + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	}
 	//var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' ' + reconParams(recon).conTag
 	console.log('here1')
@@ -368,10 +367,10 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 	  stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
 
-		console.log('dir: ' + '/root/presto/userRecons/' + reconName)
+		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 
 	  await sleep(1000)
-	  await dockerStatus(reconName);
+	  await dockerStatus(uniqueID);
 
 	}
 	  await startContainer(launchText)
@@ -426,8 +425,9 @@ prestoStartHtml = function (uniqueID, user, domain, recon) {
 }
 
 app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
-	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon))
-	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
+	var reconID = req.params.uniqueID + '_' + req.params.recon
+	res.send(prestoStartHtml(reconID, req.params.user, req.params.domain, req.params.recon))
+	runRecon(reconID, req.params.user, req.params.domain, req.params.recon)
 })
 
 app.listen(PORT, function () {
