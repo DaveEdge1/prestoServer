@@ -333,11 +333,12 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	console.log('paramsLoc: ', reconParams(recon).paramsCon)
 	console.log('container: ', reconParams(recon).conTag)
 	
-	var configLoc = updateParams(uniqueID, recon)
+	
 	var reconName = uniqueID + '_' + recon
 	var stdout = new streams.WritableStream()
 	var stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + reconName + '/';
+	var configLoc = updateParams(reconName, recon)
 	//var dockerSuccess = countNetcdf(dirname)
 	/*
 	let options = {
