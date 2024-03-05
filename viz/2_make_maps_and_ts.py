@@ -45,7 +45,7 @@ quantity_txt = 'Annual'
 if   'holocene_da' in data_dir: dataset_txt = 'daholocene'; version_txt = data_dir.split('_HoloceneDA')[0].split('/')[-1]
 elif 'graphem'    in data_dir: dataset_txt = 'graphem';    version_txt = data_dir.split('_GraphEM')[0].split('/')[-1]
 filename_txt = dataset_txt+'_v'+version_txt+'_'+var_txt+'_'+quantity_txt.lower()
-output_dir_full = output_dir+'viz_'+dataset_txt+'_'+version_txt+'/'
+output_dir_full = output_dir+'viz/'
 if os.path.exists(output_dir_full) == False: os.makedirs(output_dir_full)
 output_dir_full = output_dir_full+'assets/'
 if os.path.exists(output_dir_full) == False: os.makedirs(output_dir_full)
