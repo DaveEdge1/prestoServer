@@ -336,6 +336,7 @@ vizStatus = async function (uniqueID) {
                 while (!(viz_status)){
 			await sleep(10000)
                         viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
+			console.log(viz_status)
                 }
                 console.log('viz complete')
                 return 'done'
