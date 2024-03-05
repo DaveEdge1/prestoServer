@@ -27,12 +27,14 @@ function fromDir(startPath, filter) {
 };
 
 setPage = function(dir1){
-	var html_name = fromDir(dir1, 'html')
+	app.use(express.static(dir1 + '/assets'));
+	var html_name = fromDir(dir1, 'html');
+	return html_name;
 }
 	
 
 app.get("/:reconID", (req, res) => {
-	res.send(setPage("/root/presto/userRecons/" + req.params.reconID))
+	res.send(setPage("/root/presto/userRecons/" + req.params.reconID));
 })
 
 app.listen(PORT, function () {
