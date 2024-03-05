@@ -395,7 +395,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 
 	
 	async function writeViz(uniqueID, dirname) {
-		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh' + uniqueID
+		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
 		var { stdout, stderr } = exec(bashText);
 		stdout.pipe(fs.createWriteStream(dirname+'viz_stdout.txt'));
 	  	stderr.pipe(fs.createWriteStream(dirname+'viz_stderr.txt'));
