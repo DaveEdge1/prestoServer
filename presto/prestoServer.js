@@ -230,6 +230,7 @@ dockerStatus = async function (uniqueID) {
 }
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
+   var vizURL = "http://143.198.98.66:91/" + uniqueID
    var configFileTxt = function (configFileLoc) {
 	   var s = fs.readFileSync(configFileLoc,'utf8');
 	   s = align(s, 5)
@@ -245,7 +246,9 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + ' reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
 	text1 = text1
 		+ '<br>'
-		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to download your results</a>'
+		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
+		+ '<br>'
+		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to DOWNLOAD your results</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
 		+ '<pre>' + configFileTxt(configLoc) + '</pre>'
@@ -322,6 +325,23 @@ removeZipped = function(source_dir){
 		return(archive.finalize());
 	}
 
+vizStatus = async function (uniqueID) {
+  var viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
+	  if (viz_status){
+		  console.log('html visualizer file exists!')
+	  }
+          if (!(viz_status)){
+                console.log('awaiting viz completion')
+                //console.log('docker_status.search("test2") !== -1: ' + docker_status.search("test2") !== -1)
+                while (!(viz_status)){
+			await sleep(10000)
+                        viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
+                }
+                console.log('viz complete')
+                return 'done'
+        }
+}
+
 
 runRecon = async function(uniqueID, user, domain, recon) {
 
@@ -371,6 +391,19 @@ runRecon = async function(uniqueID, user, domain, recon) {
 
 	}
 	  await startContainer(launchText)
+
+	
+	async function writeViz(uniqueID, dirname) {
+		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh' + uniqueID
+		var { stdout, stderr } = exec(bashText);
+		stdout.pipe(fs.createWriteStream(dirname+'viz_stdout.txt'));
+	  	stderr.pipe(fs.createWriteStream(dirname+'viz_stderr.txt'));
+
+		await sleep(1000)
+	  	await vizStatus(uniqueID);
+	}
+
+	  await writeViz(uniqueID, dirname)
 	  /*
 	  if (stdout != null){
 		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
