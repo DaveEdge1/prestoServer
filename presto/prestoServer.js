@@ -426,6 +426,8 @@ prestoStartHtml = function (uniqueID, user, domain, recon) {
 
 app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
 	var reconID = req.params.uniqueID + '_' + req.params.recon
+	console.log("uniqueID: " + req.params.uniqueID)
+	console.log("reconID: " + reconID)
 	res.send(prestoStartHtml(reconID, req.params.user, req.params.domain, req.params.recon))
 	runRecon(reconID, req.params.user, req.params.domain, req.params.recon)
 })
