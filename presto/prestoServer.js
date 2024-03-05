@@ -334,9 +334,10 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	console.log('container: ', reconParams(recon).conTag)
 	
 	var configLoc = updateParams(uniqueID, recon)
+	var reconName = uniqueID + '_' + recon
 	var stdout = new streams.WritableStream()
 	var stderr = new streams.WritableStream()
-	var dirname = '/root/presto/userRecons/' + uniqueID + '_' + recon + '/';
+	var dirname = '/root/presto/userRecons/' + reconName + '/';
 	//var dockerSuccess = countNetcdf(dirname)
 	/*
 	let options = {
@@ -351,9 +352,9 @@ runRecon = async function(uniqueID, user, domain, recon) {
 		}
         */
 	if (recon == 'holocene_da'){
-		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + reconName + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
 	} else {
-		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + reconName + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	}
 	//var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' ' + reconParams(recon).conTag
 	console.log('here1')
@@ -366,10 +367,10 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 	  stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
 
-		console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
+		console.log('dir: ' + '/root/presto/userRecons/' + reconName)
 
 	  await sleep(1000)
-	  await dockerStatus(uniqueID);
+	  await dockerStatus(reconName);
 
 	}
 	  await startContainer(launchText)
@@ -384,7 +385,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  console.log('end of container function')
 	  console.log('container run complete');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
-	  await zipIt('/root/presto/userRecons/' + uniqueID + '_' + recon)
+	  await zipIt('/root/presto/userRecons/' + reconName)
 	  //removeZipped('/root/presto/userRecons/' + uniqueID)
 	
 
