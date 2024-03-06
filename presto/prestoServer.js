@@ -327,6 +327,7 @@ removeZipped = function(source_dir){
 
 vizStatus = async function (uniqueID) {
   var viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
+  var timeElapsed = 0;
 	  if (viz_status){
 		  console.log('html visualizer file exists!')
 	  }
@@ -335,6 +336,10 @@ vizStatus = async function (uniqueID) {
                 //console.log('docker_status.search("test2") !== -1: ' + docker_status.search("test2") !== -1)
                 while (!(viz_status)){
 			await sleep(10000)
+			timeElapsed += 10;
+			if(timeElapsed >= 1000){
+        			break;
+    			}
                         viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
 			console.log(viz_status)
                 }
