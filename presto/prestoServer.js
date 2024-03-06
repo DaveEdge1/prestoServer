@@ -350,6 +350,10 @@ vizStatus = async function (uniqueID) {
 			var minutes = Math.floor(timeElapsed/60)
 			var seconds = timeElapsed - minutes * 60;
 			printProgress("time elapsed: " + minutes + ":" + seconds)
+			if (seconds == 0){
+				var execText2 = "tail /root/presto/userRecons/"+uniqueID+"viz_stderr.txt"
+				shelljs.exec(execText2)
+			}
 			//console.log("time elapsed: " + minutes + ":" + seconds)
                 }
                 console.log('viz complete')
