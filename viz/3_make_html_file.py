@@ -33,7 +33,7 @@ with open(web_data_dir+'visualizer_template.html') as f:
 var_txt      = 'tas'
 quantity_txt = 'Annual'
 if   'holocene_da' in data_dir: dataset_txt = 'daholocene'; version_txt = data_dir.split('_holocene_da')[0].split('/')[-1]
-elif 'graphem'    in data_dir: dataset_txt = 'graphem';    version_txt = data_dir.split('_graphem')[0].split('/')[-1]
+elif 'graph_em'    in data_dir: dataset_txt = 'graphem';    version_txt = data_dir.split('_graph_em')[0].split('/')[-1]
 filename_txt = dataset_txt+'_v'+version_txt+'_'+var_txt+'_'+quantity_txt.lower()
 output_dir_full = output_dir+'viz/'
 print(' ===== STARTING script 3: Making html and zipping '+str(filename_txt)+' =====')
