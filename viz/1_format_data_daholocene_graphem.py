@@ -126,8 +126,8 @@ elif dataset_txt == 'graphem':
     data_xarray = xr.open_dataset(data_filename)
     #
     # Load the configuration options
-    config_dir = '/'.join(data_dir.split('/')[:-2])+'/'
-    with open(config_dir+'configs.yml','r') as file:
+    # config_dir = '/'.join(data_dir.split('/')[:-2])+'/'
+    with open(data_dir+'configs.yml','r') as file:
         options = yaml.load(file,Loader=yaml.FullLoader)
     #
     # Get coordinates
