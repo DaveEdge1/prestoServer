@@ -20,9 +20,9 @@ web_data_dir='/root/presto/viz/web_assets/'  # This directory contains an html t
 echo "=== Processing reconstruction ==="
 
 source activate presto_env &&
-python -u 1_format_data_daholocene_graphem.py $data_dir &&
-python -u 2_make_maps_and_ts.py $data_dir $output_dir &&
-python -u 3_make_html_file.py $data_dir $output_dir $web_data_dir &&
+python -u /root/presto/viz/1_format_data_daholocene_graphem.py $data_dir &&
+python -u /root/presto/viz/2_make_maps_and_ts.py $data_dir $output_dir &&
+python -u /root/presto/viz/3_make_html_file.py $data_dir $output_dir $web_data_dir &&
 
 conda activate base
 
