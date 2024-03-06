@@ -212,6 +212,12 @@ updateParams = function (uniqueID, recon){
 	
 }
 
+function printProgress(progress){
+    process.stdout.clearLine(0);
+    process.stdout.cursorTo(0);
+    process.stdout.write(progress + '%');
+}
+
 dockerStatus = async function (uniqueID) {
   docker_status = shelljs.exec('docker ps -a').stdout
 	  if (docker_status.search(uniqueID) == -1){
@@ -341,7 +347,14 @@ vizStatus = async function (uniqueID) {
         			break;
     			}
                         viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
-			console.log("time elapsed: " + timeElapsed)
+			var minutes = Math.floor(timeElapsed/60)
+			var seconds = timeElapsed - minutes * 60;
+			printProgress("time elapsed: " + minutes + ":" + seconds)
+			if (seconds == 0){
+				var execText2 = "tail /root/presto/userRecons/"+uniqueID+"viz_stderr.txt"
+				shelljs.exec(execText2)
+			}
+			//console.log("time elapsed: " + minutes + ":" + seconds)
                 }
                 console.log('viz complete')
                 return 'done'

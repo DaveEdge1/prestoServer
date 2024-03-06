@@ -122,7 +122,7 @@ elif dataset_txt == 'graphem':
     #
     # Load data
     print('=== Processing GraphEM reconstruction ===')
-    data_filename = glob.glob(data_dir+'*recon.nc')[0]
+    data_filename = glob.glob(data_dir+'test-run-graphem-cfg/'+'*recon.nc')[0]
     data_xarray = xr.open_dataset(data_filename)
     #
     # Load the configuration options
