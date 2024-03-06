@@ -341,7 +341,7 @@ vizStatus = async function (uniqueID) {
         			break;
     			}
                         viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
-			console.log(viz_status)
+			console.log("time elapsed: " + timeElapsed)
                 }
                 console.log('viz complete')
                 return 'done'
