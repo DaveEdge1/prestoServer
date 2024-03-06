@@ -246,7 +246,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + ' reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
 	text1 = text1
 		+ '<br>'
-		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
+		+ '<a href="' + vizURL + '" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
 		+ '<br>'
 		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to DOWNLOAD your results</a>'
 		+ '<br><br>'
@@ -327,6 +327,7 @@ removeZipped = function(source_dir){
 
 vizStatus = async function (uniqueID) {
   var viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
+  var timeElapsed = 0;
 	  if (viz_status){
 		  console.log('html visualizer file exists!')
 	  }
@@ -335,8 +336,12 @@ vizStatus = async function (uniqueID) {
                 //console.log('docker_status.search("test2") !== -1: ' + docker_status.search("test2") !== -1)
                 while (!(viz_status)){
 			await sleep(10000)
+			timeElapsed += 10;
+			if(timeElapsed >= 1000){
+        			break;
+    			}
                         viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
-			console.log(viz_status)
+			console.log("time elapsed: " + timeElapsed)
                 }
                 console.log('viz complete')
                 return 'done'

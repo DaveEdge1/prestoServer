@@ -24,7 +24,7 @@ data_dir = sys.argv[1]
 var_txt      = 'tas'
 quantity_txt = 'Annual'
 if   'holocene_da' in data_dir: dataset_txt = 'daholocene';  version_txt = data_dir.split('_holocene_da')[0].split('/')[-1]
-elif 'graphem'    in data_dir: dataset_txt = 'graphem'; version_txt = data_dir.split('_graphem')[0].split('/')[-1]
+elif 'graph_em'    in data_dir: dataset_txt = 'graphem'; version_txt = data_dir.split('_graph_em')[0].split('/')[-1]
 print(data_dir)
 print(dataset_txt)
 filename_txt = dataset_txt+'_v'+version_txt+'_'+var_txt+'_'+quantity_txt.lower()
