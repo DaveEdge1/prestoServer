@@ -198,7 +198,8 @@ let transporter = nodemailer.createTransport({
 	    auth: {
 		    user: "no-reply@paleopresto.com",
 		    pass: "5-KBS%*YsTneRs4"
-	    }
+	    },
+	from: 'no-reply@paleopresto.com'
 });
 
 updateParams = function (uniqueID, recon){
