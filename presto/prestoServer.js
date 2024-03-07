@@ -435,6 +435,8 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  }
           */
 	  console.log('container run complete');
+	
+	  await sleep(1000)
 	  
 	  await zipIt('/root/presto/userRecons/' + uniqueID)
 
