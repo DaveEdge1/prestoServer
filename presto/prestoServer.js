@@ -237,6 +237,7 @@ dockerStatus = async function (uniqueID) {
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
    var vizURL = "http://143.198.98.66:91/" + uniqueID
+   var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
    var configFileTxt = function (configFileLoc) {
 	   var s = fs.readFileSync(configFileLoc,'utf8');
 	   s = align(s, 5)
@@ -255,6 +256,8 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		+ '<a href="' + vizURL + '" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
 		+ '<br>'
 		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to DOWNLOAD your results</a>'
+		+ '<br>'
+	        + '<a href="' + indexURL + '" download>Copy and paste this URL into a new browser window to BROWSE ALL files created</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
 		+ '<pre>' + configFileTxt(configLoc) + '</pre>'

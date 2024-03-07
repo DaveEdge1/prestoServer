@@ -10,7 +10,11 @@ const fs = require('fs');
 
 var app = express();
 
-app.use('/dir', express.static('/root/presto/userRecons'), serveIndex('/root/presto/userRecons', {'icons': true}))
+
+
+app.use('/customRecons', express.static('/root/presto/userRecons/'), serveIndex('/root/presto/userRecons/', {'icons': true}))
+
+
 /*
 newZip = function (uniqueID) {
 	var downloadLoc = '/root/presto/userRecons/' + uniqueID + '/' + uniqueID + '.zip'
@@ -44,43 +48,11 @@ newZip = function (uniqueID) {
 }
 */
 app.get('/downloads/:downloadId', (req, res) => {
-	/*
-	newZip = function (uniqueID) {
-		        var downloadLoc = '/root/presto/userRecons/' + uniqueID + '/' + uniqueID + '.zip'
-		        var source_dir = '/root/presto/userRecons/' + uniqueID
-		        var output = fs.createWriteStream(downloadLoc);
-		        var archive = archiver('zip');
-
-		        output.on('close', function () {
-				                    console.log(archive.pointer() + ' total bytes');
-						    console.log('archiver has been finalized and the output file descriptor has closed.');
-				                    res.writeHead(200, {
-						                  'Content-Disposition': 'attachment; filename="' + req.params.downloadId + '.zip"',
-						                  'Content-Type': '.zip',
-						    })
-                                                    return(res.end(downloadLoc))
-			});
-
-
-        archive.on('error', function(err){
-		                    throw err;
-				            });
-		archive.pipe(output);
-                archive.directory(source_dir, false);
-                archive.directory('subdir/', 'new-subdir');
-                archive.finalize();
-	}
-	newZip(req.params.downloadId)
-	    /*res.writeHead(200, {
-	        'Content-Disposition': 'attachment; filename="' + req.params.downloadId + '.zip"',
-	i        'Content-Type': '.zip',
-	    })
-	    //res.download(whereTo);
-	  res.writeHead(200, {
-	      'Content-Disposition': 'attachment; filename="' + req.params.downloadId + '.zip"',
-	      'Content-Type': '.zip',
-	  })*/
 	  res.download('/root/presto/userRecons/' + req.params.downloadId + '.zip')
+});
+
+app.get('/:downloadId', (req, res) => {
+	res.send('/customRecons/'+req.params.downloadId)
 });
 /*
 
