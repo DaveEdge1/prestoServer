@@ -1,6 +1,6 @@
 # Paleo Presto Server
 
-This repo contains the four node.js apps that constitude the Paleo Presto Custom Reconstruction Engine. These apps live on the Tarry Consistency droplet on Digital Ocean at 134.114.34.6
+This repo contains the four node.js apps that constitude the Paleo Presto Custom Reconstruction Engine. These apps live on the Presto2 droplet on Digital Ocean at 143.198.98.66
 
 In addition to the four node apps, the nginx config files are also present. On a linux server, these files live at /etc/nginx/sites-enabled/
 
@@ -32,6 +32,16 @@ Basic recon info added to prestoForm/index.html:
 * name of methodology
 * publication doi
 
+### queryServer
+
+GUI for interaction with lipdverse data
+* utilizes a SQL server, which contains 21 variables for each time series on the lipdverse
+* pulls time series for downlaod from the graphDB
+* Filter lipdverse data for use in reconstruction
+* download data directly as csv
+* (coming soon) download data as zipped .lpd files, .rds file, or as .pkl
+* Filters preset based on reconstruction configs.yml (via jsoon intermediary)
+
 ### editorServer
 
 Build web form for interactive parameter editing:
@@ -50,5 +60,18 @@ Launch the recon algorithm:
 * container tag (lipd_webapps:holocene_da)
 * path to params file to use in container ('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
 * path to working config file ('/root/presto/prestoForm/holocene_da/config_default.yml')  
-*paths to standardized configs and lookup.json are standardized by recon handle
+* paths to standardized configs and lookup.json are standardized by recon handle
 
+Produce visualizations:
+* await removal of docker container
+* launch shell script which runs 3 sequential python scripts
+
+Send email to user:
+* await creation of viz products
+* send email with links to access products
+
+### downloadServer
+Access processed data, visualizations, and logs
+* download all files (zipped)
+* view vizualiations on the web
+* browse files created and download individually
