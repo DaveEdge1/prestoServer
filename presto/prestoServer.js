@@ -432,8 +432,12 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  }
           */
 	  console.log('container run complete');
-	  sendEmail(user, domain, uniqueID, configLoc, recon)
+	  
 	  await zipIt('/root/presto/userRecons/' + uniqueID)
+
+	  console.log('files zipped');
+
+	  sendEmail(user, domain, uniqueID, configLoc, recon)
 	  //removeZipped('/root/presto/userRecons/' + uniqueID)
 	
 
