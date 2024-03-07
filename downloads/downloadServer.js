@@ -1,4 +1,5 @@
-express = require('express');
+var express = require('express');
+var serveIndex = require('serve-index')
 PORT = process.env.PORT || 3001;
 const fs = require('fs');
 //var archiver = require('archiver');
@@ -8,6 +9,8 @@ const fs = require('fs');
 //const path = require('path');
 
 var app = express();
+
+app.use('/dir', express.static('/root/presto/userRecons'), serveIndex('/root/presto/userRecons', {'icons': true}))
 /*
 newZip = function (uniqueID) {
 	var downloadLoc = '/root/presto/userRecons/' + uniqueID + '/' + uniqueID + '.zip'
