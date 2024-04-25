@@ -297,9 +297,37 @@ popQueryVariable()
 <input name="proxy_archiveType" class="checkbox-1" type="checkbox" value="speleothem" id = "speleothem">
 <label style="font-size:14px;" for="speleothem">speleothem</label>
 </div>
+<div class=nest-item>
 <div class=check-item>
 <input name="proxy_archiveType" class="checkbox-1" type="checkbox" value="tree" id = "tree">
 <label style="font-size:14px;" for="tree">tree</label>
+</div>
+<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
+<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes: Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="months_range_fromSlider" type="range" value="1" min="1" max="24" step="1"/>
+<input id="months_range_toSlider" type="range" value="12" min="1" max="24" step="1"/>
+</div>
+<br>
+<div class="form_control">
+<div class="form_control_container">
+<div class="form_control_container__time">Min</div>
+<input class="form_control_container__time__input" name="months_range_text" type="text" value="Jan" id="months_range_fromInput_text" readonly="readonly"/>
+</div>
+<div class="form_control_container">
+<div class="form_control_container__time">Max</div>
+<input class="form_control_container__time__input" name="months_range_text" type="text" value="Dec" id="months_range_toInput_text" readonly="readonly"/>
+</div>
+</div>
+</div>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br>
+<hr class="solid">
+<hr class="solid">
 </div>
 </div>
 <div class="checkall-container">
@@ -471,6 +499,53 @@ popQueryVariable()
 <script>
 function val() {document.getElementById("abstract2").src = "/slider.css";}
 </script>
+<script>
+  const seasonality2 = [{"value":1,"label":"Jan"},{"value":2,"label":"Feb"},{"value":3,"label":"Mar"},{"value":4,"label":"Apr"},{"value":5,"label":"May"},{"value":6,"label":"Jun"},{"value":7,"label":"Jul"},{"value":8,"label":"Aug"},{"value":9,"label":"Sep"},{"value":10,"label":"Oct"},{"value":11,"label":"Nov"},{"value":12,"label":"Dec"},{"value":13,"label":"Jan"},{"value":14,"label":"Feb"},{"value":15,"label":"Mar"},{"value":16,"label":"Apr"},{"value":17,"label":"May"},{"value":18,"label":"Jun"},{"value":19,"label":"Jul"},{"value":20,"label":"Aug"},{"value":21,"label":"Sep"},{"value":22,"label":"Oct"},{"value":23,"label":"Nov"},{"value":24,"label":"Dec"}] 
+
+const allNumeric = seasonality2.map(function(d) { return d.value; });
+const monthText = seasonality2.map(function(d) { return d.label; });
+
+function seasonalityFromSlider(fromSlider, toSlider, fromInput) {
+	  const [from, to] = getParsed(fromSlider, toSlider);
+	  if (from < (to-11)) {
+		fromSlider.value = to-11;
+		fromInput.value = monthText[allNumeric[to-12]-1];
+	  	fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+		setToggleAccessible(fromSlider);
+	  } else {
+		fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+		if (from > to) {
+			fromSlider.value = to;
+			fromInput.value = monthText[allNumeric[to-1]-1];
+		} else {
+			fromInput.value = monthText[allNumeric[from-1]-1];
+		}
+	  }
+}
+
+function seasonalityToSlider(fromSlider, toSlider, toInput) {
+	  var [from, to] = getParsed(fromSlider, toSlider);
+	  if ((from+11) < to) {
+		to = from+11
+		toSlider.value = to;
+		toInput.value = monthText[allNumeric[to-1]-1];
+	  	fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  	setToggleAccessible(toSlider);
+	  } else {
+		fillSlider(fromSlider, toSlider, '#C6C6C6', color1, toSlider);
+	  	setToggleAccessible(toSlider);
+	  	if (from <= to) {
+			toSlider.value = to;
+			toInput.value = monthText[allNumeric[to-1]-1];
+		 } else {
+			toInput.value = monthText[allNumeric[from-1]-1];
+			toSlider.value = from;
+		 }
+	  }
+}
+
+</script>
+  
 <script src="/slidergraph_em.js"></script>
 </div>
 <br>
