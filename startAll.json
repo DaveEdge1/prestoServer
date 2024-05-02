@@ -24,7 +24,7 @@
     "uid": "sparql-server",
     "append": true,
     "watch": true,
-    "script": "query/sparqlServer.js",
+    "script": "graphDB/sparqlServer.js",
     "sourceDir": ""
   },
   {
