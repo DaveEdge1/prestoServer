@@ -1,4 +1,4 @@
-PORT = process.env.PORT || 3011
+PORT = process.env.PORT || 3012
 
 var fs = require('fs');
 var express = require('express'),
@@ -16,39 +16,46 @@ app.use(bodyParser.json({
 }));
 app.use(cors({origin: 'http://143.198.98.66:86'}));
 
-var newStatus = function(TSIDs, uniqueID){
-	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined'){
+var newStatus = function(TSids, uniqueID){
+	if (typeof TSids == 'undefined' || typeof uniqueID == 'undefined'){
+		console.log("TSids: " + TSids)
+		console.log("uniqueID: ", uniqueID)
 		return(400)
 	} else {
 		return(200)
 	}
 }
 
+var newDir = function(dir1){
+	if (!fs.existsSync(dir1)) {
+                fs.mkdir(dir1,
+                        (err) => {
+                        if (err) {
+                                return console.error(err);
+                        }
+                });
+        }
+}
+
+var writeIt = function(path1, TSids){
+  fs.writeFileSync(path1, TSids);
+  console.log('File created successfully at: ' + path1);
+}
+
 var writeJSON = function(TSids, uniqueID){
   //write a json file with the TSids in the uniqueID dir
-  dir1 = path.join(__dirname, '../userRecons', uniqueID)
-	fs.mkdir(dir1,
-		(err) => {
-		if (err) {
-			return console.error(err);
-		}
-		console.log('Directory created successfully at: ' + dir1);
-	});
-  var path1 = path.join(dir1, "TSids.json")
-  fs.writeFile(path1, TSids, (err) => {
-            if (err)
-                console.log(err);
-            else {
-                console.log('File created successfully at: ' + path1);
-            }
-  });
+  var dir1 = path.join(__dirname, '../userRecons', uniqueID);
+  newDir(dir1);
+  var path1 = path.join(dir1, "TSids.json");
+  writeIt(path1,TSids);
 };
 
 app.post('/', function(req, res) {
-	res.sendStatus(newStatus(req.body.TSIDs));
+	res.sendStatus(newStatus(req.body.TSids, req.body.uniqueID));
 	
-	if (newStatus(req.body.TSIDs, req.body.uniqueID) == 200){	
-		writeJSON(req.body.TSIDs req.body.uniqueID);
+	if (newStatus(req.body.TSids, req.body.uniqueID) == 200){	
+		writeJSON(req.body.TSids, req.body.uniqueID);
+	};
 });
 
 app.listen(PORT, function () {
