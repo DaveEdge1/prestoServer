@@ -1389,6 +1389,7 @@ compileLipds = function(Body){
 }
 
 postTSids = function(Body){
+	    console.log("in postTSids()"
 	    var xhr1 = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
@@ -1515,6 +1516,7 @@ function getLipds(loc1){
 			console.log("Total time series: " + IDs.length);
 			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
 			console.log("json body sent to 'getLipds': " + tsJSON)
+			console.log("sending post TSids")
 			postTSids(tsJSON);
 			compileLipds(tsJSON);
 		});
@@ -1522,7 +1524,6 @@ function getLipds(loc1){
 			resolve("https://www.google.com")
 		} else if (loc1 == "reconstruct"){
 			//resolve("http://143.198.98.66:85/"+window.location.search)
-			resolve("")
 		} else {
 			resolve("https://paleopresto.com/")
 		}
