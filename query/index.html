@@ -1509,7 +1509,7 @@ function downloadCurrentDocument(resp1) {
 
 function getLipds(loc1){
 	return new Promise((resolve, reject) => {
-		alert(params(useCoords=true))
+		//alert(params(useCoords=true))
 		getTSIDs().then(reso => {
 			var resoJSON = JSON.parse(reso);
 			var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
@@ -1522,7 +1522,9 @@ function getLipds(loc1){
 			if (loc1 == "donwload"){
 				resolve("https://www.google.com")
 			} else if (loc1 == "reconstruct"){
-				//resolve("http://143.198.98.66:85/"+window.location.search)
+				var queryParams = params(useCoords=true)
+				queryParams = '&' + queryParams.substring(1);
+				resolve("http://143.198.98.66:85/"+window.location.search+queryParams)
 			} else {
 				resolve("https://paleopresto.com/")
 			}
