@@ -38,6 +38,9 @@ var newDir = function(dir1){
 }
 
 var writeIt = function(path1, TSids){
+  if (Array.isArray(TSids)){
+	  TSids = JSON.stringify(TSids)
+  }
   fs.writeFileSync(path1, TSids);
   console.log('File created successfully at: ' + path1);
 }
