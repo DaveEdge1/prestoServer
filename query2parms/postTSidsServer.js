@@ -50,6 +50,7 @@ var writeJSON = function(TSids, uniqueID){
   var dir1 = path.join(__dirname, '../userRecons', uniqueID);
   newDir(dir1);
   var path1 = path.join(dir1, "TSids.json");
+  fs.closeSync(fs.openSync(path1, "w"));
   writeIt(path1,TSids);
 };
 
