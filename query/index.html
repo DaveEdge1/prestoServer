@@ -1399,9 +1399,9 @@ postTSids = function(Body){
 			if (xhr7.status === 200){
 				//console.log("time series: ");
 				//console.log(xhr.responseText);
-				resolve(xhr1.responseText);
+				resolve(xhr7.responseText);
 			} else {
-				var resp1 = "XHR didn't work: " + xhr1.status;
+				var resp1 = "XHR didn't work: " + xhr7.status;
 				console.log(resp1);
 				resolve();
 			}
