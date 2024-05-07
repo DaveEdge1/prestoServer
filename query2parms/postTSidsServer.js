@@ -52,10 +52,10 @@ var writeJSON = function(TSids, uniqueID){
 
 app.post('/', function(req, res) {
 	console.log('ping');
-	res.sendStatus(newStatus(req.body.TSids, req.body.uniqueID));
+	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID));
 	
-	if (newStatus(req.body.TSids, req.body.uniqueID) == 200){	
-		writeJSON(req.body.TSids, req.body.uniqueID);
+	if (newStatus(req.body.TSIDs, req.body.uniqueID) == 200){	
+		writeJSON(req.body.TSIDs, req.body.uniqueID);
 	};
 });
 
