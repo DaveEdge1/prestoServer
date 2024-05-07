@@ -1509,7 +1509,7 @@ function downloadCurrentDocument(resp1) {
 
 function getLipds(loc1){
 	return new Promise((resolve, reject) => {
-		alert(JSON.stringify(document.getElementById("compilationIn").value))
+		alert(params(useCoords=true))
 		getTSIDs().then(reso => {
 			var resoJSON = JSON.parse(reso);
 			var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
