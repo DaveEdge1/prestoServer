@@ -1382,22 +1382,22 @@ compileLipds = function(Body){
 				resolve();
 			}
 		};
-		xhr.open("post", "http://143.198.98.66:90/lipds", /*async*/ true);
-		xhr.setRequestHeader("Content-type", "application/json");
-		xhr.send(Body);
+		xhr1.open("post", "http://143.198.98.66:90/lipds", /*async*/ true);
+		xhr1.setRequestHeader("Content-type", "application/json");
+		xhr1.send(Body);
 		});
 }
 
 postTSids = function(Body){
 	    alert("Running postTSids()");
-	    var xhr1 = new XMLHttpRequest();
+	    var xhr7 = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
-	    	xhr1.onreadystatechange = (e) => {
-			if (xhr1.readyState !== 4) {
+	    	xhr7.onreadystatechange = (e) => {
+			if (xhr7.readyState !== 4) {
 				return;
 			}
-			if (xhr1.status === 200){
+			if (xhr7.status === 200){
 				//console.log("time series: ");
 				//console.log(xhr.responseText);
 				resolve(xhr1.responseText);
@@ -1407,9 +1407,9 @@ postTSids = function(Body){
 				resolve();
 			}
 		};
-		xhr.open("post", "http://143.198.98.66:92/", /*async*/ true);
-		xhr.setRequestHeader("Content-type", "application/json");
-		xhr.send(Body);
+		xhr7.open("post", "http://143.198.98.66:92/", /*async*/ true);
+		xhr7.setRequestHeader("Content-type", "application/json");
+		xhr7.send(Body);
 		});
 }
 	
