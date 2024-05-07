@@ -1524,6 +1524,7 @@ function getLipds(loc1){
 			} else if (loc1 == "reconstruct"){
 				var queryParams = params(useCoords=true)
 				queryParams = '&' + queryParams.substring(1);
+				queryParams = queryParams.replace(/\s/g, '');
 				resolve("http://143.198.98.66:85/"+window.location.search+queryParams)
 			} else {
 				resolve("https://paleopresto.com/")
