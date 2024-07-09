@@ -35,7 +35,6 @@ var htmlString = '<!DOCTYPE html>\n' +
 '\n' +
 '	<script type="text/javascript">\n' +
 '		const urlParams = new URLSearchParams(window.location.search);\n' +
-'		//var params1 = ''\n' +
 '		var jsonPath = "/" + urlParams.get('recon') + "_params.json"\n' +
 '		async function grabParams() {\n' +
 '	  		const response = await fetch(jsonPath);\n' +
