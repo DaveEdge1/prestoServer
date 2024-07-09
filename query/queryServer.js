@@ -16,6 +16,10 @@ app.use('/', express.static(path.join(__dirname, 'public')))
 app.get('/', function (req, res) {
 	res.sendFile(path.join(__dirname, 'index.html'))
 });
+
+app.get('/:recon', function (req, res) {
+	res.sendFile(path.join(__dirname, 'forms/', res.body.recon, '.html'))
+});
 /*
 app.get('/2', function (req, res) {
 	res.sendFile(path.join(__dirname, 'index2.html'))
