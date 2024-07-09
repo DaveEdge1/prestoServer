@@ -19,7 +19,7 @@ app.get('/', function (req, res) {
 
 app.get('/:recon', function (req, res) {
 	var fileName1 = req.params.recon + '.html'
-	var fileLoc = path.join(__dirname, 'forms/', fileName1)
+	var fileLoc = path.join(__dirname, fileName1)
 	console.log(fileLoc)
 	res.sendFile(fileLoc)
 });
