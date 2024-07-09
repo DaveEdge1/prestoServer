@@ -210,7 +210,7 @@ const htmlString =
 '</html>\n';
 
 
-fs.writeFile("/root/presto/query/forms/" + recon  + ".html", htmlstring, function(err) {
+fs.writeFile("/root/presto/query/forms/" + recon  + ".html", htmlString, function(err) {
 	    if(err) {
 		            return console.log(err);
 		        }
