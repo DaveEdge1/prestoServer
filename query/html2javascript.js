@@ -8,7 +8,7 @@ const inputFile = prompt('Provide the name of the input file (.html)?');
 console.log(`Input file name: ${inputFile}`);
 
 const outputFile = prompt('Provide the name of the output file (.js)?');
-console.log(`Output file name: ${outputFile}`);
+console.log(`Output file name: ${outputFile}`);    
 
 // Function to read, edit, and write HTML file
 function editHtmlFile(inputFilePath, outputFilePath) {
@@ -21,8 +21,9 @@ function editHtmlFile(inputFilePath, outputFilePath) {
     const outputStream = fs.createWriteStream(outputFilePath);
 
     rl.on('line', (line) => {
-        // Transform the line using the provided callback
-        const editedLine = unescape("'" + line + "\\n' +\n");
+        // Transform the line
+        const line2 = line.replaceAll("'", '"')
+        const editedLine = unescape("'" + line2 + "\\n' +\n");
         console.log(editedLine)
         outputStream.write(editedLine);
     });
