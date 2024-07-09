@@ -2,7 +2,7 @@ var fs = require('fs')
 var YAML = require('yaml')
 var bodyParser = require('body-parser')
 const prompt = require('prompt-sync')();
-require('./index.js');
+import htmlString from './index.js';
 
 reconTitle = function(recon){
 	var reconTitles = fs.readFileSync("/root/presto/jsonEditor/reconTitles.json")
