@@ -2,6 +2,12 @@ const fs = require('fs');
 const readline = require('readline');
 const prompt = require('prompt-sync')();
 
+const inputFile = prompt('Provide the name of the input file (.html)?');
+console.log(`Input file name: ${inputFile}`);
+
+const outputFile = prompt('Provide the name of the output file (.js)?');
+console.log(`Output file name: ${outputFile}`);
+
 // Function to read, edit, and write HTML file
 function editHtmlFile(inputFilePath, outputFilePath) {
     const fileStream = fs.createReadStream(inputFilePath);
@@ -26,7 +32,7 @@ function editHtmlFile(inputFilePath, outputFilePath) {
 
 // Replace 'input.html' with the actual path to the input HTML file
 // Replace 'output.html' with the desired path for the output HTML file
-editHtmlFile('index.html', 'index.js', (line) => {
+editHtmlFile(inputFile, outputFile, (line) => {
     // Modify this callback to apply your desired transformation to each line
     return line;
 });
