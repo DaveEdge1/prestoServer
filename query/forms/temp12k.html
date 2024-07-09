@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Autocomplete Lipdverse Query</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.default.css" id="theme-stylesheet">
+    <!--link rel="stylesheet" href="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.css" /-->
+    <link rel="stylesheet" href="/leaflet.legend.css">
+    <link rel="stylesheet" href="/spinner.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <link rel="stylesheet" href="/slider.css">
+    <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.6/base64.min.js"></script>
+    <!--script src="leaflet-src.js"></script-->
+    <script src="/Leaflet.draw.js"></script>
+    <script src="/Leaflet.Draw.Event.js"></script>
+    <script src="/TouchEvents.js"></script>
+    <script src="/Edit.SimpleShape.js"></script>
+    <script src="/Edit.Rectangle.js"></script>
+    <script src="/leaflet-svg-shape-markers.min.js"></script>
+    <script src="/leaflet.legend.js"></script>
+    <script src="/spin.js"></script>
+    <script language="javascript" type="text/javascript" src="/data_forge.js"></script>
+    <script type="text/javascript">
+        const urlParams = new URLSearchParams(window.location.search);
+        //var params1 = ""
+        var jsonPath = "/" + urlParams.get("recon") + "_params.json"
+        async function grabParams() {
+            const response = await fetch(jsonPath);
+            let params1 = await response.json();
+            //console.log("params1: " + Object.keys(params1));
+            return params1
+        }
+        /*
+        fetch(jsonPath)
+             .then(function(res){
+                 return res.json()
+             })
+             .then(function(data){
+                 console.log("data: " + JSON.stringify(data))
+                 params1 = data
+             })
+*/
+    </script>
+    <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
+    <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+        .leaflet-container {
+            display: block;
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+            height: auto;
+            width: auto;
+            max-width: 90%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="wide" id="all">
+<div class="top-bar py-0" id="topBar" style="background: #555"></div>
+<!-- Navbar Sticky-->
+<header class="nav-holder make-sticky">
+<div class="navbar navbar-light bg-white navbar-expand-lg py-0" id="navbar">
+<div class="container py-3 py-lg-0 px-lg-0">
+<!-- Navbar brand--><a class="navbar-brand" href="https://paleopresto.com/"><img class="d-none d-md-inline-block" src="/img/logo.png" alt="Universal logo"><img class="d-inline-block d-md-none" src="/img/logo-small.png" alt="Universal logo"><span class="sr-only">Universal - go to homepage</span></a> <!-- TODO: Update the logo. -->
+<!-- Navbar toggler-->
+<button class="navbar-toggler text-primary border-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navigationCollapse" aria-controls="navigationCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="sr-only">Toggle navigation</span><i class="fas fa-align-justify"></i></button>
+<!-- Collapsed Navigation    -->
+<div class="collapse navbar-collapse" id="navigationCollapse">
+<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+    <a class="nav-link" href="https://paleopresto.com/">Home</a>
+    <!-- megamenu [features]-->
+    <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="featuresMegamenu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reconstructions</a>
+    <ul class="dropdown-menu megamenu p-4" aria-labelledby="featuresMegamenu">
+        <li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/holocene.html">Holocene</a></li>
+        <li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/common_era.html">Common Era</a></li>
+    </ul>
+    </li>
+    <!-- megamenu [portfolio]-->
+    <a class="nav-link" href="https://paleopresto.com/analysis.html">Analysis</a>
+    <a class="nav-link" href="https://paleopresto.com/custom.html">Custom</a>
+    <a class="nav-link" href="https://paleopresto.com/about.html">About Us</a>
+</ul>
+</div>
+</div>
+</div>
+</header>
+<!-- HEADING BREADCRUMB-->
+<section class="bg-pentagon py-4">
+<div class="container py-3">
+<div class="row d-flex align-items-center gy-4">
+<div class="col-md-7">
+<h1 class="h2 mb-0 text-uppercase">Custom Reconstructions</h1>
+</div>
+<div class="col-md-5">
+<!-- Breadcrumb-->
+<ol class="text-sm justify-content-start justify-content-lg-end mb-0 breadcrumb undefined">
+    <li class="breadcrumb-item"><a class="text-uppercase" href="https://paleopresto.com/">Home</a></li>
+    <li class="breadcrumb-item text-uppercase active">Custom Reconstructions</li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<div id="content">
+<div class="container py-4">
+<div class="row gy-4">
+<div class="col-md-12">
+<div class="block-header d-flex justify-content-between align-items-center">
+    <h3 class="text-uppercase mb-0">Lipdverse Autocomplete</h3>
+    <div class="old">v1.0.2</div>
+</div>
+<div class="block-body">
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="dataset">Lipdverse Dataset</label>
+        <input type="text" id="dataset" class="form-control">
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="param">Parameter</label>
+        <input type="text" id="param" class="form-control">
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="tlim">Time Limits (comma-separated, e.g., 1000,2000 CE)</label>
+        <input type="text" id="tlim" class="form-control">
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="slim">Spatial Limits (comma-separated, e.g., -90,90,-180,180)</label>
+        <input type="text" id="slim" class="form-control">
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-12">
+        <label for="exp">Expression (leave empty for now)</label>
+        <input type="text" id="exp" class="form-control">
+    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" style="position: relative; max-width: 90%; max-height: 100%;"></div>
+<footer class="main-footer">
+<div class="bg-pentagon py-4">
+<div class="container">
+<div class="row gy-4">
+<div class="col-md-4">
+<h4 class="text-uppercase">About Us</h4>
+<p>Nullam nec ipsum efficitur, malesuada odio id, iaculis erat.</p>
+<p>Fusce ut leo libero. Sed dictum eget ex in dictum.</p>
+</div>
+<div class="col-md-4">
+<h4 class="text-uppercase">Contact</h4>
+<ul class="list-unstyled">
+    <li>123 Some Street</li>
+    <li>City</li>
+    <li>Country</li>
+    <li>Email: <a href="mailto:info@somewhere.com">info@somewhere.com</a></li>
+</ul>
+</div>
+<div class="col-md-4">
+<h4 class="text-uppercase">Social Media</h4>
+<ul class="list-unstyled">
+    <li><a href="#">Facebook</a></li>
+    <li><a href="#">Twitter</a></li>
+    <li><a href="#">LinkedIn</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</body>
+</html>
