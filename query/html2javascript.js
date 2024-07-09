@@ -1,5 +1,6 @@
 const fs = require('fs');
 const readline = require('readline');
+const prompt = require('prompt-sync')();
 
 // Function to read, edit, and write HTML file
 function editHtmlFile(inputFilePath, outputFilePath) {
