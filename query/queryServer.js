@@ -20,7 +20,7 @@ app.get('/', function (req, res) {
 app.get('/:recon', function (req, res) {
 	var fileName1 = req.params.recon + '.html'
 	var fileLoc = path.join(__dirname, fileName1)
-	console.log(fileLoc)
+	console.log("serving file: " + fileLoc)
 	res.sendFile(fileLoc)
 });
 /*
