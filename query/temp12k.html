@@ -1480,8 +1480,7 @@ function writeCSV(json1){
 	}
 	//console.log(lenMax)
 	
-	var string1 = keys1.join(", ") + "
-"
+	var string1 = keys1.join(", ") + "\n"
 	for (let j=0; j<lenMax; j++){
 		for (var key of keys1){
 	  	var val1 = Object.values(json1[key])[j]
@@ -1491,8 +1490,7 @@ function writeCSV(json1){
 	    	string1 += val1 + ","
 	    }
 	  }
-	  string1 += "
-"
+	  string1 += "\n"
 	}
 	return string1
 }
