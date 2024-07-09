@@ -18,7 +18,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/:recon', function (req, res) {
-	res.sendFile(path.join(__dirname, 'forms/', res.body.recon, '.html'))
+	res.sendFile(path.join(__dirname, 'forms/', res.params.recon, '.html'))
 });
 /*
 app.get('/2', function (req, res) {
