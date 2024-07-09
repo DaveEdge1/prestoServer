@@ -1,4 +1,4 @@
-'<!DOCTYPE html>\n' +
+var htmlString = '<!DOCTYPE html>\n' +
 '<html>\n' +
 '<head>\n' +
 '    <meta charset="utf-8" />\n' +
@@ -1803,4 +1803,4 @@
 '});\n' +
 'updateBoundingBox();\n' +
 '</script>\n' +
-'</html>\n' +
+'</html>\n'
