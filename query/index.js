@@ -1,4 +1,4 @@
-var htmlString = '<!DOCTYPE html>\n' +
+export const htmlString = '<!DOCTYPE html>\n' +
 '<html>\n' +
 '<head>\n' +
 '    <meta charset="utf-8" />\n' +
