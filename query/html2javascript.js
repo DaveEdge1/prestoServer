@@ -21,6 +21,7 @@ function editHtmlFile(inputFilePath, outputFilePath) {
     rl.on('line', (line) => {
         // Transform the line using the provided callback
         const editedLine = "'" + line + "\n'";
+        console.log(editedLine)
         outputStream.write(editedLine);
     });
 
