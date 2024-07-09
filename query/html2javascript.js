@@ -2,7 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const prompt = require('prompt-sync')();
 
-console.log("newline char: " + unescape("\n"))
+console.log("newline char: " + unescape("\\n"))
 
 const inputFile = prompt('Provide the name of the input file (.html)?');
 console.log(`Input file name: ${inputFile}`);
