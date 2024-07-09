@@ -517,7 +517,7 @@ const htmlString = '<!DOCTYPE html>\n' +
 'var target = document.getElementById("map");\n' +
 'var spinner = new Spinner(opts).spin(target);\n' +
 '	\n' +
-'let filters1 = JSON.parse("{"ages":"" + document.getElementById("ageSliderOn").checked + "", "coords":"" + document.getElementById("coordsOn").checked + "", "seasonality":"" + document.getElementById("seasonMonthsOn").checked + "", "terrestrial":"" + document.getElementById("isTerrestrialOn").checked + "", "resolution":"" + document.getElementById("resolutionOn").checked + ""}")\n' +
+`let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')\n` +
 'function updateFilters(){\n' +
 '	if (document.getElementById("ageSliderOn").checked){\n' +
 '		document.getElementById("timeSliderDiv").style.visibility = "visible";\n' +
@@ -825,7 +825,7 @@ const htmlString = '<!DOCTYPE html>\n' +
 '                },\n' +
 '\n' +
 '                onEachFeature: function (feature, layer) {\n' +
-'		    layer.bindPopup("<h1>"+feature.properties.dataSetName+"</h1><p><b>Archive Type: </b>"+feature.properties.archiveType+"<br><a href="https://lipdverse.org/data/"+feature.properties.datasetId+"" target="_blank">Dataset URL</a><br><b>Proxies: </b>"+feature.properties.paleoData_proxy+"<br><b>Mix/Max Age: </b>"+feature.properties.minAge+" / "+feature.properties.maxAge+" yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>", {\n' +
+`		    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {\n` +
 '				   maxWidth : 600\n' +
 '		    });\n' +
 '		},\n' +
@@ -1359,7 +1359,7 @@ const htmlString = '<!DOCTYPE html>\n' +
 '			});\n' +
 '                } else {\n' +
 '		    const promise1 = new Promise((resolve, reject) => {\n' +
-'			    console.log("XHR didn"t work: " + xhr0.status);\n' +
+`			    console.log("XHR didn't work: " + xhr0.status);` +
 '			    resolve();\n' +
 '		    });\n' +
 '			\n' +
