@@ -18,7 +18,9 @@ app.get('/', function (req, res) {
 });
 
 app.get('/:recon', function (req, res) {
-	res.sendFile(path.join(__dirname, 'forms/', req.params.recon, '.html'))
+	var fileLoc = path.join(__dirname, 'forms/', req.params.recon, '.html')
+	console.log(fileLoc)
+	res.sendFile(fileLoc)
 });
 /*
 app.get('/2', function (req, res) {
