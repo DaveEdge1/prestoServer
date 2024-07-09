@@ -1803,4 +1803,4 @@ var htmlString = '<!DOCTYPE html>\n' +
 '});\n' +
 'updateBoundingBox();\n' +
 '</script>\n' +
-'</html>\n' +
+'</html>\n'
