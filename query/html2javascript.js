@@ -20,7 +20,7 @@ function editHtmlFile(inputFilePath, outputFilePath) {
 
     rl.on('line', (line) => {
         // Transform the line using the provided callback
-        const editedLine = "+ '" + line + "\n'";
+        const editedLine = unescape("+ '" + line + "\n'");
         console.log(editedLine)
         outputStream.write(editedLine);
     });
