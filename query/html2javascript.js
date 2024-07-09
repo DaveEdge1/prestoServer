@@ -22,7 +22,7 @@ function editHtmlFile(inputFilePath, outputFilePath) {
 
     rl.on('line', (line) => {
         // Transform the line using the provided callback
-        const editedLine = unescape("'" + line + "\\n' +");
+        const editedLine = unescape("'" + line + "\\n' +\n");
         console.log(editedLine)
         outputStream.write(editedLine);
     });
