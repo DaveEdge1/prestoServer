@@ -14,7 +14,7 @@ reconTitle = function(recon){
 const recon = prompt('Which recon are we writing a form for?');
 console.log(`Okay, writing new form for ${recon}`);
 
-const htmlString = `<!DOCTYPE html>\n` +
+const htmlString = String.raw`<!DOCTYPE html>\n` +
 `<html>\n` +
 `<head>\n` +
 `    <meta charset="utf-8" />\n` +
