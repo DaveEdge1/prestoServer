@@ -3,6 +3,11 @@ var YAML = require('yaml')
 var bodyParser = require('body-parser')
 const prompt = require('prompt-sync')();
 
+const configs = function (recon) {
+    const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/configs.yml','utf8');
+    return YAML.parse(s)
+}
+
 reconTitle = function(recon){
 	var reconTitles = fs.readFileSync("/root/presto/jsonEditor/reconTitles.json")
 	var titlesJSON = JSON.parse(reconTitles)
