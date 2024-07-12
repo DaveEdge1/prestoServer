@@ -4,7 +4,7 @@ var bodyParser = require('body-parser')
 const prompt = require('prompt-sync')();
 
 const configs = function (recon) {
-    const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/configs.yml','utf8');
+    const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     return YAML.parse(s)
 }
 
@@ -16,10 +16,9 @@ reconTitle = function(recon){
 	return(titlesJSON[recon])
 }
 
-console.log(configs)
-
 const recon = prompt('Which recon are we writing a form for?');
 console.log(`Okay, writing new form for ${recon}`);
+console.log(configs(${recon}))
 
 const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`<html>` + `\n`
