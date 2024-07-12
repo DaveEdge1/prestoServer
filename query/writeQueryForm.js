@@ -16,6 +16,8 @@ reconTitle = function(recon){
 	return(titlesJSON[recon])
 }
 
+console.log(configs)
+
 const recon = prompt('Which recon are we writing a form for?');
 console.log(`Okay, writing new form for ${recon}`);
 
