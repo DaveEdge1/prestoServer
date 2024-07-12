@@ -1,0 +1,96 @@
+#==============================================
+# SETTINGS for Temp12k LiPDverse Query
+# Do not remove any keys
+# options for keys:
+#   Explanation: free text field (Provide context for this section if needed; "~" is equivalent to NULL)
+#   hide: true OR false (make filter invisible to user; if true, defaultChoice will always be selected)
+#   defaultChoice: [exampleChoice] (see options for each dropdown menu; value selected upon loading)
+#   options: [optionA, optionB, optionC] or "All" (see options for each dropdown menu; possible selections presented to user)
+#   offByDefault: true OR false (this filter turned off by default)
+#   defaultBounds: [minLat, maxLat, minLon, maxLon] (possible range: -90,90,-180,180; default bounding box for spatial filter)
+#   defaultRange: [min, max] (possible range: see ranges for each dual-range slider; preset toggle points for dual-range slider)
+#   tooltip: free text field (Replace the help text in the tooltip popup; "~" is equivalent to NULL, leave unchanged)
+#==============================================
+
+Compilation Filter:
+  Explanation: ~
+
+  Compilation: 
+    hide: false
+    defaultChoice: [Temp12k]
+    options: All
+    tooltip: ~
+
+Location Filters:
+  Explanation: ~
+
+  Coordinate bounds for assimilating proxies: 
+    hide: False
+    offByDefault: true
+    defaultBounds: [-90,90,-180,180]
+    tooltip: ~
+    
+  Continent: 
+    hide: false
+    defaultChoice: []
+    options: All
+    tooltip: ~
+
+  Country: 
+    hide: false
+    defaultChoice: []
+    options: All
+    tooltip: ~
+
+  Terrestrial or Marine: 
+    hide: False
+    offByDefault: true
+    defaultSelection: Terrestrial
+    tooltip: ~
+
+Material and Interpretation Filters:
+  Explanation: ~
+
+  Seasonality:
+    hide: false
+    defaultChoice: []
+    options: All
+    tooltip: ~
+    Range of Months: 
+      hide: False
+      offByDefault: true
+      defaultRange: [1,12]
+      tooltip: ~
+
+  Archive Type:
+    hide: false
+    defaultChoice: []
+    options: All
+    tooltip: ~
+
+  Variable Name:
+    hide: false
+    defaultChoice: []
+    options: All
+    tooltip: ~
+
+  Proxy:
+    hide: false
+    defaultChoice: []
+    options: All
+    tooltip: ~
+
+Temporal Filters:
+  Explanation: ~
+
+  Time interval of data coverage:
+      hide: False
+      offByDefault: true
+      defaultRange: [100,600]
+      tooltip: ~
+  
+  Resolution:
+      hide: False
+      offByDefault: true
+      defaultRange: [100]
+      tooltip: ~
