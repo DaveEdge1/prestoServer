@@ -11,6 +11,10 @@ const configs = function (recon) {
 	    const ii = Object.keys(ret)[key1]
 	console.log('key: ' + ii)
 	console.log('content: ' + YAML.stringify(ret[ii]))
+
+	const formGroup = String.raw`<button type="button" class="collapsible">` + YAML.stringify(ii) + `</button>` + `\n`
+	+ String.raw`<div class="content">` + `\n`
+	+ String.raw`<br>` + `\n`
     }
 	
     return null
