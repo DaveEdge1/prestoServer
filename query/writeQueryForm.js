@@ -5,7 +5,7 @@ const prompt = require('prompt-sync')();
 
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
-    const YAML.parse(s)
+    const ret = YAML.parse(s)
 
     for (var key1 in Object.keys(ret)) {
 	console.log('key: ' + ret[Object.keys(ret)[key1]])
