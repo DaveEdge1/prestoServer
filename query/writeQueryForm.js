@@ -10,7 +10,7 @@ const configs = function (recon) {
     for (var key1 in Object.keys(ret)) {
 	    const ii = Object.keys(ret)[key1]
 	console.log('key: ' + ii)
-	console.log('content: ' + ret[ii])
+	console.log('content: ' + YAML.stringify(ret[ii]))
     }
 	
     return null
