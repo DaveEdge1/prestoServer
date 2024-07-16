@@ -8,9 +8,7 @@ const configs = function (recon) {
     const ret = YAML.parse(s)
     console.log('Explanation: ' + ret['Compilation Filter'].Explanation)
 
-    const keys1 = Object.keys(ret)
-
-    for (var key1 in keys1) {
+    for (var key1 in Object.keys(ret)) {
 	console.log('key: ' + key1)
 	console.log('content: ' + ret[key1])
     }
