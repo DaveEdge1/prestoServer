@@ -7,7 +7,14 @@ const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
     console.log('Explanation: ' + ret['Compilation Filter'].Explanation)
-    return Object.keys(ret)
+
+    const keys1 = Object.keys(ret)
+
+    for (var key1 in keys1) {
+	console.log('key: ' + key1)
+	console.log('content: ' + ret[key1])
+    }
+    return null
 }
 
 reconTitle = function(recon){
