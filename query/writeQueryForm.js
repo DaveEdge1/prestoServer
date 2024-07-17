@@ -10,6 +10,7 @@ const configs = function (recon) {
     for (var key1 in Object.keys(ret)) {
 	    const ii = Object.keys(ret)[key1]
 	console.log('key: ' + ii)
+	console.log('length: ' + ret[ii].length)
 	console.log('content: ' + YAML.stringify(ret[ii]))
 
 	const formGroup = String.raw`<button type="button" class="collapsible">` + YAML.stringify(ii) + `</button>` + `\n`
