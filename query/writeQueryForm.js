@@ -12,7 +12,7 @@ const configs = function (recon) {
 	
 	console.log('key: ' + ii)
 
-	const completeGroup = groupHTML(ii, ret[ii].Explanation) + paramHTML(param) + String.raw`</div>` + `\n`
+	const completeGroup = groupHTML(ii, ret[ii].Explanation) + paramHTML(ret[ii]) + String.raw`</div>` + `\n`
 
 	console.log('content: ' + completeGroup)
     }
