@@ -10,15 +10,24 @@ const configs = function (recon) {
     for (var key1 in Object.keys(ret)) {
 	    const ii = Object.keys(ret)[key1]
 	console.log('key: ' + ii)
-	console.log('length: ' + ret[ii].length)
-	console.log('content: ' + YAML.stringify(ret[ii]))
+	
+	const divGroupOpen = grouHTML(ii, ret[ii].description)
 
-	const formGroup = String.raw`<button type="button" class="collapsible">` + YAML.stringify(ii) + `</button>` + `\n`
-	+ String.raw`<div class="content">` + `\n`
-	+ String.raw`<br>` + `\n`
+	const completeGroup = divGroupOpen +
+		+ String.raw`</div>` + `\n`
+
+	console.log('content: ' + completeGroup)
     }
 	
     return null
+}
+
+const groupHTML = function(key, desc) {
+	const formGroup = String.raw`<button type="button" class="collapsible">` + YAML.stringify(key) + `</button>` + `\n`
+	+ String.raw`<div class="content">` + `\n`
+	+ String.raw`<br>` + `\n`
+	+ `<p>` + desc + `</p>` + `\n`
+	+ String.raw`<br>` + `\n`
 }
 
 reconTitle = function(recon){
@@ -251,7 +260,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`	<br><br><br>` + `\n`
 + String.raw`</div>` + `\n`
 + String.raw`<br>` + `\n`
-+ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
++ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="">` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>` + `\n`
 + String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
 + String.raw`<span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>` + `\n`
