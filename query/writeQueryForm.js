@@ -20,17 +20,15 @@ const Compilation = String.raw`<div class="form-group"> ` + `\n`
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
+    const allHTML = ''
 
     for (var key1 in Object.keys(ret)) {
 	const ii = Object.keys(ret)[key1]
-	
 	console.log('key: ' + ii)
-
-	const completeGroup = groupHTML(ii, ret[ii].Explanation) + paramHTML(ret[ii]) + String.raw`</div>` + `\n`
-
-	console.log('content: ' + completeGroup)
+	allHTML = allHTML + groupHTML(ii, ret[ii].Explanation) + paramHTML(ret[ii]) + String.raw`</div>` + `\n`
     }
 	
+    console.log('content: ' + allHTML)
     return null
 }
 
@@ -57,11 +55,9 @@ const paramHTML = function(param) {
 	for (kk in param) {
 		if (kk != 'Explanation') {
 			console.log('param: ' + kk)
-			console.log('keys: ' + Object.keys(param[kk]))
 			try {
 			    var param1 = eval(kk)
 			    paramStuff = paramStuff + param1
-			    console.log('eval: ' + param1)
 			} catch (e) {
 			    console.log('eval: ' + e.message)
 			}
