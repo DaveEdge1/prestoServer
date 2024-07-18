@@ -55,7 +55,7 @@ const paramHTML = function(param) {
 		if (kk != 'Explanation') {
 			console.log('param: ' + kk)
 			console.log('keys: ' + Object.keys(param[kk]))
-			console.log(eval(param[kk]))
+			console.log('eval: ' + eval(kk))
 		}
 	}
 
