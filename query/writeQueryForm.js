@@ -8,12 +8,11 @@ const configs = function (recon) {
     const ret = YAML.parse(s)
 
     for (var key1 in Object.keys(ret)) {
-	    const ii = Object.keys(ret)[key1]
-	console.log('key: ' + ii)
+	const ii = Object.keys(ret)[key1]
 	
-	const divGroupOpen = groupHTML(ii, ret[ii].Explanation)
+	console.log('key: ' + ii)
 
-	const completeGroup = divGroupOpen + String.raw`</div>` + `\n`
+	const completeGroup = groupHTML(ii, ret[ii].Explanation) + paramHTML(param) + String.raw`</div>` + `\n`
 
 	console.log('content: ' + completeGroup)
     }
@@ -34,6 +33,14 @@ const groupHTML = function(key, desc) {
 	+ String.raw`<br>` + `\n`
 
 	return formGroup
+}
+
+const paramHTML = function(param) {
+
+	for (kk in param) {
+		console.log('param: ' + kk)
+	}
+
 }
 
 reconTitle = function(recon){
