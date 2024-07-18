@@ -22,10 +22,15 @@ const configs = function (recon) {
 }
 
 const groupHTML = function(key, desc) {
+	if (desc == null){
+		var descNew = ''
+	} else {
+		var descNew = desc
+	}
 	const formGroup = String.raw`<button type="button" class="collapsible">` + YAML.stringify(key) + `</button>` + `\n`
 	+ String.raw`<div class="content">` + `\n`
 	+ String.raw`<br>` + `\n`
-	+ `<p>` + desc + `</p>` + `\n`
+	+ `<p>` + descNew + `</p>` + `\n`
 	+ String.raw`<br>` + `\n`
 
 	return formGroup
