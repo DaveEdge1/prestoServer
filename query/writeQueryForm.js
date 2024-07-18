@@ -28,6 +28,8 @@ const groupHTML = function(key, desc) {
 	+ String.raw`<br>` + `\n`
 	+ `<p>` + desc + `</p>` + `\n`
 	+ String.raw`<br>` + `\n`
+
+	return formGroup
 }
 
 reconTitle = function(recon){
