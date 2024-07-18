@@ -20,7 +20,7 @@ const Compilation = String.raw`<div class="form-group"> ` + `\n`
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
-    const allHTML = ''
+    var allHTML = ''
 
     for (var key1 in Object.keys(ret)) {
 	const ii = Object.keys(ret)[key1]
