@@ -3,6 +3,20 @@ var YAML = require('yaml')
 var bodyParser = require('body-parser')
 const prompt = require('prompt-sync')();
 
+const Compilation = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="compilation_label" for="compilation">Compilation</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
+
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
@@ -41,6 +55,7 @@ const paramHTML = function(param) {
 		if (kk != 'Explanation') {
 			console.log('param: ' + kk)
 			console.log('keys: ' + Object.keys(param[kk]))
+			console.log(eval(param[kk]))
 		}
 	}
 
