@@ -40,6 +40,7 @@ const groupHTML = function(key, desc) {
 	} else {
 		var descNew = desc
 	}
+	
 	const formGroup = String.raw`<button type="button" class="collapsible">` + YAML.stringify(key) + `</button>` + `\n`
 	+ String.raw`<div class="content">` + `\n`
 	+ String.raw`<br>` + `\n`
@@ -51,19 +52,23 @@ const groupHTML = function(key, desc) {
 
 const paramHTML = function(param) {
 
+	var paramStuff = ''
+
 	for (kk in param) {
 		if (kk != 'Explanation') {
 			console.log('param: ' + kk)
 			console.log('keys: ' + Object.keys(param[kk]))
 			try {
-			    console.log('eval: ' + eval(kk))
+			    var param1 = eval(kk)
+			    paramStuff = paramStuff + param1
+			    console.log('eval: ' + param1)
 			} catch (e) {
 			    console.log('eval: ' + e.message)
 			}
 			
 		}
 	}
-
+	return paramStuff
 }
 
 reconTitle = function(recon){
