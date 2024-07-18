@@ -11,10 +11,9 @@ const configs = function (recon) {
 	    const ii = Object.keys(ret)[key1]
 	console.log('key: ' + ii)
 	
-	const divGroupOpen = + groupHTML(ii, ret[ii].description)
+	const divGroupOpen = groupHTML(ii, ret[ii].description)
 
-	const completeGroup = + divGroupOpen +
-		+ String.raw`</div>` + `\n`
+	const completeGroup = divGroupOpen + String.raw`</div>` + `\n`
 
 	console.log('content: ' + completeGroup)
     }
