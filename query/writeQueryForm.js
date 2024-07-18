@@ -38,7 +38,10 @@ const groupHTML = function(key, desc) {
 const paramHTML = function(param) {
 
 	for (kk in param) {
-		console.log('param: ' + kk)
+		if (kk != 'Explanation') {
+			console.log('param: ' + kk)
+			console.log('keys: ' + Object.keys(kk))
+		}
 	}
 
 }
