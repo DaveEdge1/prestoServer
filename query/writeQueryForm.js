@@ -40,7 +40,7 @@ const paramHTML = function(param) {
 	for (kk in param) {
 		if (kk != 'Explanation') {
 			console.log('param: ' + kk)
-			console.log('keys: ' + Object.keys(kk))
+			console.log('keys: ' + Object.keys(param[kk]))
 		}
 	}
 
