@@ -348,6 +348,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`` + `\n`
 + String.raw`	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>` + `\n`
 + String.raw`` + `\n`
++ String.raw`/*` + `\n`
 + String.raw`	<script type="text/javascript">` + `\n`
 + String.raw`		const urlParams = new URLSearchParams(window.location.search);` + `\n`
 + String.raw`		//var params1 = ''` + `\n`
@@ -358,7 +359,6 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`	  		//console.log("params1: " + Object.keys(params1));` + `\n`
 + String.raw`			return params1` + `\n`
 + String.raw`		}` + `\n`
-+ String.raw`		/*` + `\n`
 + String.raw`		fetch(jsonPath)` + `\n`
 + String.raw`		     .then(function(res){` + `\n`
 + String.raw`		         return res.json()` + `\n`
@@ -1824,6 +1824,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`}` + `\n`
 + String.raw`` + `\n`
 + String.raw`` + `\n`
++ String.raw`/*` + `\n`
 + String.raw`grabParams().then(reso => {` + `\n`
 + String.raw`	return new Promise((resolve, reject) => {` + `\n`
 + String.raw`		//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options` + `\n`
@@ -1860,6 +1861,8 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`		})` + `\n`
 + String.raw`	}).then(reso77 => sendQuery())` + `\n`
 + String.raw`});` + `\n`
++ String.raw`*/` + `\n`
++ String.raw`sendQuery()` + `\n`
 + String.raw`rect.on('edit', function() {` + `\n`
 + String.raw`  //setTimeout(function () {}, 100);` + `\n`
 + String.raw`  changeBoxCoord();` + `\n`
