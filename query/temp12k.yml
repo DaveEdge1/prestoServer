@@ -53,7 +53,7 @@ Material and Interpretation Filters:
 
   seasonality:
     hide: false
-    defaultChoice: []
+    defaultChoice: annual,summerOnly,winterOnly
     options: All
     tooltip: Choose seasonality(ies) (Begin typing for suggestions)
     hide2: False
@@ -91,6 +91,6 @@ Temporal Filters:
   resolution:
       hide: False
       offByDefault: true
-      defaultRange: [100]
+      defaultValue: [200]
       tooltip: Time series resolution must be better than this value (median value, in years)
 
