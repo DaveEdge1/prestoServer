@@ -367,9 +367,9 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`			     console.log("data: " + JSON.stringify(data))` + `\n`
 + String.raw`			     params1 = data` + `\n`
 + String.raw`		     })` + `\n`
-+ String.raw`*/` + `\n`
 + String.raw`		` + `\n`
 + String.raw`	</script>` + `\n`
++ String.raw`*/` + `\n`
 + String.raw`	` + `\n`
 + String.raw`    <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->` + `\n`
 + String.raw`` + `\n`
