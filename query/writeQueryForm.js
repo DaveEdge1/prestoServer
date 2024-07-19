@@ -17,6 +17,38 @@ const Compilation = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
+const coordBox = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>` + `\n`
++ String.raw`	<br>` + `\n`
++ String.raw`	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();'>` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="">` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<p style="color: red;">Note: This bounding box can also be adjusted using the draggable handles on the map</p>` + `\n`
++ String.raw`<p style="color: red;">Note: The bounding box width is limited to 360 degrees</p>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<label style="font-size:16px; margin-right:8px;">Latitude</label>` + `\n`
++ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="15" min="-90" max="90" step="1" onchange="updateBoundingBox();">` + `\n`
++ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
++ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="45" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">` + `\n`
++ String.raw`<label style="margin-right:30px;">max</label>` + `\n`
++ String.raw`<label style="font-size:16px; margin-right:8px;">Longitude</label>` + `\n`
++ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
++ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
++ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="-90" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
++ String.raw`<label>max</label>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br><br><br><br><br><br><br><br><br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
+
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
