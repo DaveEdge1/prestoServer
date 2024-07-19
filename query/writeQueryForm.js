@@ -51,6 +51,12 @@ const coordBox = String.raw`<div style="width: 10%; vertical-align: middle; floa
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
 
+const hiddencoords = String.raw`<input id="lat_min" name="coords" type="hidden" value="-90">` + `\n`
+	+ String.raw`<input id="lat_max" name="coords" type="hidden" value="90">` + `\n`
+	+ String.raw`<input id="lon_min" name="coords" type="hidden" value="-180">` + `\n`
+	+ String.raw`<input id="lon_max" name="coords" type="hidden" value="180">` + `\n`
+	
+
 const continent = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continent">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>` + `\n`
 + String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
