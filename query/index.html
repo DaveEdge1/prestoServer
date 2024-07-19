@@ -37,13 +37,14 @@
 		const urlParams = new URLSearchParams(window.location.search);
 		//var params1 = ''
 		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
+		/*
 		async function grabParams() {
 	  		const response = await fetch(jsonPath);
 	  		let params1 = await response.json();
 	  		//console.log("params1: " + Object.keys(params1));
 			return params1
 		}
-		/*
+		
 		fetch(jsonPath)
 		     .then(function(res){
 		         return res.json()
@@ -1759,7 +1760,7 @@ if (recon1 == 'false'){
 	document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct').then(reso1 => location.href = reso1)};
 }
 
-
+/*
 grabParams().then(reso => {
 	return new Promise((resolve, reject) => {
 		//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
@@ -1796,6 +1797,8 @@ grabParams().then(reso => {
 		})
 	}).then(reso77 => sendQuery())
 });
+*/
+sendQuery();
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   changeBoxCoord();
