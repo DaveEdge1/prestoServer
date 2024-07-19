@@ -49,6 +49,207 @@ const coordBox = String.raw`<div style="width: 10%; vertical-align: middle; floa
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
 
+const continent = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continent">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="continent" id="continentIn">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
+
+const country = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="country">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="country" id="countryIn">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
+
+const terrestrial = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`	<label id="isTerrestrialOn_label" for="isTerrestrialOn">Filter by Land/Sea</label>` + `\n`
++ String.raw`	<br>` + `\n`
++ String.raw`	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();'>` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
++ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Select only terrestrial/marine data</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div class="radio_container">` + `\n`
++ String.raw`<div class="radio_control">` + `\n`
++ String.raw`<input type="radio" id="Terrestrial" name="isTerrestrial" value="1" checked>` + `\n`
++ String.raw`<label for="Terrestrial">Terrestrial</label><br>` + `\n`
++ String.raw`<input type="radio" id="Marine" name="isTerrestrial" value="0">` + `\n`
++ String.raw`<label for="Marine">Marine</label><br>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br><br><br><br><br><br><br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
+
+const seasonality = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose seasonality(ies) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="interpretation1_seasonality" id="seasonality1">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`	<label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>` + `\n`
++ String.raw`	<br>` + `\n`
++ String.raw`	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();'>` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes: Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div class="range_container">` + `\n`
++ String.raw`<div class="sliders_control">` + `\n`
++ String.raw`<input id="months_range_fromSlider" type="range" value="1" min="1" max="24" step="1"/>` + `\n`
++ String.raw`<input id="months_range_toSlider" type="range" value="12" min="1" max="24" step="1"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<div class="form_control">` + `\n`
++ String.raw`<div class="form_control_container">` + `\n`
++ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
++ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Jan" id="months_range_fromInput_text" readonly="readonly"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div class="form_control_container">` + `\n`
++ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
++ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Dec" id="months_range_toInput_text" readonly="readonly"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br><br><br><br><br><br><br><br><br><br><br><br><br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
+
+const archive = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="archiveType_label" for="archiveType">Archive Type</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose archive type(s) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="archiveType" id="archiveTypeIn">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
+
+const variable = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="variableName_label" for="variableName">Variable Name</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose variable name(s) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="paleoData_variableName" id="variableName">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
+
+const proxy = String.raw`<div class="form-group"> ` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose proxy(ies) (Begin typing for suggestions)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input style="width:80%;" name="paleoData_proxy" id="proxy">` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
+
+const interval = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`	<label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>` + `\n`
++ String.raw`	<br>` + `\n`
++ String.raw`	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();'>` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>` + `\n`
++ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div class="range_container">` + `\n`
++ String.raw`<div class="sliders_control">` + `\n`
++ String.raw`<input id="time_range_to_reconstruct_fromSlider" type="range" value="100" min="0" max="12000" step="600"/>` + `\n`
++ String.raw`<input id="time_range_to_reconstruct_toSlider" type="range" value="600" min="0" max="12000" step="600"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<div class="form_control">` + `\n`
++ String.raw`<div class="form_control_container">` + `\n`
++ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
++ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="100" min="0" max="12000" step="1"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div class="form_control_container">` + `\n`
++ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
++ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="600" min="0" max="12000" step="1"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br><br><br><br><br><br><br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<br>` + `\n`
+
+const resolution String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>` + `\n`
++ String.raw`	<br>` + `\n`
++ String.raw`	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>` + `\n`
++ String.raw`	<br><br><br>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
++ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>` + `\n`
++ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
++ String.raw`<span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<div class="range_container">` + `\n`
++ String.raw`<div class="sliders_control">` + `\n`
++ String.raw`<input id="resolutionSlider" type="range" value="100" min="1" max="1000" step="1"/>` + `\n`
++ String.raw`<br>` + `\n`
++ String.raw`<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`</div>` + `\n`
++ String.raw`<br><br><br><br><br><br><br>` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<hr class="solid">` + `\n`
++ String.raw`<br>` + `\n`
+
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
@@ -303,258 +504,16 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`<span id="response"></span>` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()">` + `\n`
-+ String.raw`<button type="button" class="collapsible">Compilation Filter</button>` + `\n`
-+ String.raw`<div class="content">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="compilation_label" for="compilation">Compilation</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<button type="button" class="collapsible">Location Filters</button>` + `\n`
-+ String.raw`<div class="content">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<p style="color: red;">Note: This bounding box can also be adjusted using the draggable handles on the map</p>` + `\n`
-+ String.raw`<p style="color: red;">Note: The bounding box width is limited to 360 degrees</p>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<label style="font-size:16px; margin-right:8px;">Latitude</label>` + `\n`
-+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="15" min="-90" max="90" step="1" onchange="updateBoundingBox();">` + `\n`
-+ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
-+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="45" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">` + `\n`
-+ String.raw`<label style="margin-right:30px;">max</label>` + `\n`
-+ String.raw`<label style="font-size:16px; margin-right:8px;">Longitude</label>` + `\n`
-+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
-+ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
-+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="-90" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
-+ String.raw`<label>max</label>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continent">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="continent" id="continentIn">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="country">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="country" id="countryIn">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="isTerrestrialOn_label" for="isTerrestrialOn">Filter by Land/Sea</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
-+ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Select only terrestrial/marine data</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="radio_container">` + `\n`
-+ String.raw`<div class="radio_control">` + `\n`
-+ String.raw`<input type="radio" id="Terrestrial" name="isTerrestrial" value="1" checked>` + `\n`
-+ String.raw`<label for="Terrestrial">Terrestrial</label><br>` + `\n`
-+ String.raw`<input type="radio" id="Marine" name="isTerrestrial" value="0">` + `\n`
-+ String.raw`<label for="Marine">Marine</label><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<button type="button" class="collapsible">Material and Interpretation Filters</button>` + `\n`
-+ String.raw`<div class="content">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose seasonality(ies) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="interpretation1_seasonality" id="seasonality1">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes: Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="range_container">` + `\n`
-+ String.raw`<div class="sliders_control">` + `\n`
-+ String.raw`<input id="months_range_fromSlider" type="range" value="1" min="1" max="24" step="1"/>` + `\n`
-+ String.raw`<input id="months_range_toSlider" type="range" value="12" min="1" max="24" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form_control">` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Jan" id="months_range_fromInput_text" readonly="readonly"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Dec" id="months_range_toInput_text" readonly="readonly"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="archiveType_label" for="archiveType">Archive Type</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose archive type(s) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="archiveType" id="archiveTypeIn">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="variableName_label" for="variableName">Variable Name</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose variable name(s) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="paleoData_variableName" id="variableName">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose proxy(ies) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="paleoData_proxy" id="proxy">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<button type="button" class="collapsible">Temporal Filters</button>` + `\n`
-+ String.raw`<div class="content">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="range_container">` + `\n`
-+ String.raw`<div class="sliders_control">` + `\n`
-+ String.raw`<input id="time_range_to_reconstruct_fromSlider" type="range" value="100" min="0" max="12000" step="600"/>` + `\n`
-+ String.raw`<input id="time_range_to_reconstruct_toSlider" type="range" value="600" min="0" max="12000" step="600"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form_control">` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="100" min="0" max="12000" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="600" min="0" max="12000" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>` + `\n`
-+ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="range_container">` + `\n`
-+ String.raw`<div class="sliders_control">` + `\n`
-+ String.raw`<input id="resolutionSlider" type="range" value="100" min="1" max="1000" step="1"/>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`</div>` + `\n`
++ 
++ 
++ 
++ 
++ 
++ 
++ 
++ 
++ 
++ 
 + String.raw`</form>` + `\n`
 + String.raw`<br><br>` + `\n`
 + String.raw`<!--div>` + `\n`
