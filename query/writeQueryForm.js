@@ -225,7 +225,7 @@ const interval = String.raw`<div style="width: 10%; vertical-align: middle; floa
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
-const resolution String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
+const resolution = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 + String.raw`	<br><br><br>` + `\n`
 + String.raw`	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>` + `\n`
 + String.raw`	<br>` + `\n`
