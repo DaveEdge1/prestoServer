@@ -17,6 +17,8 @@ const compilation = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
+const hiddencompilation = String.raw`<input id="compilationIn" name="paleoData_mostRecentCompilations" type="hidden" value="">`
+
 const coordBox = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 + String.raw`	<br><br><br>` + `\n`
 + String.raw`	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>` + `\n`
@@ -258,7 +260,7 @@ const configs = function (recon) {
     for (var key1 in Object.keys(ret)) {
 	const ii = Object.keys(ret)[key1]
 	console.log('key: ' + ii)
-	allHTML = allHTML + groupHTML(ii, ret[ii].Explanation) + paramHTML(ret[ii]) + String.raw`</div>` + `\n`
+	allHTML = allHTML + groupHTML(ii, ret[ii].Explanation) + paramHTML(ret, ii) + String.raw`</div>` + `\n`
     }
     return allHTML
 }
@@ -279,22 +281,34 @@ const groupHTML = function(key, desc) {
 	return formGroup
 }
 
-const paramHTML = function(param) {
+const paramHTML = function(ret, ii) {
+
+	var param = ret[ii]
 
 	var paramStuff = ''
 
 	for (kk in param) {
 		if (kk != 'Explanation') {
 			console.log('param: ' + kk)
-			try {
-			    var param1 = eval(kk)
+			if (param[kk].hide == true) {
+				try {
+			    var param1 = eval(`hidden` + kk)
 			    if (typeof param1 == 'string'){
 				    paramStuff = paramStuff + param1
 			    }
-			} catch (e) {
-			    console.log('eval: ' + e.message)
+			    } catch (e) {
+			        console.log('eval: ' + e.message)
+			    }
+			} else {
+			    try {
+			        var param1 = eval(kk)
+			        if (typeof param1 == 'string'){
+				    paramStuff = paramStuff + param1
+			        }
+				} catch (e) {
+			    	    console.log('eval: ' + e.message)
+				}
 			}
-			
 		}
 	}
 	return paramStuff
