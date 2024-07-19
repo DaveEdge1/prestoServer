@@ -33,6 +33,7 @@
 
 	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>
 
+/*
 	<script type="text/javascript">
 		const urlParams = new URLSearchParams(window.location.search);
 		//var params1 = ''
@@ -43,7 +44,6 @@
 	  		//console.log("params1: " + Object.keys(params1));
 			return params1
 		}
-		/*
 		fetch(jsonPath)
 		     .then(function(res){
 		         return res.json()
@@ -192,6 +192,19 @@ popQueryVariable()
 <div class="content">
 <br>
 <p></p>
+<br>
+<div class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="compilation_label" for="compilation">Compilation</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
+</div>
+<br>
+<input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn">
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
 <br>
 </div>
 <button type="button" class="collapsible">Location Filters
@@ -1759,6 +1772,7 @@ if (recon1 == 'false'){
 }
 
 
+/*
 grabParams().then(reso => {
 	return new Promise((resolve, reject) => {
 		//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
@@ -1795,6 +1809,8 @@ grabParams().then(reso => {
 		})
 	}).then(reso77 => sendQuery())
 });
+*/
+sendQuery()
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   changeBoxCoord();
