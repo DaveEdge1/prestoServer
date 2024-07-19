@@ -383,6 +383,7 @@ const dropdowns = function(recon) {
 		dropdownHTML = JSON.stringify(ii + 'list')
 	    }
 	    dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `]` + `\n`
+        }
     }
     return dropdownHTML
 }
