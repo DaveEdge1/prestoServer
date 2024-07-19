@@ -15,7 +15,7 @@
 Compilation Filter:
   Explanation: ~
 
-  Compilation1: 
+  compilation1: 
     hide: false
     defaultChoice: [Temp12k]
     options: All
@@ -56,11 +56,10 @@ Material and Interpretation Filters:
     defaultChoice: []
     options: All
     tooltip: ~
-    Range of Months: 
-      hide: False
-      offByDefault: true
-      defaultRange: [1,12]
-      tooltip: ~
+    hide2: False
+    offByDefault2: true
+    defaultRange2: [1,12]
+    tooltip2: ~
 
   archive:
     hide: false
