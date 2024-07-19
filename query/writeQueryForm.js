@@ -260,9 +260,7 @@ const configs = function (recon) {
 	console.log('key: ' + ii)
 	allHTML = allHTML + groupHTML(ii, ret[ii].Explanation) + paramHTML(ret[ii]) + String.raw`</div>` + `\n`
     }
-	
-    console.log('content: ' + allHTML)
-    return null
+    return allHTML
 }
 
 const groupHTML = function(key, desc) {
@@ -504,16 +502,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`<span id="response"></span>` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()">` + `\n`
-+ 
-+ 
-+ 
-+ 
-+ 
-+ 
-+ 
-+ 
-+ 
-+ 
++ configs(recon)
 + String.raw`</form>` + `\n`
 + String.raw`<br><br>` + `\n`
 + String.raw`<!--div>` + `\n`
