@@ -71,6 +71,8 @@ const continent = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
+const hiddencontinent = String.raw`<input id="continentIn" name="continent" type="hidden" value="">` + `\n`
+
 const country = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="country">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
 + String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
@@ -83,6 +85,8 @@ const country = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
+
+const hiddencountry = String.raw`<input id="countryIn" name="country" type="hidden" value="">` + `\n`
 
 const terrestrial = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 + String.raw`	<br><br><br>` + `\n`
@@ -109,6 +113,9 @@ const terrestrial = String.raw`<div style="width: 10%; vertical-align: middle; f
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
+
+const hiddenterrestrial = String.raw`<input id="Terrestrial" name="isTerrestrial" type="hidden" value="1" checked>` + `\n`
+	+ String.raw`<input type="radio" id="Marine" name="isTerrestrial" value="0">` + `\n`
 
 const seasonality = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>` + `\n`
@@ -156,6 +163,10 @@ const seasonality = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
+const hiddenterrestrial = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden">` + `\n`
+	+ String.raw`<input id="months_range_fromSlider" type="hidden" value="1">` + `\n`
+	+ String.raw`<input id="months_range_toSlider" type="hidden" value="12">` + `\n`
+
 const archive = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="archiveType_label" for="archiveType">Archive Type</label>` + `\n`
 + String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
@@ -169,6 +180,8 @@ const archive = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
+
+const hiddenarchive = String.raw`<input name="archiveType" id="archiveTypeIn" type="hidden" value="">` + `\n`
 
 const variable = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="variableName_label" for="variableName">Variable Name</label>` + `\n`
@@ -184,6 +197,8 @@ const variable = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
+const hiddenvariable = String.raw`<input name="paleoData_variableName" id="variableName" type="hidden" value="">` + `\n`
+
 const proxy = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>` + `\n`
 + String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
@@ -196,6 +211,8 @@ const proxy = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
+
+const hiddenproxy = String.raw`<input name="paleoData_proxy" id="proxy" type="hidden" value="">` + `\n`
 
 const interval = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 + String.raw`	<br><br><br>` + `\n`
@@ -233,6 +250,9 @@ const interval = String.raw`<div style="width: 10%; vertical-align: middle; floa
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
+const hiddeninterval = String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_fromInput" value="" type="hidden">` + `\n`
+	+ String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_toInput" value="" type="hidden">` + `\n`
+
 const resolution = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 + String.raw`	<br><br><br>` + `\n`
 + String.raw`	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>` + `\n`
@@ -257,6 +277,8 @@ const resolution = String.raw`<div style="width: 10%; vertical-align: middle; fl
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<hr class="solid">` + `\n`
 + String.raw`<br>` + `\n`
+
+const hiddenresolution = String.raw`<input id="resolutionInput" name="resolution" type = "hidden" value="">` + `\n`
 
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
