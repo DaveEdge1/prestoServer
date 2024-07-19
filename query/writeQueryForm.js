@@ -3,7 +3,7 @@ var YAML = require('yaml')
 var bodyParser = require('body-parser')
 const prompt = require('prompt-sync')();
 
-const Compilation = String.raw`<div class="form-group"> ` + `\n`
+const compilation = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="compilation_label" for="compilation">Compilation</label>` + `\n`
 + String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
 + String.raw`<span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>` + `\n`
