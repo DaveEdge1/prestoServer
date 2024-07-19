@@ -57,6 +57,7 @@ const paramHTML = function(param) {
 			console.log('param: ' + kk)
 			try {
 			    var param1 = eval(kk)
+			    console.log('typeof: ' + typeof param1)
 			    paramStuff = paramStuff + param1
 			} catch (e) {
 			    console.log('eval: ' + e.message)
