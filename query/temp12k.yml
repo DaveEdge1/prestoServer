@@ -24,7 +24,7 @@ Compilation Filter:
 Location Filters:
   Explanation: ~
 
-  Coordinate bounds for assimilating proxies: 
+  coordBox: 
     hide: False
     offByDefault: true
     defaultBounds: [-90,90,-180,180]
