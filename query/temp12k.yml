@@ -15,7 +15,7 @@
 Compilation Filter:
   Explanation: ~
 
-  Compilation: 
+  Compilation1: 
     hide: false
     defaultChoice: [Temp12k]
     options: All
@@ -30,19 +30,19 @@ Location Filters:
     defaultBounds: [-90,90,-180,180]
     tooltip: ~
     
-  Continent: 
+  continent: 
     hide: false
     defaultChoice: []
     options: All
     tooltip: ~
 
-  Country: 
+  country: 
     hide: false
     defaultChoice: []
     options: All
     tooltip: ~
 
-  Terrestrial or Marine: 
+  terrestrial: 
     hide: False
     offByDefault: true
     defaultSelection: Terrestrial
@@ -51,7 +51,7 @@ Location Filters:
 Material and Interpretation Filters:
   Explanation: ~
 
-  Seasonality:
+  seasonality:
     hide: false
     defaultChoice: []
     options: All
@@ -62,19 +62,19 @@ Material and Interpretation Filters:
       defaultRange: [1,12]
       tooltip: ~
 
-  Archive Type:
+  archive:
     hide: false
     defaultChoice: []
     options: All
     tooltip: ~
 
-  Variable Name:
+  variable:
     hide: false
     defaultChoice: []
     options: All
     tooltip: ~
 
-  Proxy:
+  proxy:
     hide: false
     defaultChoice: []
     options: All
@@ -83,13 +83,13 @@ Material and Interpretation Filters:
 Temporal Filters:
   Explanation: ~
 
-  Time interval of data coverage:
+  interval:
       hide: False
       offByDefault: true
       defaultRange: [100,600]
       tooltip: ~
   
-  Resolution:
+  resolution:
       hide: False
       offByDefault: true
       defaultRange: [100]
