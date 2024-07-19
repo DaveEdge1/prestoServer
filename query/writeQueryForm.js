@@ -163,7 +163,7 @@ const seasonality = String.raw`<div class="form-group"> ` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<br>` + `\n`
 
-const hiddenterrestrial = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden">` + `\n`
+const hiddenseasonality = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden">` + `\n`
 	+ String.raw`<input id="months_range_fromSlider" type="hidden" value="1">` + `\n`
 	+ String.raw`<input id="months_range_toSlider" type="hidden" value="12">` + `\n`
 
