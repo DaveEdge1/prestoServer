@@ -374,18 +374,20 @@ const dropdowns = function(recon) {
 	console.log('key1: ' + key1)
 	console.log('key: ' + ii)
 	console.log('list: ' + ret[ii].options)
-	if (hasdropdown.includes(ii)){
-		dropdownHTML = dropdownHTML + String.raw`var ` + ii + String.raw`list = [`
-	    if (ret[ii].options != "All") {
-		for (gg in ret[ii].options) {
-			console.log('option: ' + gg)
-			dropdownHTML = dropdownHTML + String.raw`{"value":"` + gg + `","label":"` + gg + `"},` + `\n`
-		}
-	    } else {
-		dropdownHTML = JSON.stringify(ii + 'list')
-	    }
-	    dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `]` + `\n`
-        }
+	for (var key2 in ret[key1][ii]) {
+		if (hasdropdown.includes(key2)){
+			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
+		    if (ret[key2].options != "All") {
+			for (gg in ret[key2].options) {
+				console.log('option: ' + gg)
+				dropdownHTML = dropdownHTML + String.raw`{"value":"` + gg + `","label":"` + gg + `"},` + `\n`
+			}
+		    } else {
+			dropdownHTML = JSON.stringify(key2 + 'list')
+		    }
+		    dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `]` + `\n`
+	        }
+	}
     }
     return dropdownHTML
 }
