@@ -371,10 +371,11 @@ const dropdowns = function(recon) {
     const ret = YAML.parse(s)
     for (var key1 in Object.keys(ret)) {
 	const ii = Object.keys(ret)[key1]
+	var groups = ret[ii]
 	console.log('key1: ' + key1)
 	console.log('key: ' + ii)
 	console.log('list: ' + ret[ii].options)
-	for (var key2 in ret[key1][ii]) {
+	for (var key2 in groups) {
 		if (hasdropdown.includes(key2)){
 			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
 		    if (ret[key2].options != "All") {
