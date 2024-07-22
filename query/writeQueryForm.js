@@ -355,6 +355,7 @@ console.log(`Okay, writing new form for ${recon}`);
 console.log(configs(recon))
 
 const dropdowns = function(recon) {
+    console.log('start dropdowns')
     const hasdropdown = ["compilation", "continent", "country", "seasonality", "variable", "archive", "proxy"]
 	
     var archivelist = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
@@ -370,6 +371,7 @@ const dropdowns = function(recon) {
     const ret = YAML.parse(s)
     for (var key1 in Object.keys(ret)) {
 	const ii = Object.keys(ret)[key1]
+	console.log('key1: ' + key1)
 	console.log('key: ' + ii)
 	console.log('list: ' + ret[ii].options)
 	if (hasdropdown.includes(ii)){
