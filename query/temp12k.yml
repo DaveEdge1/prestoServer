@@ -59,7 +59,7 @@ Material and Interpretation Filters:
     hide2: False
     offByDefault2: true
     defaultRange2: [1,12]
-    tooltip2: Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes: Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug
+    tooltip2: Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug
 
   archive:
     hide: false
