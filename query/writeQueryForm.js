@@ -378,16 +378,16 @@ const dropdowns = function(recon) {
 	for (var key2 in groups) {
 		console.log('key2: ' + key2)
 		if (hasdropdown.includes(key2)){
-			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
 		    if (ret[ii][key2].options != "All") {
-			for (gg in ret[key2].options) {
+			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
+			for (gg in ret[ii][key2].options) {
 				console.log('option: ' + gg)
 				dropdownHTML = dropdownHTML + String.raw`{"value":"` + gg + `","label":"` + gg + `"},` + `\n`
 			}
+			dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `"]` + `\n`
 		    } else {
-			dropdownHTML = dropdownHTML + JSON.stringify(key2 + 'list')
+			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = ` + JSON.stringify(eval(key2 + 'list'))
 		    }
-		    dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `]` + `\n`
 	        }
 	}
     }
