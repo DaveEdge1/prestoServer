@@ -376,9 +376,10 @@ const dropdowns = function(recon) {
 	console.log('key: ' + ii)
 	console.log('list: ' + ret[ii].options)
 	for (var key2 in groups) {
+		console.log('key2: ' + key2)
 		if (hasdropdown.includes(key2)){
 			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
-		    if (ret[key2].options != "All") {
+		    if (ret[ii][key2].options != "All") {
 			for (gg in ret[key2].options) {
 				console.log('option: ' + gg)
 				dropdownHTML = dropdownHTML + String.raw`{"value":"` + gg + `","label":"` + gg + `"},` + `\n`
