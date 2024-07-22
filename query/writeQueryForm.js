@@ -385,7 +385,7 @@ const dropdowns = function(recon) {
 				dropdownHTML = dropdownHTML + String.raw`{"value":"` + gg + `","label":"` + gg + `"},` + `\n`
 			}
 		    } else {
-			dropdownHTML = JSON.stringify(key2 + 'list')
+			dropdownHTML = dropdownHTML + JSON.stringify(key2 + 'list')
 		    }
 		    dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `]` + `\n`
 	        }
