@@ -897,7 +897,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-paleoData_proxy, extractLast( request.term ) ) );
+proxylist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -940,7 +940,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-paleoData_variableName, extractLast( request.term ) ) );
+variablelist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -983,7 +983,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-archiveType, extractLast( request.term ) ) );
+archivelist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -1026,7 +1026,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-country, extractLast( request.term ) ) );
+countrylist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -1069,7 +1069,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-continent, extractLast( request.term ) ) );
+continentlist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -1112,7 +1112,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-compilations, extractLast( request.term ) ) );
+compilationlist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -1156,7 +1156,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-seasonality, extractLast( request.term ) ) );
+seasonalitylist, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
