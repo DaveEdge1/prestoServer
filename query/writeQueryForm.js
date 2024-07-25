@@ -380,7 +380,8 @@ const dropdowns = function(recon) {
 		console.log('key2: ' + key2)
 		console.log('iii: ' + iii)
 		console.log('dropdown key: ' + hasdropdown.includes(key2))
-		console.log('All choices?: ' + ret[ii][iii].options)
+		console.log('key2 keys: ' + JSON.stringify(ret[ii][key2]))
+		console.log('All choices?: ' + ret[ii][key2].options)
 		if (hasdropdown.includes(key2)){
 		    if (ret[key1][key2].options != "All") {
 			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
