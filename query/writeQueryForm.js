@@ -377,6 +377,8 @@ const dropdowns = function(recon) {
 	console.log('list: ' + ret[ii].options)
 	for (var key2 in groups) {
 		console.log('key2: ' + key2)
+		console.log('dropdown key: ' + hasdropdown.includes(key2))
+		console.log('All choices?: ' + ret[ii][key2].options)
 		if (hasdropdown.includes(key2)){
 		    if (ret[ii][key2].options != "All") {
 			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
