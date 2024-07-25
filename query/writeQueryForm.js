@@ -396,7 +396,6 @@ const dropdowns = function(recon) {
 	        }
 	}
     }
-    dropdownHTML = String.raw`\\dropdown start \n`
     return dropdownHTML
 }
 	
