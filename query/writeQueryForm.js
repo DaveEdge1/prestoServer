@@ -376,7 +376,7 @@ const dropdowns = function(recon) {
 	console.log('key: ' + ii)
 	console.log('list: ' + ret[ii].options)
 	for (var key2 in groups) {
-		const iii = Object.keys(ret)[key1][key2]
+		const iii = groups[key2]
 		console.log('key2: ' + key2)
 		console.log('iii: ' + iii)
 		console.log('dropdown key: ' + hasdropdown.includes(key2))
