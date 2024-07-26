@@ -16,7 +16,7 @@ Compilation Filter:
   Explanation: ~
 
   compilation: 
-    hide: false
+    hide: true
     defaultChoice: [Temp12k]
     options: All
     tooltip: Choose compilation(s) (Begin typing for suggestions)
