@@ -420,6 +420,8 @@ const paramHTML = function(ret, ii) {
 			if (hasdropdown.includes(kk)) {
 				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 			} else if (kk == 'seasonality') {
+				console.log("all keys" " + Object.keys(ret[ii][kk]))
+				console.log("defaultRange2: " + ret[ii][kk].defaultRange2)
 				var param1 = eval(kk + '(ret[ii][kk].hide1, ret[ii][kk].defaultChoice1, ret[ii][kk].tooltip1, ret[ii][kk].hide2, ret[ii][kk].offByDefault2, ret[ii][kk].defaultRange2, ret[ii][kk].tooltip2)')
 			} else if (kk == 'coordBox'){
 				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultBounds, ret[ii][kk].tooltip, ret[ii][kk].offByDefault)')
