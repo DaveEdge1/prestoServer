@@ -196,6 +196,7 @@ const coordBox = function (hide, defaultBounds, tooltip, offByDefault) {
 }
 
 const seasonality = function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
+	console.log("defaultRange2: " + ret[ii][kk].defaultRange2)
 	if (defaultChoice1 == null){
 		defaultChoice1 = ''
 	}
@@ -232,7 +233,7 @@ const seasonality = function (hide1, defaultChoice1, tooltip1, hide2, offByDefau
 		+ String.raw`<div class="range_container">` + `\n`
 		+ String.raw`<div class="sliders_control">` + `\n`
 		+ String.raw`<input id="months_range_fromSlider" type="range" value="`+ defaultRange2[0] +`" min="1" max="24" step="1"/>` + `\n`
-		+ String.raw`<input id="months_range_toSlider" type="range" value="`+ defaultRange2[0] +`" min="1" max="24" step="1"/>` + `\n`
+		+ String.raw`<input id="months_range_toSlider" type="range" value="`+ defaultRange2[1] +`" min="1" max="24" step="1"/>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`<br>` + `\n`
 		+ String.raw`<div class="form_control">` + `\n`
