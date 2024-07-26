@@ -391,7 +391,7 @@ const dropdowns = function(recon) {
 			}
 			dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `"]` + `\n`
 		    } else {
-			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = ` + JSON.stringify(eval(key2 + 'list'))
+			dropdownHTML = dropdownHTML + `\n` + String.raw`var ` + key2 + String.raw`list = ` + JSON.stringify(eval(key2 + 'list')) + `\n`
 		    }
 	        }
 	}
