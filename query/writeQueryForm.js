@@ -421,7 +421,7 @@ const paramHTML = function(ret, ii) {
 			} else if (kk == 'seasonality') {
 				var param1 = eval(kk + '(kk.hide1, kk.defaultChoice1, kk.tooltip1, kk.hide2, kk.offByDefault2, kk.defaultRange2, kk.tooltip2)')
 			} else if (kk == 'coordBox'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
+				var param1 = eval(kk + '(kk.hide, kk.defaultBounds, kk.tooltip, kk.offByDefault)')
 			} else if (kk == 'interval'){
 				var param1 = eval(kk + '(kk.hide, kk.defaultRange, kk.offByDefault, kk.tooltip)')
 			} else if (kk == 'resolution'){
