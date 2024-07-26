@@ -197,7 +197,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn">
+<input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn" value="Temp12k">
 </div>
 <br>
 <hr class="solid">
@@ -215,7 +215,7 @@ popQueryVariable()
 	<br><br><br>
 	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>
 	<br>
-	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();'>
+	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' >
 	<br><br><br>
 </div>
 <br>
@@ -228,14 +228,14 @@ popQueryVariable()
 <p style="color: red;">Note: The bounding box width is limited to 360 degrees</p>
 <br>
 <label style="font-size:16px; margin-right:8px;">Latitude</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="15" min="-90" max="90" step="1" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="1" onchange="updateBoundingBox();">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="45" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:30px;">max</label>
 <label style="font-size:16px; margin-right:8px;">Longitude</label>
 <input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="-90" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
 <label>max</label>
 </div>
 <br><br><br><br><br><br><br><br><br>
@@ -248,7 +248,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="continent" id="continentIn">
+<input style="width:80%;" name="continent" id="continentIn" value="">
 </div>
 <br>
 <hr class="solid">
@@ -261,7 +261,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="country" id="countryIn">
+<input style="width:80%;" name="country" id="countryIn" value="">
 </div>
 <br>
 <hr class="solid">
@@ -271,7 +271,7 @@ popQueryVariable()
 	<br><br><br>
 	<label id="isTerrestrialOn_label" for="isTerrestrialOn">Filter by Land/Sea</label>
 	<br>
-	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();'>
+	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();' >
 	<br><br><br>
 </div>
 <div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
@@ -283,7 +283,7 @@ popQueryVariable()
 <div class="radio_control">
 <input type="radio" id="Terrestrial" name="isTerrestrial" value="1" checked>
 <label for="Terrestrial">Terrestrial</label><br>
-<input type="radio" id="Marine" name="isTerrestrial" value="0">
+<input type="radio" id="Marine" name="isTerrestrial" value="0" >
 <label for="Marine">Marine</label><br>
 </div>
 </div>
@@ -305,7 +305,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose seasonality(ies) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="interpretation1_seasonality" id="seasonality1">
+<input style="width:80%;" name="interpretation1_seasonality" id="seasonality1" value="annual,summerOnly,winterOnly">
 </div>
 <br>
 <br>
@@ -313,13 +313,13 @@ popQueryVariable()
 	<br><br><br>
 	<label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>
 	<br>
-	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();'>
+	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();' >
 	<br><br><br>
 </div>
 <div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
 <label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
-<span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes: Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>
+<span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>
 </div>
 <div class="range_container">
 <div class="sliders_control">
@@ -350,7 +350,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose archive type(s) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="archiveType" id="archiveTypeIn">
+<input style="width:80%;" name="archiveType" id="archiveTypeIn" value="">
 </div>
 <br>
 <hr class="solid">
@@ -363,7 +363,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose variable name(s) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="paleoData_variableName" id="variableName">
+<input style="width:80%;" name="paleoData_variableName" id="variableName" value="">
 </div>
 <br>
 <hr class="solid">
@@ -376,7 +376,7 @@ popQueryVariable()
 <span class="tooltip-text">Choose proxy(ies) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="paleoData_proxy" id="proxy">
+<input style="width:80%;" name="paleoData_proxy" id="proxy" value="">
 </div>
 <br>
 <hr class="solid">
@@ -393,7 +393,7 @@ popQueryVariable()
 	<br><br><br>
 	<label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>
 	<br>
-	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();'>
+	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();' >
 	<br><br><br>
 </div>
 <div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
@@ -428,7 +428,7 @@ popQueryVariable()
 	<br><br><br>
 	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>
 	<br>
-	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>
+	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();' >
 	<br><br><br>
 </div>
 <div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
@@ -438,7 +438,7 @@ popQueryVariable()
 </div>
 <div class="range_container">
 <div class="sliders_control">
-<input id="resolutionSlider" type="range" value="100" min="1" max="1000" step="1"/>
+<input id="resolutionSlider" type="range" value="200" min="1" max="1000" step="1"/>
 <br>
 <input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>
 </div>
@@ -875,8 +875,6 @@ var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
 var countrylist = [{"value":"Afghanistan","label":"Afghanistan"},{"value":"Aland","label":"Aland"},{"value":"Albania","label":"Albania"},{"value":"Algeria","label":"Algeria"},{"value":"Antarctica","label":"Antarctica"},{"value":"Argentina","label":"Argentina"},{"value":"Armenia","label":"Armenia"},{"value":"Australia","label":"Australia"},{"value":"Austria","label":"Austria"},{"value":"Belarus","label":"Belarus"},{"value":"Belgium","label":"Belgium"},{"value":"Belize","label":"Belize"},{"value":"Bermuda","label":"Bermuda"},{"value":"Bhutan","label":"Bhutan"},{"value":"Bolivia","label":"Bolivia"},{"value":"Botswana","label":"Botswana"},{"value":"Brazil","label":"Brazil"},{"value":"Bulgaria","label":"Bulgaria"},{"value":"Burundi","label":"Burundi"},{"value":"Canada","label":"Canada"},{"value":"Cayman Islands","label":"Cayman Islands"},{"value":"Chad","label":"Chad"},{"value":"Chile","label":"Chile"},{"value":"China","label":"China"},{"value":"Colombia","label":"Colombia"},{"value":"Cook Islands","label":"Cook Islands"},{"value":"Costa Rica","label":"Costa Rica"},{"value":"Cuba","label":"Cuba"},{"value":"Czech Republic","label":"Czech Republic"},{"value":"Democratic Republic of the Congo","label":"Democratic Republic of the Congo"},{"value":"Denmark","label":"Denmark"},{"value":"Djibouti","label":"Djibouti"},{"value":"Dominican Republic","label":"Dominican Republic"},{"value":"Ecuador","label":"Ecuador"},{"value":"Egypt","label":"Egypt"},{"value":"Estonia","label":"Estonia"},{"value":"Ethiopia","label":"Ethiopia"},{"value":"Faroe Islands","label":"Faroe Islands"},{"value":"Finland","label":"Finland"},{"value":"France","label":"France"},{"value":"French Polynesia","label":"French Polynesia"},{"value":"Georgia","label":"Georgia"},{"value":"Germany","label":"Germany"},{"value":"Ghana","label":"Ghana"},{"value":"Greece","label":"Greece"},{"value":"Greenland","label":"Greenland"},{"value":"Guam","label":"Guam"},{"value":"Guatemala","label":"Guatemala"},{"value":"Haiti","label":"Haiti"},{"value":"Hungary","label":"Hungary"},{"value":"Iceland","label":"Iceland"},{"value":"India","label":"India"},{"value":"Indonesia","label":"Indonesia"},{"value":"Iran","label":"Iran"},{"value":"Ireland","label":"Ireland"},{"value":"Israel","label":"Israel"},{"value":"Italy","label":"Italy"},{"value":"Jamaica","label":"Jamaica"},{"value":"Japan","label":"Japan"},{"value":"Jordan","label":"Jordan"},{"value":"Kazakhstan","label":"Kazakhstan"},{"value":"Kenya","label":"Kenya"},{"value":"Kyrgyzstan","label":"Kyrgyzstan"},{"value":"Laos","label":"Laos"},{"value":"Lebanon","label":"Lebanon"},{"value":"Libya","label":"Libya"},{"value":"Lithuania","label":"Lithuania"},{"value":"Luxembourg","label":"Luxembourg"},{"value":"Macedonia","label":"Macedonia"},{"value":"Madagascar","label":"Madagascar"},{"value":"Malawi","label":"Malawi"},{"value":"Malaysia","label":"Malaysia"},{"value":"Mali","label":"Mali"},{"value":"Malta","label":"Malta"},{"value":"Mauritania","label":"Mauritania"},{"value":"Mexico","label":"Mexico"},{"value":"Mongolia","label":"Mongolia"},{"value":"Morocco","label":"Morocco"},{"value":"Namibia","label":"Namibia"},{"value":"Nauru","label":"Nauru"},{"value":"Nepal","label":"Nepal"},{"value":"Netherlands","label":"Netherlands"},{"value":"New Zealand","label":"New Zealand"},{"value":"Nicaragua","label":"Nicaragua"},{"value":"Niger","label":"Niger"},{"value":"Nigeria","label":"Nigeria"},{"value":"Norway","label":"Norway"},{"value":"Oman","label":"Oman"},{"value":"Pakistan","label":"Pakistan"},{"value":"Papua New Guinea","label":"Papua New Guinea"},{"value":"Peru","label":"Peru"},{"value":"Poland","label":"Poland"},{"value":"Portugal","label":"Portugal"},{"value":"Romania","label":"Romania"},{"value":"Russia","label":"Russia"},{"value":"Saudi Arabia","label":"Saudi Arabia"},{"value":"Senegal","label":"Senegal"},{"value":"Seychelles","label":"Seychelles"},{"value":"Slovakia","label":"Slovakia"},{"value":"Slovenia","label":"Slovenia"},{"value":"South Africa","label":"South Africa"},{"value":"South Korea","label":"South Korea"},{"value":"South Sudan","label":"South Sudan"},{"value":"Spain","label":"Spain"},{"value":"Sudan","label":"Sudan"},{"value":"Sweden","label":"Sweden"},{"value":"Switzerland","label":"Switzerland"},{"value":"Syria","label":"Syria"},{"value":"Taiwan","label":"Taiwan"},{"value":"Tajikistan","label":"Tajikistan"},{"value":"Thailand","label":"Thailand"},{"value":"The Bahamas","label":"The Bahamas"},{"value":"Togo","label":"Togo"},{"value":"Tunisia","label":"Tunisia"},{"value":"Turkey","label":"Turkey"},{"value":"Uganda","label":"Uganda"},{"value":"Ukraine","label":"Ukraine"},{"value":"United Kingdom","label":"United Kingdom"},{"value":"United Republic of Tanzania","label":"United Republic of Tanzania"},{"value":"United States of America","label":"United States of America"},{"value":"Uzbekistan","label":"Uzbekistan"},{"value":"Vanuatu","label":"Vanuatu"},{"value":"Venezuela","label":"Venezuela"},{"value":"Vietnam","label":"Vietnam"},{"value":"West Bank","label":"West Bank"},{"value":"Western Sahara","label":"Western Sahara"},{"value":"Yemen","label":"Yemen"},{"value":"Zambia","label":"Zambia"}]
-
-var seasonalitylist = [{"value":"Annual","label":"Annual"},{"value":"Growing Season","label":"Growing Season"},{"value":"Warmest Month","label":"Warmest Month"},{"value":"Coldest Month","label":"Coldest Month"},{"value":"Wet Season","label":"Wet Season"},{"value":"Winter","label":"Winter"},{"value":"Spring","label":"Spring"},{"value":"Summer","label":"Summer"},{"value":"Fall","label":"Fall"},{"value":"subannual","label":"subannual"}]
 
 var archivelist = [{"value":"Borehole","label":"Borehole, borehole"},{"value":"Coral","label":"Coral, coral"},{"value":"FluvialSediment","label":"Creek, Fluvial, FluvialSediment, River, Stream, "},{"value":"GlacierIce","label":"GlacierIce, ice cores"},{"value":"GroundIce","label":"GroundIce, bulk ice"},{"value":"LakeSediment","label":"Lagoon, Lake, Lake Sediment, LakeSediment, "},{"value":"MarineSediment","label":"Marine, MarineSediment, Delta, Marine Sediment, Ocean, "},{"value":"Midden","label":"Midden, "},{"value":"MolluskShell","label":"MolluskShells, bivalve, MolluskShell"},{"value":"Other","label":"Marl, Meadow, Archaeological, Coast, Farmland, Forest, Sediment, Spring, Valley, , Other"},{"value":"Peat","label":"Wetland, Bog, Fen, Marsh, Mire, Peat, Swamp, peat"},{"value":"Sclerosponge","label":"Sclerosponge, sclerosponge"},{"value":"Shoreline","label":"LakeDeposit, LakeDeposits, Shoreline, lake levels"},{"value":"Speleothem","label":"Cave, Speleothem, speleothems"},{"value":"TerrestrialSediment","label":"Paleosol, Dune, Loess, TerrestrialSediment, Terrestrial Sediment, "},{"value":"Wood","label":"Wood, tree ring, tree"}]
 
