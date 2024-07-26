@@ -11,7 +11,7 @@ var checkedText = function (boolVal){
 	}
 }
 
-const compilation function (hide, defaultChoice, tooltip) {
+const compilation = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
 	}
@@ -35,7 +35,7 @@ const compilation function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
-const continent function (hide, defaultChoice, tooltip) {
+const continent = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
 	}
@@ -59,7 +59,7 @@ const continent function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
-const country function (hide, defaultChoice, tooltip) {
+const country = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
 	}
@@ -82,7 +82,7 @@ const country function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
-const archive function (hide, defaultChoice, tooltip) {
+const archive = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
 	}
@@ -106,7 +106,7 @@ const archive function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
-const variable function (hide, defaultChoice, tooltip) {
+const variable = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
 	}
@@ -130,7 +130,7 @@ const variable function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
-const proxy function (hide, defaultChoice, tooltip) {
+const proxy = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
 	}
@@ -153,7 +153,7 @@ const proxy function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
-const coordBox function (hide, defaultBounds, tooltip, offByDefault) {
+const coordBox = function (hide, defaultBounds, tooltip, offByDefault) {
 	if (hide) {
 		var html1 = String.raw`<input id="lat_min" name="coords" type="hidden" value="`+defaultBounds[0]+`">` + `\n`
 		+ String.raw`<input id="lat_max" name="coords" type="hidden" value="`+defaultBounds[1]+`">` + `\n`
@@ -195,7 +195,7 @@ const coordBox function (hide, defaultBounds, tooltip, offByDefault) {
 	return html1
 }
 
-const seasonality function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
+const seasonality = function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
 	if (defaultChoice1 == null){
 		defaultChoice1 = ''
 	}
@@ -257,7 +257,7 @@ const seasonality function (hide1, defaultChoice1, tooltip1, hide2, offByDefault
 	return html1 + html2
 }
 
-const interval function (hide, defaultRange, offByDefault, tooltip) {
+const interval = function (hide, defaultRange, offByDefault, tooltip) {
 	if (hide) {
 		var html1 = String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_fromInput" value="" type="hidden">` + `\n`
 		+ String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_toInput" value="" type="hidden">` + `\n`
@@ -301,7 +301,7 @@ const interval function (hide, defaultRange, offByDefault, tooltip) {
 	return html1
 }
 
-const resolution function (hide, defaultValue, offByDefault, tooltip) {
+const resolution = function (hide, defaultValue, offByDefault, tooltip) {
 	if (hide) {
 		var html1 = String.raw`<input id="resolutionInput" name="resolution" type = "hidden" value="">` + `\n`
 	} else {
@@ -333,7 +333,7 @@ const resolution function (hide, defaultValue, offByDefault, tooltip) {
 	return html1
 }
 
-const terrestrial function (hide, defaultSelection, offByDefault, tooltip) {
+const terrestrial = function (hide, defaultSelection, offByDefault, tooltip) {
 	if (defaultSelection.toLowerCase() == 'terrestrial'){
 		var checked1 = 'checked'
 		var checked2 = ''
