@@ -404,7 +404,7 @@ const groupHTML = function(key, desc) {
 	return formGroup
 }
 
-const hasdropdown = ["compilation", "continent", "country", "seasonality", "variable", "archive", "proxy"]
+const hasdropdown = ["compilation", "continent", "country", "variable", "archive", "proxy"]
 
 
 const paramHTML = function(ret, ii) {
