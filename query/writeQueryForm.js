@@ -34,48 +34,6 @@ const compilation function (hide, defaultChoice, tooltip) {
 	}
 	return html1
 }
-	
-const coordBox function (hide, defaultBounds, tooltip, offByDefault) {
-	if (hide) {
-		var html1 = String.raw`<input id="lat_min" name="coords" type="hidden" value="`+defaultBounds[0]+`">` + `\n`
-		+ String.raw`<input id="lat_max" name="coords" type="hidden" value="`+defaultBounds[1]+`">` + `\n`
-		+ String.raw`<input id="lon_min" name="coords" type="hidden" value="`+defaultBounds[2]+`">` + `\n`
-		+ String.raw`<input id="lon_max" name="coords" type="hidden" value="`+defaultBounds[3]+`">` + `\n`
-	} else {
-		var html1 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-		+ String.raw`	<br><br><br>` + `\n`
-		+ String.raw`	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>` + `\n`
-		+ String.raw`	<br>` + `\n`
-		+ String.raw`	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
-		+ String.raw`	<br><br><br>` + `\n`
-		+ String.raw`</div>` + `\n`
-		+ String.raw`<br>` + `\n`
-		+ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="">` + `\n`
-		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>` + `\n`
-		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
-		+ String.raw`</div>` + `\n`
-		+ String.raw`<p style="color: red;">Note: This bounding box can also be adjusted using the draggable handles on the map</p>` + `\n`
-		+ String.raw`<p style="color: red;">Note: The bounding box width is limited to 360 degrees</p>` + `\n`
-		+ String.raw`<br>` + `\n`
-		+ String.raw`<label style="font-size:16px; margin-right:8px;">Latitude</label>` + `\n`
-		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="`+defaultBounds[0]+`" min="-90" max="90" step="1" onchange="updateBoundingBox();">` + `\n`
-		+ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
-		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="`+defaultBounds[1]+`" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">` + `\n`
-		+ String.raw`<label style="margin-right:30px;">max</label>` + `\n`
-		+ String.raw`<label style="font-size:16px; margin-right:8px;">Longitude</label>` + `\n`
-		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="`+defaultBounds[2]+`" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
-		+ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
-		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="`+defaultBounds[3]+`" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
-		+ String.raw`<label>max</label>` + `\n`
-		+ String.raw`</div>` + `\n`
-		+ String.raw`<br><br><br><br><br><br><br><br><br>` + `\n`
-		+ String.raw`<hr class="solid">` + `\n`
-		+ String.raw`<hr class="solid">` + `\n`
-		+ String.raw`<br>` + `\n`
-	}
-	return html1
-}
 
 const continent function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
@@ -195,6 +153,186 @@ const proxy function (hide, defaultChoice, tooltip) {
 	return html1
 }
 
+const coordBox function (hide, defaultBounds, tooltip, offByDefault) {
+	if (hide) {
+		var html1 = String.raw`<input id="lat_min" name="coords" type="hidden" value="`+defaultBounds[0]+`">` + `\n`
+		+ String.raw`<input id="lat_max" name="coords" type="hidden" value="`+defaultBounds[1]+`">` + `\n`
+		+ String.raw`<input id="lon_min" name="coords" type="hidden" value="`+defaultBounds[2]+`">` + `\n`
+		+ String.raw`<input id="lon_max" name="coords" type="hidden" value="`+defaultBounds[3]+`">` + `\n`
+	} else {
+		var html1 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`	<label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>` + `\n`
+		+ String.raw`	<br>` + `\n`
+		+ String.raw`	<input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="">` + `\n`
+		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>` + `\n`
+		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
+		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<p style="color: red;">Note: This bounding box can also be adjusted using the draggable handles on the map</p>` + `\n`
+		+ String.raw`<p style="color: red;">Note: The bounding box width is limited to 360 degrees</p>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<label style="font-size:16px; margin-right:8px;">Latitude</label>` + `\n`
+		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="`+defaultBounds[0]+`" min="-90" max="90" step="1" onchange="updateBoundingBox();">` + `\n`
+		+ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
+		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="`+defaultBounds[1]+`" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">` + `\n`
+		+ String.raw`<label style="margin-right:30px;">max</label>` + `\n`
+		+ String.raw`<label style="font-size:16px; margin-right:8px;">Longitude</label>` + `\n`
+		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="`+defaultBounds[2]+`" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
+		+ String.raw`<label style="margin-right:8px;">min</label>` + `\n`
+		+ String.raw`<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="`+defaultBounds[3]+`" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">` + `\n`
+		+ String.raw`<label>max</label>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br><br><br><br><br><br><br><br><br>` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<br>` + `\n`
+	}
+	return html1
+}
+
+const seasonality function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
+	if (defaultChoice1 == null){
+		defaultChoice1 = ''
+	}
+	if (hide1) {
+		var html1 = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden">` + `\n`
+	} else {
+		var html1 = String.raw`<div class="form-group"> ` + `\n`
+		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>` + `\n`
+		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
+		+ String.raw`<span class="tooltip-text">`+ tooltip1 +`</span>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<input style="width:80%;" name="interpretation1_seasonality" id="seasonality1" value="` + defaultChoice1 + `">` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<br>` + `\n`
+	}
+	if (hide2) {
+		var html2 = String.raw`<input id="months_range_fromSlider" type="hidden" value="1">` + `\n`
+		+ String.raw`<input id="months_range_toSlider" type="hidden" value="12">` + `\n`
+	} else {
+		var html2 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`	<label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>` + `\n`
+		+ String.raw`	<br>` + `\n`
+		+ String.raw`	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault2)+`>` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>` + `\n`
+		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
+		+ String.raw`<span class="tooltip-text">`+ tooltip2 +`</span>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div class="range_container">` + `\n`
+		+ String.raw`<div class="sliders_control">` + `\n`
+		+ String.raw`<input id="months_range_fromSlider" type="range" value="`+ defaultRange2[0] +`" min="1" max="24" step="1"/>` + `\n`
+		+ String.raw`<input id="months_range_toSlider" type="range" value="`+ defaultRange2[0] +`" min="1" max="24" step="1"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<div class="form_control">` + `\n`
+		+ String.raw`<div class="form_control_container">` + `\n`
+		+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
+		+ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Jan" id="months_range_fromInput_text" readonly="readonly"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div class="form_control_container">` + `\n`
+		+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
+		+ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Dec" id="months_range_toInput_text" readonly="readonly"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br><br><br><br><br><br><br><br><br><br><br><br><br>` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<br>` + `\n`
+	}
+		
+	return html1 + html2
+}
+
+const interval function (hide, defaultRange, offByDefault, tooltip) {
+	if (hide) {
+		var html1 = String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_fromInput" value="" type="hidden">` + `\n`
+		+ String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_toInput" value="" type="hidden">` + `\n`
+	} else {
+		var html1 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`	<label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>` + `\n`
+		+ String.raw`	<br>` + `\n`
+		+ String.raw`	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>` + `\n`
+		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
+		+ String.raw`<span class="tooltip-text">`+ tooltip +`</span>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div class="range_container">` + `\n`
+		+ String.raw`<div class="sliders_control">` + `\n`
+		+ String.raw`<input id="time_range_to_reconstruct_fromSlider" type="range" value="`+ defaultRange[0] +`" min="0" max="12000" step="600"/>` + `\n`
+		+ String.raw`<input id="time_range_to_reconstruct_toSlider" type="range" value="`+ defaultRange[1] +`" min="0" max="12000" step="600"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<div class="form_control">` + `\n`
+		+ String.raw`<div class="form_control_container">` + `\n`
+		+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
+		+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="100" min="0" max="12000" step="1"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div class="form_control_container">` + `\n`
+		+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
+		+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="600" min="0" max="12000" step="1"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br><br><br><br><br><br><br>` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<br>` + `\n`
+	}
+	return html1
+}
+
+const resolution function (hide, defaultValue, offByDefault, tooltip) {
+	if (hide) {
+		var html1 = String.raw`<input id="resolutionInput" name="resolution" type = "hidden" value="">` + `\n`
+	} else {
+		var html1 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>` + `\n`
+		+ String.raw`	<br>` + `\n`
+		+ String.raw`	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
+		+ String.raw`	<br><br><br>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>` + `\n`
+		+ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
+		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<div class="range_container">` + `\n`
+		+ String.raw`<div class="sliders_control">` + `\n`
+		+ String.raw`<input id="resolutionSlider" type="range" value="`+ defaultValue +`" min="1" max="1000" step="1"/>` + `\n`
+		+ String.raw`<br>` + `\n`
+		+ String.raw`<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`</div>` + `\n`
+		+ String.raw`<br><br><br><br><br><br><br>` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<hr class="solid">` + `\n`
+		+ String.raw`<br>` + `\n`
+	}
+	return html1
+}
+
 const terrestrial function (hide, defaultSelection, offByDefault, tooltip) {
 	if (defaultSelection.toLowerCase() == 'terrestrial'){
 		var checked1 = 'checked'
@@ -235,146 +373,6 @@ const terrestrial function (hide, defaultSelection, offByDefault, tooltip) {
 	}
 	return html1
 }
-
-const proxy function (hide, defaultChoice, tooltip) {
-	if (defaultChoice == null){
-		defaultChoice = ''
-	}
-	if (hide) {
-		var html1 = String.raw`<input name="paleoData_proxy" id="proxy" type="hidden" value="">` + `\n`
-	} else {
-		var html1 = String.raw`<div class="form-group"> ` + `\n`
-		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>` + `\n`
-		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
-		+ String.raw`</div>` + `\n`
-		+ String.raw`<br>` + `\n`
-		+ String.raw`<input style="width:80%;" name="paleoData_proxy" id="proxy" value="` + defaultChoice + `">` + `\n`
-		+ String.raw`</div>` + `\n`
-		+ String.raw`<br>` + `\n`
-		+ String.raw`<hr class="solid">` + `\n`
-		+ String.raw`<hr class="solid">` + `\n`
-		+ String.raw`<br>` + `\n`
-	}
-	return html1
-}
-
-const seasonality = String.raw`<div class="form-group"> ` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose seasonality(ies) (Begin typing for suggestions)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input style="width:80%;" name="interpretation1_seasonality" id="seasonality1">` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes: Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="range_container">` + `\n`
-+ String.raw`<div class="sliders_control">` + `\n`
-+ String.raw`<input id="months_range_fromSlider" type="range" value="1" min="1" max="24" step="1"/>` + `\n`
-+ String.raw`<input id="months_range_toSlider" type="range" value="12" min="1" max="24" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form_control">` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Jan" id="months_range_fromInput_text" readonly="readonly"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="months_range_text" type="text" value="Dec" id="months_range_toInput_text" readonly="readonly"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-
-const hiddenseasonality = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden">` + `\n`
-	+ String.raw`<input id="months_range_fromSlider" type="hidden" value="1">` + `\n`
-	+ String.raw`<input id="months_range_toSlider" type="hidden" value="12">` + `\n`
-
-
-const interval = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>` + `\n`
-+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="range_container">` + `\n`
-+ String.raw`<div class="sliders_control">` + `\n`
-+ String.raw`<input id="time_range_to_reconstruct_fromSlider" type="range" value="100" min="0" max="12000" step="600"/>` + `\n`
-+ String.raw`<input id="time_range_to_reconstruct_toSlider" type="range" value="600" min="0" max="12000" step="600"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<div class="form_control">` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="100" min="0" max="12000" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="form_control_container">` + `\n`
-+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
-+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="600" min="0" max="12000" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<br>` + `\n`
-
-const hiddeninterval = String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_fromInput" value="" type="hidden">` + `\n`
-	+ String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_toInput" value="" type="hidden">` + `\n`
-
-const resolution = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`	<label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>` + `\n`
-+ String.raw`	<br>` + `\n`
-+ String.raw`	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>` + `\n`
-+ String.raw`	<br><br><br>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
-+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>` + `\n`
-+ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
-+ String.raw`<span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<div class="range_container">` + `\n`
-+ String.raw`<div class="sliders_control">` + `\n`
-+ String.raw`<input id="resolutionSlider" type="range" value="100" min="1" max="1000" step="1"/>` + `\n`
-+ String.raw`<br>` + `\n`
-+ String.raw`<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`</div>` + `\n`
-+ String.raw`<br><br><br><br><br><br><br>` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<hr class="solid">` + `\n`
-+ String.raw`<br>` + `\n`
-
-const hiddenresolution = String.raw`<input id="resolutionInput" name="resolution" type = "hidden" value="">` + `\n`
 
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
@@ -419,17 +417,17 @@ const paramHTML = function(ret, ii) {
 		    console.log('param: ' + kk)
 		} else {
 			if (hasdropdown.includes(kk)) {
-				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
+				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 			} else if (kk == 'seasonality') {
-				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
+				var param1 = eval(kk + '(kk.hide1, kk.defaultChoice1, kk.tooltip1, kk.hide2, kk.offByDefault2, kk.defaultRange2, kk.tooltip2)')
 			} else if (kk == 'coordBox'){
 				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
 			} else if (kk == 'interval'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
+				var param1 = eval(kk + '(kk.hide, kk.defaultRange, kk.offByDefault, kk.tooltip)')
 			} else if (kk == 'resolution'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
+				var param1 = eval(kk + '(kk.hide, kk.defaultValue, kk.offByDefault, kk.tooltip)')
 			} else if (kk == 'terrestrial'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultChoice, kk.tooltip)')
+				var param1 = eval(kk + '(kk.hide, kk.defaultSelection, kk.offByDefault, kk.tooltip)')
 			}
 		    try {
 			if (typeof param1 == 'string'){
