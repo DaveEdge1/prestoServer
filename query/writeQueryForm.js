@@ -419,15 +419,15 @@ const paramHTML = function(ret, ii) {
 			if (hasdropdown.includes(kk)) {
 				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 			} else if (kk == 'seasonality') {
-				var param1 = eval(kk + '(kk.hide1, kk.defaultChoice1, kk.tooltip1, kk.hide2, kk.offByDefault2, kk.defaultRange2, kk.tooltip2)')
+				var param1 = eval(kk + '(ret[ii][kk].hide1, ret[ii][kk].defaultChoice1, ret[ii][kk].tooltip1, ret[ii][kk].hide2, ret[ii][kk].offByDefault2, ret[ii][kk].defaultRange2, ret[ii][kk].tooltip2)')
 			} else if (kk == 'coordBox'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultBounds, kk.tooltip, kk.offByDefault)')
+				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultBounds, ret[ii][kk].tooltip, ret[ii][kk].offByDefault)')
 			} else if (kk == 'interval'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultRange, kk.offByDefault, kk.tooltip)')
+				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultRange, ret[ii][kk].offByDefault, ret[ii][kk].tooltip)')
 			} else if (kk == 'resolution'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultValue, kk.offByDefault, kk.tooltip)')
+				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultValue, ret[ii][kk].offByDefault, ret[ii][kk].tooltip)')
 			} else if (kk == 'terrestrial'){
-				var param1 = eval(kk + '(kk.hide, kk.defaultSelection, kk.offByDefault, kk.tooltip)')
+				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultSelection, ret[ii][kk].offByDefault, ret[ii][kk].tooltip)')
 			}
 		    try {
 			if (typeof param1 == 'string'){
