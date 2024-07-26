@@ -52,10 +52,10 @@ Material and Interpretation Filters:
   Explanation: ~
 
   seasonality:
-    hide: false
-    defaultChoice: annual,summerOnly,winterOnly
-    options: All
-    tooltip: Choose seasonality(ies) (Begin typing for suggestions)
+    hide1: false
+    defaultChoice1: annual,summerOnly,winterOnly
+    options1: All
+    tooltip1: Choose seasonality(ies) (Begin typing for suggestions)
     hide2: False
     offByDefault2: true
     defaultRange2: [1,12]
