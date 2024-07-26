@@ -366,7 +366,7 @@ const dropdowns = function(recon) {
     var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}]
     var seasonalitylist = [{"value":"Annual","label":"Annual"},{"value":"Growing Season","label":"Growing Season"},{"value":"Warmest Month","label":"Warmest Month"},{"value":"Coldest Month","label":"Coldest Month"},{"value":"Wet Season","label":"Wet Season"},{"value":"Winter","label":"Winter"},{"value":"Spring","label":"Spring"},{"value":"Summer","label":"Summer"},{"value":"Fall","label":"Fall"},{"value":"subannual","label":"subannual"}]
 
-    var dropdownHTML = String.raw`\\dropdown start \n`
+    var dropdownHTML = String.raw``
     const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     const ret = YAML.parse(s)
     for (var key1 in Object.keys(ret)) {
