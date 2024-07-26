@@ -1031,7 +1031,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`paleoData_proxy, extractLast( request.term ) ) );` + `\n`
++ String.raw`proxylist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1074,7 +1074,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`paleoData_variableName, extractLast( request.term ) ) );` + `\n`
++ String.raw`variablelist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1117,7 +1117,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`archiveType, extractLast( request.term ) ) );` + `\n`
++ String.raw`archivelist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1160,7 +1160,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`country, extractLast( request.term ) ) );` + `\n`
++ String.raw`countrylist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1203,7 +1203,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`continent, extractLast( request.term ) ) );` + `\n`
++ String.raw`continentlist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1246,7 +1246,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`compilations, extractLast( request.term ) ) );` + `\n`
++ String.raw`compilationlist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1290,7 +1290,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`source: function( request, response ) {` + `\n`
 + String.raw`// delegate back to autocomplete, but extract the last term` + `\n`
 + String.raw`response( $.ui.autocomplete.filter(` + `\n`
-+ String.raw`seasonality, extractLast( request.term ) ) );` + `\n`
++ String.raw`seasonalitylist, extractLast( request.term ) ) );` + `\n`
 + String.raw`},` + `\n`
 + String.raw`` + `\n`
 + String.raw`//    source:projects,    ` + `\n`
@@ -1348,7 +1348,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`}` + `\n`
 + String.raw`</script>` + `\n`
 + String.raw`<script>` + `\n`
-+ String.raw`var compVals = compilations.map(function(d) { return d.value })` + `\n`
++ String.raw`var compVals = compilationlist.map(function(d) { return d.value })` + `\n`
 + String.raw`//console.log(compVals)` + `\n`
 + String.raw`host2 = compVals.map(function(aa) {` + `\n`
 + String.raw`    var splitup = aa.split("-")` + `\n`
