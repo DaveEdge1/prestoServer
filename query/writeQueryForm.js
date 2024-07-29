@@ -196,7 +196,13 @@ const coordBox = function (hide, defaultBounds, tooltip, offByDefault) {
 }
 
 const seasonality = function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
+	console.log("hide1: " + hide1)
+	console.log("defaultChoice1: " + defaultChoice1)
+	console.log("tooltip1: " + tooltip1)
+	console.log("hide2: " + hide2)
+	console.log("offByDefault2: " + offByDefault2)
 	console.log("defaultRange2: " + defaultRange2)
+	console.log("tooltip2: " + tooltip2)
 	if (defaultChoice1 == null){
 		defaultChoice1 = ''
 	}
