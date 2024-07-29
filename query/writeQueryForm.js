@@ -424,8 +424,6 @@ const paramHTML = function(ret, ii) {
 		console.log("full param: " + JSON.stringify(ret[ii][kk]))
 		if (kk == 'Explanation') {
 		} else {
-			var eq1 = eval(kk)
-			console.log('eq name: ' + eq1)
 			if (hasdropdown.includes(kk)) {
 				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 				if (kk == 'seasonality') {
