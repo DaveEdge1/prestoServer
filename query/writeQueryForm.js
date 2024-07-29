@@ -424,9 +424,12 @@ const paramHTML = function(ret, ii) {
 		console.log("full param: " + JSON.stringify(ret[ii][kk]))
 		if (kk == 'Explanation') {
 		} else {
+			var eq1 = eval(kk)
+			console.log('eq name: ' + eq1)
 			if (hasdropdown.includes(kk)) {
 				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 				if (kk == 'seasonality') {
+					
 					var param1 = eval(kk + '(ret[ii][kk].hide1, ret[ii][kk].defaultChoice1, ret[ii][kk].tooltip1, ret[ii][kk].hide2, ret[ii][kk].offByDefault2, ret[ii][kk].defaultRange2, ret[ii][kk].tooltip2)')
 				}
 			} else if (kk == 'coordBox'){
