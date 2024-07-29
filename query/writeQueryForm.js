@@ -414,14 +414,13 @@ const paramHTML = function(ret, ii) {
 	var paramStuff = ''
 
 	for (kk in param) {
+		console.log('param: ' + kk)
+		console.log("full param: " + JSON.stringify(ret[ii][kk]))
 		if (kk == 'Explanation') {
-		    console.log('param: ' + kk)
 		} else {
 			if (hasdropdown.includes(kk)) {
 				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 				if (kk == 'seasonality') {
-					console.log("all keys: " + Object.keys(ret[ii][kk]))
-					console.log("defaultRange2: " + ret[ii][kk].defaultRange2)
 					var param1 = eval(kk + '(ret[ii][kk].hide1, ret[ii][kk].defaultChoice1, ret[ii][kk].tooltip1, ret[ii][kk].hide2, ret[ii][kk].offByDefault2, ret[ii][kk].defaultRange2, ret[ii][kk].tooltip2)')
 				}
 			} else if (kk == 'coordBox'){
