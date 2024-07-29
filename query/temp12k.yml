@@ -54,7 +54,7 @@ Material and Interpretation Filters:
   seasonality:
     hide1: false
     defaultChoice1: annual,summerOnly,winterOnly
-    options1: All
+    options: All
     tooltip1: Choose seasonality(ies) (Begin typing for suggestions)
     hide2: false
     offByDefault2: true
