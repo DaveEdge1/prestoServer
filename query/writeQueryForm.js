@@ -195,7 +195,7 @@ const coordBox = function (hide, defaultBounds, tooltip, offByDefault) {
 	return html1
 }
 
-const seasonality = function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
+const seasonality1 = function (hide1, defaultChoice1, tooltip1, hide2, offByDefault2, defaultRange2, tooltip2) {
 	console.log("hide1: " + hide1)
 	console.log("defaultChoice1: " + defaultChoice1)
 	console.log("tooltip1: " + tooltip1)
@@ -427,7 +427,7 @@ const paramHTML = function(ret, ii) {
 			var eq1 = eval(kk)
 			console.log('eq name: ' + eq1)
 			if (hasdropdown.includes(kk)) {
-				var param1 = eval(kk + '(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
+				var param1 = eval(kk + '1(ret[ii][kk].hide, ret[ii][kk].defaultChoice, ret[ii][kk].tooltip)')
 				if (kk == 'seasonality') {
 					
 					var param1 = eval(kk + '(ret[ii][kk].hide1, ret[ii][kk].defaultChoice1, ret[ii][kk].tooltip1, ret[ii][kk].hide2, ret[ii][kk].offByDefault2, ret[ii][kk].defaultRange2, ret[ii][kk].tooltip2)')
