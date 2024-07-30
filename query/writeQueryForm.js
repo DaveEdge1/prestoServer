@@ -239,7 +239,7 @@ const seasonality1 = function (hide1, defaultChoice1, tooltip1, hide2, offByDefa
 		+ String.raw`	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault2)+`>` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
 		+ String.raw`</div>` + `\n`
-		+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault)+`; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault2)+`; display: inline-block;" class="form-group">` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>` + `\n`
 		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
 		+ String.raw`<span class="tooltip-text">`+ tooltip2 +`</span>` + `\n`
