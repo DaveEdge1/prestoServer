@@ -15,7 +15,7 @@ var hiddenText = function (boolVal){
 	if (boolVal) {
 		return 'hidden'
 	} else {
-		return 'checked'
+		return 'visible'
 	}
 }
 
@@ -239,7 +239,7 @@ const seasonality1 = function (hide1, defaultChoice1, tooltip1, hide2, offByDefa
 		+ String.raw`	<input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault2)+`>` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
 		+ String.raw`</div>` + `\n`
-		+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault)+`; display: inline-block;" class="form-group">` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>` + `\n`
 		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
 		+ String.raw`<span class="tooltip-text">`+ tooltip2 +`</span>` + `\n`
@@ -284,7 +284,7 @@ const interval = function (hide, defaultRange, offByDefault, tooltip) {
 		+ String.raw`	<input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
 		+ String.raw`</div>` + `\n`
-		+ String.raw`<div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault)+`; display: inline-block;" class="form-group">` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>` + `\n`
 		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
 		+ String.raw`<span class="tooltip-text">`+ tooltip +`</span>` + `\n`
@@ -327,7 +327,7 @@ const resolution = function (hide, defaultValue, offByDefault, tooltip) {
 		+ String.raw`	<input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
 		+ String.raw`</div>` + `\n`
-		+ String.raw`<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault)+`; display: inline-block;" class="form-group">` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>` + `\n`
 		+ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
 		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
@@ -367,7 +367,7 @@ const terrestrial = function (hide, defaultSelection, offByDefault, tooltip) {
 		+ String.raw`	<input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();' `+checkedText(offByDefault)+`>` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
 		+ String.raw`</div>` + `\n`
-		+ String.raw`<div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">` + `\n`
+		+ String.raw`<div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault)+`; display: inline-block;" class="form-group">` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
 		+ String.raw`<div style: "vertical-align: middle; height: 50px;" class="hover-text">?` + `\n`
 		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
