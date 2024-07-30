@@ -11,6 +11,14 @@ var checkedText = function (boolVal){
 	}
 }
 
+var hiddenText = function (boolVal){
+	if (boolVal) {
+		return 'hidden'
+	} else {
+		return 'checked'
+	}
+}
+
 const compilation = function (hide, defaultChoice, tooltip) {
 	if (defaultChoice == null){
 		defaultChoice = ''
@@ -168,7 +176,7 @@ const coordBox = function (hide, defaultBounds, tooltip, offByDefault) {
 		+ String.raw`	<br><br><br>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`<br>` + `\n`
-		+ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="">` + `\n`
+		+ String.raw`<div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: `+hiddenText(offByDefault)+`; display: inline-block;" class="">` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>` + `\n`
 		+ String.raw`<div style= "vertical-align: middle; height: 20px;" class="hover-text">?` + `\n`
 		+ String.raw`<span class="tooltip-text">` + tooltip + `</span>` + `\n`
