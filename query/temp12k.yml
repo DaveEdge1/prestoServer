@@ -18,7 +18,7 @@ Compilation Filter:
   compilation: 
     hide: false
     defaultChoice: [Temp12k]
-    options: [Temp12k, Pages2kTemperature]
+    options: All
     tooltip: Choose compilation(s) (Begin typing for suggestions)
 
 Location Filters:
