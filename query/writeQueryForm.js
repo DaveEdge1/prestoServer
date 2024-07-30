@@ -494,10 +494,10 @@ const dropdowns = function(recon) {
 		    if (ret[ii][key2].options != "All") {
 			dropdownHTML = dropdownHTML + String.raw`var ` + key2 + String.raw`list = [`
 			for (gg in ret[ii][key2].options) {
-				console.log('option: ' + gg)
-				dropdownHTML = dropdownHTML + String.raw`{"value":"` + gg + `","label":"` + gg + `"},` + `\n`
+				console.log('option: ' + ret[ii][key2].options[gg])
+				dropdownHTML = dropdownHTML + String.raw`{"value":"` + ret[ii][key2].options[gg] + `","label":"` + ret[ii][key2].options[gg] + `"},`
 			}
-			dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `"]` + `\n`
+			dropdownHTML = dropdownHTML.substring(0, dropdownHTML.length - 1) + `]` + `\n`
 		    } else {
 			dropdownHTML = dropdownHTML + `\n` + String.raw`var ` + key2 + String.raw`list = ` + JSON.stringify(eval(key2 + 'list')) + `\n`
 		    }
