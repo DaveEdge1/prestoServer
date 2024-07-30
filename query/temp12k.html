@@ -230,12 +230,12 @@ popQueryVariable()
 <label style="font-size:16px; margin-right:8px;">Latitude</label>
 <input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="1" onchange="updateBoundingBox();">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="0" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:30px;">max</label>
 <label style="font-size:16px; margin-right:8px;">Longitude</label>
 <input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
 <label style="margin-right:8px;">min</label>
-<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
+<input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="0" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
 <label>max</label>
 </div>
 <br><br><br><br><br><br><br><br><br>
@@ -869,8 +869,8 @@ function updatePoints (coords){
 	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 
-var compilationlist = [{"value":"0","label":"0"},
-{"value":"1","label":"1"}]
+
+var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}]
 
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
