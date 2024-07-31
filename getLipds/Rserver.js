@@ -105,8 +105,8 @@ app.post('/lipds', function(req, res) {
 	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language));
 	
 	if (newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language) == 200){
-		path1 = path.join(__dirname, '../userRecons', req.body.uniqueID, 'TSIDs.txt')
-		fs.writeFile(path1, JSON.stringify(req.body.TSIDs), (err) => {
+		path1 = path.join(__dirname, '../userRecons', req.body.uniqueID, 'TSIDs.json')
+		fs.writeFile(path1, req.body.TSIDs, (err) => {
 			  if (err)
 				    console.log(err);
 			  else {
