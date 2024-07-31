@@ -407,7 +407,7 @@ const makeRect = function (recon){
     	const ret = YAML.parse(s)
 	const coords = ret['Location Filters']['coordBox']['defaultBounds']
 	console.log('makeRect() coords: ' + coords)
-	return String.raw`let rect = L.rectangle([[`+coords[0]+`, `+coords[1]+`], [`+coords[2]+`, `+coords[3]+`]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });` + `\n`
+	return String.raw`let rect = L.rectangle([[`+coords[0]+`, `+coords[2]+`], [`+coords[1]+`, `+coords[3]+`]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });` + `\n`
 }
 
 const groupHTML = function(key, desc) {
