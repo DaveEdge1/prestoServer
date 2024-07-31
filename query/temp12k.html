@@ -798,7 +798,9 @@ function updatePoints (coords){
 	spinner.spin();
 	inRectCount = 0;
 	layerGroup.clearLayers();
+	updateBoundingBox();
 	if (!document.getElementById("coordsOn").checked) {
+		console.log("setting coords to full earth")
 		document.getElementById("lat_min").value = -90
 		document.getElementById("lat_max").value = 90
 		document.getElementById("lon_min").value = -180
@@ -809,6 +811,7 @@ function updatePoints (coords){
 		rect.editing.disable();
 		
 	} else {
+		console.log("setting coords to full earth")
 		rect.editing.enable();
 		rectCoord = changeBoxCoord();
 	}
