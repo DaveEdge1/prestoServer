@@ -810,7 +810,7 @@ function updatePoints (coords){
 		
 	} else {
 		rect.editing.enable();
-		rectCoord = changeBoxCoord();
+		rectCoord = updateBoundingBox();
 	}
  L.geoJSON([loadLatLon(coords)], {
 
