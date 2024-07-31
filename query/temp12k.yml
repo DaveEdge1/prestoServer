@@ -75,8 +75,8 @@ Material and Interpretation Filters:
 
   proxy:
     hide: false
-    defaultChoice: ~
-    options: All
+    defaultChoice: d18O
+    options: [d18O]
     tooltip: Choose proxy(ies) (Begin typing for suggestions)
 
 Temporal Filters:
@@ -85,12 +85,12 @@ Temporal Filters:
   interval:
       hide: false
       offByDefault: true
-      defaultRange: [100,600]
+      defaultRange: [200,800]
       tooltip: Choose the time period for which data will be required (years BP)
   
   resolution:
       hide: false
       offByDefault: true
-      defaultValue: 200
+      defaultValue: 400
       tooltip: Time series resolution must be better than this value (median value, in years)
 
