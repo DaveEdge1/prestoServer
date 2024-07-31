@@ -871,6 +871,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`	}` + `\n`
 + String.raw`	rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);` + `\n`
 + String.raw`	rect.editing.enable();` + `\n`
++ String.raw`	return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}` + `\n`
 + String.raw`}` + `\n`
 + String.raw`	` + `\n`
 + String.raw`//add layer for points` + `\n`
@@ -1073,7 +1074,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`		` + `\n`
 + String.raw`	} else {` + `\n`
 + String.raw`		rect.editing.enable();` + `\n`
-+ String.raw`		rectCoord = changeBoxCoord();` + `\n`
++ String.raw`		rectCoord = updateBoundingBox();` + `\n`
 + String.raw`	}` + `\n`
 + String.raw` L.geoJSON([loadLatLon(coords)], {` + `\n`
 + String.raw`` + `\n`
