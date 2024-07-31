@@ -1816,6 +1816,7 @@ grabParams().then(reso => {
 sendQuery()
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
+  changeBoxCoord();
   updatePoints(prevResp);
 });
 changeBoxCoord();
