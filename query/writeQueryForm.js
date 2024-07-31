@@ -2067,7 +2067,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`sendQuery()` + `\n`
 + String.raw`rect.on('edit', function() {` + `\n`
 + String.raw`  //setTimeout(function () {}, 100);` + `\n`
-+ String.raw`  changeBoxCoord();` + `\n`
++ String.raw`  ` + `\n`
 + String.raw`  updatePoints(prevResp);` + `\n`
 + String.raw`});` + `\n`
 + String.raw`updateBoundingBox();` + `\n`
