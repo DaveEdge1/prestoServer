@@ -63,7 +63,7 @@ Material and Interpretation Filters:
 
   archive:
     hide: true
-    defaultChoice: ~
+    defaultChoice: GlacierIce
     options: All
     tooltip: Choose archive type(s) (Begin typing for suggestions)
 
