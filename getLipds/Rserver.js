@@ -105,13 +105,14 @@ app.post('/lipds', function(req, res) {
 	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language));
 	
 	if (newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language) == 200){
-			fs.writeFile('TSIDs.txt', JSON.stringify(req.body.TSIDs), (err) => {
-				  if (err)
-					    console.log(err);
-				  else {
-					      console.log("File written successfully\n");
-					    }
-			});
+		path1 = path.join(__dirname, '../userRecons', req.body.uniqueID)
+		fs.writeFile(path1, JSON.stringify(req.body.TSIDs), (err) => {
+			  if (err)
+				    console.log(err);
+			  else {
+				      console.log("File written successfully at: " + path1);
+				    }
+		});
 		/*rspawn1(req.body.TSIDs, req.body.uniqueID, req.body.language).then(reso => {
 			var path2 = path.join(path1, "processCode.txt")
 			fs.writeFile(path2, reso.toString(), (err) => {
