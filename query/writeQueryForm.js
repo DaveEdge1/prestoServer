@@ -402,7 +402,7 @@ const configs = function (recon) {
     return allHTML
 }
 
-const makeRect(recon){
+const makeRect = function (recon){
 	const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
     	const ret = YAML.parse(s)
 	const coords = ret['Location Filters']['coordBox']['defaultBounds']
