@@ -110,8 +110,6 @@ app.post('/lipds', function(req, res) {
 					    console.log(err);
 				  else {
 					      console.log("File written successfully\n");
-					      console.log("The written has the following contents:");
-					      console.log(fs.readFileSync(path2, "utf8"));
 					    }
 			});
 		/*rspawn1(req.body.TSIDs, req.body.uniqueID, req.body.language).then(reso => {
