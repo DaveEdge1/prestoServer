@@ -1,6 +1,6 @@
 #==============================================
-# SETTINGS for Temp12k LiPDverse Query
-# Do not remove any keys
+# SETTINGS for example LiPDverse Query
+# Do not edit
 # options for keys:
 #   Explanation: free text field (Provide context for this section if needed; "~" is equivalent to NULL)
 #   hide: true OR false (make filter invisible to user; if true, defaultChoice will always be selected)
@@ -10,6 +10,8 @@
 #   defaultBounds: [minLat, maxLat, minLon, maxLon] (possible range: -90,90,-180,180; default bounding box for spatial filter)
 #   defaultRange: [min, max] (possible range: see ranges for each dual-range slider; preset toggle points for dual-range slider)
 #   tooltip: free text field (Replace the help text in the tooltip popup; "~" is equivalent to NULL, leave unchanged)
+# Settings as shown:
+#   http://143.198.98.66:86/example?recon=holocene_da&user=john.doe&domain=gmail.com&uniqueID=17080345286042665&language=R
 #==============================================
 
 Compilation Filter:
