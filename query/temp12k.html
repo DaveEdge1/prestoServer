@@ -608,6 +608,7 @@ function updateBoundingBox(){
 	}
 	rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
 	rect.editing.enable();
+	return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
 }
 	
 //add layer for points
@@ -798,7 +799,6 @@ function updatePoints (coords){
 	spinner.spin();
 	inRectCount = 0;
 	layerGroup.clearLayers();
-	updateBoundingBox();
 	if (!document.getElementById("coordsOn").checked) {
 		console.log("setting coords to full earth")
 		document.getElementById("lat_min").value = -90
@@ -813,7 +813,7 @@ function updatePoints (coords){
 	} else {
 		console.log("setting coords to full earth")
 		rect.editing.enable();
-		rectCoord = changeBoxCoord();
+		rectCoord = updateBoundingBox();
 	}
  L.geoJSON([loadLatLon(coords)], {
 
