@@ -27,7 +27,7 @@ Location Filters:
   coordBox: 
     hide: false
     offByDefault: false
-    defaultBounds: [-90,0,-180,0]
+    defaultBounds: [0,90,-180,0]
     tooltip: Provide bounds to assimilate only proxies in a given region
     
   continent: 
