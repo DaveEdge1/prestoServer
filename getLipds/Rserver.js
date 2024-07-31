@@ -106,7 +106,8 @@ app.post('/lipds', function(req, res) {
 	
 	if (newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language) == 200){
 		path1 = path.join(__dirname, '../userRecons', req.body.uniqueID, 'TSIDs.json')
-		fs.writeFile(path1, req.body.TSIDs, (err) => {
+		var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
+		fs.writeFile(path1, fullJSON, (err) => {
 			  if (err)
 				    console.log(err);
 			  else {
