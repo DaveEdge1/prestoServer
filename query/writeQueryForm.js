@@ -402,6 +402,13 @@ const configs = function (recon) {
     return allHTML
 }
 
+const makeRect(recon){
+	const s = fs.readFileSync('/root/presto/query/' + recon + '.yml','utf8');
+    	const ret = YAML.parse(s)
+	const coords = ret['Location Filters']['coordBox']['defaultBounds']
+	return String.raw`let rect = L.rectangle([[`+coords[0]+`, `+coords[1]+`], [`+coords[2]+`, `+coords[3]+`]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });` + `\n`
+}
+
 const groupHTML = function(key, desc) {
 	if (desc == null){
 		var descNew = ''
@@ -825,7 +832,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw` "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"diamond",` + `\n`
 + String.raw` "Peat":"triangle-down","Sclerosponge":"triangle-down","Shoreline":"diamond","Wood":"triangle","TerrestrialSediment":"circle"}` + `\n`
 + String.raw`//initiate leaflet rectangle` + `\n`
-+ String.raw`let rect = L.rectangle([[-90, -180], [90, 180]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });` + `\n`
++ makeRect(recon)
 + String.raw`map.addLayer(rect);` + `\n`
 + String.raw`/*` + `\n`
 + String.raw`var southWest = L.latLng(-100, -360),` + `\n`
