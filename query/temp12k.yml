@@ -84,13 +84,13 @@ Temporal Filters:
 
   interval:
       hide: false
-      offByDefault: true
+      offByDefault: false
       defaultRange: [200,800]
       tooltip: Choose the time period for which data will be required (years BP)
   
   resolution:
       hide: false
-      offByDefault: true
+      offByDefault: false
       defaultValue: 400
       tooltip: Time series resolution must be better than this value (median value, in years)
 
