@@ -274,8 +274,8 @@ const seasonality1 = function (hide1, defaultChoice1, tooltip1, hide2, offByDefa
 
 const interval = function (hide, defaultRange, offByDefault, tooltip) {
 	if (hide) {
-		var html1 = String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_fromInput" value="" type="hidden">` + `\n`
-		+ String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_toInput" value="" type="hidden">` + `\n`
+		var html1 = String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_fromInput" value="`+ defaultRange[0] +`" type="hidden">` + `\n`
+		+ String.raw`<input name="time_range_to_reconstruct" id="time_range_to_reconstruct_toInput" value="`+ defaultRange[1] +`" type="hidden">` + `\n`
 	} else {
 		var html1 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
@@ -298,11 +298,11 @@ const interval = function (hide, defaultRange, offByDefault, tooltip) {
 		+ String.raw`<div class="form_control">` + `\n`
 		+ String.raw`<div class="form_control_container">` + `\n`
 		+ String.raw`<div class="form_control_container__time">Min</div>` + `\n`
-		+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="100" min="0" max="12000" step="1"/>` + `\n`
+		+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="`+ defaultRange[0] +`" min="0" max="12000" step="1"/>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`<div class="form_control_container">` + `\n`
 		+ String.raw`<div class="form_control_container__time">Max</div>` + `\n`
-		+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="600" min="0" max="12000" step="1"/>` + `\n`
+		+ String.raw`<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="`+ defaultRange[1] +`" min="0" max="12000" step="1"/>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`</div>` + `\n`
@@ -318,7 +318,7 @@ const interval = function (hide, defaultRange, offByDefault, tooltip) {
 
 const resolution = function (hide, defaultValue, offByDefault, tooltip) {
 	if (hide) {
-		var html1 = String.raw`<input id="resolutionInput" name="resolution" type = "hidden" value="">` + `\n`
+		var html1 = String.raw`<input id="resolutionInput" name="resolution" type = "hidden" value="`+ defaultValue +`">` + `\n`
 	} else {
 		var html1 = String.raw`<div style="width: 10%; vertical-align: middle; float: left;">` + `\n`
 		+ String.raw`	<br><br><br>` + `\n`
@@ -336,7 +336,7 @@ const resolution = function (hide, defaultValue, offByDefault, tooltip) {
 		+ String.raw`<div class="sliders_control">` + `\n`
 		+ String.raw`<input id="resolutionSlider" type="range" value="`+ defaultValue +`" min="1" max="1000" step="1"/>` + `\n`
 		+ String.raw`<br>` + `\n`
-		+ String.raw`<input type="number" id="resolutionInput" name="resolution" value="100" min="1" max="1000" step="1"/>` + `\n`
+		+ String.raw`<input type="number" id="resolutionInput" name="resolution" value="`+ defaultValue +`" min="1" max="1000" step="1"/>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`</div>` + `\n`
 		+ String.raw`</div>` + `\n`
