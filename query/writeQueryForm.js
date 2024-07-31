@@ -48,7 +48,7 @@ const continent = function (hide, defaultChoice, tooltip) {
 		defaultChoice = ''
 	}
 	if (hide) {
-		var html1 = String.raw`<input id="continentIn" name="continent" type="hidden" value="">` + `\n`
+		var html1 = String.raw`<input id="continentIn" name="continent" type="hidden" value="` + defaultChoice + `">` + `\n`
 	} else {
 		var html1 = String.raw`<div class="form-group"> ` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continent">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>` + `\n`
@@ -72,7 +72,7 @@ const country = function (hide, defaultChoice, tooltip) {
 		defaultChoice = ''
 	}
 	if (hide) {
-		var html1 = String.raw`<input id="countryIn" name="country" type="hidden" value="">` + `\n`
+		var html1 = String.raw`<input id="countryIn" name="country" type="hidden" value="` + defaultChoice + `">` + `\n`
 	} else {
 		var html1 = String.raw`<div class="form-group"> ` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="country">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>` + `\n`
@@ -95,7 +95,7 @@ const archive = function (hide, defaultChoice, tooltip) {
 		defaultChoice = ''
 	}
 	if (hide) {
-		var html1 = String.raw`<input name="archiveType" id="archiveTypeIn" type="hidden" value="">` + `\n`
+		var html1 = String.raw`<input name="archiveType" id="archiveTypeIn" type="hidden" value="` + defaultChoice + `">` + `\n`
 	} else {
 		var html1 = String.raw`<div class="form-group"> ` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="archiveType_label" for="archiveType">Archive Type</label>` + `\n`
@@ -119,7 +119,7 @@ const variable = function (hide, defaultChoice, tooltip) {
 		defaultChoice = ''
 	}
 	if (hide) {
-		var html1 = String.raw`<input name="paleoData_variableName" id="variableName" type="hidden" value="">` + `\n`
+		var html1 = String.raw`<input name="paleoData_variableName" id="variableName" type="hidden" value="` + defaultChoice + `">` + `\n`
 	} else {
 		var html1 = String.raw`<div class="form-group"> ` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="variableName_label" for="variableName">Variable Name</label>` + `\n`
@@ -143,7 +143,7 @@ const proxy = function (hide, defaultChoice, tooltip) {
 		defaultChoice = ''
 	}
 	if (hide) {
-		var html1 = String.raw`<input name="paleoData_proxy" id="proxy" type="hidden" value="">` + `\n`
+		var html1 = String.raw`<input name="paleoData_proxy" id="proxy" type="hidden" value="` + defaultChoice + `">` + `\n`
 	} else {
 		var html1 = String.raw`<div class="form-group"> ` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>` + `\n`
@@ -215,7 +215,7 @@ const seasonality1 = function (hide1, defaultChoice1, tooltip1, hide2, offByDefa
 		defaultChoice1 = ''
 	}
 	if (hide1) {
-		var html1 = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden">` + `\n`
+		var html1 = String.raw`<input name="interpretation1_seasonality" id="seasonality1" type="hidden" value="` + defaultChoice1 + `">` + `\n`
 	} else {
 		var html1 = String.raw`<div class="form-group"> ` + `\n`
 		+ String.raw`<label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>` + `\n`
