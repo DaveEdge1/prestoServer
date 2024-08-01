@@ -143,6 +143,15 @@ app.get('/', function (req, res) {
   res.sendFile(formLocate(req.query.recon))
 });
 
+var formLocate2 = function(recon1){
+	return '/root/presto/jsonEditor/forms-query/' + recon1 + '.html'
+}
+
+app.get('/querypath', function (req, res) {
+  //console.log(req.params.recon)
+  //userInfo = getUserInfo(req.params.recon, req.params.parsedUser, req.params.parsedDomain, req.params.uniqueID)
+  res.sendFile(formLocate2(req.query.recon))
+});
 
 app.post('/sendReconRequest', function(req, res) {
         console.log(req.query.uniqueID)
