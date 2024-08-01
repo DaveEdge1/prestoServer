@@ -573,6 +573,24 @@ var map = L.map('map', {
   center: [-90, 0],
   zoom: 0
  });
+var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+	minZoom: 1
+}).addTo(map);
+/*
+const proj = 'EPSG:3031';
+const proj4= '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs';
+  
+let crs= new L.Proj.CRS(proj, proj4, {
+  resolutions: [8192, 4096, 2048, 1024, 512, 256], 
+  origin: [-4194304, 4194304],
+  bounds: L.bounds ([-4194304, -4194304], [4194304, 4194304])
+ }) ;
+var map = L.map('map', {
+  crs:crs,
+  center: [-90, 0],
+  zoom: 0
+ });
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
 	attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
 	maxZoom: 13
