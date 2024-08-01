@@ -430,7 +430,7 @@ function buildHtml(configs, recon) {
        //+ '<form onSubmit="search();return false;" action="">\n'//action="/sendReconRequest" method="POST"
        + '<form id="paramsForm" method="POST" onsubmit="buildURL()">\n'
        + '<input id="recon" name="recon" type="hidden" value="graph_em">\n'
-       + '<script>
+       + '<script>'
        + 'function getQueryVariable(variable)\n'
        + '{\n'
        + '       var query = window.location.search.substring(1);\n'
