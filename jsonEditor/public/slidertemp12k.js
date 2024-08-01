@@ -3,7 +3,6 @@ const color1 = '#896A67'
 const color2 = '#C6C6C6'
 var mapMax = 0;
 var mapCount = '';
-
 function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 	    const [from, to] = getParsed(fromInput, toInput);
 	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
@@ -11,7 +10,7 @@ function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 		            fromSlider.value = to;
 		            fromInput.value = to;
 		        } else {
-				        fromSlider.value = (from+3001);
+				        fromSlider.value = from;
 				    }
 }
     
@@ -262,11 +261,10 @@ function draw() {
     if (rect.h < 0){
 	rect.h = 0
     }
-	/*
     if (rect.w > 540){
 	rect.w = 540
     }
-*/
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "rgba(5, 5, 5, 0.3)";
     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
@@ -306,14 +304,16 @@ function draw() {
 			    posHandle.y = rect.y + rect.h / 2;
 			    break;
 		    }
-	var latMin = Math.round(180-(rect.y+rect.h)/3-90)
-	var latMax = Math.round(90-rect.y/3)
 	if (mapMax == 180) {
+		var latMin = Math.round(180-(rect.y+rect.h)/3-90)
+		var latMax = Math.round(90-rect.y/3)
 		var lonMin = Math.round(rect.x/3-180)
 		var lonMax = Math.round((rect.x+rect.w)/3-180)
 	} else if (mapMax == 360) {
-		var lonMin = Math.round(rect.x/3)
-		var lonMax = Math.round((rect.x+rect.w)/3)
+		var latMin = Math.round(Math.round(135-rect.y-rect.h)/1.5)
+		var latMax = Math.round(90-rect.y/1.5)
+		var lonMin = Math.round(rect.x/1.5) - 360
+		var lonMax = Math.round((rect.x+rect.w)/1.5) - 360
 	}
 
 	document.getElementById("lat_max").value = latMax
@@ -331,15 +331,20 @@ function draw() {
 
 function updateRect(maxOfMap) {
 	mapMax = maxOfMap;
+	if ((Math.round((document.getElementById("lon_max").value - document.getElementById("lon_min").value) * 1000) / 1000) > 360){
+		    document.getElementById("lon_max").value = (Math.round(Math.round(document.getElementById("lon_min").value * 1000) / 1000)+360)
+	}
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
+		var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
+		var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
 	} else if (mapMax == 360) {
-		var xmin = Math.round(Math.round(document.getElementById("lon_min").value))*3
-		var width = ((Math.round(document.getElementById("lon_max").value)) * 3) - xmin
+		var xmin = Math.round(Math.round(Math.round(document.getElementById("lon_min").value) + 360)*1.5)
+		var width = ((Math.round(document.getElementById("lon_max").value) + 360) * 1.5) - xmin
+		var ymax = Math.round((135 - Math.round(document.getElementById("lat_max").value)*1.5))
+		var height = Math.round(135 - (ymax + Math.round(document.getElementById("lat_min").value)*1.5))
 	}
-	var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
-	var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
 
 	rect.x = xmin
 	rect.y = ymax
@@ -361,14 +366,8 @@ time_range_to_reconstruct_fromSilder.oninput = () => controlFromSlider(time_rang
 time_range_to_reconstruct_toSilder.oninput = () => controlToSlider(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_toSilder, time_range_to_reconstruct_toInput);
 time_range_to_reconstruct_fromInput.onchange = () => controlFromInput(time_range_to_reconstruct_fromSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
 time_range_to_reconstruct_toInput.onchange = () => controlToInput(time_range_to_reconstruct_toSilder, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSilder);
-const time_resolutionSilder = document.getElementById("time_resolutionSilder");
-const time_resolutionInput = document.getElementById("time_resolutionInput");
-time_resolutionSilder.oninput = () => changeInput(time_resolutionSilder, time_resolutionInput);
-time_resolutionInput.onchange = () => changeSlider(time_resolutionInput, time_resolutionSilder);
-fillSingleSlider(time_resolutionSilder)
 const uncertainty_nensSilder = document.getElementById("uncertainty_nensSilder");
 const uncertainty_nensInput = document.getElementById("uncertainty_nensInput");
 uncertainty_nensSilder.oninput = () => changeInput(uncertainty_nensSilder, uncertainty_nensInput);
 uncertainty_nensInput.onchange = () => changeSlider(uncertainty_nensInput, uncertainty_nensSilder);
 fillSingleSlider(uncertainty_nensSilder)
-updateRect(180)
