@@ -1794,7 +1794,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`				var queryParams = params(useCoords=true)` + `\n`
 + String.raw`				queryParams = '&' + queryParams.substring(1);` + `\n`
 + String.raw`				queryParams = queryParams.replace(/\s/g, '');` + `\n`
-+ String.raw`				resolve("http://143.198.98.66:85/"+window.location.search+queryParams)` + `\n`
++ String.raw`				resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)` + `\n`
 + String.raw`			} else {` + `\n`
 + String.raw`				resolve("https://paleopresto.com/")` + `\n`
 + String.raw`			}` + `\n`
