@@ -573,9 +573,9 @@ var map = L.map('map', {
   center: [-90, 0],
   zoom: 0
  });
-var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-	minZoom: 1
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+	maxZoom: 13
 }).addTo(map);
 /*
 const proj = 'EPSG:3031';
