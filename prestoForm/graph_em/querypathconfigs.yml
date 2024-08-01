@@ -52,15 +52,15 @@ proxy:
     complexity: advanced
     URL: null
   path: 
-    value: PAGES2kv2
-    default: PAGES2kv2
+    value: unique
+    default: unique
     limits: null
     options: [PAGES2kv1,PAGES2kv2,PAGES2kvLATEST]
     precision: null
     long_name: proxy database
     description: the source of climate proxy data
     data_type: character
-    complexity: standard
+    complexity: experimental
     URL: null
   archiveType: 
     value: [coral]
@@ -83,17 +83,6 @@ calibration:
     long_name: climate normal period
     description: the interval to set the baseline for anomaly calculation
     data_type: range
-    complexity: standard
-    URL: null
-  coord_bounds: 
-    value: [-20,20,150,260]
-    default: [-20,20,150,260]
-    limits: [-90,90,-360,360]
-    options: [single,360]
-    precision: .001
-    long_name: coordinate bounds for instrumental data
-    description: provide bounds to include only climate data in a given region
-    data_type: lat-lon
     complexity: standard
     URL: null
   annualize_months: 
