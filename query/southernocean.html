@@ -560,23 +560,46 @@ function updateFilters(){
 
 //initiate leaflet map
 //The South Polar projection
-const proj = 'EPSG:3857';
-const proj4= '+proj=stere +lat_0=-90 +lat_ts=-65 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs';
+const proj = 'EPSG:3031';
+const proj4= '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs';
+const crsOpts={
+		resolutions: [8192, 4096, 2048, 1024, 512, 256], 
+		origin: [-4194304, 4194304],
+		bounds: L.bounds (
+			[-4194304, -4194304],
+		  [4194304, 4194304]
+		)
+	} ;
   
-let crs= new L.Proj.CRS(proj, proj4, {
-  resolutions: [156543.03392800014, 78271.51696399994, 39135.75848200009, 19567.87924099992, 9783.93962049996, 4891.96981024998, 2445.98490512499, 1222.992452562495, 611.4962262813797, 305.74811314055756, 152.87405657041106, 76.43702828507324, 38.21851414253662, 19.10925707126831, 9.554628535634155, 4.77731426794937, 2.388657133974685], 
-  origin: [0.0, 2425478.08],
-  bounds: L.bounds ([-4388309.03, -4433435.01], [4388309.03, 4433435.01])
- }) ;
+let crs= new L.Proj.CRS(proj, proj4, crsOpts) ;
+
 var map = L.map('map', {
   crs:crs,
   center: [-90, 0],
   zoom: 0
  });
-L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
-	attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
-	maxZoom: 13
-}).addTo(map);
+
+//Modis imagery
+L.tileLayer("http://map1{s}.vis.earthdata.nasa.gov/wmts-antarctic/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg", {
+    layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
+    tileMatrixSet: "EPSG3031_250m",
+    time: "2022-10-01",
+    tileSize: 512,
+    //continuousWorld: true,
+    attribution:"<a href='https://earthdata.nasa.gov/gibs'> NASA </a>"
+    }).addTo(map);
+
+//Coastlines
+L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
+    layers:"polarview:coastS10",
+    format:"image/png",
+    transparent:true,
+    attribution:"<a href='https://www.polarview.aq/antarctic'>Polarview</a>",
+    tileSize: 512,
+  }).addTo(map) ;
+  
+  
+
 /*
 const proj = 'EPSG:3031';
 const proj4= '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs';
