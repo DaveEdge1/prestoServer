@@ -499,7 +499,7 @@ console.log(`Okay, writing new form for ${recon}`);
 
 var html = buildHtml(configs(recon), recon);
 
-fs.writeFile("/root/presto/jsonEditor/forms/" + recon  + ".html", html, function(err) {
+fs.writeFile("/root/presto/jsonEditor/forms-query/" + recon  + ".html", html, function(err) {
 	    if(err) {
 		            return console.log(err);
 		        }
