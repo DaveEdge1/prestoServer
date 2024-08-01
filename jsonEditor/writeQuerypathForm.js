@@ -72,7 +72,7 @@ buildJS4 = function(mapNum, mapMax) {
 }
 
 const configs = function (recon) {
-    const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/configs.yml','utf8');
+    const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/querypathconfigs.yml','utf8');
     return YAML.parse(s)
 }
 
