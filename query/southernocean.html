@@ -573,13 +573,11 @@ var map = L.map('map', {
   center: [-90, 0],
   zoom: 0
  });
-L.tileLayer("http://map1{s}.vis.earthdata.nasa.gov/wmts-antarctic/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg", {
-    layer: "MODIS_Aqua_CorrectedReflectance_TrueColor",
-    tileMatrixSet: "EPSG3031_250m",
-    time: "2022-10-01",
-    tileSize: 512,
-    attribution:"<a href='https://earthdata.nasa.gov/gibs'> NASA </a>"
-    }).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+	maxZoom: 13
+});
+/*
 L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     layers:"polarview:coastS10",
     format:"image/png",
@@ -587,7 +585,7 @@ L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     attribution:"<a href='https://www.polarview.aq/antarctic'>Polarview</a>",
     tileSize: 512,
   }).addTo(map) ;
-/*
+
 var map = L.map('map', {attributionControl: false}).setView([0, 0], 1);
 var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
