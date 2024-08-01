@@ -2,6 +2,7 @@
 const color1 = '#896A67'
 const color2 = '#C6C6C6'
 var mapMax = 0;
+var mapCount = '';
 function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
 	    const [from, to] = getParsed(fromInput, toInput);
 	    fillSlider(fromInput, toInput, '#C6C6C6', color1, controlSlider);
@@ -260,6 +261,9 @@ function draw() {
     if (rect.h < 0){
 	rect.h = 0
     }
+    if (rect.w > 540){
+	rect.w = 540
+    }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "rgba(5, 5, 5, 0.3)";
@@ -300,14 +304,16 @@ function draw() {
 			    posHandle.y = rect.y + rect.h / 2;
 			    break;
 		    }
-	var latMin = Math.round(180-(rect.y+rect.h)/3-90)
-	var latMax = Math.round(90-rect.y/3)
 	if (mapMax == 180) {
+		var latMin = Math.round(180-(rect.y+rect.h)/3-90)
+		var latMax = Math.round(90-rect.y/3)
 		var lonMin = Math.round(rect.x/3-180)
 		var lonMax = Math.round((rect.x+rect.w)/3-180)
 	} else if (mapMax == 360) {
-		var lonMin = Math.round(rect.x/3)
-		var lonMax = Math.round((rect.x+rect.w)/3)
+		var latMin = Math.round(Math.round(135-rect.y-rect.h)/1.5)
+		var latMax = Math.round(90-rect.y/1.5)
+		var lonMin = Math.round(rect.x/1.5) - 360
+		var lonMax = Math.round((rect.x+rect.w)/1.5) - 360
 	}
 
 	document.getElementById("lat_max").value = latMax
@@ -325,15 +331,21 @@ function draw() {
 
 function updateRect(maxOfMap) {
 	mapMax = maxOfMap;
+	if ((Math.round((document.getElementById("lon_max").value - document.getElementById("lon_min").value) * 1000) / 1000) > 360){
+		    document.getElementById("lon_max").value = (Math.round(Math.round(document.getElementById("lon_min").value * 1000) / 1000)+360)
+	}
 	if (mapMax == 180) {
 		var xmin = Math.round(Math.round(document.getElementById("lon_min").value) + 180)*3
 		var width = ((Math.round(document.getElementById("lon_max").value) + 180) * 3) - xmin
+		var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
+		var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
 	} else if (mapMax == 360) {
-		var xmin = Math.round(Math.round(document.getElementById("lon_min").value))*3
-		var width = ((Math.round(document.getElementById("lon_max").value)) * 3) - xmin
+		var xmin = Math.round(Math.round(Math.round(document.getElementById("lon_min").value) + 360)*1.5)
+		var width = ((Math.round(document.getElementById("lon_max").value) + 360) * 1.5) - xmin
+		var ymax = Math.round((135 - Math.round(document.getElementById("lat_max").value)*1.5))
+		var height = Math.round(135 - (ymax + Math.round(document.getElementById("lat_min").value)*1.5))
 	}
-	var ymax = Math.round(((90*3) - Math.round(document.getElementById("lat_max").value)*3))
-	var height = Math.round(270 - (ymax + Math.round(document.getElementById("lat_min").value)*3))
+
 	rect.x = xmin
 	rect.y = ymax
 	rect.h = height
@@ -394,11 +406,6 @@ const prior_seedInput = document.getElementById("prior_seedInput");
 prior_seedSilder.oninput = () => changeInput(prior_seedSilder, prior_seedInput);
 prior_seedInput.onchange = () => changeSlider(prior_seedInput, prior_seedSilder);
 fillSingleSlider(prior_seedSilder)
-const proxy_resolution_maxSilder = document.getElementById("proxy_resolution_maxSilder");
-const proxy_resolution_maxInput = document.getElementById("proxy_resolution_maxInput");
-proxy_resolution_maxSilder.oninput = () => changeInput(proxy_resolution_maxSilder, proxy_resolution_maxInput);
-proxy_resolution_maxInput.onchange = () => changeSlider(proxy_resolution_maxInput, proxy_resolution_maxSilder);
-fillSingleSlider(proxy_resolution_maxSilder)
 const proxy_seedSilder = document.getElementById("proxy_seedSilder");
 const proxy_seedInput = document.getElementById("proxy_seedInput");
 proxy_seedSilder.oninput = () => changeInput(proxy_seedSilder, proxy_seedInput);
@@ -414,14 +421,3 @@ function prior_models_incrementCheckCycle(){
 prior_models_checkCycle = prior_models_checkCycle+1;
 return (prior_models_checkCycle);
 }
-var proxy_archives_checkCycle = 0;
-function proxy_archives_incrementCheckCycle(){
-proxy_archives_checkCycle = proxy_archives_checkCycle+1;
-return (proxy_archives_checkCycle);
-}
-var proxy_seasonality_checkCycle = 0;
-function proxy_seasonality_incrementCheckCycle(){
-proxy_seasonality_checkCycle = proxy_seasonality_checkCycle+1;
-return (proxy_seasonality_checkCycle);
-}
-updateRect(180)
