@@ -152,7 +152,7 @@ function uncheckAll(divid, checkCycle) {
 				    }
 			    }
 }
-
+/*
 var canvas = document.getElementById('canvas'),
 	    ctx = canvas.getContext('2d'),
 	    rect = {
@@ -355,7 +355,7 @@ function updateRect(maxOfMap) {
 }
 
 init();
-
+*/
 const time_range_to_reconstruct_fromSilder = document.getElementById("time_range_to_reconstruct_fromSilder");
 const time_range_to_reconstruct_toSilder = document.getElementById("time_range_to_reconstruct_toSilder");
 const time_range_to_reconstruct_fromInput = document.getElementById("time_range_to_reconstruct_fromInput");
