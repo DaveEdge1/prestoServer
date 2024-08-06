@@ -4,14 +4,6 @@ process.argv.forEach(function (val, index, array) {
 
 var fs = require('fs');
 const path = require("path")
-var bodyParser = require('body-parser');
-
-//app.use(bodyParser.json());
-app.use(bodyParser.json({
-     parameterLimit: 100000,
-     limit: '50mb',
-     extended: true
-}));
 
 var child_process = require('child_process');
 var file_path = "getLipd.R";
