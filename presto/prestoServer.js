@@ -396,6 +396,8 @@ runRecon = async function(uniqueID, user, domain, recon) {
         */
 	if (recon == 'holocene_da'){
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
+	} else if (recon == 'temp12k'){
+		var launchText = 'docker run --rm --name ' + uniqueID + '-v /root/temp12k-regional-composites/regional_composites.R:/regional_composites.R -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	} else {
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	}
