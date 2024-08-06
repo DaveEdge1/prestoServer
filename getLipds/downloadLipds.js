@@ -1,6 +1,7 @@
 process.argv.forEach(function (val, index, array) {
   console.log(index + ': ' + val);
 });
+console.log("num args: " + process.argv.length)
 
 var fs = require('fs');
 const path = require("path")
