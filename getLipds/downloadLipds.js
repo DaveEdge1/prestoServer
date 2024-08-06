@@ -1,3 +1,7 @@
+process.argv.forEach(function (val, index, array) {
+  console.log(index + ': ' + val);
+});
+
 var fs = require('fs');
 const path = require("path")
 var bodyParser = require('body-parser');
@@ -93,11 +97,11 @@ pickleEm = function(path1){
 									                                                                                        });
 }
 
-app.post('/lipds', function(req, res) {
+downloadEm = function(TSIDs, uniqueID, language){
 	
-	if (newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language)){
-		path1 = path.join(__dirname, '../userRecons', req.body.uniqueID, 'TSIDs.json')
-		var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
+	if (newStatus(TSIDs, uniqueID, language)){
+		path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
+		var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs) + `}`
 		fs.writeFile(path1, fullJSON, (err) => {
 			  if (err)
 				    console.log(err);
@@ -105,7 +109,7 @@ app.post('/lipds', function(req, res) {
 				      console.log("File written successfully at: " + path1);
 				    }
 		});
-		rspawn1(req.body.TSIDs, req.body.uniqueID, req.body.language).then(reso => {
+		rspawn1(TSIDs, uniqueID, language).then(reso => {
 			var path2 = path.join(path1, "processCode.txt")
 			fs.writeFile(path2, reso.toString(), (err) => {
 				  if (err)
@@ -116,7 +120,7 @@ app.post('/lipds', function(req, res) {
 					      console.log(fs.readFileSync(path2, "utf8"));
 					    }
 			});
-			fs.writeFile('TSIDs.txt', JSON.stringify(req.body.TSIDs), (err) => {
+			fs.writeFile('TSIDs.txt', JSON.stringify(TSIDs), (err) => {
 				  if (err)
 					    console.log(err);
 				  else {
@@ -125,14 +129,11 @@ app.post('/lipds', function(req, res) {
 					      console.log(fs.readFileSync(path2, "utf8"));
 					    }
 			});
-			if (reso == 0 && req.body.language == "Python"){
+			if (reso == 0 && language == "Python"){
 				pickleEm(path1)
 			}
 		});
 	}
 
-});
+};
 
-app.listen(PORT, function () {
-		    console.log(`Express server listening on port ${PORT}`)
-		  })
