@@ -95,7 +95,14 @@ downloadEm = function(TSIDs, uniqueID, language){
 	
 		if (newStatus(TSIDs, uniqueID, language)){
 			path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
-			const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+			fs.stat(path1, function(err, stat) {
+  				if (err == null) {
+					const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+				} else {
+					console.log('no TSIDs file for given uniqueID: ' + uniqueID)
+					process.exit(1);
+				}
+			});
 			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs) + `}`
 			console.log('TSIDs: ' + TSIDs)
 			rspawn1(TSIDs, uniqueID, language).then(reso => {
