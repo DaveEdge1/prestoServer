@@ -96,35 +96,35 @@ downloadEm = function(TSIDs, uniqueID, language){
 		if (newStatus(TSIDs, uniqueID, language)){
 			path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs) + `}`
-			fs.writeFile(path1, fullJSON, (err) => {
-				  if (err)
-					    console.log(err);
-				  else {
-					      console.log("File written successfully at: " + path1);
-					    }
-			});
+			const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+			console.log('TSIDs: ' + TSIDs)
 			rspawn1(TSIDs, uniqueID, language).then(reso => {
-				var path2 = path.join(path1, "processCode.txt")
-				fs.writeFile(path2, reso.toString(), (err) => {
-					  if (err)
-						    console.log(err);
-					  else {
-						      console.log("File written successfully\n");
-						      console.log("The written has the following contents:");
-						      console.log(fs.readFileSync(path2, "utf8"));
-						    }
-				});
-				fs.writeFile('TSIDs.txt', JSON.stringify(TSIDs), (err) => {
-					  if (err)
-						    console.log(err);
-					  else {
-						      console.log("File written successfully\n");
-						      console.log("The written has the following contents:");
-						      console.log(fs.readFileSync(path2, "utf8"));
-						    }
-				});
-				if (reso == 0 && language == "Python"){
-					pickleEm(path1)
+				if (reso == 1){
+					process.exit(1);
+				} else {
+					
+					var path2 = path.join(path1, "processCode.txt")
+					fs.writeFile(path2, reso.toString(), (err) => {
+						  if (err)
+							    console.log(err);
+						  else {
+							      console.log("File written successfully\n");
+							      console.log("The written has the following contents:");
+							      console.log(fs.readFileSync(path2, "utf8"));
+							    }
+					});
+					fs.writeFile('TSIDs.txt', JSON.stringify(TSIDs), (err) => {
+						  if (err)
+							    console.log(err);
+						  else {
+							      console.log("File written successfully\n");
+							      console.log("The written has the following contents:");
+							      console.log(fs.readFileSync(path2, "utf8"));
+							    }
+					});
+					if (reso == 0 && language == "Python"){
+						pickleEm(path1)
+					}
 				}
 			});
 		}
