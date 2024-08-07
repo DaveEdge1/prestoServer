@@ -95,8 +95,8 @@ downloadEm = function(TSIDs, uniqueID, language){
 	
 		if (newStatus(TSIDs, uniqueID, language)){
 			path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
-			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs) + `}`
 			const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs) + `}`
 			console.log('TSIDs: ' + TSIDs)
 			rspawn1(TSIDs, uniqueID, language).then(reso => {
 				if (reso == 1){
