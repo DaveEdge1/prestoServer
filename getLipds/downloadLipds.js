@@ -107,9 +107,8 @@ var downloadEm = function(uniqueID, language){
 					}
 				});
 			};
-			var TSIDs1 = TSIDs(path1)
-			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs1) + `}`
-			rspawn1(TSIDs1, uniqueID, language).then(reso => {
+			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs(path1)) + `}`
+			rspawn1(fullJSON, uniqueID, language).then(reso => {
 				if (reso == 1){
 					process.exit(1);
 				} else {
