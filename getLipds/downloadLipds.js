@@ -8,7 +8,6 @@ const path = require("path")
 var child_process = require('child_process');
 var file_path = "getLipd.R";
 var r_comm = '/usr/bin/Rscript';
-let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
 var newStatus = function(TSIDs, uniqueID, language){
@@ -21,7 +20,7 @@ var newStatus = function(TSIDs, uniqueID, language){
 
 
 var rspawn1 = function (TSIDs, uniqueID, language){
-	path1 = path.join(__dirname, '../userRecons', uniqueID)
+	var path1 = path.join(__dirname, '../userRecons', uniqueID)
 	fs.mkdir(path1,
 		(err) => {
 		if (err) {
@@ -94,7 +93,7 @@ downloadEm = function(TSIDs, uniqueID, language){
 	if (process.argv.length == 5){
 	
 		if (newStatus(TSIDs, uniqueID, language)){
-			path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
+			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 			fs.stat(path1, function(err, stat) {
   				if (err == null) {
 					console.log('path1: ' + path1);
