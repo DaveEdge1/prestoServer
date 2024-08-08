@@ -97,6 +97,7 @@ downloadEm = function(TSIDs, uniqueID, language){
 			path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 			fs.stat(path1, function(err, stat) {
   				if (err == null) {
+					console.log('path1: ' + path1);
 					const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
 				} else {
 					console.log('no TSIDs file for given uniqueID: ' + uniqueID)
