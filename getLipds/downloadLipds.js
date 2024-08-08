@@ -119,8 +119,8 @@ var downloadEm = function(uniqueID, language){
 		if (newStatus(uniqueID, language)){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 
-			//var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs(path1)) + `}`
-			rspawn1(TSIDs(path1), uniqueID, language).then(reso => {
+			var fullJSON = JSON.parse(TSIDs(path1))
+			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
 				if (reso == 1){
 					process.exit(1);
 				} else {
