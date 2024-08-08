@@ -89,6 +89,15 @@ pickleEm = function(path1){
 };
 
 TSIDs = function(path1){
+	try {
+	  return fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+	} catch (error) {
+	  console.log('no TSIDs file for given uniqueID: ' + uniqueID)
+			process.exit(1);
+	  // Expected output: ReferenceError: nonExistentFunction is not defined
+	  // (Note: the exact output may be browser-dependent)
+	}
+	/*
 	fs.statSync(path1, function(err, stat) {
 		if (err == null) {
 			console.log('path1: ' + path1);
@@ -100,6 +109,7 @@ TSIDs = function(path1){
 			process.exit(1);
 		}
 	});
+ */
 };
 
 var downloadEm = function(uniqueID, language){
