@@ -66,27 +66,27 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 };
 
 pickleEm = function(path1){
-	                                console.log("launching lipd pickler")
-	                                var dockerComm = "docker run -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
-	                                var dockerspawn = child_process.exec(dockerComm);
-	                                                        dockerspawn.stdout.on('data', function (data) {
-									                                                                                                console.log(data.toString());
-									                                                                                        });
+	console.log("launching lipd pickler")
+	var dockerComm = "docker run -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
+	var dockerspawn = child_process.exec(dockerComm);
+	dockerspawn.stdout.on('data', function (data) {
+		console.log(data.toString());
+	});
 
-	                                                        dockerspawn.stderr.on('data', function (data) {
-									                                                                                                console.log('stderr: ' + data);
-									                                                                                                console.log(data.toString().search("error"));
-									                                                                                                console.log(dockerspawn.connected);
-									                                                                                                if ((data.toString().search("error") != -1) ) {
-																						                                                                                                                                                console.log('process has been killed - "error" keyword found in stderr!');
-																						                                                                                                                                                dockerspawn.kill('SIGTERM');
-																						                                                                                                                                        }
-									                                                                                        });
+	dockerspawn.stderr.on('data', function (data) {
+		console.log('stderr: ' + data);
+		console.log(data.toString().search("error"));
+		console.log(dockerspawn.connected);
+		if ((data.toString().search("error") != -1) ) {
+			console.log('process has been killed - "error" keyword found in stderr!');
+			dockerspawn.kill('SIGTERM');
+		}
+	});
 
-	                                                        dockerspawn.on('close', function (code) {
-									                                                                                                console.log('child process exited with code ' + code);
-									                                                                                                return(code)
-									                                                                                        });
+	dockerspawn.on('close', function (code) {
+		console.log('child process exited with code ' + code);
+		return(code)
+	});
 };
 
 TSIDs = function(path1){
@@ -121,7 +121,7 @@ var downloadEm = function(uniqueID, language){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 
 			var fullJSON = JSON.parse(TSIDs(path1))
-			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
+			rspawn1(fullJSON.TSIDs, uniqueID, language)/*.then(reso => {
 				if (reso == 1){
 					process.exit(1);
 				} else {
@@ -144,7 +144,7 @@ var downloadEm = function(uniqueID, language){
 							      console.log("The written has the following contents:");
 							      console.log(fs.readFileSync(path2, "utf8"));
 							    }
-					});
+					});*/
 					if (reso == 0 && language == "Python"){
 						pickleEm(path1)
 					}
