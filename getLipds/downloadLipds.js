@@ -99,13 +99,13 @@ var downloadEm = function(uniqueID, language){
 	  				if (err == null) {
 						console.log('path1: ' + path1);
 						const TSIDs2 = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
-						console.log('TSIDs read from file: ' + TSIDs);
+						console.log('TSIDs read from file: ' + TSIDs2);
+						return TSIDs2
 					} else {
 						console.log('no TSIDs file for given uniqueID: ' + uniqueID)
 						process.exit(1);
 					}
 				});
-				return TSIDs2
 			};
 			var TSIDs1 = TSIDs(path1)
 			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs1) + `}`
