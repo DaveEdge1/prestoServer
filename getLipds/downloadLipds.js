@@ -62,7 +62,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 			});
 	});
 	
-}
+};
 
 pickleEm = function(path1){
 	                                console.log("launching lipd pickler")
@@ -86,7 +86,21 @@ pickleEm = function(path1){
 									                                                                                                console.log('child process exited with code ' + code);
 									                                                                                                return(code)
 									                                                                                        });
-}
+};
+
+TSIDs = function(path1){
+	fs.statSync(path1, function(err, stat) {
+		if (err == null) {
+			console.log('path1: ' + path1);
+			const TSIDs2 = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+			console.log('TSIDs read from file: ' + TSIDs2);
+			return TSIDs2
+		} else {
+			console.log('no TSIDs file for given uniqueID: ' + uniqueID)
+			process.exit(1);
+		}
+	});
+};
 
 var downloadEm = function(uniqueID, language){
 
@@ -94,19 +108,7 @@ var downloadEm = function(uniqueID, language){
 	
 		if (newStatus(uniqueID, language)){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
-			const TSIDs = function(path1){
-				fs.statSync(path1, function(err, stat) {
-	  				if (err == null) {
-						console.log('path1: ' + path1);
-						const TSIDs2 = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
-						console.log('TSIDs read from file: ' + TSIDs2);
-						return TSIDs2
-					} else {
-						console.log('no TSIDs file for given uniqueID: ' + uniqueID)
-						process.exit(1);
-					}
-				});
-			};
+
 			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs(path1)) + `}`
 			rspawn1(fullJSON, uniqueID, language).then(reso => {
 				if (reso == 1){
