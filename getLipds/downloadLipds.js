@@ -11,7 +11,7 @@ var r_comm = '/usr/bin/Rscript';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
 var newStatus = function(TSIDs, uniqueID, language){
-	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined' || typeof language == 'undefined'){
+	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(false)
 	} else {
 		return(true)
@@ -88,16 +88,17 @@ pickleEm = function(path1){
 									                                                                                        });
 }
 
-downloadEm = function(TSIDs, uniqueID, language){
+downloadEm = function(uniqueID, language){
 
-	if (process.argv.length == 5){
+	if (process.argv.length == 4){
 	
-		if (newStatus(TSIDs, uniqueID, language)){
+		if (newStatus(uniqueID, language)){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 			fs.stat(path1, function(err, stat) {
   				if (err == null) {
 					console.log('path1: ' + path1);
 					const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+					console.log('TSIDs read from file: ' + TSIDs);
 				} else {
 					console.log('no TSIDs file for given uniqueID: ' + uniqueID)
 					process.exit(1);
@@ -142,5 +143,5 @@ downloadEm = function(TSIDs, uniqueID, language){
 
 };
 
-downloadEm(process.argv[2], process.argv[3], process.argv[4])
+downloadEm(process.argv[2], process.argv[3])
 
