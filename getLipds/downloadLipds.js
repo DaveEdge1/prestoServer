@@ -10,7 +10,7 @@ var file_path = "getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-var newStatus = function(TSIDs, uniqueID, language){
+var newStatus = function(uniqueID, language){
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(false)
 	} else {
