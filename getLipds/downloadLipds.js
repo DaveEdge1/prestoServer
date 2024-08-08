@@ -88,30 +88,33 @@ pickleEm = function(path1){
 									                                                                                        });
 }
 
-downloadEm = function(uniqueID, language){
+var downloadEm = function(uniqueID, language){
 
 	if (process.argv.length == 4){
 	
 		if (newStatus(uniqueID, language)){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
-			fs.statSync(path1, function(err, stat) {
-  				if (err == null) {
-					console.log('path1: ' + path1);
-					const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
-					console.log('TSIDs read from file: ' + TSIDs);
-				} else {
-					console.log('no TSIDs file for given uniqueID: ' + uniqueID)
-					process.exit(1);
-				}
-			});
-			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs) + `}`
-			console.log('TSIDs: ' + TSIDs)
-			rspawn1(TSIDs, uniqueID, language).then(reso => {
+			const TSIDs = function(path1){
+				fs.statSync(path1, function(err, stat) {
+	  				if (err == null) {
+						console.log('path1: ' + path1);
+						const TSIDs = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
+						console.log('TSIDs read from file: ' + TSIDs);
+					} else {
+						console.log('no TSIDs file for given uniqueID: ' + uniqueID)
+						process.exit(1);
+					}
+				});
+				return TSIDs
+			};
+			var TSIDs1 = TSIDs(path1)
+			var fullJSON = `{"TSIDs":` + JSON.stringify(TSIDs1) + `}`
+			rspawn1(TSIDs1, uniqueID, language).then(reso => {
 				if (reso == 1){
 					process.exit(1);
 				} else {
 					
-					var path2 = path.join(path1, "processCode.txt")
+					var path2 = path.join(__dirname, '../userRecons', uniqueID, "processCode.txt")
 					fs.writeFile(path2, reso.toString(), (err) => {
 						  if (err)
 							    console.log(err);
