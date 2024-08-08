@@ -144,12 +144,12 @@ var downloadEm = function(uniqueID, language){
 							      console.log("The written has the following contents:");
 							      console.log(fs.readFileSync(path2, "utf8"));
 							    }
-					});*/
+					});
 					if (reso == 0 && language == "Python"){
 						pickleEm(path1)
 					}
-				}
-			});
+				//}
+			//});*/
 		}
 	} else {
 		console.log("Error: num args to downloadLipds.js: " + process.argv.length)
