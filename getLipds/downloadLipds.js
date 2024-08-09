@@ -89,7 +89,7 @@ pickleEm = function(path1){
 	});
 };
 
-TSIDs = function(path1){
+TSIDs = function(path1, uniqueID){
 	try {
 	  return fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
 	} catch (error) {
@@ -120,7 +120,7 @@ var downloadEm = function(uniqueID, language){
 		if (newStatus(uniqueID, language)){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 
-			var fullJSON = JSON.parse(TSIDs(path1))
+			var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
 			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
    					if (reso == 0 && language == "Python"){
 						pickleEm(path1)
