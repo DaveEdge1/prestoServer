@@ -448,7 +448,7 @@ prestoStartHtml = function (uniqueID, user, domain, recon) {
 		 + '{window.location = "https://paleopresto.com/"; }, timeout); </script>')
 }
 
-app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
+app.get("/:recon/:user/:domain/:uniqueID/:language", (req, res) => {
 	console.log("uniqueID: " + req.params.uniqueID)
 	console.log("reconID: " + req.params.uniqueID)
 	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon))
