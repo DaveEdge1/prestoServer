@@ -21,13 +21,14 @@ var newStatus = function(uniqueID, language){
 
 var rspawn1 = function (TSIDs, uniqueID, language){
 	var path1 = path.join(__dirname, '../userRecons', uniqueID)
+	/*
 	fs.mkdir(path1,
 		(err) => {
 		if (err) {
 			return console.error(err);
 		}
 		console.log('Directory created successfully at: ' + path1);
-	});
+	});*/
 	if (language == "Python"){
 		var path3 = path.join(path1, "lipd.pkl")
 		fs.writeFile(path3, " ", (err) => {
