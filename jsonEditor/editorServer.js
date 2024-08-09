@@ -117,10 +117,10 @@ newDir = function(dirname) {
 	        return (dirname)
 }
 
-function writeConfigs (recon, user, domain, jsonBody, uniqueID) {
+function writeConfigs (recon, user, domain, jsonBody, uniqueID, language) {
   var reconID = uniqueID + '_' + recon
   var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
-  var downloadPath = 'http://143.198.98.66:81/' + recon + '/' + user + '/' + domain + '/' + reconID
+  var downloadPath = 'http://143.198.98.66:81/' + recon + '/' + user + '/' + domain + '/' + reconID + '/' + language
   editConfigs(configLoc, jsonBody, recon, reconID)
   //newDir('/root/presto/userRecons/' + uniqueID)
   return (downloadPath);
@@ -159,7 +159,7 @@ app.post('/sendReconRequest', function(req, res) {
 	//var d = new Date();
 	//var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
 	//var downloadPath = writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID)
-	res.redirect(writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID))
+	res.redirect(writeConfigs(req.query.recon, req.query.user, req.query.domain, req.body, req.query.uniqueID, req.query.language))
 	//res.download(writeConfigs(userInfo.recon, userInfo.parsedUser, userInfo.parsedDomain, req.body))
 });
 
