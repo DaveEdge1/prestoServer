@@ -5,6 +5,7 @@ const fs = require('fs');
 var shelljs = require("shelljs");
 //const util = require('util');
 var exec = require("child_process").exec;
+var execSync = require("child_process").execSync;
 var archiver = require('archiver');
 var YAML = require('yaml')
 const streams = require('memory-streams')
@@ -366,7 +367,7 @@ vizStatus = async function (uniqueID) {
 }
 
 
-runRecon = async function(uniqueID, user, domain, recon) {
+runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	console.log('reconParams(recon): ' + reconParams(recon))
 
@@ -397,11 +398,26 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	if (recon == 'holocene_da'){
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
 	} else if (recon == 'temp12k'){
-		var launchText = 'docker run --rm --name ' + uniqueID + '-v /root/temp12k-regional-composites/regional_composites.R:/regional_composites.R -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + uniqueID + '-v /root/userRecons/'+uniqueID+'/lipd.rds:/lipd.rds ' '-v /root/temp12k-regional-composites/regional_composites.R:/regional_composites.R -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	} else {
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	}
-	//var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' ' + reconParams(recon).conTag
+
+	var lipdText = 'node downloadLipds.js ' + uniqueID + ' ' + language
+
+	async function gatherLipds(lipdText) {
+		  console.log('gathering lipd data... ' + lipdText);
+		  var { stdout, stderr } = execSync(lipdText);
+		  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
+	
+		  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
+	
+		  await sleep(1000)
+	}
+	await gatherLipds(lipdText)
+	console.log('lipd data saved'))
+	
 	async function startContainer(launchText) {
 	  console.log('running container...');
 	  console.log(launchText)
@@ -415,7 +431,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  await dockerStatus(uniqueID);
 
 	}
-	  await startContainer(launchText)
+	await startContainer(launchText)
 
 	
 	async function writeViz(uniqueID, dirname) {
@@ -428,7 +444,7 @@ runRecon = async function(uniqueID, user, domain, recon) {
 	  	await vizStatus(uniqueID);
 	}
 
-	  await writeViz(uniqueID, dirname)
+	await writeViz(uniqueID, dirname)
 	  /*
 	  if (stdout != null){
 		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
