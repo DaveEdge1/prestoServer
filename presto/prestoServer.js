@@ -370,31 +370,16 @@ vizStatus = async function (uniqueID) {
 runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	console.log('reconParams(recon): ' + reconParams(recon))
-
 	console.log('recon: ' + reconParams(recon).title)
-
 	console.log('resultsDir: ', reconParams(recon).resultsDir)
 	console.log('paramsLoc: ', reconParams(recon).paramsCon)
 	console.log('container: ', reconParams(recon).conTag)
-	
 	
 	var stdout = new streams.WritableStream()
 	var stderr = new streams.WritableStream()
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	var configLoc = updateParams(uniqueID, recon)
-	//var dockerSuccess = countNetcdf(dirname)
-	/*
-	let options = {
-		Tty: false,
-		HostConfig: {
-			AutoRemove: true,
-			Binds: [
-				dirname + ':' + rparams[recon].resultsDir,
-				configLoc + ':' + rparams[recon].paramsCon
-				]
-			}
-		}
-        */
+
 	if (recon == 'holocene_da'){
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
 	} else if (recon == 'temp12k'){
@@ -432,7 +417,6 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	}
 	await startContainer(launchText)
-
 	
 	async function writeViz(uniqueID, dirname) {
 		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
@@ -445,48 +429,11 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	}
 
 	await writeViz(uniqueID, dirname)
-	  /*
-	  if (stdout != null){
-		  fs.writeFile(dirname+'docker_stdout.txt', stdout.toString())
-	  }
-	  if (stderr != null){
-		  fs.writeFile(dirname+'docker_stderr.txt', stderr.toString())
-	  }
-          */
 	  console.log('container run complete');
-	
 	  await sleep(1000)
-	  
 	  await zipIt('/root/presto/userRecons/' + uniqueID)
-
 	  console.log('files zipped');
-
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
-	  //removeZipped('/root/presto/userRecons/' + uniqueID)
-	
-
-        /*
-
-	
-		docker.run(rparams[recon].conTag,
-			   [],
-			   [stdout, stderr],
-			   options,
-			   
-			   function (err, data, container) {
-				   fs.writeFile(dirname+'docker_stdout.txt', stdout.toString(), function(err) {
-					   if(err) {
-						   return console.log(err);
-					   }
-				   });
-				   fs.writeFile(dirname+'docker_stderr.txt', stderr.toString(), function(err) {
-					   if(err) {
-						   return console.log(err);
-					   }
-				   });
-				   sendEmail(dockerSuccess, user, domain, uniqueID, configLoc)
-				   zipIt(uniqueID)
-			   })*/
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon) {
@@ -504,7 +451,7 @@ app.get("/:recon/:user/:domain/:uniqueID", (req, res) => {
 	console.log("uniqueID: " + req.params.uniqueID)
 	console.log("reconID: " + req.params.uniqueID)
 	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon))
-	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon)
+	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon, req.params.language)
 })
 
 app.listen(PORT, function () {
