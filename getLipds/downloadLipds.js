@@ -6,7 +6,7 @@ var fs = require('fs');
 const path = require("path")
 
 var child_process = require('child_process');
-var file_path = "getLipd.R";
+var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
