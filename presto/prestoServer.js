@@ -403,7 +403,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	}
 
-	var lipdText = 'node downloadLipds.js ' + uniqueID + ' ' + language
+	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
 
 	async function gatherLipds(lipdText) {
 		  console.log('gathering lipd data... ' + lipdText);
