@@ -374,6 +374,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	console.log('resultsDir: ', reconParams(recon).resultsDir)
 	console.log('paramsLoc: ', reconParams(recon).paramsCon)
 	console.log('container: ', reconParams(recon).conTag)
+	console.log('language: ' + language)
 	
 	var stdout = new streams.WritableStream()
 	var stderr = new streams.WritableStream()
