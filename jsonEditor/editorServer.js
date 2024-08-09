@@ -48,7 +48,7 @@ function formKeyIndex (formData, formKey){
 function parseBool(val) { return val === true || val === "true" }
 
 function editConfigs (configLoc, formEdits, recon, uniqueID){
-	configDir = newDir('/root/presto/userRecons/' + uniqueID)
+	configDir = '/root/presto/userRecons/' + uniqueID
 	var configFile = fs.readFileSync(configLoc,'utf8')
 	var configFileNew = YAML.parse(configFile)
 	for (var key1 in configFileNew){
@@ -108,13 +108,6 @@ function editConfigs (configLoc, formEdits, recon, uniqueID){
                     console.log("The config file file was saved!");
 });
 	return(configDir + 'configs.yml')
-}
-
-newDir = function(dirname) {
-	        fs.mkdirSync(dirname, { recursive: true }, (err) => {
-			                  if (err) throw err;
-			        });
-	        return (dirname)
 }
 
 function writeConfigs (recon, user, domain, jsonBody, uniqueID, language) {
