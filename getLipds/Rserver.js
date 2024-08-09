@@ -112,7 +112,7 @@ app.post('/lipds', function(req, res) {
 	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language));
 	
 	if (newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language) == 200){
-		path1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.query.recon, 'TSIDs.json'))
+		path1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon, 'TSIDs.json'))
 		var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
 		fs.writeFile(path1, fullJSON, (err) => {
 			  if (err)
