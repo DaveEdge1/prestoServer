@@ -393,9 +393,9 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	async function gatherLipds(lipdText) {
 		  console.log('gathering lipd data... ' + lipdText);
-		  var { stdout, stderr } = execSync(lipdText);
-		  stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
+		  execSync(lipdText);
+		  //stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+		  //stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
 	
 		  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 	
