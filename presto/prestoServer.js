@@ -416,7 +416,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 		  await sleep(1000)
 	}
 	await gatherLipds(lipdText)
-	console.log('lipd data saved'))
+	console.log('lipd data saved');
 	
 	async function startContainer(launchText) {
 	  console.log('running container...');
