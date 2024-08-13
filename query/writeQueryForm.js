@@ -2073,14 +2073,21 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`updateBoundingBox();` + `\n`
 + String.raw`</script>` + `\n`
 + String.raw`</html>`
-
+/*
 fs.writeFile("/root/presto/query/" + recon  + ".html", htmlString, function(err) {
 	    if(err) {
 		            return console.log(err);
 		        }
 	    console.log("The " + recon + ".html file was saved!");
 }); 
+*/
 
+fs.writeFile("/root/presto/query/temp12kRedux.html", htmlString, function(err) {
+	    if(err) {
+		            return console.log(err);
+		        }
+	    console.log("The temp12kRedux.html file was saved!");
+}); 
 
 //fs.writeFile("/root/presto/jsonEditor/public/slider" + recon + ".js", jsExt + jsExt2 + jsExt3 + jsExt4, function(err) {
 //	            if(err) {
