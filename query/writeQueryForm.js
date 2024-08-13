@@ -1780,7 +1780,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`			var resoJSON = JSON.parse(reso);` + `\n`
 + String.raw`			var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })` + `\n`
 + String.raw`			console.log("Total time series: " + IDs.length);` + `\n`
-+ String.raw`			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + ',"uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'` + `\n`
++ String.raw`			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'` + `\n`
 + String.raw`			console.log("json body sent to 'getLipds': " + tsJSON)` + `\n`
 + String.raw`			console.log("sending post TSids")` + `\n`
 + String.raw`			postTSids(tsJSON);` + `\n`
