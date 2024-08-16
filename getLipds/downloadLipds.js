@@ -123,8 +123,12 @@ var downloadEm = function(uniqueID, language){
 
 			var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
 			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
+					console.log("rspawn1 reso: " + reso)
    					if (reso == 0 && language == "Python"){
+						console.log("attempting pickle")
 						pickleEm(path1)
+					} else {
+						console.log("no pickling")
 					}
 			});
      				/*
