@@ -126,8 +126,9 @@ var downloadEm = function(uniqueID, language){
 					console.log("rspawn1 reso: " + reso)
 					console.log("rspawn1 language: " + language)
    					if (reso == 0 && language == "Python"){
+						var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
 						console.log("attempting pickle")
-						pickleEm(path1)
+						pickleEm(pathToPkl)
 					} else {
 						console.log("no pickling")
 					}
