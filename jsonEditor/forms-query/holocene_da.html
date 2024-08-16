@@ -455,7 +455,7 @@ function buildURL(){
 if (confirm("Submit Custom Reconstruction request?")){
 var urlParams = new URLSearchParams(window.location.search);
 document.getElementById("paramsForm").method = "POST"
-document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")
+document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")
 return true;
 } else {
 document.getElementById("paramsForm").action = ""
