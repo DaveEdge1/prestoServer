@@ -111,6 +111,7 @@ function editConfigs (configLoc, formEdits, recon, uniqueID){
 }
 
 function writeConfigs (recon, user, domain, jsonBody, uniqueID, language) {
+  console.log("language: " + language)
   var reconID = uniqueID + '_' + recon
   var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
   var downloadPath = 'http://143.198.98.66:81/' + recon + '/' + user + '/' + domain + '/' + reconID + '/' + language
