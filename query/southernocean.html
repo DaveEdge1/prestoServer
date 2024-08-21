@@ -579,7 +579,11 @@ var map = L.map('map', {
   zoom: 0
  });
 
+	
 //Modis imagery
+var template =
+'//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
+'{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
 L.tileLayer(template, {
     layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     tileMatrixSet: '250m',
