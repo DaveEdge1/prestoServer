@@ -585,12 +585,12 @@ var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
 '{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
 L.tileLayer(template, {
-    //layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
-    layer: 'BlueMarble_ShadedRelief_Bathymetry',
+    layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
+    //layer: 'BlueMarble_ShadedRelief_Bathymetry',
     tileMatrixSet: '250m',
     format: 'image%2Fjpeg',
-    time: '2024-7-13',
-	//time: '2013-12-01',
+    //time: '2024-7-13',
+    time: '2013-12-01',
     tileSize: 512,
     subdomains: 'abc',
     noWrap: true,
