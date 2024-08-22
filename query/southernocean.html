@@ -581,17 +581,17 @@ var map = L.map('map', {
 
 	
 //Modis imagery
-/*
+
 var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
 '{layer}/default/{tileMatrixSet}/{z}/{y}/{x}.jpg';
 //'{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
 L.tileLayer(template, {
-    layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
-    //layer: 'BlueMarble_ShadedRelief_Bathymetry',
-    tileMatrixSet: '250m',
+    //layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
+    layer: 'BlueMarble_ShadedRelief_Bathymetry',
+    tileMatrixSet: '500m',
     format: 'image%2Fjpeg',
-    time: '2024-7-13',
+    //time: '2024-7-13',
     //time: '2013-12-01',
     tileSize: 512,
     subdomains: 'abc',
@@ -602,14 +602,14 @@ L.tileLayer(template, {
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
   }).addTo(map);
-*/
+/*
 L.tileLayer("https://cdn.statically.io/gh/freetiler/nasa-bluemarble-labeled/main/tiles/{z}/{x}/{y}.jpeg", {
     layers:"polarview:coastS10",
     format:"image/jpeg",
     attribution:"<a href='https://github.com/freetiler/nasa-bluemarble-labeled'>nasa-bluemarble-labeled</a>",
     tileSize: 512
 }).addTo(map);
-
+*/
 //Coastlines
 L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     layers:"polarview:coastS10",
