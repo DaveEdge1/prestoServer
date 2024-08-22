@@ -29,7 +29,6 @@
 	
 	<script src="/leaflet-svg-shape-markers.min.js"></script>
 	<script src="/leaflet.legend.js"></script>
-	<script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
 	<script src="/spin.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.js"></script>
@@ -486,6 +485,7 @@ popQueryVariable()
           </div>
         </div>
       </footer>
+	<script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
 
 <script>
 var opts = {
@@ -644,8 +644,6 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
   }).addTo(map) ;
 
 var url_to_geotiff_file = 'http://143.198.98.66:86/IBCSO_v2_bed_RGB.tif';
-var parse_georaster = require("georaster");
-var GeoRasterLayer = require("georaster-layer-for-leaflet");
 
 fetch(url_to_geotiff_file)
   .then(response => response.arrayBuffer())
