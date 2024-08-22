@@ -616,20 +616,17 @@ var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
   })
-var Sea_Ice = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
-    layer: 'MODIS_Aqua_Sea_Ice',
-    tileMatrixSet: '250m',
-    format: 'image%2Fjpeg',
-    time: '2002-07-03',
-    tileSize: 512,
-    subdomains: 'abc',
-    noWrap: true,
-    continuousWorld: true,
-    attribution:
-      '<a href="https://wiki.earthdata.nasa.gov/display/GIBS">' +
-      'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
-      '</a>'
-  })
+var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.ncd"
+var sst = L.tileLayer.wms(testWMS, {
+    layers: 'sst',
+    format: 'image/png',
+    transparent: true,
+    style: 'boxfill/sst_36',
+    colorscalerange: '-3,35',
+    abovemaxcolor: "extend",
+    belowmincolor: "extend",
+    attribution: '<a href="https://www.ncdc.noaa.gov">NOAAs National Climatic Data Center</a>'
+});
 
 /*
 L.tileLayer("https://cdn.statically.io/gh/freetiler/nasa-bluemarble-labeled/main/tiles/{z}/{x}/{y}.jpeg", {
@@ -710,7 +707,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "Sea_Ice": Sea_Ice }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
+var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
 layerControl.addTo(map);
   
 
