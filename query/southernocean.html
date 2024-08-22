@@ -616,11 +616,11 @@ var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
   })
-var SST = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
-    layer: 'MODIS_Aqua_L3_SST_Thermal_4km_Day_Annual',
+var Sea_Ice = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
+    layer: 'MODIS_Aqua_Sea_Ice',
     tileMatrixSet: '250m',
     format: 'image%2Fjpeg',
-    time: '2017-01-01',
+    time: '2002-07-03',
     tileSize: 512,
     subdomains: 'abc',
     noWrap: true,
@@ -710,7 +710,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": SST }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
+var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "Sea_Ice": Sea_Ice }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
 layerControl.addTo(map);
   
 
