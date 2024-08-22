@@ -622,7 +622,13 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 //var layerGroupings = { "Basemap": basemap, "Outline": outline };
 var pointA = new L.LatLng(-90, 90);
 var pointB = new L.LatLng(-70, 70);
-var pointList = [pointA, pointB];
+//var pointList = [pointA, pointB];
+var BoundaryCoords = ["latitude"={-90,-70}, "longitude"={90,70}]
+
+var pointList = BoundaryCoords.map(function(dataPoint){
+    console.log(dataPoint); // It might be useful to inspect these values
+    return L.latLng(dataPoint.latitude, dataPoint.longitude);
+});
 
 var firstpolyline = new L.Polyline(pointList, {
     color: 'red',
