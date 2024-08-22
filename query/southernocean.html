@@ -586,7 +586,7 @@ var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
 '{layer}/default/{tileMatrixSet}/{z}/{y}/{x}.jpg';
 //'{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
-var basemap = L.tileLayer(template, {
+var BlueMarble = L.tileLayer(template, {
     //layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     layer: 'BlueMarble_ShadedRelief_Bathymetry',
     tileMatrixSet: '500m',
@@ -602,6 +602,21 @@ var basemap = L.tileLayer(template, {
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
   }).addTo(map);
+var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
+'{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';, {
+    layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
+    tileMatrixSet: '250m',
+    format: 'image%2Fjpeg',
+    time: '2013-12-01',
+    tileSize: 512,
+    subdomains: 'abc',
+    noWrap: true,
+    continuousWorld: true,
+    attribution:
+      '<a href="https://wiki.earthdata.nasa.gov/display/GIBS">' +
+      'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
+      '</a>'
+  })
 /*
 L.tileLayer("https://cdn.statically.io/gh/freetiler/nasa-bluemarble-labeled/main/tiles/{z}/{x}/{y}.jpeg", {
     layers:"polarview:coastS10",
@@ -681,7 +696,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "Basemap": basemap }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
+var layerControl = new L.control.layers({ "BlueMarble": BlueMarble },{ "MODIS_Aqua": MODIS_Aqua }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
 layerControl.addTo(map);
   
 
