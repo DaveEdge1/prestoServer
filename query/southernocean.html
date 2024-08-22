@@ -602,8 +602,7 @@ var BlueMarble = L.tileLayer(template, {
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
   }).addTo(map);
-var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
-'{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';, {
+var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
     layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     tileMatrixSet: '250m',
     format: 'image%2Fjpeg',
