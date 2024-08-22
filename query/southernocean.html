@@ -642,7 +642,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     tileSize: 512,
   }).addTo(map) ;
 
-const georaster = 'http://143.198.98.66:86/IBCSO_v2_bed_RGB.tif'
+const georaster = parseGeoraster('http://143.198.98.66:86/IBCSO_v2_bed_RGB.tif')
 const min = Math.round(georaster.mins[0])
 const max = Math.round(georaster.maxs[0])
 const rainbow = new Rainbow()
