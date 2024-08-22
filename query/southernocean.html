@@ -644,6 +644,8 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
   }).addTo(map) ;
 
 var url_to_geotiff_file = 'http://143.198.98.66:86/IBCSO_v2_bed_RGB.tif';
+var parse_georaster = require("georaster");
+var GeoRasterLayer = require("georaster-layer-for-leaflet");
 
 fetch(url_to_geotiff_file)
   .then(response => response.arrayBuffer())
