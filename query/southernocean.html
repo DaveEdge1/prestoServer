@@ -620,7 +620,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
   }).addTo(map) ;
 
 var layerGroupings = { "Basemap": basemap, "Outline": outline };
-var layerControl = new L.control.layers({ "Basemap": basemap }, { "Outline": outline }, { collapsed: false });
+var layerControl = new L.control.layers({ "Basemap": basemap }, { "Coastlines": outline }, { collapsed: false });
 layerControl.addTo(map);
   
 
