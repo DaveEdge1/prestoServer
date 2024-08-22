@@ -584,6 +584,13 @@ var map = L.map('map', {
         currentTime: currentMonth
     },
  });
+Date.prototype.format = function (mask, utc) {
+    return dateFormat(this, mask, utc);
+};
+
+var currentMonth = new Date();
+currentMonth.setUTCDate(1);
+currentMonth.setUTCHours(12, 0, 0, 0);
 
 var testTimeLayer = L.timeDimension.layer.wms(testLayer, {
     proxy: proxy,
