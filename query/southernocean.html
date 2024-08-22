@@ -580,7 +580,9 @@ var map = L.map('map', {
  });
 
 	
-//Modis imagery
+L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
 var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
