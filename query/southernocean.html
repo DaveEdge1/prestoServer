@@ -695,7 +695,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "BlueMarble": BlueMarble },{ "MODIS_Aqua": MODIS_Aqua }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
+var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "MODIS_Aqua": MODIS_Aqua }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
 layerControl.addTo(map);
   
 
