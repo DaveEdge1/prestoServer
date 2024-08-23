@@ -1063,7 +1063,8 @@ var groundIceOpac = L.icon({
 });
 //let AllPoints = {};
 function updatePoints (coords){
-	//console.log("starting updatepoints()" + coords)
+	console.log("south front: " + document.querySelector('input[name=sbound]:checked').value)
+	console.log("north front: " + document.querySelector('input[name=nbound]:checked').value)
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
