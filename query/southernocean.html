@@ -1027,7 +1027,7 @@ function frontalBounds (sfront, nfront, lat, lon) {
 	}
 	console.log("south lat at nearest lon: " + SB)
 	console.log("north lat at nearest lon: " + NB)
-	if (lat > southLat[whichLonS] && lat < northLat[whichLonN]){
+	if (lat > SB && lat < NB){
 		return true
 	} else {
 		return false
