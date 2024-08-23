@@ -1001,7 +1001,7 @@ function frontalBounds (sfront, nfront, lat, lon) {
 	var southLat = sfront.points.map(function(dataPoint){
     		return dataPoint[0];
 	});
-	var whichLon = closest(south, lon)
+	var whichLon = closest(southLon, lon)
 	console.log("selected lon: " + lon)
 	console.log("index of value nearest selected lon: " + whichLon)
 	console.log("nearest lon: " + southLon[whichLon])
