@@ -1076,7 +1076,7 @@ var numPoints = +(numdata * 2)
 		    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
 		  if (lat != 'undefined'){
 			  console.log('lat: ' + lat + ' long: ' + lon)
-			  console.log('geometry: ' + typeof geojson.features[i].geometry)
+			  console.log('geometry: ' + typeof geojson.features[i])
 		    geojson.features[i].geometry.coordinates.push(lon,lat);
 		    geojson.features[i].properties.archiveType.push(aType);
 		    geojson.features[i].properties.dataSetName.push(dName);
