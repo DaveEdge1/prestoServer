@@ -1065,7 +1065,7 @@ var numPoints = +(numdata * 2)
 	    lat = Object.values(x1)[ii].geo_latitude
     	    lon = (ptLon - 360)
     }
-	  //if (frontalBounds(sfront, nfront, lat, lon)){
+	  if (frontalBounds(sfront, nfront, lat, lon)){
 		    aType = Object.values(x1)[ii].archiveType
 		    dName = Object.values(x1)[ii].dataSetName
 		    dID = Object.values(x1)[ii].datasetId
@@ -1080,7 +1080,7 @@ var numPoints = +(numdata * 2)
 		    geojson.features[i].properties.paleoData_proxy.push(proxy1);
 		    geojson.features[i].properties.minAge.push(minAge);
 		    geojson.features[i].properties.maxAge.push(maxAge);
-	  //}
+	  }
   }
 //console.log("finished loadLatLon(coords)")
   return(geojson)
@@ -1126,9 +1126,9 @@ function frontCoords (loc) {
 function updatePoints (coords){
 	var sfname = frontCoords(document.querySelector('input[name=sbound]:checked').value)
 	var nfname = frontCoords(document.querySelector('input[name=nbound]:checked').value)
-	console.log("south front: " + sfname)
-	console.log("north front: " + nfname)
-	console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
+	//console.log("south front: " + sfname)
+	//console.log("north front: " + nfname)
+	//console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
