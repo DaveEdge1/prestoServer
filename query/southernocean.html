@@ -1107,9 +1107,11 @@ var groundIceOpac = L.icon({
 //let AllPoints = {};
 	
 function updatePoints (coords){
-	console.log("south front: " + document.querySelector('input[name=sbound]:checked').value)
-	console.log("north front: " + document.querySelector('input[name=nbound]:checked').value)
-	frontalBounds(document.querySelector('input[name=sbound]:checked').value, document.querySelector('input[name=nbound]:checked').value, -60, 180)
+	var sfname = document.querySelector('input[name=sbound]:checked').value + "Coord"
+	var nfname = document.querySelector('input[name=nbound]:checked').value + "Coord"
+	console.log("south front: " + sfname)
+	console.log("north front: " + nfname)
+	frontalBounds(eval(sfname), eval(nfname), -60, 180)
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
