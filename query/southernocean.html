@@ -1001,16 +1001,32 @@ function frontalBounds (sfront, nfront, lat, lon) {
 	var southLat = sfront.points.map(function(dataPoint){
     		return dataPoint[0];
 	});
-	var whichLon = closest(southLon, lon)
+	var northLon = nfront.points.map(function(dataPoint){
+    		return dataPoint[1];
+	});
+	var northLat = nfront.points.map(function(dataPoint){
+    		return dataPoint[0];
+	});
+	var whichLonS = closest(southLon, lon)
 	console.log("selected lon: " + lon)
-	console.log("index of value nearest selected lon: " + whichLon)
-	console.log("nearest lon: " + southLon[whichLon])
-	console.log("lat at nearest lon: " + southLat[whichLon])
+	console.log("south index of value nearest selected lon: " + whichLonS)
+	console.log("south nearest lon: " + southLon[whichLonS])
+	console.log("south lat at nearest lon: " + southLat[whichLonS])
+	var whichLonN = closest(northLon, lon)
+	console.log("north index of value nearest selected lon: " + whichLonN)
+	console.log("north nearest lon: " + northLon[whichLonN])
+	console.log("north lat at nearest lon: " + northLat[whichLonN])
+	if (lat > southLat[whichLonS] && lat < northLat[whichLonN]){
+		return true
+	} else {
+		return false
+	}
 }
-frontalBounds(SAFCoords, SAFCoords, -60, 180)
 
 function loadLatLon (a1){
 	//console.log("starting loadLatLon(coords)")
+	var sfront = document.querySelector('input[name=sbound]:checked').value
+	var nfront = document.querySelector('input[name=nbound]:checked').value
 	var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
 	var geojson = {
@@ -1038,20 +1054,22 @@ var numPoints = +(numdata * 2)
 	    lat = Object.values(x1)[ii].geo_latitude
     	    lon = (ptLon - 360)
     }
-    aType = Object.values(x1)[ii].archiveType
-    dName = Object.values(x1)[ii].dataSetName
-    dID = Object.values(x1)[ii].datasetId
-    proxy1 = Object.values(x1)[ii].paleoData_proxy
-    minAge = Object.values(x1)[ii].minAge
-    maxAge = Object.values(x1)[ii].maxAge
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
-    geojson.features[i].geometry.coordinates.push(lon,lat);
-    geojson.features[i].properties.archiveType.push(aType);
-    geojson.features[i].properties.dataSetName.push(dName);
-    geojson.features[i].properties.datasetId.push(dID);
-    geojson.features[i].properties.paleoData_proxy.push(proxy1);
-    geojson.features[i].properties.minAge.push(minAge);
-    geojson.features[i].properties.maxAge.push(maxAge);
+	  //if (frontalBounds(sfront, nfront, lat, lon)){
+		    aType = Object.values(x1)[ii].archiveType
+		    dName = Object.values(x1)[ii].dataSetName
+		    dID = Object.values(x1)[ii].datasetId
+		    proxy1 = Object.values(x1)[ii].paleoData_proxy
+		    minAge = Object.values(x1)[ii].minAge
+		    maxAge = Object.values(x1)[ii].maxAge
+		    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
+		    geojson.features[i].geometry.coordinates.push(lon,lat);
+		    geojson.features[i].properties.archiveType.push(aType);
+		    geojson.features[i].properties.dataSetName.push(dName);
+		    geojson.features[i].properties.datasetId.push(dID);
+		    geojson.features[i].properties.paleoData_proxy.push(proxy1);
+		    geojson.features[i].properties.minAge.push(minAge);
+		    geojson.features[i].properties.maxAge.push(maxAge);
+	  //}
   }
 //console.log("finished loadLatLon(coords)")
   return(geojson)
@@ -1091,6 +1109,7 @@ var groundIceOpac = L.icon({
 function updatePoints (coords){
 	console.log("south front: " + document.querySelector('input[name=sbound]:checked').value)
 	console.log("north front: " + document.querySelector('input[name=nbound]:checked').value)
+	frontalBounds(document.querySelector('input[name=sbound]:checked').value, document.querySelector('input[name=nbound]:checked').value, -60, 180)
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
