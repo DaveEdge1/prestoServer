@@ -1075,15 +1075,17 @@ var numPoints = +(numdata * 2)
 		    maxAge = Object.values(x1)[ii].maxAge
 		    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
 		  if (lat != 'undefined'){
+			  if (typeof geojson.features[i] != 'undefined'){
 			  console.log('lat: ' + lat + ' long: ' + lon)
 			  console.log('geometry: ' + typeof geojson.features[i])
-		    geojson.features[i].geometry.coordinates.push(lon,lat);
-		    geojson.features[i].properties.archiveType.push(aType);
-		    geojson.features[i].properties.dataSetName.push(dName);
-		    geojson.features[i].properties.datasetId.push(dID);
-		    geojson.features[i].properties.paleoData_proxy.push(proxy1);
-		    geojson.features[i].properties.minAge.push(minAge);
-		    geojson.features[i].properties.maxAge.push(maxAge);
+			    geojson.features[i].geometry.coordinates.push(lon,lat);
+			    geojson.features[i].properties.archiveType.push(aType);
+			    geojson.features[i].properties.dataSetName.push(dName);
+			    geojson.features[i].properties.datasetId.push(dID);
+			    geojson.features[i].properties.paleoData_proxy.push(proxy1);
+			    geojson.features[i].properties.minAge.push(minAge);
+			    geojson.features[i].properties.maxAge.push(maxAge);
+			  }
 		  }
 	  }
   }
