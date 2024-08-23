@@ -935,7 +935,7 @@ function changeBoxCoord(){
 
 
 function loadLatLon (a1){
-	console.log("starting loadLatLon(coords)")
+	//console.log("starting loadLatLon(coords)")
 	var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
 	var geojson = {
@@ -978,7 +978,7 @@ var numPoints = +(numdata * 2)
     geojson.features[i].properties.minAge.push(minAge);
     geojson.features[i].properties.maxAge.push(maxAge);
   }
-console.log("finished loadLatLon(coords)")
+//console.log("finished loadLatLon(coords)")
   return(geojson)
 }
 let inRectCount = 0;
@@ -1013,7 +1013,7 @@ var groundIceOpac = L.icon({
 });
 //let AllPoints = {};
 function updatePoints (coords){
-	console.log("starting updatepoints()" + coords)
+	//console.log("starting updatepoints()" + coords)
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
@@ -1030,7 +1030,7 @@ function updatePoints (coords){
 		rect.editing.enable();
 		rectCoord = updateBoundingBox();
 	}*/
-	console.log("starting L.geoJSON([loadLatLon(coords)")
+	//console.log("starting L.geoJSON([loadLatLon(coords)")
  L.geoJSON([loadLatLon(coords)], {
 
                 style : function(feature) {
