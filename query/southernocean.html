@@ -995,27 +995,38 @@ function closest(list, x) {
 }
 	
 function frontalBounds (sfront, nfront, lat, lon) {
-	var southLon = sfront.points.map(function(dataPoint){
-	    return dataPoint[1];
-	});
-	var southLat = sfront.points.map(function(dataPoint){
-    		return dataPoint[0];
-	});
-	var northLon = nfront.points.map(function(dataPoint){
-    		return dataPoint[1];
-	});
-	var northLat = nfront.points.map(function(dataPoint){
-    		return dataPoint[0];
-	});
-	var whichLonS = closest(southLon, lon)
-	console.log("selected lon: " + lon)
-	console.log("south index of value nearest selected lon: " + whichLonS)
-	console.log("south nearest lon: " + southLon[whichLonS])
-	console.log("south lat at nearest lon: " + southLat[whichLonS])
-	var whichLonN = closest(northLon, lon)
-	console.log("north index of value nearest selected lon: " + whichLonN)
-	console.log("north nearest lon: " + northLon[whichLonN])
-	console.log("north lat at nearest lon: " + northLat[whichLonN])
+	if (sfront == null){
+		var SB = -90
+	} else {
+		var southLon = sfront.points.map(function(dataPoint){
+		    return dataPoint[1];
+		});
+		var southLat = sfront.points.map(function(dataPoint){
+	    		return dataPoint[0];
+		});
+		var whichLonS = closest(southLon, lon)
+		console.log("selected lon: " + lon)
+		console.log("south index of value nearest selected lon: " + whichLonS)
+		console.log("south nearest lon: " + southLon[whichLonS])
+		var NB = southLat[whichLonS]
+		console.log("south lat at nearest lon: " + SB)
+	}
+	if (nfront == null){
+		var NB = -50
+	} else {
+		var northLon = nfront.points.map(function(dataPoint){
+	    		return dataPoint[1];
+		});
+		var northLat = nfront.points.map(function(dataPoint){
+	    		return dataPoint[0];
+		});
+		var whichLonN = closest(northLon, lon)
+		console.log("north index of value nearest selected lon: " + whichLonN)
+		console.log("north nearest lon: " + northLon[whichLonN])
+		var NB = northLat[whichLonN]
+	}
+	console.log("south lat at nearest lon: " + SB)
+	console.log("north lat at nearest lon: " + NB)
 	if (lat > southLat[whichLonS] && lat < northLat[whichLonN]){
 		return true
 	} else {
@@ -1105,13 +1116,19 @@ var groundIceOpac = L.icon({
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 //let AllPoints = {};
-	
+function frontCoords (loc) {
+	if (loc == "none"){
+		return null
+	} else {
+		return loc + "Coord"
+	}
+}
 function updatePoints (coords){
-	var sfname = document.querySelector('input[name=sbound]:checked').value + "Coord"
-	var nfname = document.querySelector('input[name=nbound]:checked').value + "Coord"
+	var sfname = frontCoords(document.querySelector('input[name=sbound]:checked').value)
+	var nfname = frontCoords(document.querySelector('input[name=nbound]:checked').value)
 	console.log("south front: " + sfname)
 	console.log("north front: " + nfname)
-	frontalBounds(eval(sfname), eval(nfname), -60, 180)
+	console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
