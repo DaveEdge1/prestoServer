@@ -216,28 +216,28 @@ popQueryVariable()
 <p></p>
 <br>
 <div id="frontsDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
-<label style="font-size:20px; padding-right:10px; color:black" id="fronts_label">Circumpolar Fronts (based on <a href="https://www.academia.edu/download/51317825/On_the_Meridional_Extent_and_Fronts_of_t20170112-2455-6j6mmk.pdf" target="_blank">Orsi et al., 1995</a>)</label>
+<label style="font-size:20px; padding-right:10px; color:black" id="fronts_label">Southerly bounding fronts</label>
 <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-<span class="tooltip-text">Choose Southerly and Northery bounding fronts</span>
+<span class="tooltip-text">Circumpolar Fronts (based on <a href="https://www.academia.edu/download/51317825/On_the_Meridional_Extent_and_Fronts_of_t20170112-2455-6j6mmk.pdf" target="_blank">Orsi et al., 1995</a>)</span>
 </div>
 <div class="radio_container">
 <div class="radio_control">
-<input type="radio" id="none" name="sbound" checked>
+<input type="radio" id="none" name="sbound" value="none" checked>
 <label for="none">none</label><br>
-<input type="radio" id="Boundary" name="sbound">
+<input type="radio" id="Boundary" name="sbound" value="Boundary">
 <label for="Boundary">Boundary</label><br>
-<input type="radio" id="SACCF" name="sbound" >
+<input type="radio" id="SACCF" name="sbound" value="SACCF">
 <label for="SACCF">SACCF</label><br>
-<input type="radio" id="PF" name="sbound" >
+<input type="radio" id="PF" name="sbound" value="PF" >
 <label for="PF">PF</label><br>
-<input type="radio" id="SAF" name="sbound" >
+<input type="radio" id="SAF" name="sbound" value="SAF" >
 <label for="SAF">SAF</label><br>
-<input type="radio" id="STF" name="sbound" >
+<input type="radio" id="STF" name="sbound" value="STF" >
 <label for="STF">STF</label><br>
 </div>
 </div>
 </div>
-<br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br>
 <hr class="solid">
 <hr class="solid">
 <br>
@@ -767,7 +767,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "STF": STF, "SAF": SAF }, { collapsed: false });
+var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
