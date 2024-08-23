@@ -1074,7 +1074,7 @@ var numPoints = +(numdata * 2)
 		    minAge = Object.values(x1)[ii].minAge
 		    maxAge = Object.values(x1)[ii].maxAge
 		    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
-		  if (typeof geojson.features[i] != 'undefined' && typeof lat != 'undefined' && typeof lon != 'undefined'){
+		  if (lat != 'undefined'){
 		    geojson.features[i].geometry.coordinates.push(lon,lat);
 		    geojson.features[i].properties.archiveType.push(aType);
 		    geojson.features[i].properties.dataSetName.push(dName);
