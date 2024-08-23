@@ -580,7 +580,7 @@ var map = L.map('map', {
   center: [-90, 0],
   zoom: 0
  });
-var circle = L.circle([-90, 0], 200).addTo(map);
+var circle = L.circle([-90, 0], { radius: 5000, color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true }).addTo(map);
 
 var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
@@ -785,7 +785,7 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
  "Peat":"triangle-down","Sclerosponge":"triangle-down","Shoreline":"diamond","Wood":"triangle","TerrestrialSediment":"circle"}
 //initiate leaflet rectangle
 let rect = L.rectangle([[document.getElementById("lat_min").value, document.getElementById("lon_min").value], [document.getElementById("lat_max").value, document.getElementById("lon_max").value]], { color: "#ff7800", opacity:0.1, fill: "#ff7800", fillOpacity:0.1, draggable: true });
-map.addLayer(rect);
+map.addLayer(circle);
 /*
 var southWest = L.latLng(-100, -360),
 northEast = L.latLng(100, 360);
