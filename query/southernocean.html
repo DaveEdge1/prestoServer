@@ -996,10 +996,10 @@ function closest(list, x) {
 	
 function frontalBounds (sfront, nfront, lat, lon) {
 	var southLon = sfront.points.map(function(dataPoint){
-	    return dataPoint[0];
+	    return dataPoint[1];
 	});
 	var southLat = sfront.points.map(function(dataPoint){
-    		return dataPoint[1];
+    		return dataPoint[0];
 	});
 	var whichLon = closest(southLon, lon)
 	console.log("selected lon: " + lon)
