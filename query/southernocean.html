@@ -1036,8 +1036,8 @@ function frontalBounds (sfront, nfront, lat, lon) {
 
 function loadLatLon (a1){
 	//console.log("starting loadLatLon(coords)")
-	var sfront = document.querySelector('input[name=sbound]:checked').value
-	var nfront = document.querySelector('input[name=nbound]:checked').value
+	var sfront = eval(frontCoords(document.querySelector('input[name=sbound]:checked').value))
+	var nfront = eval(frontCoords(document.querySelector('input[name=nbound]:checked').value))
 	var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
 	var geojson = {
@@ -1128,7 +1128,7 @@ function updatePoints (coords){
 	var nfname = frontCoords(document.querySelector('input[name=nbound]:checked').value)
 	//console.log("south front: " + sfname)
 	//console.log("north front: " + nfname)
-	//console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
+	console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
