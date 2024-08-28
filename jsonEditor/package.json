@@ -1,0 +1,25 @@
+{
+  "name": "jsoneditor",
+  "version": "1.0.0",
+  "description": "edit recon params in web form",
+  "main": "editorServer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/DaveEdge1/jsonEditor.git"
+  },
+  "author": "Dave Edge",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DaveEdge1/jsonEditor/issues"
+  },
+  "homepage": "https://github.com/DaveEdge1/jsonEditor#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "forever": "^4.0.3",
+    "prompt-sync": "^4.2.0",
+    "yaml": "^2.3.1"
+  }
+}

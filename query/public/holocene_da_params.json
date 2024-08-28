@@ -1,0 +1,35 @@
+{
+  "compilation": {
+    "value": [
+      "Temp12k"
+    ],
+    "default": [
+      "Temp12k"
+    ],
+    "complexity": "experimental",
+    "URL": "https://lipdverse.org/project/"
+  },
+  "seasonality": {
+    "value": [
+      "annual",
+      "summerOnly",
+      "winterOnly"
+    ],
+    "default": [
+      "annual",
+      "summerOnly",
+      "winterOnly"
+    ],
+    "complexity": "standard"
+  },
+  "resolution": {
+    "value": 200,
+    "default": 200,
+    "limits": [
+      10,
+      1000
+    ],
+    "precision": 10,
+    "complexity": "standard"
+  }
+}

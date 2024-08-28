@@ -1,0 +1,19 @@
+{
+	    "variable.name":null,
+	    "archive.type":null,
+	    "paleo.proxy": null,
+	    "paleo.units": null,
+	    "coord": [0, 10, 0, 10],
+	    "age.min": null,
+	    "age.max": null,
+	    "pub.info": null,
+	    "country": null,
+	    "continent": null,
+	    "ocean": "FALSE",
+	    "seasonality": null,
+	    "season.not": null,
+	    "interp.vars": null,
+	    "interp.details": null,
+	    "compilation": null,
+	    "file.type": "Python"
+}

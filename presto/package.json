@@ -1,0 +1,31 @@
+{
+  "name": "presto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Dave Edge",
+  "license": "ISC",
+  "dependencies": {
+    "align-yaml": "^0.1.8",
+    "archiver": "^6.0.0",
+    "axios": "^1.3.5",
+    "child_process": "^1.0.2",
+    "config": "^3.3.9",
+    "dockerode": "^3.3.5",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "glob": "^7.2.0",
+    "http": "^0.0.1-security",
+    "http-proxy": "^1.18.1",
+    "memory-streams": "^0.1.3",
+    "nodemailer": "^6.9.1",
+    "parseurl": "^1.3.3",
+    "shelljs": "^0.8.5",
+    "stream-demux": "^8.1.0",
+    "util": "^0.12.5",
+    "yaml": "^2.3.1"
+  }
+}

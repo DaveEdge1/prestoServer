@@ -1,0 +1,14 @@
+PREFIX le: <http://linked.earth/ontology#>
+
+    SELECT ?variableID ?values
+    WHERE {
+        ?ds a le:Dataset .
+    	?ds le:includesPaleoData ?data .
+        ?data le:foundInMeasurementTable ?table .
+	?table le:includesVariable ?var .
+	?var le:hasVariableID ?hasVariableID .
+		FILTER (?hasVariableID = "Asia_163" || ?hasVariableID = "Asia_022" || ?hasVariableID = "S2LR1f792pGT8l") .
+	?var le:hasVariableID ?variableID .
+	?var le:hasValues ?values .
+}
+LIMIT 100

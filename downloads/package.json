@@ -1,0 +1,16 @@
+{
+  "name": "downloads",
+  "version": "1.0.0",
+  "description": "",
+  "main": "downloadServer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-zip": "^3.0.0",
+    "serve-index": "^1.9.1"
+  }
+}

@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+    <link rel="stylesheet" href="../src/leaflet-areaselect.css" />
+</head>
+<body>
+    <div id="map" style="width: 600px; height: 400px;"></div>    
+    <div id="result">
+        <div class="left">
+            South west:<br>
+            <input type="text" class="sw"><br>
+            
+            North east:<br>
+            <input type="text" class="ne">
+            
+            <button id="remove">Remove</button>            
+        </div>
+        <div class="right">
+            Width:<br>
+            <input type="text" class="width" /><br>
+
+            Height:<br>
+            <input type="text" class="height" />       
+            <button id="setDimensions">Set Dimensions</button>     
+        </div>
+    </div>
+    <a href="https://github.com/heyman/leaflet-areaselect"><img style="position:absolute; top:0; right:0; border:0; z-index: 1000;" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149" alt="Fork me on GitHub"></a>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../src/leaflet-areaselect.js"></script>
+    <script>
+        // initialize map
+        var map = L.map('map').setView([38, 0], 2);
+        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        var areaSelect = areaSelect.setBounds([{lat:59.2272559, lng:17.7606917}, {lat:59.4402838, lng:18.2000673}]);
+        areaSelect.on("change", function() {
+            var bounds = this.getBounds();
+            $("#result .sw").val(bounds.getSouthWest().lat + ", " + bounds.getSouthWest().lng);
+            $("#result .ne").val(bounds.getNorthEast().lat + ", " + bounds.getNorthEast().lng);
+            $(".width").val(this.getDimensions().width);
+            $(".height").val(this.getDimensions().height);
+        });
+        areaSelect.addTo(map);
+        
+        $("#remove").click(function() {
+            areaSelect.remove();
+        });
+
+        $("#setDimensions").click(function () {
+            areaSelect.setDimensions({width: $('.width').val(), height: $('.height').val()})
+        })
+    </script>
+</body>

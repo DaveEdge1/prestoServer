@@ -1,0 +1,56 @@
+annualize_proxydb_months:
+- 12
+- 1
+- 2
+annualize_proxydb_ptypes:
+- coral
+calib_period:
+- 1901
+- 2000
+compress_params:
+  zlib: true
+cutoff_radius: 1500
+filter_proxydb_args: []
+filter_proxydb_kwargs:
+  by: ptype
+  keys:
+  - coral
+graph_method: hybrid
+obs_annualize_months:
+- 12
+- 1
+- 2
+obs_anom_period:
+- 1951
+- 1980
+obs_lat_max: 20
+obs_lat_min: -20
+obs_lat_name: lat
+obs_lon_max: 260
+obs_lon_min: 150
+obs_lon_name: lon
+obs_path:
+  tas: gistemp1200_GHCNv4_ERSSTv5
+obs_regrid_nlat: 42
+obs_regrid_nlon: 63
+obs_rename_dict:
+  tas: tempanomaly
+obs_time_name: time
+output_indices:
+- gm
+- nhm
+- shm
+- nino3.4
+proxydb_center_ref_period:
+- 1901
+- 2000
+proxydb_path: PAGES2kv2
+recon_period:
+- 1871
+- 2000
+recon_timescale: 1
+save_dirpath: ./recons/test-run-graphem-cfg
+save_filename: job_r01_recon.nc
+sp_FF: 3
+sp_FP: 4
+uniform_pdb: true

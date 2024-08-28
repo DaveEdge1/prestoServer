@@ -1,0 +1,92 @@
+#==============================================
+# SETTINGS for running the temp12k composites code
+# See the README.md file for more explaination.
+# https://github.com/DaveEdge1/temp12k-regional-composites
+#==============================================
+
+
+proxy:
+  compilation:
+    value: null
+    default: null
+    limits: null
+    options: [Pages2kTemperature-2_1_2, iso2k-1_0_1, SISAL-LiPD-2_0_1, SISAL-LiPD-2_0_0, Temp12k-1_1_0, iso2k-1_0_0, Temp12k-1_2_0, wNAm-1_0_0, Temp12k-1_2_0, wNAm-1_0_0, Temp12k-1_0_2, wNAm-0_3_0, Temp12k-1_0_1]
+    precision: null
+    long_name: draw from existing comilations
+    description: proxy data from compilations and project datasets
+    data_type: list
+    complexity: standard
+    URL: https://lipdverse.org/project/
+
+  variable.name:
+    value: null
+    default: null
+    limits: null
+    options: null
+    precision: null
+    long_name: archive types to assimilate
+    description: Check of one or more archive types to assimilate.
+    data_type: free-form
+    complexity: standard
+    URL: https://lipdverse.org/vocabulary/archivetype/
+
+  archive.type:
+    value: [Borehole, Coral, FluvialSediment, GlacierIce, GroundIce, LakeSediment, MarineSediment, Midden, MolluskShell, Other, Peat, Sclerosponge, Shoreline, Speleothem, TerrestrialSediment, Wood]
+    default: [Borehole, Coral, FluvialSediment, GlacierIce, GroundIce, LakeSediment, MarineSediment, Midden, MolluskShell, Other, Peat, Sclerosponge, Shoreline, Speleothem, TerrestrialSediment, Wood]
+    limits: null
+    options: [Borehole, Coral, FluvialSediment, GlacierIce, GroundIce, LakeSediment, MarineSediment, Midden, MolluskShell, Other, Peat, Sclerosponge, Shoreline, Speleothem, TerrestrialSediment, Wood]
+    precision: null
+    long_name: archive types to assimilate
+    description: Check of one or more archive types to assimilate.
+    data_type: list
+    complexity: standard
+    URL: https://lipdverse.org/vocabulary/archivetype/
+ 
+  seasonality:
+    value: [annual, summerOnly, winterOnly]
+    default: [annual, summerOnly, winterOnly]
+    limits: null
+    options: [annual, summerOnly, winterOnly, summer+, winter+]
+    precision: null
+    long_name: seasonality of proxies to assimilate
+    description: The reconstruction will still try to represent annual means.
+    data_type: list
+    complexity: standard
+    URL: null
+
+  resoltion:
+    value: [0, 1000]
+    default: [0, 1000]
+    limits: [0, 1000]
+    options: null
+    precision: 1
+    long_name: range of proxy resolutions
+    description: Assimilate proxies with median resolutions in a given band.  Bounds are [inclusive,exclusive]. This option should be improved before use.
+    data_type: range
+    complexity: experimental
+    URL: null
+   
+  seasonality:
+    value: null
+    default: null
+    limits: null
+    options: [annual, summer, winter, jja, djf]
+    precision: null
+    long_name: force seasonality assignment
+    description: All proxies are set to specific seasonalities
+    data_type: list
+    complexity: experimental
+    URL: null
+
+  coord:
+    value: [-90, 90, -180, 180]
+    default: [-90, 90, -180, 180]
+    limits: [-90, 90, -180, 180]
+    options: [single,180]
+    precision: 0.001
+    long_name: coordinate bounds for proxies
+    description: Provide bounds to utilize only proxies in a given region
+    data_type: lat-lon
+    complexity: standard
+    URL: null
+

@@ -1,0 +1,297 @@
+/*Credit to Predrag Davidovic for the dual slider: "https://medium.com/@predragdavidovic10/native-dual-range-slider-html-css-javascript-91e778134816"*/
+.range_container {
+	  display: flex;
+	    flex-direction: column;
+	      width: 100%;
+	        margin: 1% auto;
+	}
+
+	.sliders_control {
+		  position: relative;
+		    min-height: 10px;
+	    }
+
+	    .form_control {
+		      position: relative;
+		        display: flex;
+			  justify-content: space-between;
+			    font-size: 14px;
+			      color: black;
+		      }
+		      .form_check {
+			        font-size: 14px;
+				margin: 100px;
+			}
+			.form-check:after {
+				content: "";
+				display: table;
+				clear: both;
+			}
+			.form-group { 
+				width: 90%;
+				 padding-left: 5%;
+			 }
+			 .form-group-experimental {
+				 width: 90%;
+				 padding-left: 5%;
+				 display: none;
+			 }
+			 .form-group-advanced {
+				 width: 90%;
+	                         padding-left: 5%;
+				 display:none
+				}
+			 .tooltip-text {
+				   visibility: hidden;
+				     position: absolute;
+				       z-index: 2;
+					 width: max-content;
+					 max-width: 300px;
+					  height: max-content;
+					   color: black;
+					   border-width:2px;
+	                                    border-style:solid;
+					     border-color:black;
+					     font-size: 12px;
+					      text-align: center;
+					       background-color: white;
+					         border-radius: 10px;
+						   padding: 10px 3px 10px 3px;
+					   }
+
+					   .tooltip-text::before {
+						     content: "";
+						       position: absolute;
+							   background-color: white;
+							     padding: 0px;
+							       z-index: 1;
+						       }
+
+						       .hover-text:hover .tooltip-text {
+							         visibility: visible;
+								 top: 20px;
+								 left: 0%;
+							 }
+							 .hover-text {
+								   position: relative;
+								     display: inline-block;
+								       margin-bottom: 8px;
+								       vertical-align: middle;
+								        font-size: 12px;
+									 color: white;
+									   text-align: top;
+									   border-width:0px;
+									   border-style:solid;
+									   border-color:white;
+									   border-radius: 10px;
+									   background-color: #808080;
+									   padding: 0px 6px 0px 6px;
+								   }
+								   .solid {
+									     height: 2px;
+									       background-color: #3E4A43;
+									         border: none;
+									 }
+								    .a-URL {
+									    color: blue;
+									    font-size: 10px;
+								    }
+								    .checkbox-1 {
+									    accent-color: #899877;
+									    margin 100px;
+								    }
+								    .checkbox-1 input {
+									    font-size: 12px;
+									    margin: 100px;
+								    }
+
+								    .checkbox-1 label {
+									    margin: 100px;
+								    }
+								    .button-submit {
+									      text-align: center;
+								      }
+								    .check-item {
+									    float:left;
+									    width:33%;
+								    }
+								    /* Style the button that is used to open and close the collapsible content */
+								    .collapsible {
+									      background-color: #ebe8e1;
+									        color: black;
+										  cursor: pointer;
+										    padding: 18px;
+										      width: 100%;
+										        border: none;
+											  text-align: center;
+											   font-weight: bold;
+											    outline: none;
+											      font-size: 20px;
+										      }
+										      /*.collapsible:focus{
+											      background-color: #BCC4AB;
+										      }*/
+
+										      .collapsible:active{
+											       background-color: #ebe8e1;
+	                                                                               }
+
+										      /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+										      .active, .collapsible:hover {
+											        background-color: #BCC4AB;
+											}
+
+											/* Style the collapsible content. Note: hidden by default */
+											.content {
+												  padding: 0 18px;
+												    display: none;
+												      overflow: hidden;
+													border: 1px solid black
+												}
+											.checkAll {
+												margin: 0;
+												  position: absolute;
+												    top: 50%;
+												      left: 50%;
+												        -ms-transform: translate(-50%, -50%);
+													  transform: translate(-50%, -50%);
+												}
+											.checkall-container {
+													  height: 60px;
+													    position: relative;
+												      }
+										        .check-uncheck {
+												width: 500px;
+												font-size: 16px;
+											}
+											.active, .check-uncheck:hover {
+												background-color: #C6C6C6;
+											}
+											.outsideWrapper{ 
+												    width:900px; height:500px; 
+												        margin:20px 60px; 
+													    border:1px solid blue;}
+													    .insideWrapper{ 
+														        width:100%; height:100%; 
+															    position:relative;}
+															    .coveredImage{ 
+																        width:100%; height:100%; 
+																	    position:absolute; top:0px; left:0px;
+																    }
+																    .coveringCanvas{ 
+																	        width:100%; height:100%; 
+																		    position:absolute; top:0px; left:0px;
+																		        background-color: rgba(255,0,0,.1);
+																		}
+											.mapAll {
+												float:left;
+												/*margin: 0;
+												position: absolute;
+												top: 50%;
+												left: 50%;
+												-ms-transform: translate(-50%, -50%);
+												transform: translate(-50%, -50%);*/
+											}
+											.mapall-container {
+												height: 600px;
+												margin-top: 30px;
+												width: 1080px;
+									                        display: inline-block;
+												justify-content: space-between;
+												/*position:relative;*/
+											}
+											.map-numeric {
+												height: 60px;
+												display: inline-block;
+											}
+
+                                         input[type=range]::-webkit-slider-thumb {
+						   -webkit-appearance: none;
+						     pointer-events: all;
+						       width: 24px;
+						         height: 24px;
+							   background-color: #fff;
+							     border-radius: 50%;
+							       box-shadow: 0 0 0 1px #C6C6C6;
+							         cursor: pointer;
+							 }
+
+				      input[type=range]::-moz-range-thumb {
+					        -webkit-appearance: none;
+						  pointer-events: all;
+						    width: 24px;
+						      height: 24px;
+						        background-color: #fff;
+							  border-radius: 90%;
+							    box-shadow: 0 0 0 1px #C6C6C6;
+							      cursor: pointer;  
+						      }
+
+						      input[type=range]::-webkit-slider-thumb:hover {
+							        background: #f7f7f7;
+							}
+
+							input[type=range]::-webkit-slider-thumb:active {
+								  box-shadow: inset 0 0 3px #387bbe, 0 0 9px #387bbe;
+								    -webkit-box-shadow: inset 0 0 3px #387bbe, 0 0 9px #387bbe;
+							    }
+
+							    
+
+							    input[type="number"] {
+								      color: black;
+								        width: 100px;
+									  height: 30px;
+									    font-size: 14px;
+									      border: none;
+								      }
+
+								      input[type=number]::-webkit-inner-spin-button, 
+								      input[type=number]::-webkit-outer-spin-button {  
+									         opacity: 1;
+									 }
+
+										       input[type="range"] {
+											         -webkit-appearance: none; 
+												   appearance: none;
+												     height: 10px;
+												       width: 100%;
+												         position: absolute;
+													   background-color: #C6C6C6;
+													     pointer-events: none;
+												     }
+
+												     input[type="checkbox"]{
+													       width: 20px; /*Desired width*/
+													         height: 20px; /*Desired height*/
+														   cursor: pointer;
+														     font-size: 14px;
+														     margin-left: 20px;
+													       }
+
+										       #fromSlider {
+											         height: 0;
+												   z-index: 1;
+											   }
+										       #time_resolution_maxSilder {
+											       -webkit-appearance: none;
+											       appearnace: none;
+										       }
+										       .breadcrumb-item {
+											       color: black;
+											       background-color: transparent;
+										       }
+										       /*#myinput {
+											       -webkit-appearance: none;
+											         appearance: none;
+											         background: linear-gradient(to right, #82CFD0 0%, #82CFD0 50%, #fff 50%, #fff 100%);
+												   border: solid 1px #82CFD0;
+												     border-radius: 8px;
+												       height: 7px;
+												         width: 1000px;
+													  position: absolute;
+													   outline: none;
+													    background-color: #C6C6C6;
+													     pointer-events: none;
+													     transition: background 450ms ease-in;
+												       }*/
