@@ -207,9 +207,11 @@ updateParams = function (uniqueID, recon){
 	if (recon == 'holocene_da' || recon == 'graph_em'){
 		translate(uniqueID, recon)
 		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
-	} else {
+	} else if (recon == 'temp12k) {
 		translateJSON(uniqueID, recon)
 		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json')
+	} else {
+		return true
 	}
 	
 }
@@ -386,7 +388,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	} else if (recon == 'temp12k'){
 		var launchText = 'docker run --rm --name ' + uniqueID + ' -v /root/presto/userRecons/'+uniqueID+'/lipd.rds:/lipd.rds ' + '-v /root/temp12k-regional-composites/regional_composites.R:/regional_composites.R -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	} else {
-		var launchText = 'docker run --rm --name ' + uniqueID + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
+		var launchText = 'console.log("lipd download only")'
 	}
 
 	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
@@ -429,7 +431,9 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  	await vizStatus(uniqueID);
 	}
 
-	await writeViz(uniqueID, dirname)
+	if (recon != "download"){
+		await writeViz(uniqueID, dirname)
+	}
 	  console.log('container run complete');
 	  await sleep(1000)
 	  await zipIt('/root/presto/userRecons/' + uniqueID)
