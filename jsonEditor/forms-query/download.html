@@ -99,7 +99,6 @@
 </div>
 </div>
 </div>
-</div>
 </section>
 <br>
 <br>
@@ -107,11 +106,44 @@
 <br>
 <br>
 <br>
-<p style="font-size:16px">To download LiPD data, adjust the options below and click "submit." You will receive an email when your data is ready</p>
+<p style="font-size:16px"><p style="font-size:15px">To create a Holocene reconstruction, adjust the options below and click "submit." You will receive an email when your reconstruction is done.
 <br>
 <br>
+For more information about each of the options, mouse over the question mark icons or see <a href="https://cp.copernicus.org/articles/18/2599/2022/" target="_blank">Erb et al. 2022</a> for more details. Default values will produce a reconstruction similar to the one in Erb et al., 2022. If you are unsure what an option does, leaving it at its default value is a good choice.<p>
+<p>
 <br>
 <br>
+<form style="width:90%" id="formAd" name="formAd" onclick = "showAdv()" align="right">
+<input style="margin-right:5px;" type="checkbox" name="display" id="advCheck" value=1>
+<label for="advcheck">Show advanced options</label><br>
+</form>
+<br>
+<br>
+<form id="paramsForm" method="POST" onsubmit="buildURL()">
+<input id="recon" name="recon" type="hidden" value="graph_em">
+<script>function getQueryVariable(variable)
+{
+       var query = window.location.search.substring(1);
+       var vars = query.split("&");
+       for (var i=0;i<vars.length;i++) {
+               var pair = vars[i].split("=");
+               if(pair[0] == variable){
+                 return pair[1];}
+       }
+       return(false);
+}
+</script>
+<script>
+function popQueryVariable(){
+document.getElementById("recon").value = getQueryVariable("recon");
+document.getElementById("user").value = getQueryVariable("user");
+document.getElementById("domain").value = getQueryVariable("domain");
+document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
+}
+</script>
+<script>
+popQueryVariable()
+</script>
 <form id="paramsForm" method="POST" onsubmit="buildURL()">
 <input id="recon" name="recon" type="hidden" value="download">
 <input id="language" name="language" type="hidden" value="">
