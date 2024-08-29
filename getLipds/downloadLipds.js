@@ -153,8 +153,11 @@ var downloadEm = function(uniqueID, language){
    					if (reso == 0 && language == "Python"){
 						var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
 						console.log("attempting pickle")
-						pickleEm(pathToPkl)
-						removeEm(pathToPkl)
+						var pickleCode = pickleEm(pathToPkl)
+						console.log("pickle code: " + pickleCode)
+						if (pickleCode == 0){
+							removeEm(pathToPkl)
+						}
 					} else {
 						console.log("no pickling")
 					}
