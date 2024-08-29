@@ -240,7 +240,7 @@ dockerStatus = async function (uniqueID) {
 }
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
-   var vizURL = function(configLoc){ if (configLoc == true) {return ""} else {return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '/" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'}};
+   var vizURL = function(configLoc){ if (configLoc == true) {return '<br>'} else {return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '/" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'}};
    var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
    var configFileTxt = function (configFileLoc) {
 	   if (configFileLoc == true){
@@ -259,7 +259,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 	}
         */
-	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + ' reconstruction (or LiPD download). This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
+	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + '. This link will expire after 7 days.</p>'
 	text1 = text1
 		+ '<br>'
 		+ vizURL(configLoc) +
@@ -287,7 +287,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		+ '<br>'
 		+ '<p>This account is not monitored for replies</p>'
 		+ '<p>If the link above does not initiate a download, try manually copying the link address to your browser</p>'
-		+ '<p>If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu?Subject=' + uniqueID  +'">email us directly</a>  with your unique reconstruction id: ' + uniqueID + '</p>'
+		+ '<p>If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why. If you are having trouble with Presto please <a href = "mailto:david.edge@nau.edu?Subject=' + uniqueID  +'">email us directly</a>  with your unique reconstruction id: ' + uniqueID + '</p>'
 	        + '<p>Let us know how we are doing at the <strong><a href="https://forms.gle/1wPXaCY75WwMyHXJ8" target="_blank" rel="noopener noreferrer">feedback form</a></strong>.</p>'
 	return(text1)
 }
