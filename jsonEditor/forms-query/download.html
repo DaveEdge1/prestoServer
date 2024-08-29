@@ -137,13 +137,13 @@ document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
 <script>
 popQueryVariable()
 </script>
-<form id="paramsForm" method="POST" onsubmit="buildURL()">
+<!--form id="paramsForm" method="POST" onsubmit="buildURL()">
 <input id="recon" name="recon" type="hidden" value="download">
 <input id="language" name="language" type="hidden" value="">
 <input id="user" name="user" type="hidden" value="">
 <input id="domain" name="domain" type="hidden" value="">
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
-<!--button type="button" class="collapsible">Data Format</button-->
+<button type="button" class="collapsible">Data Format</button>
 <div>
 <br>
 <br>
@@ -164,6 +164,336 @@ popQueryVariable()
 <br>
 </div>
 </div>
+<br>
+<br>
+<br>
+<div class="button-submit">
+<button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
+</div>
+</form-->
+<form id="paramsForm" method="POST" onsubmit="buildURL()">
+<input id="recon" name="recon" type="hidden" value="graph_em">
+<script>function getQueryVariable(variable)
+{
+       var query = window.location.search.substring(1);
+       var vars = query.split("&");
+       for (var i=0;i<vars.length;i++) {
+               var pair = vars[i].split("=");
+               if(pair[0] == variable){
+                 return pair[1];}
+       }
+       return(false);
+}
+</script>
+<script>
+function popQueryVariable(){
+document.getElementById("recon").value = getQueryVariable("recon");
+document.getElementById("user").value = getQueryVariable("user");
+document.getElementById("domain").value = getQueryVariable("domain");
+document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
+}
+</script>
+<script>
+popQueryVariable()
+</script>
+<input id="recon" name="recon" type="hidden" value="">
+<input id="user" name="user" type="hidden" value="">
+<input id="domain" name="domain" type="hidden" value="">
+<input id="uniqueID" name="uniqueID" type="hidden" value="">
+<button type="button" class="collapsible">Reconstruction</button>
+<div class="content">
+<br>
+<br>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="recon_exp_name_label" for="recon_exp_name">experiment name </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The experiment name, which will be appended to the filename. Pick something short & memorable, using only letters, numbers, and underscores (no spaces).</span>
+</div>
+<input style="font-size:14px;" type="text" class="form-control" id="recon_exp_name" aria-describedby="emailHelp" value="default" name="recon_exp_name">
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="recon_target_variable_label" for="recon_target_variable">variable to reconstruct </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The variables to reconstruct {['tas']}.  Note, only tas is fully supported at the moment.</span>
+</div>
+<div name="recon_target_variable" id="recon_target_variable" class="form-check">
+<div class=check-item>
+<input name="recon_target_variable" class="checkbox-1" type="checkbox" value="tas" checked id = "tas">
+<label style="font-size:14px;" for="tas">tas</label>
+</div>
+</div>
+<div class="checkall-container">
+<div class="checkAll">
+<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('recon_target_variable', recon_target_variable_incrementCheckCycle());" >
+</div>
+</div>
+<br>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+</div>
+<button type="button" class="collapsible">Time</button>
+<div class="content">
+<br>
+<br>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">time interval for reconstruction </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">define a start and end year in units years BP</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="time_range_to_reconstruct_fromSilder" type="range" value="0" min="0" max="12000" step="600"/>
+<input id="time_range_to_reconstruct_toSilder" type="range" value="12000" min="0" max="12000" step="600"/>
+</div>
+<br>
+<div class="form_control">
+<div class="form_control_container">
+<div class="form_control_container__time">Min</div>
+<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="0" min="0" max="12000" step="1"/>
+</div>
+<div class="form_control_container">
+<div class="form_control_container__time">Max</div>
+<input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="12000" min="0" max="12000" step="1"/>
+</div>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="time_resolution_label" for="time_resolution">duration of reconstruction time step </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The base temporal resolution, in years {10}</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="time_resolutionSilder" type="range" value="200" min="10" max="1000" step="55"/>
+<br>
+<input type="number" id="time_resolutionInput" name="time_resolution" value="200" min="10" max="1000" step="10"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="time_reference_label" for="time_reference">time interval for anomaly calculation </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">define a start and end year in units years BP</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="time_reference_fromSilder" type="range" value="3000" min="0" max="12000" step="600"/>
+<input id="time_reference_toSilder" type="range" value="5000" min="0" max="12000" step="600"/>
+</div>
+<br>
+<div class="form_control">
+<div class="form_control_container">
+<div class="form_control_container__time">Min</div>
+<input class="form_control_container__time__input" name="time_reference" type="number" id="time_reference_fromInput" value="3000" min="0" max="12000" step="1"/>
+</div>
+<div class="form_control_container">
+<div class="form_control_container__time">Max</div>
+<input class="form_control_container__time__input" name="time_reference" type="number" id="time_reference_toInput" value="5000" min="0" max="12000" step="1"/>
+</div>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+</div>
+<button type="button" class="collapsible">Bayesian Priors</button>
+<div class="content">
+<br>
+<br>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="prior_models_label" for="prior_models">models used for prior </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">model details here</span>
+</div>
+<div name="prior_models" id="prior_models" class="form-check">
+<div class=check-item>
+<input name="prior_models" class="checkbox-1" type="checkbox" value="hadcm3_regrid" checked id = "hadcm3_regrid">
+<label style="font-size:14px;" for="hadcm3_regrid">hadcm3_regrid</label>
+</div>
+<div class=check-item>
+<input name="prior_models" class="checkbox-1" type="checkbox" value="trace_regrid" checked id = "trace_regrid">
+<label style="font-size:14px;" for="trace_regrid">trace_regrid</label>
+</div>
+</div>
+<div class="checkall-container">
+<div class="checkAll">
+<input type="button" value="check/uncheck all" class="check-uncheck"  onclick="uncheckAll('prior_models', prior_models_incrementCheckCycle());" >
+</div>
+</div>
+<br>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="prior_time_window_label" for="prior_time_window">prior time window </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">The size of the window for the time-varying prior, in years {'all',5010,1010}</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="prior_time_windowSilder" type="range" value="5200" min="10" max="10000" step="555"/>
+<br>
+<input type="number" id="prior_time_windowInput" name="prior_time_window" value="5200" min="10" max="10000" step="10"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div style: "vertical-align: middle; height: 50px;" class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="prior_model_interval_label" for="prior_model_interval">time interval to use in model prior </label>
+<div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+<span class="tooltip-text">define a start and end year in units years BP</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="prior_model_interval_fromSilder" type="range" value="0" min="0" max="22000" step="1100"/>
+<input id="prior_model_interval_toSilder" type="range" value="22000" min="0" max="22000" step="1100"/>
+</div>
+<br>
+<div class="form_control">
+<div class="form_control_container">
+<div class="form_control_container__time">Min</div>
+<input class="form_control_container__time__input" name="prior_model_interval" type="number" id="prior_model_interval_fromInput" value="0" min="0" max="22000" step="1"/>
+</div>
+<div class="form_control_container">
+<div class="form_control_container__time">Max</div>
+<input class="form_control_container__time__input" name="prior_model_interval" type="number" id="prior_model_interval_toInput" value="22000" min="0" max="22000" step="1"/>
+</div>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="prior_mean_invariant">variability of prior mean (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">Is the mean of the prior allowed to change through time? {True,False}. If true, the mean of the prior is always 0.</span>
+</div>
+<div class="boolean_container">
+<input id="prior_mean_invariant" type = "radio" value="true" name="prior_mean_invariant">
+<label for="true">True</label><br>
+<input id="prior_mean_invariant" type = "radio" value="false" name="prior_mean_invariant" checked>
+<label for="false">False</label><br>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="prior_percentage">percentage of the prior states to assimilate (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">What percentage of the prior states to assimilate {100}.  Note, a value of 8.7 -> 100 ens, if other settings are default</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="prior_percentageSilder" type="range" value="100" min="0" max="100" step="5"/>
+<br>
+<input type="number" id="prior_percentageInput" name="prior_percentage" value="100" min="0" max="100" step="0.001"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="prior_seed">prior pseudo-random selection seed (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">This seed is only used if 'percent_of_prior' is below 100 {0}</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="prior_seedSilder" type="range" value="0" min="0" max="999" step="37"/>
+<br>
+<input type="number" id="prior_seedInput" name="prior_seed" value="0" min="0" max="999" step="1"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+</div>
+<button type="button" class="collapsible">Climate Proxies</button>
+<div class="content">
+<br>
+<br>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="proxy_assimilate_together">joint proxy assimilation (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">If False, assimile proxies one at a time (slower) {True,False}</span>
+</div>
+<div class="boolean_container">
+<input id="proxy_assimilate_together" type = "radio" value="true" name="proxy_assimilate_together" checked>
+<label for="true">True</label><br>
+<input id="proxy_assimilate_together" type = "radio" value="false" name="proxy_assimilate_together">
+<label for="false">False</label><br>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="proxy_seed">proxy pseudo-random selection seed (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">This seed is only used if 'percent_to_assimilate' is below 100</span>
+</div>
+<div class="range_container">
+<div class="sliders_control">
+<input id="proxy_seedSilder" type="range" value="0" min="0" max="999999" step="47619"/>
+<br>
+<input type="number" id="proxy_seedInput" name="proxy_seed" value="0" min="0" max="999999" step="1"/>
+</div>
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+</div>
+<button type="button" class="collapsible">Geospatial</button>
+<div class="content">
+<br>
+<br>
+<div class="form-group-advanced">
+<label style="font-size:20px; padding-right:10px; color:black" for="geo_localization_radius">proxy assimilation radius (advanced) </label>
+<div class="hover-text">?
+<span class="tooltip-text">Localization radius, in meters {None,15000}  Only works if assimate_together=False</span>
+</div>
+<input style="font-size:14px;" type="text" class="form-control" id="geo_localization_radius" aria-describedby="emailHelp" value="null" name="geo_localization_radius">
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+</div>
+</div>
+<br>
 <br>
 <br>
 <br>
