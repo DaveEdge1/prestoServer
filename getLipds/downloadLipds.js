@@ -67,6 +67,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 };
 
 pickleEm = function(path1){
+	var close = ''
 	console.log("launching lipd pickler")
 	var dockerComm = "docker run --rm -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
 	var dockerspawn = child_process.exec(dockerComm);
@@ -84,9 +85,9 @@ pickleEm = function(path1){
 		}
 	});
 
-	var close = dockerspawn.on('close', function (code) {
+	dockerspawn.on('close', function (code) {
 		console.log('lipd pickler process exited with code ' + code);
-		return(code)
+		close = code
 	});
 	return close
 };
