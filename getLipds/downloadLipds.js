@@ -68,7 +68,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 
 pickleEm = function(path1){
 	console.log("launching lipd pickler")
-	var dockerComm = "docker run -rm -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
+	var dockerComm = "docker run --rm -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
 	var dockerspawn = child_process.exec(dockerComm);
 	dockerspawn.stdout.on('data', function (data) {
 		console.log(data.toString());
