@@ -1,6 +1,6 @@
 {
   "holocene_da": {
-    "title": "Holocene DA",
+    "title": "Holocene DA reconstruction",
     "paramsCon": "/config_default.yml",
     "resultsDir": "/results",
     "github": "https://github.com/Holocene-Reconstruction/Holocene-code",
@@ -9,7 +9,7 @@
     "workingParams": "/root/presto/prestoForm/holocene_da/config_default.yml"
   },
   "temp12k": {
-    "title": "Temperature 12k Standard Calibrated Composite",
+    "title": "Temperature 12k Standard Calibrated Composite reconstruction",
     "paramsCon": "/params.json",
     "resultsDir": "/output",
     "github": "https://github.com/paleopresto/temp12k-regional-composites",
@@ -17,11 +17,19 @@
     "translate": "false"
   },
   "graph_em": {
-    "title": "GraphEM",
+    "title": "GraphEM reconstruction",
     "paramsCon": "/configs.yml",
     "resultsDir": "/recons",
     "github": "https://fzhu2e.github.io/cfr/ug-graphem.html",
     "conTag": "davidedge/lipd_webapps:graph_em",
+    "translate": "false"
+  },
+  "download": {
+    "title": "LiPD download",
+    "paramsCon": "",
+    "resultsDir": "",
+    "github": "https://lipdverse.org/",
+    "conTag": "",
     "translate": "false"
   }
 }
