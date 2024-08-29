@@ -4,6 +4,7 @@ process.argv.forEach(function (val, index, array) {
 
 var fs = require('fs');
 const path = require("path")
+const archiver = require("archiver")
 
 var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
@@ -115,6 +116,51 @@ removeEm = function(path1){
 		return(code)
 	});
 };
+
+zipIt = function (source_dir) {
+	var moveEm = 'mv ' + source_dir + '/*.ext ' + path.join(source_dir, lipds)
+	console.log("moveEm text: " + moveEm)
+
+	var movespawn = function(moveEm){
+		child_process.exec(moveEm);
+		movespawn.stdout.on('data', function (data) {
+			console.log(data.toString());
+		});
+	
+		movespawn.stderr.on('data', function (data) {
+			console.log('stderr: ' + data);
+			console.log(data.toString().search("error"));
+			console.log(movespawn.connected);
+			if ((data.toString().search("error") != -1) ) {
+				console.log('moveEm process has been killed - "error" keyword found in stderr!');
+				movespawn.kill('SIGTERM');
+			}
+		});
+		return new Promise((resolve, reject) => {
+			movespawn.on('close', function (code) {
+				console.log('moveEm process exited with code ' + code);
+				resolve(code)
+			});
+		});
+	}
+	movespawn.then(reso => {
+	
+		var downloadLoc = path.join(source_dir, source_dir + '.zip')
+		var output = fs.createWriteStream(downloadLoc);
+		var archive = archiver('zip');
+		output.on('close', function () {
+			console.log(archive.pointer() + ' total bytes');
+			console.log('archiver has been finalized and the output file descriptor has closed.');
+		})
+		archive.on('error', function(err){
+			throw err;
+		});
+		archive.pipe(output);
+		archive.directory(source_dir, false);
+		//archive.directory('subdir/', 'new-subdir');
+		return(archive.finalize());
+	});
+}
 
 TSIDs = function(path1, uniqueID){
 	try {
