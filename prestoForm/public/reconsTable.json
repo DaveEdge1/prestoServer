@@ -12,7 +12,7 @@
 		"title":"Temperature 12k Composites",
 		"time":"0-12,000 years",
 		"proxies":"Temperature 12k proxy database",
-		"models":"N/A",
+		"models":"NA",
 		"methods":"Standard calibrated composite (SCC)",
 		"doi":"https://doi.org/10.1038/s41597-020-0445-3",
 		"language":"R"
@@ -21,9 +21,18 @@
 		"title":"GraphEM",
 		"time":"0-2,000 years",
 		"proxies":"Pages 2k proxy database",
-		"models":"N/A",
+		"models":"NA",
 		"methods":"Graphical Expectation-Maximization algorithm",
 		"doi":"https://doi.org/10.1214/14-AOAS794",
 		"language":"Python"
+	},
+	"download": {
+		"title":"Download LiPDs",
+		"time":"NA",
+		"proxies":"NA",
+		"models":"NA",
+		"methods":"NA",
+		"doi":"https://doi.org/10.5194/cp-12-1093-2016",
+		"language":"NA"
 	}
 }
