@@ -68,7 +68,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 
 pickleEm = function(path1){
 	console.log("launching lipd pickler")
-	var dockerComm = "docker run -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
+	var dockerComm = "docker run -rm -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
 	var dockerspawn = child_process.exec(dockerComm);
 	dockerspawn.stdout.on('data', function (data) {
 		console.log(data.toString());
@@ -85,7 +85,32 @@ pickleEm = function(path1){
 	});
 
 	dockerspawn.on('close', function (code) {
-		console.log('child process exited with code ' + code);
+		console.log('lipd pickler process exited with code ' + code);
+		return(code)
+	});
+};
+
+removeEm = function(path1){
+	console.log("removing .lpd files")
+	var rmComm = "rm " + path1 + "/*.gch"
+	console.log("rm command: " + rmComm)
+	var rmspawn = child_process.exec(rmComm);
+	rmspawn.stdout.on('data', function (data) {
+		console.log(data.toString());
+	});
+
+	rmspawn.stderr.on('data', function (data) {
+		console.log('stderr: ' + data);
+		console.log(data.toString().search("error"));
+		console.log(rmspawn.connected);
+		if ((data.toString().search("error") != -1) ) {
+			console.log('process has been killed - "error" keyword found in stderr!');
+			rmspawn.kill('SIGTERM');
+		}
+	});
+
+	rmspawn.on('close', function (code) {
+		console.log('rm lpd process exited with code ' + code);
 		return(code)
 	});
 };
@@ -129,6 +154,7 @@ var downloadEm = function(uniqueID, language){
 						var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
 						console.log("attempting pickle")
 						pickleEm(pathToPkl)
+						removeEm(pathToPkl)
 					} else {
 						console.log("no pickling")
 					}
