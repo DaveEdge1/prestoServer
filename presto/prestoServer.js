@@ -419,7 +419,9 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  await dockerStatus(uniqueID);
 
 	}
-	await startContainer(launchText)
+	if (recon != "download"){
+		await startContainer(launchText)
+	}
 	
 	async function writeViz(uniqueID, dirname) {
 		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
