@@ -334,7 +334,7 @@ removeZipped = function(source_dir){
 }
 
         zipIt = function (source_dir) {
-		var downloadLoc = source_dir + '.zip'
+		var downloadLoc = path.join(source_dir, source_dir + '.zip')
 		var output = fs.createWriteStream(downloadLoc);
 		var archive = archiver('zip');
                 output.on('close', function () {
