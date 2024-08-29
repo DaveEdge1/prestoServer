@@ -113,9 +113,12 @@ function editConfigs (configLoc, formEdits, recon, uniqueID){
 function writeConfigs (recon, user, domain, jsonBody, uniqueID, language) {
   console.log("language: " + language)
   var reconID = uniqueID + '_' + recon
-  var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
+  
   var downloadPath = 'http://143.198.98.66:81/' + recon + '/' + user + '/' + domain + '/' + reconID + '/' + language
-  editConfigs(configLoc, jsonBody, recon, reconID)
+  if (recon != "download"){
+	  var configLoc = '/root/presto/prestoForm/' + recon + '/configs.yml'
+	  editConfigs(configLoc, jsonBody, recon, reconID)
+  }
   //newDir('/root/presto/userRecons/' + uniqueID)
   return (downloadPath);
 }
