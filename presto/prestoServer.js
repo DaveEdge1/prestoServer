@@ -32,11 +32,11 @@ var translateJSON = function (uniqueID, recon){
 		const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/lookup.json','utf8');
 		return JSON.parse(s)
 	}
-	
-	const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
-	
-	const configsOrig = JSON.parse(fs.readFileSync('/root/presto/prestoForm/' + recon + '/params.json','utf8'));
-
+	if (recon != "download"){
+		const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
+		
+		const configsOrig = JSON.parse(fs.readFileSync('/root/presto/prestoForm/' + recon + '/params.json','utf8'));
+	}
 	function writeJSON () {
 		var yamlText = ''
 		var newConfigs = configs
