@@ -240,13 +240,12 @@ dockerStatus = async function (uniqueID) {
 }
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
+   var vizURL = if (configLoc == true) {return ""} else {return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '/" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'};
    var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
    var configFileTxt = function (configFileLoc) {
 	   if (configFileLoc == true){
-		   var vizURL = ""
 		   return "";
 	   } else {
-		   var vizURL = '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '/" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
 		+ '<br>'
 		   var s = fs.readFileSync(configFileLoc,'utf8');
 		   s = align(s, 5)
