@@ -66,7 +66,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 	
 };
 
-pickleEm = function(path1){
+pickleEm = async function(path1){
 	var close = ''
 	console.log("launching lipd pickler")
 	var dockerComm = "docker run --rm -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
@@ -87,9 +87,8 @@ pickleEm = function(path1){
 
 	dockerspawn.on('close', function (code) {
 		console.log('lipd pickler process exited with code ' + code);
-		close = code
+		return(code)
 	});
-	return close
 };
 
 removeEm = function(path1){
@@ -155,11 +154,8 @@ var downloadEm = function(uniqueID, language){
    					if (reso == 0 && language == "Python"){
 						var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
 						console.log("attempting pickle")
-						var pickleCode = pickleEm(pathToPkl)
-						console.log("pickle code: " + pickleCode)
-						if (pickleCode == 0){
-							removeEm(pathToPkl)
-						}
+						await pickleEm(pathToPkl)
+						removeEm(pathToPkl)
 					} else {
 						console.log("no pickling")
 					}
