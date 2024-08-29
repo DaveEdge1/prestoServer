@@ -92,7 +92,7 @@ pickleEm = function(path1){
 
 removeEm = function(path1){
 	console.log("removing .lpd files")
-	var rmComm = "rm " + path1 + "/*.gch"
+	var rmComm = "rm " + path1 + "/*.lpd"
 	console.log("rm command: " + rmComm)
 	var rmspawn = child_process.exec(rmComm);
 	rmspawn.stdout.on('data', function (data) {
