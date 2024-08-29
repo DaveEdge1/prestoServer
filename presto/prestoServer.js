@@ -448,9 +448,9 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon) {
-	return('Starting your custom PReSto' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
+	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
-		 + '<a href=' + reconParams(recon).github + 'target="_blank">' + reconParams(recon).title + ' Code</a><br /><br />' 
+		 + '<a href=' + reconParams(recon).github + 'target="_blank">visit the ' + reconParams(recon).title + ' webpage</a><br /><br />' 
 		 + 'The results will be sent to: ' + user + '@' + domain 
 		 + '<br /><br />If results do not arrive within 1-2 hours, check your Spam folder <br /><br />You will automatically be redirected to the Presto home page after 10 seconds'
 	         + '<br /><br />Let us know how we are doing at the <strong><a href="https://forms.gle/1wPXaCY75WwMyHXJ8" target="_blank" rel="noopener noreferrer">feedback form</a></strong>.'
