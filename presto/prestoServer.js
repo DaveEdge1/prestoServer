@@ -207,7 +207,7 @@ updateParams = function (uniqueID, recon){
 	if (recon == 'holocene_da' || recon == 'graph_em'){
 		translate(uniqueID, recon)
 		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
-	} else if (recon == 'temp12k) {
+	} else if (recon == 'temp12k') {
 		translateJSON(uniqueID, recon)
 		return('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json')
 	} else {
