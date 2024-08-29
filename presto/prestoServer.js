@@ -240,12 +240,18 @@ dockerStatus = async function (uniqueID) {
 }
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
-   var vizURL = "http://143.198.98.66:91/" + uniqueID
    var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
    var configFileTxt = function (configFileLoc) {
-	   var s = fs.readFileSync(configFileLoc,'utf8');
-	   s = align(s, 5)
-	   return s
+	   if (configFileLoc == true){
+		   var vizURL = ""
+		   return "";
+	   } else {
+		   var vizURL = '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '/" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
+		+ '<br>'
+		   var s = fs.readFileSync(configFileLoc,'utf8');
+		   s = align(s, 5)
+		   return s
+	   }
    }
 	/*
 	if (dockerSuccess > 0) {
@@ -254,11 +260,10 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
 	}
         */
-	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + ' reconstruction. This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
+	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + ' reconstruction (or LiPD download). This link will expire after 7 days. If for some reason your reconstruction has failed, the docker stdout and stderr files can be used to understand why.</p>'
 	text1 = text1
 		+ '<br>'
-		+ '<a href="' + vizURL + '" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a>'
-		+ '<br>'
+		+ vizURL +
 		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to DOWNLOAD your results</a>'
 		+ '<br>'
 	        + '<a href="' + indexURL + '" download>Copy and paste this URL into a new browser window to BROWSE ALL files created</a>'
