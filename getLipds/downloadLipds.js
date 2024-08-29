@@ -84,10 +84,11 @@ pickleEm = function(path1){
 		}
 	});
 
-	dockerspawn.on('close', function (code) {
+	var close = dockerspawn.on('close', function (code) {
 		console.log('lipd pickler process exited with code ' + code);
 		return(code)
 	});
+	return close
 };
 
 removeEm = function(path1){
