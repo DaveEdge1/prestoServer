@@ -156,7 +156,7 @@ var downloadEm = function(uniqueID, language){
 						console.log("attempting pickle")
 						pickleEm(pathToPkl).then(reso => {
 							removeEm(pathToPkl)
-						}
+						})
 					} else {
 						console.log("no pickling")
 					}
