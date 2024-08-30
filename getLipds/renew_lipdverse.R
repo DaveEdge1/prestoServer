@@ -1,0 +1,8 @@
+library(lipdR)
+load("/root/presto/getLipds/lipdverse.RData")
+rm(D)
+gc()
+tts <- as.lipdTsTibble(TS)
+rm(TS)
+gc()
+save("/root/presto/getLipds/lipdverse_tts.RData")
