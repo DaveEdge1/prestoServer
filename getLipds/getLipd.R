@@ -1,4 +1,5 @@
 args = commandArgs(trailingOnly=TRUE)
+library(lipdR)
 print(paste0("args: ", args))
 if (length(args) != 3){
 	stop("TSIDs, uniqueID, and language required")
@@ -7,8 +8,8 @@ TSIDs <- unlist(strsplit(args[1], split = ","))
 if (length(TSIDs) < 1){
 	stop("Requires at least 1 TSId")
 }
-library(lipdR)
-qt <- lipdR:::newQueryTable()
+
+qt <- read.csv(/root/presto/getLipds/lipdverseQuery.csv)
 TSIndex <- which(qt$paleoData_TSid %in% TSIDs)
 
 if(length(TSIndex)==0){
@@ -20,8 +21,7 @@ tsPick <- qt$paleoData_TSid[TSIndex]
 dsPick <- unique(qt$datasetId[TSIndex])
 
 
-D <- readLipd(dsPick)
-tts <- as.lipdTsTibble(D)
+load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
 
 if (length(dsPick) == 1){
