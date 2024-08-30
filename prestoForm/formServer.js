@@ -110,7 +110,9 @@ app.get('/down', function (req, res) {
 
 app.get('/', function (req, res) {
 	console.log(req.ip)
-	res.sendFile("/root/presto/prestoForm/index.html")
+	//res.sendFile("/root/presto/prestoForm/index.html")
+	res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
+
 });
 
 app.get('/query', function (req, res) {
