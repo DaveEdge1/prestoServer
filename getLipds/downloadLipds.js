@@ -46,11 +46,11 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 				var rspawn = child_process.spawnSync(r_comm,[args]);
 	
 				
-				rspawn.stdout.on('data', function (data) {
+				rspawn.stdout('data', function (data) {
 			  		console.log(data.toString());
 				});
 	
-				rspawn.stderr.on('data', function (data) {
+				rspawn.stderr('data', function (data) {
 			  		console.log('stderr: ' + data);
 					console.log(data.toString().search("error"));
 					console.log(rspawn.connected);
@@ -60,7 +60,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 					}
 				});
 				
-				rspawn.on('close', function (code) {
+				rspawn('close', function (code) {
 			  		console.log('child process exited with code ' + code);
 					console.log("code: " + code)
 					if (code == 0){
