@@ -9,7 +9,7 @@ if (length(TSIDs) < 1){
 	stop("Requires at least 1 TSId")
 }
 
-qt <- read.csv(/root/presto/getLipds/lipdverseQuery.csv)
+qt <- read.csv("/root/presto/getLipds/lipdverseQuery.csv")
 TSIndex <- which(qt$paleoData_TSid %in% TSIDs)
 
 if(length(TSIndex)==0){
