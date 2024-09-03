@@ -43,7 +43,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 	var args = '--vanilla ' + file_path + ' ' + TSIDs + ' ' + path1 + ' ' + language;
 	return new Promise((resolve, reject) => {
 			for (let tryR = 0; tryR < 5; tryR++) {
-				var rspawn = child_process.spawn(r_comm,[args]);
+				var rspawn = child_process.spawnSync(r_comm,[args]);
 	
 				
 				rspawn.stdout.on('data', function (data) {
