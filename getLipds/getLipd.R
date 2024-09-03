@@ -1,5 +1,5 @@
 args = commandArgs(trailingOnly=TRUE)
-library(lipdR)
+#library(lipdR)
 print(paste0("args: ", args))
 if (length(args) != 3){
 	stop("TSIDs, uniqueID, and language required")
@@ -25,9 +25,9 @@ load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
 
 if (length(dsPick) == 1){
-	D <- as.lipd(tts)
+	D <- lipdR::as.lipd(tts)
 } else {
-	D <- as.multiLipd(tts)
+	D <- lipdR::as.multiLipd(tts)
 }
 
 if (args[3] == "R"){
