@@ -44,7 +44,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 	return new Promise((resolve, reject) => {
 			var rspawn = child_process.spawn(r_comm,[args]);
 
-			/*
+			
 			rspawn.stdout.on('data', function (data) {
 		  		console.log(data.toString());
 			});
@@ -58,7 +58,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 					rspawn.kill('SIGTERM');
 				}
 			});
-			*/
+			
 			rspawn.on('close', function (code) {
 		  		console.log('child process exited with code ' + code);
 		  		resolve(code)
