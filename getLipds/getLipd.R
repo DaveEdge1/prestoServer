@@ -30,9 +30,9 @@ if (length(dsPick) == 1){
 	D <- lipdR::as.multiLipd(tts)
 }
 
-if (args[3] == "R"){
-	destPath <- file.path(args[2], "lipd.rds") 
-	saveRDS(D, destPath)
-} else {
+
+destPath <- file.path(args[2], "lipd.rds") 
+saveRDS(D, destPath)
+if (args[3] == "Python") {
 	writeLipd(D, args[2])
 }
