@@ -49,7 +49,7 @@ var checkmd5 = function (uniqueID){
 	});
 }
 
-var newStatus = async function(uniqueID, language){
+var newStatus = function(uniqueID, language){
 	console.log("starting status check")
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(3)
