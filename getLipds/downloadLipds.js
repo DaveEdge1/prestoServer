@@ -10,10 +10,10 @@ var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 
-function checkFileExists(filepath){
+function checkFileExistsSync(filepath){
   let flag = true;
   try{
-    fs.access(filepath, fs.constants.F_OK);
+    fs.accessSync(filepath, fs.constants.F_OK);
   }catch(e){
     flag = false;
   }
@@ -57,7 +57,8 @@ function newStatus(uniqueID, language){
 	checkmd5(uniqueID).then(reso => {
 		console.log("md5 checked")
 		var path999 = path.join(__dirname, '/checkTSIDmd5.R')
-		if (checkFileExistsSync(path999)){
+		const exists1 = await checkFileExistsSync(path999)
+		if (exists1){
 			console.log("matching TSIDs file exists")
 			return(2)
 		} else {
