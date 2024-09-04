@@ -25,7 +25,7 @@ var newStatus = function(uniqueID, language){
 		return(3)
 	}
 	checkmd5(uniqueID).then(reso => {
-		var path999 <- path.join(__dirname, '/checkTSIDmd5.R')
+		var path999 = path.join(__dirname, '/checkTSIDmd5.R')
 		if (checkFileExistsSync(path999)){
 			return(2)
 		} else {
@@ -231,7 +231,7 @@ TSIDs = function(path1, uniqueID){
 var downloadEm = function(uniqueID, language){
 
 	if (process.argv.length == 4){
-		var runStatus <- newStatus(uniqueID, language)
+		var runStatus = newStatus(uniqueID, language)
 	
 		if (runStatus == 1){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
