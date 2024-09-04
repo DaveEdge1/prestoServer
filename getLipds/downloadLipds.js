@@ -198,15 +198,15 @@ var downloadEm = function(uniqueID, language){
 			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
 					console.log("rspawn1 reso: " + reso)
 					console.log("rspawn1 language: " + language)
-   					if (reso == 0 && language == "Python"){
-						var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
-						console.log("attempting pickle")
-						pickleEm(pathToPkl).then(reso => {
-							removeEm(pathToPkl)
-						})
-					} else {
-						console.log("no pickling")
-					}
+   					//if (reso == 0 && language == "Python"){
+					var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
+					console.log("attempting pickle")
+					pickleEm(pathToPkl).then(reso => {
+						removeEm(pathToPkl)
+					})
+					//} else {
+						//console.log("no pickling")
+					//}
 			});
      				/*
 				if (reso == 1){
