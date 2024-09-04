@@ -240,6 +240,7 @@ var downloadEm = async function(uniqueID, language){
 		var runStatus = await newStatus(uniqueID, language)
 	
 		if (runStatus == 1){
+			console.log("no matching TSIDs set, building new collection")
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 
 			var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
