@@ -393,12 +393,19 @@ function checkFileExistsSync(filepath){
 function = routeExistingLipds(uniqueID){
 	var root1 = '/root/presto/userRecons/' + uniqueID
 	var path99 = root1 + '/pointer.txt'
-	if checkFileExistsSync(path99){
+	if (checkFileExistsSync(path99)){
 		const s1 = fs.readFileSync(path99,'utf8');
-		var bashText2 = 'ln -s ' + s1 + ' ' + root1 + '/test' + path.extname(s1)
+		var bashText2 = 'ln -s ' + s1 + '/lipd.pkl ' + root1 + '/lipd.pkl'
 		var { stdout, stderr } = exec(bashText2);
-		stdout.pipe(fs.createWriteStream(dirname+'create_shortcut_stdout.txt'));
-	  	stderr.pipe(fs.createWriteStream(dirname+'create_shortcut_stderr.txt'));
+		stdout.pipe(fs.createWriteStream(dirname+'create_pkl_shortcut_stdout.txt'));
+	  	stderr.pipe(fs.createWriteStream(dirname+'create_pkl_shortcut_stderr.txt'));
+		var bashText3 = 'ln -s ' + s1 + '/lipd.rds ' + root1 + '/lipd.rds'
+		var { stdout, stderr } = exec(bashText3);
+		stdout.pipe(fs.createWriteStream(dirname+'create_rds_shortcut_stdout.txt'));
+	  	stderr.pipe(fs.createWriteStream(dirname+'create_rds_shortcut_stderr.txt'));
+		return true
+	} else {
+		return false
 	}
 }
 
@@ -425,20 +432,25 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 		var launchText = 'console.log("lipd download only")'
 	}
 
-	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
+	if (routeExistingLipds(uniqueID)){
+		console.log('using existing lipd data');
+	} else {
 
-	async function gatherLipds(lipdText) {
-		  console.log('gathering lipd data... ' + lipdText);
-		  console.log(execSync(lipdText).toString());
-		  //stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  //stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
+		var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
 	
-		  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
-	
-		  await sleep(1000)
+		async function gatherLipds(lipdText) {
+			  console.log('gathering lipd data... ' + lipdText);
+			  console.log(execSync(lipdText).toString());
+			  //stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
+			  //stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
+		
+			  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
+		
+			  await sleep(1000)
+		}
+		await gatherLipds(lipdText)
+		console.log('lipd data saved');
 	}
-	await gatherLipds(lipdText)
-	console.log('lipd data saved');
 	
 	async function startContainer(launchText) {
 	  console.log('running container...');
