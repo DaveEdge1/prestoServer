@@ -20,7 +20,7 @@ function checkFileExistsSync(filepath){
   return flag;
 }
 
-var checkmd5 = function (uniqueID){
+var checkmd5 = async function (uniqueID){
 	var path99 = path.join(__dirname, '../userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
 	var args2 = '--vanilla ' + path9 + ' ' + path99;
@@ -54,17 +54,17 @@ async function newStatus(uniqueID, language){
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(3)
 	}
-	checkmd5(uniqueID).then(reso => {
-		console.log("md5 checked")
-		var path999 = path.join(__dirname, '/checkTSIDmd5.R')
-		const exists1 = await checkFileExistsSync(path999)
-		if (exists1){
-			console.log("matching TSIDs file exists")
-			return(2)
-		} else {
-			return(1)
-		}
-	});
+	await checkmd5(uniqueID)
+	console.log("md5 checked")
+	var path999 = path.join(__dirname, '/checkTSIDmd5.R')
+	const exists1 = await checkFileExistsSync(path999)
+	if (exists1){
+		console.log("matching TSIDs file exists")
+		return(2)
+	} else {
+		return(1)
+	}
+
 }
 
 var rspawn1 = function (TSIDs, uniqueID, language){
