@@ -42,32 +42,28 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 	}
 	var args = '--vanilla ' + file_path + ' ' + TSIDs + ' ' + path1 + ' ' + language;
 	return new Promise((resolve, reject) => {
-			for (let tryR = 0; tryR < 5; tryR++) {
-				var rspawn = child_process.spawnSync(r_comm,[args]);
-	
-				
-				rspawn.stdout('data', function (data) {
-			  		console.log(data.toString());
-				});
-	
-				rspawn.stderr('data', function (data) {
-			  		console.log('stderr: ' + data);
-					console.log(data.toString().search("error"));
-					console.log(rspawn.connected);
-					if ((data.toString().search("error") != -1) ) {
-						console.log('process has been killed - "error" keyword found in stderr!');
-						rspawn.kill('SIGTERM');
-					}
-				});
-				
-				rspawn('close', function (code) {
-			  		console.log('child process exited with code ' + code);
-					console.log("code: " + code)
-					if (code == 0){
-						resolve(code)
-					}
-				});
-			}
+			var rspawn = child_process.spawn(r_comm,[args]);
+
+			
+			rspawn.stdout.on('data', function (data) {
+				console.log(data.toString());
+			});
+
+			rspawn.stderr.on('data', function (data) {
+				console.log('stderr: ' + data);
+				console.log(data.toString().search("error"));
+				console.log(rspawn.connected);
+				if ((data.toString().search("error") != -1) ) {
+					console.log('process has been killed - "error" keyword found in stderr!');
+					rspawn.kill('SIGTERM');
+				}
+			});
+			
+			rspawn.on('close', function (code) {
+				console.log('child process exited with code ' + code);
+				console.log("code: " + code)
+				resolve(code)
+			});
 	});
 	
 };
