@@ -20,7 +20,7 @@ function checkFileExistsSync(filepath){
   return flag;
 }
 
-var newStatus = function(uniqueID, language){
+var newStatus = async function(uniqueID, language){
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(3)
 	}
@@ -229,10 +229,10 @@ TSIDs = function(path1, uniqueID){
  */
 };
 
-var downloadEm = function(uniqueID, language){
+var downloadEm = async function(uniqueID, language){
 
 	if (process.argv.length == 4){
-		var runStatus = newStatus(uniqueID, language)
+		var runStatus = await newStatus(uniqueID, language)
 	
 		if (runStatus == 1){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
