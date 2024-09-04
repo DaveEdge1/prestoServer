@@ -33,6 +33,5 @@ if (length(dsPick) == 1){
 
 destPath <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPath)
-if (args[3] == "Python") {
-	writeLipd(D, args[2])
-}
+writeLipd(D, args[2])
+
