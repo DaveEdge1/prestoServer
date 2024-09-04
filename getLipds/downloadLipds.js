@@ -10,10 +10,10 @@ var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 
-function checkFileExistsSync(filepath){
+function checkFileExists(filepath){
   let flag = true;
   try{
-    fs.accessSync(filepath, fs.constants.F_OK);
+    fs.access(filepath, fs.constants.F_OK);
   }catch(e){
     flag = false;
   }
