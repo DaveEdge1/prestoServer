@@ -21,12 +21,15 @@ function checkFileExistsSync(filepath){
 }
 
 var newStatus = async function(uniqueID, language){
+	console.log("starting status check")
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(3)
 	}
 	checkmd5(uniqueID).then(reso => {
+		console.log("md5 checked")
 		var path999 = path.join(__dirname, '/checkTSIDmd5.R')
 		if (checkFileExistsSync(path999)){
+			console.log("matching TSIDs file exists")
 			return(2)
 		} else {
 			return(1)
@@ -39,6 +42,7 @@ var checkmd5 = function (uniqueID){
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
 	var args2 = '--vanilla ' + path9 + ' ' + path99;
 	return new Promise((resolve, reject) => {
+		console.log("starting TSID md5 check")
 		var rspawn2 = child_process.spawn(r_comm,[args]);
 		
 		rspawn2.stdout.on('data', function (data) {
