@@ -380,6 +380,28 @@ vizStatus = async function (uniqueID) {
         }
 }
 
+function checkFileExistsSync(filepath){
+  let flag = true;
+  try{
+    fs.accessSync(filepath, fs.constants.F_OK);
+  }catch(e){
+    flag = false;
+  }
+  return flag;
+}
+
+function = routeExistingLipds(uniqueID){
+	var root1 = '/root/presto/userRecons/' + uniqueID
+	var path99 = root1 + '/pointer.txt'
+	if checkFileExistsSync(path99){
+		const s1 = fs.readFileSync(path99,'utf8');
+		var bashText2 = 'ln -s ' + s1 + ' ' + root1 + '/test' + path.extname(s1)
+		var { stdout, stderr } = exec(bashText2);
+		stdout.pipe(fs.createWriteStream(dirname+'create_shortcut_stdout.txt'));
+	  	stderr.pipe(fs.createWriteStream(dirname+'create_shortcut_stderr.txt'));
+	}
+}
+
 
 runRecon = async function(uniqueID, user, domain, recon, language) {
 
