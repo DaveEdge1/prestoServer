@@ -236,7 +236,7 @@ TSIDs = function(path1, uniqueID){
 var downloadEm = function(uniqueID, language){
 
 	if (process.argv.length == 4){
-		var runStatus = await newStatus(uniqueID, language)
+		var runStatus = newStatus(uniqueID, language)
 	
 		if (runStatus == 1){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
