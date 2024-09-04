@@ -287,6 +287,7 @@ var downloadEm = function(uniqueID, language){
 			process.exit(0);
 		} else {
 			console.log("Error: num args to downloadLipds.js: " + process.argv.length)
+			console.log("runStatus: " + runStatus)
 			process.exit(1);
 		}
 	}
