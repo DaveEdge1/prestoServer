@@ -9,16 +9,57 @@ const archiver = require("archiver")
 var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
-//var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
+
+function checkFileExistsSync(filepath){
+  let flag = true;
+  try{
+    fs.accessSync(filepath, fs.constants.F_OK);
+  }catch(e){
+    flag = false;
+  }
+  return flag;
+}
 
 var newStatus = function(uniqueID, language){
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
-		return(false)
-	} else {
-		return(true)
+		return(3)
 	}
+	checkmd5(uniqueID).then(reso => {
+		var path999 <- path.join(__dirname, '/checkTSIDmd5.R')
+		if (checkFileExistsSync(path999)){
+			return(2)
+		} else {
+			return(1)
+		}
+	});
 }
 
+var checkmd5 = function (uniqueID){
+	var path99 = path.join(__dirname, '../userRecons', uniqueID)
+	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
+	var args2 = '--vanilla ' + path9 + ' ' + path99;
+	return new Promise((resolve, reject) => {
+		var rspawn2 = child_process.spawn(r_comm,[args]);
+		
+		rspawn2.stdout.on('data', function (data) {
+			console.log(data.toString());
+		});
+
+		rspawn2.stderr.on('data', function (data) {
+			console.log('rspawn2 stderr: ' + data);
+			console.log(data.toString().search("error"));
+			console.log(rspawn2.connected);
+			if ((data.toString().search("error") != -1) ) {
+				console.log('rspawn2 process has been killed - "error" keyword found in stderr!');
+				rspawn2.kill('SIGTERM');
+			}
+		});
+		
+		rspawn2.on('close', function (code) {
+			console.log('rspawn2 exited with code ' + code);
+			resolve(code)
+		});
+	});
 
 var rspawn1 = function (TSIDs, uniqueID, language){
 	var path1 = path.join(__dirname, '../userRecons', uniqueID)
@@ -30,16 +71,16 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 		}
 		console.log('Directory created successfully at: ' + path1);
 	});*/
-	if (language == "Python"){
-		var path3 = path.join(path1, "lipd.pkl")
-		fs.writeFile(path3, " ", (err) => {
-			                                  if (err)
-				                                            console.log(err);
-			                                  else {
-								                                                console.log("Blank lipd.pkl written successfully\n");
-								                                              }
-			                        });
-	}
+	//if (language == "Python"){
+	var path3 = path.join(path1, "lipd.pkl")
+	fs.writeFile(path3, " ", (err) => {
+		  if (err)
+				console.log(err);
+		  else {
+				console.log("Blank lipd.pkl written successfully\n");
+		       }
+	});
+	//}
 	var args = '--vanilla ' + file_path + ' ' + TSIDs + ' ' + path1 + ' ' + language;
 	return new Promise((resolve, reject) => {
 			var rspawn = child_process.spawn(r_comm,[args]);
@@ -190,8 +231,9 @@ TSIDs = function(path1, uniqueID){
 var downloadEm = function(uniqueID, language){
 
 	if (process.argv.length == 4){
+		var runStatus <- newStatus(uniqueID, language)
 	
-		if (newStatus(uniqueID, language)){
+		if (runStatus == 1){
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 
 			var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
@@ -237,11 +279,15 @@ var downloadEm = function(uniqueID, language){
 					}
 				//}
 			//});*/
+			console.log("downloadLipds.js successful")
+			process.exit(0);
+		} else if (runStatus == 2){
+			console.log("downloadLipds.js successful, found existing TSID set")
+			process.exit(0);
+		} else {
+			console.log("Error: num args to downloadLipds.js: " + process.argv.length)
+			process.exit(1);
 		}
-	} else {
-		console.log("Error: num args to downloadLipds.js: " + process.argv.length)
-		process.exit(1);
-	}
 
 };
 
