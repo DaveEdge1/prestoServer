@@ -60,6 +60,7 @@ var checkmd5 = function (uniqueID){
 			resolve(code)
 		});
 	});
+}
 
 var rspawn1 = function (TSIDs, uniqueID, language){
 	var path1 = path.join(__dirname, '../userRecons', uniqueID)
@@ -288,6 +289,7 @@ var downloadEm = function(uniqueID, language){
 			console.log("Error: num args to downloadLipds.js: " + process.argv.length)
 			process.exit(1);
 		}
+	}
 
 };
 
