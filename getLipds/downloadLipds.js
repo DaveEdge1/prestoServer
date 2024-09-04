@@ -20,23 +20,6 @@ function checkFileExistsSync(filepath){
   return flag;
 }
 
-var newStatus = async function(uniqueID, language){
-	console.log("starting status check")
-	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
-		return(3)
-	}
-	checkmd5(uniqueID).then(reso => {
-		console.log("md5 checked")
-		var path999 = path.join(__dirname, '/checkTSIDmd5.R')
-		if (checkFileExistsSync(path999)){
-			console.log("matching TSIDs file exists")
-			return(2)
-		} else {
-			return(1)
-		}
-	});
-}
-
 var checkmd5 = function (uniqueID){
 	var path99 = path.join(__dirname, '../userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
@@ -63,6 +46,23 @@ var checkmd5 = function (uniqueID){
 			console.log('rspawn2 exited with code ' + code);
 			resolve(code)
 		});
+	});
+}
+
+var newStatus = async function(uniqueID, language){
+	console.log("starting status check")
+	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
+		return(3)
+	}
+	checkmd5(uniqueID).then(reso => {
+		console.log("md5 checked")
+		var path999 = path.join(__dirname, '/checkTSIDmd5.R')
+		if (checkFileExistsSync(path999)){
+			console.log("matching TSIDs file exists")
+			return(2)
+		} else {
+			return(1)
+		}
 	});
 }
 
@@ -233,7 +233,7 @@ TSIDs = function(path1, uniqueID){
  */
 };
 
-var downloadEm = async function(uniqueID, language){
+var downloadEm = function(uniqueID, language){
 
 	if (process.argv.length == 4){
 		var runStatus = await newStatus(uniqueID, language)
