@@ -234,7 +234,7 @@ TSIDs = function(path1, uniqueID){
  */
 };
 
-var downloadEm = function(uniqueID, language){
+var downloadEm = async function(uniqueID, language){
 
 	if (process.argv.length == 4){
 		var runStatus = await newStatus(uniqueID, language)
