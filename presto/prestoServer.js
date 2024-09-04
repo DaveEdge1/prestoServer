@@ -390,7 +390,7 @@ function checkFileExistsSync(filepath){
   return flag;
 }
 
-function = routeExistingLipds(uniqueID){
+function routeExistingLipds(uniqueID){
 	var root1 = '/root/presto/userRecons/' + uniqueID
 	var path99 = root1 + '/pointer.txt'
 	if (checkFileExistsSync(path99)){
