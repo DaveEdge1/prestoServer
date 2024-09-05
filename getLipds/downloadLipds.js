@@ -26,6 +26,10 @@ var checkmd5 = async function (uniqueID){
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
 	var path9999 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs,json')
 	const exists1 = await checkFileExistsSync(path9999)
+	console.log("exists1: " + exists1)
+	if (!exists1){
+		process.exit(1);
+	}
 	var args2 = '--vanilla ' + path9 + ' ' + path99;
 	return new Promise((resolve, reject) => {
 		console.log("starting TSID md5 check")
