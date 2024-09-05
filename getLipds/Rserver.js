@@ -23,8 +23,8 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-var newStatus = function(TSIDs, uniqueID, language){
-	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined' || typeof language == 'undefined'){
+var newStatus = function(TSIDs, uniqueID){
+	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined'){
 		return(400)
 	} else {
 		return(200)
@@ -109,10 +109,11 @@ newDir = function(dirname) {
 }
 
 app.post('/lipds', function(req, res) {
-	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language));
+	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID));
+	var dir1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon))
 	
-	if (newStatus(req.body.TSIDs, req.body.uniqueID, req.body.language) == 200){
-		var path0 = path.join(newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon)), 'TSIDs.json')
+	if (newStatus(req.body.TSIDs, req.body.uniqueID) == 200){
+		var path0 = path.join(dir1, 'TSIDs.json')
 		var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
 		fs.writeFile(path0, fullJSON, (err) => {
 			  if (err)
@@ -145,7 +146,15 @@ app.post('/lipds', function(req, res) {
 				pickleEm(path1)
 			}
 		});*/
-	}
+	} else {
+		var path0 = path.join(dir1, 'TSIDs_err.txt')
+		fs.writeFile(path0, "Rserver error! TSIDs not written.", (err) => {
+			  if (err)
+				    console.log(err);
+			  else {
+				      console.log("File written successfully at: " + path0);
+				    }
+		});
 
 });
 
