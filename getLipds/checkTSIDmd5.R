@@ -6,6 +6,7 @@ if (length(existing) > 0){
   a1 <- tools::md5sum(TSIDs.loc)
   md5Index <- which(existing$md5 == a1)[1]
   if (length(md5Index) > 0){
+    dir.create(args[1])
     write(existing$location[md5Index], file = file.path(args[1], "pointer.txt"))
   }
 }
