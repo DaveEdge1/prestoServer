@@ -10,6 +10,25 @@ var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 
+async function routeExistingLipds(uniqueID){
+	var root1 = '/root/presto/userRecons/' + uniqueID
+	var path99 = root1 + '/pointer.txt'
+	if (checkFileExistsSync(path99)){
+		const s1 = fs.readFileSync(path99,'utf8');
+		var bashText2 = 'ln -s ' + s1 + '/lipd.pkl ' + root1 + '/lipd.pkl'
+		var { stdout, stderr } = exec(bashText2);
+		stdout.pipe(fs.createWriteStream(dirname+'create_pkl_shortcut_stdout.txt'));
+	  	stderr.pipe(fs.createWriteStream(dirname+'create_pkl_shortcut_stderr.txt'));
+		var bashText3 = 'ln -s ' + s1 + '/lipd.rds ' + root1 + '/lipd.rds'
+		var { stdout, stderr } = exec(bashText3);
+		stdout.pipe(fs.createWriteStream(dirname+'create_rds_shortcut_stdout.txt'));
+	  	stderr.pipe(fs.createWriteStream(dirname+'create_rds_shortcut_stderr.txt'));
+		return true
+	} else {
+		return false
+	}
+}
+
 function checkFileExistsSync(filepath){
   console.log("checking for file: " + filepath)
   let flag = true;
@@ -242,6 +261,7 @@ var downloadEm = async function(uniqueID, language){
 			console.log("downloadLipds.js successful")
 			process.exit(0);
 		} else if (runStatus == 2){
+			await routeExistingLipds(uniqueID)
 			console.log("downloadLipds.js successful, found existing TSID set")
 			process.exit(0);
 		} else {
