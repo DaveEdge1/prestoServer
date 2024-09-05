@@ -57,7 +57,8 @@ async function newStatus(uniqueID, language){
 	}
 	await checkmd5(uniqueID)
 	console.log("md5 checked")
-	var path999 = path.join(__dirname, '/checkTSIDmd5.R')
+	var path999 = path.join(__dirname, '/pointer.txt')
+	console.log("checking for file: " + path999)
 	const exists1 = await checkFileExistsSync(path999)
 	if (exists1){
 		console.log("matching TSIDs file exists")
