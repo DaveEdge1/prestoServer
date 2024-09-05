@@ -217,22 +217,7 @@ TSIDs = function(path1, uniqueID){
 	} catch (error) {
 	  console.log('no TSIDs file for given uniqueID: ' + uniqueID)
 			process.exit(1);
-	  // Expected output: ReferenceError: nonExistentFunction is not defined
-	  // (Note: the exact output may be browser-dependent)
 	}
-	/*
-	fs.statSync(path1, function(err, stat) {
-		if (err == null) {
-			console.log('path1: ' + path1);
-			const TSIDs2 = fs.readFileSync(path1, { encoding: 'utf8', flag: 'r' });
-			console.log('TSIDs read from file: ' + TSIDs2);
-			return TSIDs2
-		} else {
-			console.log('no TSIDs file for given uniqueID: ' + uniqueID)
-			process.exit(1);
-		}
-	});
- */
 };
 
 var downloadEm = async function(uniqueID, language){
