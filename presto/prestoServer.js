@@ -418,7 +418,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
 
-	async function gatherLipds(cmd) {
+	function gatherLipds(cmd) {
 	console.log('gathering lipd data... ' + lipdText);
 	  try {
 	    return execSync(cmd).toString();
@@ -430,7 +430,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	    error.stdout;  // Holds the stdout output. Use `.toString()`.
 	  }
 	};
-	await console.log(gatherLipds(lipdText));
+	console.log(gatherLipds(lipdText));
 	/*
 	async function gatherLipds(lipdText) {
 		  console.log('gathering lipd data... ' + lipdText);
