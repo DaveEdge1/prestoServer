@@ -301,6 +301,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 }
 
   sendEmail = function (user, domain, uniqueID, configLoc, recon) {
+    console.log('attempting to send email')
     var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
