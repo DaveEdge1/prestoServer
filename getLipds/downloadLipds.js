@@ -11,6 +11,7 @@ var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 
 function checkFileExistsSync(filepath){
+  console.log("checking for file: " + filepath)
   let flag = true;
   try{
     fs.accessSync(filepath, fs.constants.F_OK);
@@ -23,6 +24,8 @@ function checkFileExistsSync(filepath){
 var checkmd5 = async function (uniqueID){
 	var path99 = path.join(__dirname, '../userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
+	var path9999 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs,json')
+	const exists1 = await checkFileExistsSync(path9999)
 	var args2 = '--vanilla ' + path9 + ' ' + path99;
 	return new Promise((resolve, reject) => {
 		console.log("starting TSID md5 check")
@@ -58,7 +61,6 @@ async function newStatus(uniqueID, language){
 	await checkmd5(uniqueID)
 	console.log("md5 checked")
 	var path999 = path.join(__dirname, '/pointer.txt')
-	console.log("checking for file: " + path999)
 	const exists1 = await checkFileExistsSync(path999)
 	if (exists1){
 		console.log("matching TSIDs file exists")
