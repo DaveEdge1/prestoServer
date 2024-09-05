@@ -16,11 +16,11 @@ async function routeExistingLipds(uniqueID){
 	if (checkFileExistsSync(path99)){
 		const s1 = fs.readFileSync(path99,'utf8');
 		var bashText2 = 'ln -s ' + s1 + '/lipd.pkl ' + root1 + '/lipd.pkl'
-		var { stdout, stderr } = exec(bashText2);
+		var { stdout, stderr } = child_process.exec(bashText2);
 		stdout.pipe(fs.createWriteStream(dirname+'create_pkl_shortcut_stdout.txt'));
 	  	stderr.pipe(fs.createWriteStream(dirname+'create_pkl_shortcut_stderr.txt'));
 		var bashText3 = 'ln -s ' + s1 + '/lipd.rds ' + root1 + '/lipd.rds'
-		var { stdout, stderr } = exec(bashText3);
+		var { stdout, stderr } = child_process.exec(bashText3);
 		stdout.pipe(fs.createWriteStream(dirname+'create_rds_shortcut_stdout.txt'));
 	  	stderr.pipe(fs.createWriteStream(dirname+'create_rds_shortcut_stderr.txt'));
 		return true
