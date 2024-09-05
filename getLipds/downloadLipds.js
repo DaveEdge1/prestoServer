@@ -177,10 +177,14 @@ removeEm = function(path1){
 		}
 	});
 
-	rmspawn.on('close', function (code) {
-		console.log('rm lpd process exited with code ' + code);
-		return(code)
+	return new Promise((resolve, reject) => {
+		rmspawn.on('close', function (code) {
+			console.log('rm lpd process exited with code ' + code);
+			return(code)
+		});
 	});
+
+	
 };
 
 zipIt = function (source_dir) {
