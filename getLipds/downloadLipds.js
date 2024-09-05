@@ -26,6 +26,7 @@ var checkmd5 = async function (uniqueID){
 	var args2 = '--vanilla ' + path9 + ' ' + path99;
 	return new Promise((resolve, reject) => {
 		console.log("starting TSID md5 check")
+		console.log("rspawn2 args: " + args2)
 		var rspawn2 = child_process.spawn(r_comm,[args2]);
 		
 		rspawn2.stdout.on('data', function (data) {
