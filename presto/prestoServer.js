@@ -418,9 +418,23 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
 
+	async function gatherLipds(cmd) {
+	console.log('gathering lipd data... ' + lipdText);
+	  try {
+	    return execSync(cmd).toString();
+	  } 
+	  catch (error) {
+	    error.status;  // Might be 127 in your example.
+	    error.message; // Holds the message you typically want.
+	    error.stderr;  // Holds the stderr output. Use `.toString()`.
+	    error.stdout;  // Holds the stdout output. Use `.toString()`.
+	  }
+	};
+	await console.log(gatherLipds(lipdText));
+	/*
 	async function gatherLipds(lipdText) {
 		  console.log('gathering lipd data... ' + lipdText);
-		  shelljs.exec(lipdText).stdout;
+		  console.log(execSync(lipdText).toString())
 		  //stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
 		  //stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
 	
@@ -429,6 +443,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 		  await sleep(1000)
 	}
 	await gatherLipds(lipdText)
+	*/
 	console.log('lipd data saved');
 	//}
 	
