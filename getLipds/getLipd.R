@@ -1,5 +1,5 @@
 args = commandArgs(trailingOnly=TRUE)
-#library(lipdR)
+library(lipdR)
 print(paste0("args: ", args))
 if (length(args) != 3){
 	stop("TSIDs, uniqueID, and language required")
