@@ -77,15 +77,7 @@ async function newStatus(uniqueID, language){
 
 var rspawn1 = function (TSIDs, uniqueID, language){
 	var path1 = path.join(__dirname, '../userRecons', uniqueID)
-	/*
-	fs.mkdir(path1,
-		(err) => {
-		if (err) {
-			return console.error(err);
-		}
-		console.log('Directory created successfully at: ' + path1);
-	});*/
-	//if (language == "Python"){
+
 	var path3 = path.join(path1, "lipd.pkl")
 	fs.writeFile(path3, " ", (err) => {
 		  if (err)
@@ -94,7 +86,6 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 				console.log("Blank lipd.pkl written successfully\n");
 		       }
 	});
-	//}
 	var args = '--vanilla ' + file_path + ' ' + TSIDs + ' ' + path1 + ' ' + language;
 	return new Promise((resolve, reject) => {
 			var rspawn = child_process.spawn(r_comm,[args]);
@@ -246,39 +237,8 @@ var downloadEm = async function(uniqueID, language){
 					pickleEm(pathToPkl).then(reso => {
 						removeEm(pathToPkl)
 					})
-					//} else {
-						//console.log("no pickling")
-					//}
 			});
-     				/*
-				if (reso == 1){
-					process.exit(1);
-				} else {
-					
-					var path2 = path.join(__dirname, '../userRecons', uniqueID, "processCode.txt")
-					fs.writeFile(path2, reso.toString(), (err) => {
-						  if (err)
-							    console.log(err);
-						  else {
-							      console.log("File written successfully\n");
-							      console.log("The written has the following contents:");
-							      console.log(fs.readFileSync(path2, "utf8"));
-							    }
-					});
-					fs.writeFile('TSIDs.txt', JSON.stringify(TSIDs), (err) => {
-						  if (err)
-							    console.log(err);
-						  else {
-							      console.log("File written successfully\n");
-							      console.log("The written has the following contents:");
-							      console.log(fs.readFileSync(path2, "utf8"));
-							    }
-					});
-					if (reso == 0 && language == "Python"){
-						pickleEm(path1)
-					}
-				//}
-			//});*/
+
 			console.log("downloadLipds.js successful")
 			process.exit(0);
 		} else if (runStatus == 2){
