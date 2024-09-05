@@ -254,12 +254,13 @@ var downloadEm = async function(uniqueID, language){
 					var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
 					console.log("attempting pickle")
 					pickleEm(pathToPkl).then(reso => {
-						removeEm(pathToPkl)
+						removeEm(pathToPkl).then(reso => {
+							console.log("downloadLipds.js successful, new lipd set created")
+							process.exit(0);
+						});
 					})
 			});
 
-			console.log("downloadLipds.js successful")
-			process.exit(0);
 		} else if (runStatus == 2){
 			await routeExistingLipds(uniqueID)
 			console.log("downloadLipds.js successful, found existing TSID set")
