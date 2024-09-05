@@ -419,7 +419,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
 
 	function gatherLipds(cmd) {
-	console.log('gathering lipd data... ' + lipdText);
+	console.log('gathering lipd data... ' + cmd);
 	  try {
 	    return execSync(cmd).toString();
 	  } 
