@@ -19,10 +19,11 @@ async function routeExistingLipds(uniqueID){
 		const s1 = fs.readFileSync(path99,'utf8');
 		var origpkl = root0 + s1 + '/lipd.pkl'
 		var origrds = root0 + s1 + '/lipd.rds'
-		console.log("link " + origrds + " to " + root1)
-		console.log("link " + origpkl + " to " + root1)
 		var bashText2 = 'ln -s ' + origpkl + ' ' + root1
 		var bashText3 = 'ln -s ' + origrds + ' ' + root1
+		console.log("bash2: " + bashText2)
+		console.log("bash3: " + bashText3)
+		shelljs.exec(bashText2).stdout
 		shelljs.exec(bashText3).stdout
 		return true
 	} else {
