@@ -70,7 +70,7 @@ var checkmd5 = async function (uniqueID){
 	var path99 = path.join(__dirname, '../userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
 	var path9999 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
-	const exist = await checkFileExistsSync(path9999)
+	const exists1 = await checkFileExistsSync(path9999)
 	if (!exists1){
 		console.log("no TSID.json file in directory: " + uniqueID)
 		process.exit(1);
