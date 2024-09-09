@@ -16,7 +16,7 @@ async function routeExistingLipds(uniqueID){
 	var root1 = path.join(root0, uniqueID)
 	var path99 = path.join(root1, '/pointer.txt')
 	if (checkFileExistsSync(path99)){
-		const s1 = fs.readFileSync(path99,'utf8');
+		var s1 = fs.readFileSync(path99,'utf8');
 		s1 = s1.replace(/(\r\n|\n|\r)/gm, "");
 		console.log("s1: " + s1)
 		var origpkl = root0 + s1 + '/lipd.pkl'
