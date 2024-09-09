@@ -487,7 +487,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
   
 prestoStartHtml = function (uniqueID, user, domain, recon, language) {
 	var bashText2 = 'node /root/presto/presto/prestoGo.js ' + uniqueID + ' ' + user + ' ' + domain + ' ' + recon + ' ' + language
-	console.log(execSync(bashText2).toString())
+	console.log(shelljs.exec(bashText2).stdout)
 	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + reconParams(recon).github + 'target="_blank">visit the ' + reconParams(recon).title + ' webpage</a><br /><br />' 
