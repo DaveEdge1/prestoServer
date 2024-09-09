@@ -21,6 +21,8 @@ async function routeExistingLipds(uniqueID){
 		var origpkl = path.join(root0, s1, 'lipd.pkl')
 		var newrds = path.join(root1, 'lipd.rds')
 		var origrds = path.join(root0, s1, 'lipd.rds')
+		console.log("Creating link from " + origrds + " to " + newrds)
+		console.log("Creating link from " + origpkl + " to " + newpkl)
 		var bashText2 = 'ln -s ' + origpkl + ' ' + newpkl
 		var bashText3 = 'ln -s ' + origrds + ' ' + newrds
 		shelljs.exec(bashText3).stdout
