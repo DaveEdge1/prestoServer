@@ -4,6 +4,7 @@ PORT = process.env.PORT || 3000
 const fs = require('fs');
 var shelljs = require("shelljs");
 //const util = require('util');
+var spawn = require("child_process").spawn;
 var exec = require("child_process").exec;
 var execSync = require("child_process").execSync;
 var archiver = require('archiver');
@@ -487,7 +488,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
   
 prestoStartHtml = function (uniqueID, user, domain, recon, language) {
 	var bashText2 = 'node /root/presto/presto/prestoGo.js ' + uniqueID + ' ' + user + ' ' + domain + ' ' + recon + ' ' + language
-	console.log(shelljs.exec(bashText2).stdout)
+	spawn(bashText2)
 	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + reconParams(recon).github + 'target="_blank">visit the ' + reconParams(recon).title + ' webpage</a><br /><br />' 
