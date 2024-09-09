@@ -110,7 +110,6 @@ async function newStatus(uniqueID, language){
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(3)
 	}
-	await updateTSIDmd5()
 	await checkmd5(uniqueID)
 	console.log("md5 checked")
 	var path999 = path.join(__dirname, '../userRecons', uniqueID, '/pointer.txt')
@@ -272,6 +271,7 @@ TSIDs = function(path1, uniqueID){
 };
 
 var downloadEm = async function(uniqueID, language){
+	updateTSIDmd5()
 
 	if (process.argv.length == 4){
 		var runStatus = await newStatus(uniqueID, language)
