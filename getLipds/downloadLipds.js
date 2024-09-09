@@ -12,12 +12,13 @@ var file_path = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 
 async function routeExistingLipds(uniqueID){
-	var root1 = '/root/presto/userRecons/' + uniqueID
-	var path99 = root1 + '/pointer.txt'
+	var root0 = '/root/presto/userRecons/'
+	var root1 = path.join(root0, uniqueID)
+	var path99 = path.join(root1, '/pointer.txt')
 	if (checkFileExistsSync(path99)){
 		const s1 = fs.readFileSync(path99,'utf8');
-		var bashText2 = 'ln -s ' + s1 + '/lipd.pkl ' + root1 + '/lipd.pkl'
-		var bashText3 = 'ln -s ' + s1 + '/lipd.rds ' + root1 + '/lipd.rds'
+		var bashText2 = 'ln -s ' + path.join(root0, s1, 'lipd.pkl') + ' ' + path.join(root1, 'lipd.pkl')
+		var bashText3 = 'ln -s ' + path.join(root0, s1, 'lipd.rds') + ' ' + path.join(root1, 'lipd.rds')
 		shelljs.exec(bashText3).stdout
 		return true
 	} else {
@@ -69,7 +70,7 @@ var checkmd5 = async function (uniqueID){
 	var path99 = path.join(__dirname, '../userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
 	var path9999 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
-	const exists1 = await checkFileExistsSync(path9999)
+	const exist = await checkFileExistsSync(path9999)
 	if (!exists1){
 		console.log("no TSID.json file in directory: " + uniqueID)
 		process.exit(1);
