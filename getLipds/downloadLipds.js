@@ -18,13 +18,10 @@ async function routeExistingLipds(uniqueID){
 	if (checkFileExistsSync(path99)){
 		var s1 = fs.readFileSync(path99,'utf8');
 		s1 = s1.replace(/(\r\n|\n|\r)/gm, "");
-		console.log("s1: " + s1)
 		var origpkl = root0 + s1 + '/lipd.pkl'
 		var origrds = root0 + s1 + '/lipd.rds'
 		var bashText2 = 'ln -s ' + origpkl + ' ' + root1
 		var bashText3 = 'ln -s ' + origrds + ' ' + root1
-		console.log("bash2: " + bashText2)
-		console.log("bash3: " + bashText3)
 		shelljs.exec(bashText2).stdout
 		shelljs.exec(bashText3).stdout
 		return true
