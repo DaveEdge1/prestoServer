@@ -17,14 +17,12 @@ async function routeExistingLipds(uniqueID){
 	var path99 = path.join(root1, '/pointer.txt')
 	if (checkFileExistsSync(path99)){
 		const s1 = fs.readFileSync(path99,'utf8');
-		var newpkl = path.join(root1, 'lipd.pkl')
 		var origpkl = path.join(root0, s1, 'lipd.pkl')
-		var newrds = path.join(root1, 'lipd.rds')
 		var origrds = path.join(root0, s1, 'lipd.rds')
-		console.log("Creating link from " + origrds + " to " + newrds)
-		console.log("Creating link from " + origpkl + " to " + newpkl)
-		var bashText2 = 'ln -s ' + origpkl + ' ' + newpkl
-		var bashText3 = 'ln -s ' + origrds + ' ' + newrds
+		console.log("Creating link from " + origrds + " to " + root1)
+		console.log("Creating link from " + origpkl + " to " + root1)
+		var bashText2 = 'ln -s ' + origpkl + ' ' + root1
+		var bashText3 = 'ln -s ' + origrds + ' ' + root1
 		shelljs.exec(bashText3).stdout
 		return true
 	} else {
