@@ -17,8 +17,8 @@ async function routeExistingLipds(uniqueID){
 	var path99 = path.join(root1, '/pointer.txt')
 	if (checkFileExistsSync(path99)){
 		const s1 = fs.readFileSync(path99,'utf8');
-		var origpkl = root1 + s1 + '/lipd.pkl'
-		var origrds = root1 + s1 + '/lipd.rds'
+		var origpkl = root0 + s1 + '/lipd.pkl'
+		var origrds = root0 + s1 + '/lipd.rds'
 		console.log("link " + origrds + " to " + root1)
 		console.log("link " + origpkl + " to " + root1)
 		var bashText2 = 'ln -s ' + origpkl + ' ' + root1
