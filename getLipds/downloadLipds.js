@@ -29,7 +29,6 @@ async function routeExistingLipds(uniqueID){
 		} else {
 			return false
 		}
-	}
 	} else {
 		return false
 	}
