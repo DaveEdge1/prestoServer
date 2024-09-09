@@ -487,7 +487,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 }
   
 prestoStartHtml = function (uniqueID, user, domain, recon, language) {
-	spawn('node /root/presto/presto/prestoGo.js', [uniqueID, user, domain, recon, language])
+	spawn('/root/presto/presto/prestoGo.js', [uniqueID, user, domain, recon, language])
 	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + reconParams(recon).github + 'target="_blank">visit the ' + reconParams(recon).title + ' webpage</a><br /><br />' 
