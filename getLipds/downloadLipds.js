@@ -5,6 +5,7 @@ process.argv.forEach(function (val, index, array) {
 var fs = require('fs');
 const path = require("path")
 const archiver = require("archiver")
+const shelljs = require("shelljs")
 
 var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
@@ -16,13 +17,8 @@ async function routeExistingLipds(uniqueID){
 	if (checkFileExistsSync(path99)){
 		const s1 = fs.readFileSync(path99,'utf8');
 		var bashText2 = 'ln -s ' + s1 + '/lipd.pkl ' + root1 + '/lipd.pkl'
-		var { stdout, stderr } = child_process.exec(bashText2);
-		stdout.pipe(fs.createWriteStream(path.join(root1+'create_pkl_shortcut_stdout.txt')));
-	  	stderr.pipe(fs.createWriteStream(path.join(root1+'create_pkl_shortcut_stderr.txt')));
 		var bashText3 = 'ln -s ' + s1 + '/lipd.rds ' + root1 + '/lipd.rds'
-		var { stdout, stderr } = child_process.exec(bashText3);
-		stdout.pipe(fs.createWriteStream(path.join(root1+'create_rds_shortcut_stdout.txt')));
-	  	stderr.pipe(fs.createWriteStream(path.join(root1+'create_rds_shortcut_stderr.txt')));
+		shelljs.exec(bashText3).stdout
 		return true
 	} else {
 		return false
