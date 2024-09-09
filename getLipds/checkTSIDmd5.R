@@ -10,7 +10,7 @@ if (length(existing) > 0){
   md5Index <- which(existing$md5 == a1)[1]
   print(paste0("md5Index: ",  md5Index))
   print(paste0("length(md5Index): ",  length(md5Index)))
-  if (length(md5Index) > 0){
+  if (!is.na(md5Index)){
     dir.create(args[1], showWarnings = FALSE)
     write(existing$location[md5Index], file = file.path(args[1], "pointer.txt"))
   }
