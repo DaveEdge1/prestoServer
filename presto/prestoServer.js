@@ -485,7 +485,8 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
   
-prestoStartHtml = function (uniqueID, user, domain, recon) {
+prestoStartHtml = function (uniqueID, user, domain, recon, language) {
+	runRecon(uniqueID, user, domain, recon, language)
 	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + reconParams(recon).github + 'target="_blank">visit the ' + reconParams(recon).title + ' webpage</a><br /><br />' 
@@ -499,8 +500,7 @@ prestoStartHtml = function (uniqueID, user, domain, recon) {
 app.get("/:recon/:user/:domain/:uniqueID/:language", (req, res) => {
 	console.log("uniqueID: " + req.params.uniqueID)
 	console.log("reconID: " + req.params.uniqueID)
-	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon))
-	runRecon(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon, req.params.language)
+	res.send(prestoStartHtml(req.params.uniqueID, req.params.user, req.params.domain, req.params.recon, req.params.language))
 })
 
 app.listen(PORT, function () {
