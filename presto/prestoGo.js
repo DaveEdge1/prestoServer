@@ -481,3 +481,5 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  console.log('files zipped');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
+
+runRecon(process.argv[2], process.argv[3], process.argv[4], process.argv[5], process.argv[6])
