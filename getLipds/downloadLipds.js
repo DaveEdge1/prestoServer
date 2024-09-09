@@ -20,11 +20,16 @@ async function routeExistingLipds(uniqueID){
 		s1 = s1.replace(/(\r\n|\n|\r)/gm, "");
 		var origpkl = root0 + s1 + '/lipd.pkl'
 		var origrds = root0 + s1 + '/lipd.rds'
-		var bashText2 = 'ln -s ' + origpkl + ' ' + root1
-		var bashText3 = 'ln -s ' + origrds + ' ' + root1
-		shelljs.exec(bashText2).stdout
-		shelljs.exec(bashText3).stdout
-		return true
+		if (checkFileExistsSync(origpkl) && checkFileExistsSync(origrds)){
+			var bashText2 = 'ln -s ' + origpkl + ' ' + root1
+			var bashText3 = 'ln -s ' + origrds + ' ' + root1
+			shelljs.exec(bashText2).stdout
+			shelljs.exec(bashText3).stdout
+			return true
+		} else {
+			return false
+		}
+	}
 	} else {
 		return false
 	}
