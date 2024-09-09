@@ -271,10 +271,10 @@ TSIDs = function(path1, uniqueID){
 };
 
 var downloadEm = async function(uniqueID, language){
-	updateTSIDmd5()
 
 	if (process.argv.length == 4){
 		var runStatus = await newStatus(uniqueID, language)
+		updateTSIDmd5()
 	
 		if (runStatus == 1){
 			console.log("no matching TSIDs set, building new collection")
