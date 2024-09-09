@@ -40,6 +40,35 @@ function checkFileExistsSync(filepath){
   return flag;
 }
 
+var updateTSIDmd5 = async function (){
+	var path89 = path.join(__dirname, '/updateTSIDmd5.R')
+	var args2 = '--vanilla ' + path89;
+	return new Promise((resolve, reject) => {
+		console.log("starting TSID md5 update")
+		console.log("rspawn2 args: " + args2)
+		var rspawn2 = child_process.spawn(r_comm,[args2]);
+		
+		rspawn2.stdout.on('data', function (data) {
+			console.log(data.toString());
+		});
+
+		rspawn2.stderr.on('data', function (data) {
+			console.log('rspawn2 stderr: ' + data);
+			console.log(data.toString().search("error"));
+			console.log(rspawn2.connected);
+			if ((data.toString().search("error") != -1) ) {
+				console.log('rspawn2 process has been killed - "error" keyword found in stderr!');
+				rspawn2.kill('SIGTERM');
+			}
+		});
+		
+		rspawn2.on('close', function (code) {
+			console.log('rspawn2 exited with code ' + code);
+			resolve(code)
+		});
+	});
+}
+
 var checkmd5 = async function (uniqueID){
 	var path99 = path.join(__dirname, '../userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
@@ -81,6 +110,7 @@ async function newStatus(uniqueID, language){
 	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
 		return(3)
 	}
+	await updateTSIDmd5()
 	await checkmd5(uniqueID)
 	console.log("md5 checked")
 	var path999 = path.join(__dirname, '../userRecons', uniqueID, '/pointer.txt')
