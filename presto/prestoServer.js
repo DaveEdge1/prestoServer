@@ -485,10 +485,20 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  console.log('files zipped');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
+
+async function startPresto(launchText, dirname) {
+	console.log('starting presto...');
+	console.log(launchText)
+	var { stdout, stderr } = exec(launchText);
+	stdout.pipe(fs.createWriteStream(dirname+'prestoGo_stdout.txt'));
+	stderr.pipe(fs.createWriteStream(dirname+'prestoGo_stderr.txt'));
+	console.log('dir: ' + dirname)
+}
   
 prestoStartHtml = function (uniqueID, user, domain, recon, language) {
+	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
 	var execComm = '/root/presto/presto/prestoGo.js ' + uniqueID + ' ' + user + ' ' + domain + ' ' + recon + ' ' + language
-	exec(execComm)
+	startPresto(execComm, dirname)
 	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
 		 + '<a href=' + reconParams(recon).github + 'target="_blank">visit the ' + reconParams(recon).title + ' webpage</a><br /><br />' 
