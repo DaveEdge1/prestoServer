@@ -497,7 +497,7 @@ async function startPresto(launchText, dirname) {
   
 prestoStartHtml = function (uniqueID, user, domain, recon, language) {
 	var dirname = '/root/presto/userRecons/' + uniqueID + '/';
-	var execComm = '/root/presto/presto/prestoGo.js ' + uniqueID + ' ' + user + ' ' + domain + ' ' + recon + ' ' + language
+	var execComm = 'node /root/presto/presto/prestoGo.js ' + uniqueID + ' ' + user + ' ' + domain + ' ' + recon + ' ' + language
 	startPresto(execComm, dirname)
 	return('Starting your custom PReSto ' + reconParams(recon).title + ', ID: '+ uniqueID +'<br /><br />' 
 		 + "WARNING: Using your browser's 'back' button will overwrite your previous submission<br /><br />"  
