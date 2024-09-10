@@ -106,6 +106,7 @@ var translateJSON = function (uniqueID, recon){
 }
 
 function sleep(ms) {
+    console.log("pausing for " + ms " ms to complete background processes")
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -331,22 +332,27 @@ removeZipped = function(source_dir){
 	fs.rmdirSync(source_dir);
 }
 
-        zipIt = function (source_dir) {
+zipIt = function (source_dir) {
+	try{
 		var downloadLoc = path.join(source_dir, source_dir + '.zip')
 		var output = fs.createWriteStream(downloadLoc);
 		var archive = archiver('zip');
-                output.on('close', function () {
+		output.on('close', function () {
 			console.log(archive.pointer() + ' total bytes');
 			console.log('archiver has been finalized and the output file descriptor has closed.');
 		})
 		archive.on('error', function(err){
+			console.error("zipping processes error!")
 			throw err;
 		});
 		archive.pipe(output);
 		archive.directory(source_dir, false);
-		//archive.directory('subdir/', 'new-subdir');
-		return(archive.finalize());
+	}catch(e){
+		console.error("zipping processes error!")
 	}
+	//archive.directory('subdir/', 'new-subdir');
+	return(archive.finalize());
+}
 
 vizStatus = async function (uniqueID) {
   var viz_status = fs.existsSync("/root/presto/userRecons/"+uniqueID+"/viz/visualizer.html")
@@ -475,7 +481,6 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	if (recon != "download"){
 		await writeViz(uniqueID, dirname)
 	}
-	  console.log('container run complete');
 	  await sleep(1000)
 	  await zipIt('/root/presto/userRecons/' + uniqueID)
 	  console.log('files zipped');
