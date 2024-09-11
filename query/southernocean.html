@@ -634,7 +634,7 @@ var map = L.map('map', {
  });
 
 var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
-var open = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}?style=gbif-classic', {
+var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}?style=gbif-classic', {
 	tileSize: 512
 }).addTo(map);
 
@@ -657,7 +657,7 @@ var BlueMarble = L.tileLayer(template, {
       '<a href="https://wiki.earthdata.nasa.gov/display/GIBS">' +
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
-  }).addTo(map);
+  })
 var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
     layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     tileMatrixSet: '250m',
@@ -796,7 +796,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap, "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
