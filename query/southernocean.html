@@ -633,7 +633,7 @@ var map = L.map('map', {
   zoom: 0
  });
 
-
+var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
 var open = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic'.replace('{r}', pixel_ratio), {
 	tileSize: 512
 }).addTo(map);
