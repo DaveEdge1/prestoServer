@@ -633,6 +633,11 @@ var map = L.map('map', {
   zoom: 0
  });
 
+
+var open = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@{r}x.png?style=gbif-classic'.replace('{r}', pixel_ratio), {
+	tileSize: 512
+}).addTo(map);
+
 var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
 '{layer}/default/{tileMatrixSet}/{z}/{y}/{x}.jpg';
