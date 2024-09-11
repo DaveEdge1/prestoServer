@@ -634,7 +634,7 @@ var map = L.map('map', {
  });
 
 var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
-var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}?style=gbif-classic', {
+var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}.pbf?style=gbif-classic', {
 	tileSize: 512
 }).addTo(map);
 
