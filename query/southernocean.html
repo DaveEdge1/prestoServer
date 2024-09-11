@@ -660,6 +660,7 @@ var map = L.map('map', {
 var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
 	tileSize: 512
 }).addTo(map);
+map.setMaxBounds(map.getBounds());
 /*
 var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
