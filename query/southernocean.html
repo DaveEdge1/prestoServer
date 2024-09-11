@@ -659,7 +659,7 @@ var map = L.map('map', {
 var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
 	tileSize: 512
 }).addTo(map);
-
+/*
 var template =
 '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
 '{layer}/default/{tileMatrixSet}/{z}/{y}/{x}.jpg';
@@ -694,6 +694,7 @@ var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{
       'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
       '</a>'
   })
+*/
 var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.ncd"
 //var testWMS = "https://gis.ngdc.noaa.gov/arcgis/services/PathfinderSST_monthly_averages/ImageServer/WMSServer"
 var sst = L.tileLayer.wms(testWMS, {
@@ -818,7 +819,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap, "BlueMarble": BlueMarble, "Imagery": MODIS_Aqua, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap, "SST": sst }, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
