@@ -637,7 +637,7 @@ var map = L.map('map', {
  });*/
 
 var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
-var max_zoom = 13;
+var max_zoom = 16;
 var tile_size = 512;
 
 var extent = 12367396.2185; // To the Equator
@@ -655,7 +655,7 @@ var crs = new L.Proj.CRS(
 
 var map = L.map('map', {
 	crs: crs,
-}).setView([-90, 180], 10);
+}).setView([-90, 180], 3);
 var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
 	tileSize: 512
 }).addTo(map);
