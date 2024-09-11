@@ -620,8 +620,10 @@ const crsOpts={
 		resolutions: [8192, 4096, 2048, 1024, 512, 256], 
 		origin: [-4194304, 4194304],
 		bounds: L.bounds (
-			[-4194304, -4194304],
-		  [4194304, 4194304]
+			[-12367396.2185, 12367396.2185],
+		  	[12367396.2185, -12367396.2185]
+			//[-4194304, -4194304],
+		  	//[4194304, 4194304]
 		)
 	} ;
   
@@ -634,7 +636,7 @@ var map = L.map('map', {
  });
 
 var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
-var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@1x.png?style=gbif-natural-en', {
+var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
 	tileSize: 512
 }).addTo(map);
 
