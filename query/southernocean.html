@@ -697,11 +697,11 @@ var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{
       '</a>'
   })
 */
-var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.png"
+var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.ncd"
 //var testWMS = "https://gis.ngdc.noaa.gov/arcgis/services/PathfinderSST_monthly_averages/ImageServer/WMSServer"
 var sst = L.tileLayer.wms(testWMS, {
     layers: 'sst',
-    format: 'image/png',
+    format: 'image/ncd',
     transparent: true,
     style: 'boxfill/sst_36',
     colorscalerange: '-3,35',
