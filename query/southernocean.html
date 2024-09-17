@@ -659,7 +659,7 @@ var map = L.map('map', {
 }).setView([-90, 180], 1);
 var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
 	tileSize: 512
-}).addTo(map);
+});
 //map.setMaxBounds(map.getBounds());
 /*
 var template =
@@ -708,7 +708,7 @@ var sst = L.tileLayer.wms(testWMS, {
     abovemaxcolor: "extend",
     belowmincolor: "extend",
     attribution: '<a href="https://www.ncdc.noaa.gov">NOAAs National Climatic Data Center</a>'
-});
+}).addTo(map);
 
 /*
 L.tileLayer("https://cdn.statically.io/gh/freetiler/nasa-bluemarble-labeled/main/tiles/{z}/{x}/{y}.jpeg", {
