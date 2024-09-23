@@ -106,7 +106,7 @@ var translateJSON = function (uniqueID, recon){
 }
 
 function sleep(ms) {
-    console.log("pausing for " + ms " ms to complete background processes")
+    console.log("pausing for " + ms + " ms to complete background processes")
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
