@@ -271,10 +271,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + '. This link will expire after 7 days.</p>'
 	text1 = text1
 		+ '<br>'
-		+ vizURL(configLoc)
-		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to DOWNLOAD your results</a>'
-		+ '<br>'
-	        + '<a href="' + indexURL + '" download>Copy and paste this URL into a new browser window to BROWSE ALL files created</a>'
+	        + '<a href="' + indexURL + '" download>BROWSE ALL files created</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
 		+ '<pre>' + configFileTxt(configLoc) + '</pre>'
