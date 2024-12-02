@@ -30,12 +30,7 @@ var translateJSON = function (uniqueID, recon){
 		return JSON.parse(s)
 	}
 	console.log("recon: " + recon)
-	if (recon != "download"){
-		const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
-		
-		const configsOrig = JSON.parse(fs.readFileSync('/root/presto/prestoForm/' + recon + '/params.json','utf8'));
-	}
-	function writeJSON () {
+	function writeJSON (configs, configsOrig) {
 		var yamlText = ''
 		var newConfigs = configs
 		var lookups = lookup()
@@ -95,7 +90,14 @@ var translateJSON = function (uniqueID, recon){
 		}
 	}
 
-	writeJSON()
+	if (recon != "download"){
+		const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
+		
+		const configsOrig = JSON.parse(fs.readFileSync('/root/presto/prestoForm/' + recon + '/params.json','utf8'));
+
+		writeJSON(configs, configsOrig)
+	}
+
 	
 	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json', JSON.stringify(configsOrig), function(err) {
 		if(err) {
