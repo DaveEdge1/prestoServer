@@ -182,11 +182,11 @@ var translate = function (uniqueID, recon){
 		}
 	writeYaml()
 	
-	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml', yaml.dump(configsOrig), function(err) {
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "request initiated" + "\n", function(err) {
 		if(err) {
 		          return console.log(err)
 		}
-		console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml has been edited');
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
 	});
 }
 
@@ -395,6 +395,13 @@ function checkFileExistsSync(filepath){
 }
 
 runRecon = async function(uniqueID, user, domain, recon, language) {
+
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json', JSON.stringify(configsOrig), function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json has been edited');
+	});
 
 	console.log('reconParams(recon): ' + reconParams(recon))
 	console.log('recon: ' + reconParams(recon).title)
