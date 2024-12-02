@@ -504,7 +504,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	}
 	
 	async function writeViz(uniqueID, dirname) {
-	const dirCont = fs.readdirSync( dir );
+	const dirCont = fs.readdirSync( '/root/presto/userRecons/' + uniqueID );
 	const files = dirCont.filter( ( elm ) => elm.match(/.*\.(nc?)/ig));
 	if (files.length < 1) {
 	        console.log("no nc files in dir!");
