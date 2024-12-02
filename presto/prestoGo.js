@@ -504,6 +504,17 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	}
 	
 	async function writeViz(uniqueID, dirname) {
+	const dirCont = fs.readdirSync( dir );
+	const files = dirCont.filter( ( elm ) => elm.match(/.*\.(nc?)/ig));
+	if (files.length < 1) {
+	        console.log("no nc files in dir!");
+	        fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz haulted, nc file missing!" + "\n", function(err) {
+			if(err) {
+			          return console.log(err)
+			}
+		});
+		process.exit([1])
+    	}
 	fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz launched" + "\n", function(err) {
 		if(err) {
 		          return console.log(err)
