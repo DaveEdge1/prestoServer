@@ -269,8 +269,6 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	text1 = text1
 		+ '<br>'
 		+ vizURL(configLoc)
-		+ '<a href="' + destURL + '" download>Copy and paste this URL into a new browser window to DOWNLOAD your results</a>'
-		+ '<br>'
 	        + '<a href="' + indexURL + '" download>Copy and paste this URL into a new browser window to BROWSE ALL files created</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
