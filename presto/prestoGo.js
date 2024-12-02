@@ -510,7 +510,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 		console.log("files.length: " + files.length);
 		console.log("files: " + files);
 	        console.log("no nc files in dir!");
-	        fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz haulted, nc file missing!" + "\n", function(err) {
+	        fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz halted, nc file missing! Check docker logs" + "\n", function(err) {
 			if(err) {
 			          return console.log(err)
 			}
