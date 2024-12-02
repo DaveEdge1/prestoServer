@@ -29,6 +29,7 @@ var translateJSON = function (uniqueID, recon){
 		const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/lookup.json','utf8');
 		return JSON.parse(s)
 	}
+	console.log("recon: " + recon)
 	if (recon != "download"){
 		const configs = yaml.load(fs.readFileSync('/root/presto/userRecons/' + uniqueID  + '/configs.yml','utf8'));
 		
