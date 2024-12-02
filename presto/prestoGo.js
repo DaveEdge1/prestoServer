@@ -309,8 +309,20 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
     };
       transporter.sendMail(mailOptions, function(error, info){
        if (error) {
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "email error" + "\n", function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+	});
 	  console.log(error);
        } else {
+		fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "email sent" + "\n", function(err) {
+			if(err) {
+			          return console.log(err)
+			}
+			console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+		});
 	  console.log('Email sent: ' + info.response);
        }
      });
@@ -430,6 +442,12 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	var lipdText = 'node /root/presto/getLipds/downloadLipds.js ' + uniqueID + ' ' + language
 
 	function gatherLipds(cmd) {
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "gathering lipd data" + "\n", function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+	});
 	console.log('gathering lipd data... ' + cmd);
 	  try {
 	    return execSync(cmd).toString();
@@ -455,10 +473,15 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	}
 	await gatherLipds(lipdText)
 	*/
-	console.log('lipd data saved');
 	//}
 	
 	async function startContainer(launchText) {
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "container launched" + "\n", function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+	});
 	  console.log('running container...');
 	  console.log(launchText)
 	  var { stdout, stderr } = exec(launchText);
@@ -470,12 +493,25 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  await sleep(1000)
 	  await dockerStatus(uniqueID);
 
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "container completed" + "\n", function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+	});
+
 	}
 	if (recon != "download"){
 		await startContainer(launchText)
 	}
 	
 	async function writeViz(uniqueID, dirname) {
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz launched" + "\n", function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+	});
 		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
 		var { stdout, stderr } = exec(bashText);
 		stdout.pipe(fs.createWriteStream(dirname+'viz_stdout.txt'));
@@ -483,6 +519,12 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 
 		await sleep(1000)
 	  	await vizStatus(uniqueID);
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz completed" + "\n", function(err) {
+		if(err) {
+		          return console.log(err)
+		}
+		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+	});
 	}
 
 	if (recon != "download"){
