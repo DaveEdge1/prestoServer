@@ -88,6 +88,12 @@ var translateJSON = function (uniqueID, recon){
 				 }
 			}
 		}
+		fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json', JSON.stringify(configsOrig), function(err) {
+			if(err) {
+			          return console.log(err)
+			}
+			console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json has been edited');
+		});
 	}
 
 	if (recon != "download"){
@@ -97,15 +103,6 @@ var translateJSON = function (uniqueID, recon){
 
 		writeJSON(configs, configsOrig)
 	}
-
-	
-	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json', JSON.stringify(configsOrig), function(err) {
-		if(err) {
-		          return console.log(err)
-		}
-		console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json has been edited');
-	});
-
 }
 
 function sleep(ms) {
