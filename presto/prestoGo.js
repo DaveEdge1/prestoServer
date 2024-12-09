@@ -182,11 +182,11 @@ var translate = function (uniqueID, recon){
 		}
 	writeYaml()
 
-	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json', JSON.stringify(configsOrig), function(err) {
+	fs.writeFileSync('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml', JSON.stringify(configsOrig), function(err) {
 		if(err) {
 		          return console.log(err)
 		}
-		console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.json has been edited');
+		console.log('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml has been edited');
 	});
 }
 
