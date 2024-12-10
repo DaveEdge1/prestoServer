@@ -542,7 +542,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 		await writeViz(uniqueID, dirname)
 	}
 	  await sleep(1000)
-	  await zipIt('/root/presto/userRecons/' + uniqueID)
+	  //await zipIt('/root/presto/userRecons/' + uniqueID)
 	  console.log('files zipped');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
