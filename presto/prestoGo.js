@@ -488,7 +488,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 
 	  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
 
-	  await sleep(1000)
+	  await sleep(5000)
 	  await dockerStatus(uniqueID);
 
 	fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "container completed" + "\n", function(err) {
@@ -507,8 +507,6 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	const dirCont = fs.readdirSync( '/root/presto/userRecons/' + uniqueID );
 	const files = dirCont.filter( ( elm ) => elm.match(/.*\.(nc?)/ig));
 	if (files.length < 1) {
-		console.log("files.length: " + files.length);
-		console.log("files: " + files);
 	        console.log("no nc files in dir!");
 	        fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz halted, nc file missing! Check docker logs" + "\n", function(err) {
 			if(err) {
