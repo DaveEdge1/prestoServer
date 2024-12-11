@@ -115,7 +115,7 @@ with open(output_dir_full+'visualizer.html','w') as f:
 #%% MOVE FILES AND CREATE ZIP
 
 # Move files and create zip
-os.system('cp '+web_data_dir+'assets/* '+output_dir_full+'public/assets/')          # Add the general assets to the visualization folder.
+os.system('cp '+web_data_dir+'assets/* '+output_dir_full+'assets/')          # Add the general assets to the visualization folder.
 os.chdir(output_dir_full)                                                    # Change directory to the visualization folder.
 os.system('zip -r '+output_dir+'viz_'+dataset_txt+'_'+version_txt+'.zip *')  # Zip everything in the visualization folder.
 
