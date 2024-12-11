@@ -47,7 +47,7 @@ elif 'graph_em'    in data_dir: dataset_txt = 'graphem';    version_txt = data_d
 filename_txt = dataset_txt+'_v'+version_txt+'_'+var_txt+'_'+quantity_txt.lower()
 output_dir_full = output_dir+'viz/'
 if os.path.exists(output_dir_full) == False: os.makedirs(output_dir_full)
-output_dir_full = output_dir_full+'public/assets/'
+output_dir_full = output_dir_full+'assets/'
 if os.path.exists(output_dir_full) == False: os.makedirs(output_dir_full)
 output_dir_full = output_dir_full+dataset_txt+'/'
 if os.path.exists(output_dir_full) == False: os.makedirs(output_dir_full)
