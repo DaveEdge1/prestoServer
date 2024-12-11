@@ -6,7 +6,7 @@ var path = require('path')
 var app = express();
 
 setPage = function(dir1){
-	app.use(express.static(dir1 + 'viz/assets'));
+	app.use(express.static(dir1));
 	var html_name = dir1 + 'visualizer.html';
 	return html_name;
 }
