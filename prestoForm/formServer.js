@@ -102,16 +102,16 @@ var doSomething = function(){
 
 app.get('/down', function (req, res) {
     //res.end(dom1.serialize());
-    res.sendFile("/root/presto/prestoForm/index.html")
-    //res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
+    //res.sendFile("/root/presto/prestoForm/index.html")
+    res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
     //console.log(dom1.window.document.getElementById("abstract").src)
     //console.log(dom1.window.document.getElementById("selectpicker").value)
 });
 
 app.get('/', function (req, res) {
 	console.log(req.ip)
-	//res.sendFile("/root/presto/prestoForm/index.html")
-	res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
+	res.sendFile("/root/presto/prestoForm/index.html")
+	//res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
 
 });
 
