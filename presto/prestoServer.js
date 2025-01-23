@@ -2,21 +2,21 @@
 express = require("express");
 PORT = process.env.PORT || 3000
 const fs = require('fs');
-var shelljs = require("shelljs");
+//var shelljs = require("shelljs");
 //const util = require('util');
-var spawn = require("child_process").spawn;
-var exec = require("child_process").exec;
-var execSync = require("child_process").execSync;
-var archiver = require('archiver');
-var YAML = require('yaml')
+//var spawn = require("child_process").spawn;
+//var exec = require("child_process").exec;
+//var execSync = require("child_process").execSync;
+//var archiver = require('archiver');
+//var YAML = require('yaml')
 const streams = require('memory-streams')
 const path = require('path')
 var app = express()
 //var docker = new Docker({protocol:'http', host: 'localhost', port: 2375});
 //var d = new Date();
 //var timeNow = d.getTime()
-var nodemailer = require('nodemailer');
-var align = require('align-yaml');
+//var nodemailer = require('nodemailer');
+//var align = require('align-yaml');
 
 var reconParams = function(recon) {
 	const reconParamsNow = fs.readFileSync('/root/presto/presto/reconLib.json','utf8');
@@ -25,7 +25,7 @@ var reconParams = function(recon) {
 	const rparams = JSON.parse(reconParamsNow)[recon]
 	return rparams
 }
-
+/*
 var translateJSON = function (uniqueID, recon){
 	var yaml = require('js-yaml')
 	
@@ -60,12 +60,7 @@ var translateJSON = function (uniqueID, recon){
 						      console.log('position length: ' + pos.length)
 						      configsOrig[orig].length = new Array()
 						      //var origPos = 0
-						      /*
-						      for (ii in pos){
-							      console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
-							      //configsOrig[orig][origPos] = configs1.value[ii]
-							      origPos = origPos + 1
-						      }*/
+
 						      if (orig == 'latRange' || orig == 'lonRange'){
 							      var newVal1 = configs1.value
 							      if (orig == 'latRange') {
@@ -161,16 +156,7 @@ var translate = function (uniqueID, recon){
 						      		console.log('position length: ' + orig.length)
 						      		var origPos = 0
 						      		for (let ii = 0; ii < orig.length; ii++){
-									/*
-							      		console.log("position increment: " + ii + ' origPos: ' + origPos + ' newVal: ' + configs1.value[ii])
-									console.log('configsOrig: ' + configsOrig)
-									console.log('configsOrig[orig]: ' + configsOrig[orig])
-									console.log('configsOrig[obs_lat_min]: ' + configsOrig['obs_lat_min'])
-									console.log('orig[ii]: ' + orig[ii])
-									console.log('configsOrig[orig[ii]]: ' + configsOrig[orig[ii]])
-									console.log('configsOrig[orig][ii]: ' + configsOrig[orig][ii])
-									console.log('configsOrig[orig][origPos]: ' + configsOrig[orig][origPos])
-	                                                                */
+
 							      		configsOrig[orig[ii]] = configs1.value[ii]						      	  	}
 							  }
 							  else {
@@ -216,13 +202,7 @@ updateParams = function (uniqueID, recon){
 	}
 	
 }
-/*
-function printProgress(progress){
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
-    process.stdout.write(progress);
-}
-*/
+
 dockerStatus = async function (uniqueID) {
   docker_status = shelljs.exec('docker ps -a').stdout
 	  if (docker_status.search(uniqueID) == -1){
@@ -261,13 +241,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
    }
 	console.log("vizURL(configLoc): " + vizURL(configLoc))
 	console.log("destURL: " + destURL)
-	/*
-	if (dockerSuccess > 0) {
-		var text1 = '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
-	} else {
-		var text1 = '<p>Thank you for using Presto! Use the link below to access the results of your custom reconstruction. This link will expire after 7 days.</p>'
-	}
-        */
+
 	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + '. This link will expire after 7 days.</p>'
 	text1 = text1
 		+ '<br>'
@@ -430,19 +404,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  }
 	};
 	console.log(gatherLipds(lipdText));
-	/*
-	async function gatherLipds(lipdText) {
-		  console.log('gathering lipd data... ' + lipdText);
-		  console.log(execSync(lipdText).toString())
-		  //stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  //stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
-	
-		  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
-	
-		  await sleep(1000)
-	}
-	await gatherLipds(lipdText)
-	*/
+
 	console.log('lipd data saved');
 	//}
 	
@@ -482,7 +444,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  console.log('files zipped');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
-
+*/
 async function startPresto(launchText, dirname) {
 	console.log('starting presto...');
 	console.log(launchText)
