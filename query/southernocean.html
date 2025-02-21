@@ -700,6 +700,7 @@ var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{
 */
 var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.ncd"
 //var testWMS = "https://gis.ngdc.noaa.gov/arcgis/services/PathfinderSST_monthly_averages/ImageServer/WMSServer"
+/*
 var sst = L.tileLayer.wms(testWMS, {
     crossOrigin: true,
     layers: 'sst',
@@ -712,7 +713,7 @@ var sst = L.tileLayer.wms(testWMS, {
     attribution: '<a href="https://www.ncdc.noaa.gov">NOAAs National Climatic Data Center</a>'
 });
 
-/*
+
 L.tileLayer("https://cdn.statically.io/gh/freetiler/nasa-bluemarble-labeled/main/tiles/{z}/{x}/{y}.jpeg", {
     layers:"polarview:coastS10",
     format:"image/jpeg",
@@ -749,12 +750,12 @@ fetch(url_to_geotiff_file)
           https://leafletjs.com/reference.html#gridlayer
       */
 	    console.log('create layer from geotiff')
-      var layer = new GeoRasterLayer({
+      var sst = L.GeoRasterLayer({
           georaster: georaster,
           opacity: 0.7,
           pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
           resolution: 64 // optional parameter for adjusting display resolution
-      }).addTo(map);
+      });
       //map.fitBounds(L.getBounds());
 
   });
