@@ -730,6 +730,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 var url_to_geotiff_file = "/jan_ice_concentration.tiff";
 
 fetch(url_to_geotiff_file)
+  console.log('fetching geotiff')
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     parse_georaster(arrayBuffer).then(georaster => {
@@ -746,6 +747,7 @@ fetch(url_to_geotiff_file)
 
           https://leafletjs.com/reference.html#gridlayer
       */
+	    console.log('create layer from geotiff')
       var layer = new GeoRasterLayer({
           georaster: georaster,
           opacity: 0.7,
