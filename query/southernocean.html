@@ -750,7 +750,7 @@ fetch(url_to_geotiff_file)
           https://leafletjs.com/reference.html#gridlayer
       */
 	    console.log('create layer from geotiff')
-      var sst = L.GeoRasterLayer({
+      var sst = GeoRasterLayer({
           georaster: georaster,
           opacity: 0.7,
           pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
