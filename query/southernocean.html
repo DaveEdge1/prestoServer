@@ -730,7 +730,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     tileSize: 512,
   });
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
-var geoTIFFLayerGroup = L.layerGroup().addTo(map);
+var geoTIFFLayerGroup = L.layerGroup();
 
 function addGeoTIFFToGroup(imagePath, groupName) {
 fetch(imagePath)
@@ -860,7 +860,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap}, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap, "IceConcentration": geoTIFFLayerGroup}, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
