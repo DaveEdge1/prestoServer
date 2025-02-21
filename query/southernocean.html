@@ -1067,11 +1067,11 @@ function frontalBounds (sfront, nfront, lat, lon) {
 	    		return dataPoint[0];
 		});
 		var whichLonS = closest(southLon, lon)
-		console.log("selected lon: " + lon)
-		console.log("south index of value nearest selected lon: " + whichLonS)
-		console.log("south nearest lon: " + southLon[whichLonS])
+		//console.log("selected lon: " + lon)
+		//console.log("south index of value nearest selected lon: " + whichLonS)
+		//console.log("south nearest lon: " + southLon[whichLonS])
 		var SB = southLat[whichLonS]
-		console.log("south lat at nearest lon: " + SB)
+		//console.log("south lat at nearest lon: " + SB)
 	}
 	if (nfront == null){
 		var NB = -50
@@ -1083,12 +1083,12 @@ function frontalBounds (sfront, nfront, lat, lon) {
 	    		return dataPoint[0];
 		});
 		var whichLonN = closest(northLon, lon)
-		console.log("north index of value nearest selected lon: " + whichLonN)
-		console.log("north nearest lon: " + northLon[whichLonN])
+		//console.log("north index of value nearest selected lon: " + whichLonN)
+		//console.log("north nearest lon: " + northLon[whichLonN])
 		var NB = northLat[whichLonN]
 	}
-	console.log("south lat at nearest lon: " + SB)
-	console.log("north lat at nearest lon: " + NB)
+	//console.log("south lat at nearest lon: " + SB)
+	//console.log("north lat at nearest lon: " + NB)
 	if (lat > SB && lat < NB){
 		return true
 	} else {
@@ -1127,7 +1127,7 @@ var numPoints = +(numdata * 2)
 	    lat = Object.values(x1)[ii].geo_latitude
     	    lon = (ptLon - 360)
     }
-	  console.log("numdata: " + numdata + " ii: " + ii + " i: " + i)
+	  //console.log("numdata: " + numdata + " ii: " + ii + " i: " + i)
 	  if (frontalBounds(sfront, nfront, lat, lon)){
 		    aType = Object.values(x1)[ii].archiveType
 		    dName = Object.values(x1)[ii].dataSetName
@@ -1138,8 +1138,8 @@ var numPoints = +(numdata * 2)
 		    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
 		  if (lat != 'undefined'){
 			  if (typeof geojson.features[i] != 'undefined'){
-			  console.log('lat: ' + lat + ' long: ' + lon)
-			  console.log('geometry: ' + typeof geojson.features[i])
+			  //console.log('lat: ' + lat + ' long: ' + lon)
+			  //console.log('geometry: ' + typeof geojson.features[i])
 			    geojson.features[i].geometry.coordinates.push(lon,lat);
 			    geojson.features[i].properties.archiveType.push(aType);
 			    geojson.features[i].properties.dataSetName.push(dName);
@@ -1197,7 +1197,7 @@ function updatePoints (coords){
 	var nfname = frontCoords(document.querySelector('input[name=nbound]:checked').value)
 	//console.log("south front: " + sfname)
 	//console.log("north front: " + nfname)
-	console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
+	//console.log("is -60, 180 within the selected fronts? " + frontalBounds(eval(sfname), eval(nfname), -60, 180))
 	spinner.spin();
 	//inRectCount = 0;
 	layerGroup.clearLayers();
