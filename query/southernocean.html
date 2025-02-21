@@ -730,9 +730,9 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 var url_to_geotiff_file = "/jan_ice_concentration.tiff";
 
 fetch(url_to_geotiff_file)
-  console.log('fetching geotiff')
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
+    console.log('fetching geotiff')
     parse_georaster(arrayBuffer).then(georaster => {
       console.log("georaster:", georaster);
 
