@@ -727,7 +727,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     attribution:"<a href='https://www.polarview.aq/antarctic'>Polarview</a>",
     tileSize: 512,
   });
-var url_to_geotiff_file = "example_4326.tif";
+var url_to_geotiff_file = "/jan_ice_concentration.tiff";
 
 fetch(url_to_geotiff_file)
   .then(response => response.arrayBuffer())
