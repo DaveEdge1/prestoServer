@@ -758,6 +758,7 @@ fetch(imagePath)
           //pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
           //resolution: 64 // optional parameter for adjusting display resolution
       })
+      console.log("georaster: ", sst)
       sst.addTo(geoTIFFLayerGroup);
       //map.fitBounds(L.getBounds());
 
