@@ -734,7 +734,7 @@ fetch(url_to_geotiff_file)
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
-    parseGeoRaster(arrayBuffer).then(georaster => {
+    parseGeoraster(arrayBuffer).then(georaster => {
       console.log("georaster:", georaster);
 
       /*
