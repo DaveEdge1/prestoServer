@@ -748,6 +748,7 @@ fetch("/jan_ice_concentration.tif")
           //pixelValuesToColorFn: values => values[0] === -3.4e+38 ? null : `rgb(${values[0]})`,
           resolution: 512 // optional parameter for adjusting display resolution
       }).addTo(geoTIFFLayerGroup);
+      console.log("rasterbounds: ", sst.getBounds())
       //console.log("georaster: ", sst)
       //sst.addTo(geoTIFFLayerGroup);
       //new GeoRasterLayer({ georaster }).addTo(geoTIFFLayerGroup);
