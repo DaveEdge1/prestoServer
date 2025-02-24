@@ -732,9 +732,9 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
   });
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
 var geoTIFFLayerGroup = L.layerGroup();
-/*
+
 //function addGeoTIFFToGroup(imagePath, groupName) {
-fetch("/jan_ice_concentration.tif")
+fetch("/jan_ice_concentration_merc.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
@@ -765,18 +765,6 @@ fetch("/jan_ice_concentration.tif")
 });
 //}
 //addGeoTIFFToGroup("/jan_ice_concentration.tif", 'ice_concentration');
-*/
-var imageUrl = '/jan_ice_concentration.PNG';
-var errorOverlayUrl = 'https://cdn-icons-png.flaticon.com/512/110/110686.png';
-var altText = 'Sea Ice Concentration';
-var latLngBounds = L.latLngBounds([[-180, -90], [180, -30]]);
-
-var imageOverlay = L.imageOverlay(imageUrl, latLngBounds, {
-    opacity: 0.7,
-    errorOverlayUrl: errorOverlayUrl,
-    alt: altText,
-    interactive: false
-}).addTo(map);
 
 //var layerGroupings = { "Basemap": basemap, "Outline": outline };
 var pointA = new L.LatLng(-90, 90);
