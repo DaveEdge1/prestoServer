@@ -740,9 +740,10 @@ fetch("/jan_ice_concentration.tif")
     console.log('fetching geotiff')
     parseGeoraster(arrayBuffer).then(georaster => {
       console.log("georaster:", georaster);
-	const numberOfItems = Math.round(georaster.maxs[0])
+	const minNum = Math.round(georaster.maxs[0])
+	    const maxNum = Math.round(georaster.mins[0])
     const rainbow = new Rainbow()
-    rainbow.setNumberRange(0, 1)
+    rainbow.setNumberRange(minNum, maxNum)
     rainbow.setSpectrum('white', 'red')
 	    
       var sst = new GeoRasterLayer({
