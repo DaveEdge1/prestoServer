@@ -36,7 +36,7 @@
 	<!--script src="https://unpkg.com/-layer-for-leaflet/-layer-for-leaflet.browserify.min.js"></script-->
 	<script src="https://unpkg.com/georaster"></script>
 	<script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
-
+	<script src="https://cdn.jsdelivr.net/npm/rainbowvis.js@1.1.1/rainbowvis.js"></script>
 	
 	<!--script type="text/javascript">
 		const urlParams = new URLSearchParams(window.location.search);
@@ -740,11 +740,15 @@ fetch("/output_hh.tif")
     console.log('fetching geotiff')
     parseGeoraster(arrayBuffer).then(georaster => {
       console.log("georaster:", georaster);
-
+	const numberOfItems = Math.round(georaster.maxs[0])
+    const rainbow = new Rainbow()
+    rainbow.setNumberRange(1, numberOfItems)
+    rainbow.setSpectrum('white', 'red')
+	    
       var sst = new GeoRasterLayer({
           georaster: georaster,
           opacity: 0.7,
-          pixelValuesToColorFn: values => values[0] === 0 ? '#ffffff' : '#000000',
+          pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
           resolution: 512, // optional parameter for adjusting display resolution
       }).addTo(geoTIFFLayerGroup);
       //console.log("rasterbounds: ", sst.getBounds())
