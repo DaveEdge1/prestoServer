@@ -730,10 +730,10 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     tileSize: 512,
   });
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
-var geoTIFFLayerGroup = L.layerGroup();
+//var geoTIFFLayerGroup = L.layerGroup();
 
-function addGeoTIFFToGroup(imagePath, groupName) {
-fetch(imagePath)
+//function addGeoTIFFToGroup(imagePath, groupName) {
+fetch("/jan_ice_concentration.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
@@ -752,52 +752,21 @@ fetch(imagePath)
           https://leafletjs.com/reference.html#gridlayer
       */
 	    console.log('create layer from geotiff')
-      var sst = GeoRasterLayer({
-          georaster: georaster,
-          opacity: 0.7,
+      //var sst = GeoRasterLayer({
+      //    georaster: georaster,
+      //    opacity: 0.7,
           //pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
           //resolution: 64 // optional parameter for adjusting display resolution
-      })
-      console.log("georaster: ", sst)
-      sst.addTo(geoTIFFLayerGroup);
-      //map.fitBounds(L.getBounds());
+      //})
+      //console.log("georaster: ", sst)
+      //sst.addTo(geoTIFFLayerGroup);
+      new GeoRasterLayer({ georaster }).addTo(map);
 
   });
 });
-}
-addGeoTIFFToGroup("/jan_ice_concentration.tif", 'ice_concentration');
+//}
+//addGeoTIFFToGroup("/jan_ice_concentration.tif", 'ice_concentration');
 
-var url_to_geotiff_file = 'http://143.198.98.66:86/IBCSO_v2_bed_RGB.tif';
-fetch(url_to_geotiff_file)
-  .then(response => response.arrayBuffer())
-  .then(arrayBuffer => {
-    parseGeoraster(arrayBuffer).then(georaster => {
-      console.log("georaster:", georaster);
-
-      /*
-          GeoRasterLayer is an extension of GridLayer,
-          which means can use GridLayer options like opacity.
-
-          Just make sure to include the georaster option!
-
-          Optionally set the pixelValuesToColorFn function option to customize
-          how values for a pixel are translated to a color.
-
-          https://leafletjs.com/reference.html#gridlayer
-      */
-
-      var layer = new GeoRasterLayer({
-          georaster: georaster,
-          opacity: 0.7,
-          pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
-          resolution: 64 // optional parameter for adjusting display resolution
-      });
-      layer.addTo(map);
-
-      map.fitBounds(layer.getBounds());
-
-  });
-});
 
 //var layerGroupings = { "Basemap": basemap, "Outline": outline };
 var pointA = new L.LatLng(-90, 90);
@@ -861,7 +830,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap, "IceConcentration": geoTIFFLayerGroup}, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap}, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
