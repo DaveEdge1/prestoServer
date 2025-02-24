@@ -730,7 +730,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     tileSize: 512,
   });
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
-//var geoTIFFLayerGroup = L.layerGroup();
+var geoTIFFLayerGroup = L.layerGroup();
 
 //function addGeoTIFFToGroup(imagePath, groupName) {
 fetch("/jan_ice_concentration.tif")
@@ -740,18 +740,6 @@ fetch("/jan_ice_concentration.tif")
     parseGeoraster(arrayBuffer).then(georaster => {
       console.log("georaster:", georaster);
 
-      /*
-          GeoRasterLayer is an extension of GridLayer,
-          which means can use GridLayer options like opacity.
-
-          Just make sure to include the georaster option!
-
-          Optionally set the pixelValuesToColorFn function option to customize
-          how values for a pixel are translated to a color.
-
-          https://leafletjs.com/reference.html#gridlayer
-      */
-	    console.log('create layer from geotiff')
       //var sst = GeoRasterLayer({
       //    georaster: georaster,
       //    opacity: 0.7,
@@ -760,7 +748,7 @@ fetch("/jan_ice_concentration.tif")
       //})
       //console.log("georaster: ", sst)
       //sst.addTo(geoTIFFLayerGroup);
-      new GeoRasterLayer({ georaster }).addTo(map);
+      new GeoRasterLayer({ georaster }).addTo(geoTIFFLayerGroup);
 
   });
 });
@@ -830,7 +818,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap}, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "OpenStreetMap": OpenStreetMap, "iceConcentration": geoTIFFLayerGroup}, { "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
