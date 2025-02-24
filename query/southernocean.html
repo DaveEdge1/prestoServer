@@ -744,7 +744,7 @@ fetch("/jan_ice_concentration.tif")
       var sst = new GeoRasterLayer({
           georaster: georaster,
           opacity: 0.7,
-          pixelValuesToColorFn: values => values[0] === -3.4e+38 ? null : `rgb(${values[0]})`',
+          pixelValuesToColorFn: values => values[0] === -3.4e+38 ? null : `rgb(${values[0]})`,
           resolution: 512 // optional parameter for adjusting display resolution
       }).addTo(geoTIFFLayerGroup);
       //console.log("georaster: ", sst)
