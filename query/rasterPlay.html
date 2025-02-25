@@ -612,7 +612,7 @@ function updateFilters(){
 
 
 //add sea ice overlay
-fetch("/jan_ice_concentration.tif")
+fetch("/output_hh.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
