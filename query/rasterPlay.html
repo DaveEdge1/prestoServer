@@ -610,6 +610,9 @@ function updateFilters(){
       '</a>'
   }).addTo(map);
 
+var MSL = L.leafletGeotiff(
+  url = '/jan_ice_concentration3031.tif',
+).addTo(mymap);
 
 //add sea ice overlay
 fetch("/jan_ice_concentration3031.tif")
