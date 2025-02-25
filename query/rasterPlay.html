@@ -625,9 +625,9 @@ fetch("/jan_ice_concentration3031.tif")
 	    
       var sst = new GeoRasterLayer({
           georaster: georaster,
-          opacity: 0.7,
+          opacity: 0.4,
 	  mask_srs: "epsg:3031",
-          //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
+          pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
           resolution: 64, // optional parameter for adjusting display resolution
       }).addTo(map);
 	    //console.log("crs:", crs)
