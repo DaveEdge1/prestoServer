@@ -567,7 +567,7 @@ var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 	minZoom: 1
 }).addTo(map);
 
-fetch("/jan_ice_concentration_merc.tif")
+fetch("/jan_ice_concentration.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
