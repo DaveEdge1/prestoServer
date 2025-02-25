@@ -562,7 +562,7 @@ function updateFilters(){
 }
 
 //initiate leaflet map
-window.onload = function () {
+
   var EPSG3031 = new L.Proj.CRS(
     'EPSG:3031',
     '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 ' +
@@ -610,7 +610,7 @@ window.onload = function () {
       'View Source' +
       '</a>'
   }).addTo(map);
-};
+
 
 //add sea ice overlay
 fetch("/jan_ice_concentration.tif")
