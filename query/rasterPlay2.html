@@ -585,8 +585,7 @@ function updateFilters(){
   var map = L.map('map', {
     center: [-90, 0],
     zoom: 0,
-    maxZoom: 5,
-    crs: EPSG3857
+    maxZoom: 5
   });
 
 var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
