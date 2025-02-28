@@ -610,6 +610,7 @@ fetch("/jan_ice_concentration3857.tif")
           //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
           resolution: 64, // optional parameter for adjusting display resolution
       }).addTo(map);
+      map.fitBounds(sst.getBounds());
 	    //console.log("crs:", crs)
 	    //console.log("resolutions: ", resolutions)
       //console.log("rasterbounds: ", sst.getBounds())
