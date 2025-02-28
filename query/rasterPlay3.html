@@ -1,54 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8">
-    <title>Cloud Optimized GeoTIFF (COG)</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.3.0/ol.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
     <style>
-      html, body, .map {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
+      #map {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
       }
     </style>
   </head>
   <body>
-    <div id="map" class="map"></div>
-    <script src="https://cdn.jsdelivr.net/npm/elm-pep@1.0.6/dist/elm-pep.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/geotiff"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ol@v7.3.0/dist/ol.js"></script>
+    <div id="map"></div>
+    <script src="https://unpkg.com/browse/whatwg-fetch@3.2.0/dist/fetch.umd.js"></script>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/proj4"></script>
+    <script src="https://unpkg.com/proj4leaflet@1.0.2"></script>
+    <script src="https://unpkg.com/georaster"></script>
+    <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
     <script>
+    	// set CRS
+      const EPSGRef = 'EPSG:3031'
+      const proj4Definition =
+        "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+      const resolutions = [
+        0, 
+        78271.484, 
+        33072.982812632297,
+        16536.491406316149,
+        8268.2457031580743,
+        4134.1228515790372,
+        2067.0614257895186,
+        1033.5307128947593,
+        516.76535644737965,
+        258.38267822368982,
+        129.19133911184491,
+        64.595669555922456,
+        32.297834777961228,
+        16.148917388980614]
 
-const projection = new ol.proj.Projection({
-  code: 'EPSG:3031',
-  units: 'm',
-});
+    const crs = new L.Proj.CRS(EPSGRef, proj4Definition, {
+      origin: [-8929486, 6564912],
+      projectedBounds: L.bounds(L.point(-50, -38), L.point(130, -9)),
+      resolutions: resolutions
+    })
+    
+      // initalize leaflet map
+      var map = L.map("map", {
+      crs,
+      center: [-85.52885587994032,178.22048648568565],
+      zoom: 3,
+      minZoom: 2,
+      maxZoom: 10,
+      })
 
-const sourceExtent = [-7086438, -7094688, 7078250.825320755, 7086665.377306179];
+      // add AAD Polar Steregraphic Base Map
+      L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>'
+      }).addTo(map);
 
-const source = new ol.source.GeoTIFF({
-  sources: [
-    {
-      url: '/sithick_01.tif',
-    },
-  ],
-});
+      var url_to_geotiff_file = 'https://github.com/DaveEdge1/prestoServer/raw/refs/heads/master/query/public/jan_ice_concentration3031.tif';
+
+			//var scale = chroma.scale('Spectral').domain([-19, -2340]);
+      console.log("log test")
       
-const map = new ol.Map({
-  target: 'map',
-  layers: [
-    new ol.layer.WebGLTile({
-      source: source,
-    }),
-  ],
-  view: new ol.View({
-          projection: projection,
-          center: ol.extent.getCenter(sourceExtent),
-          extent: sourceExtent,
-          zoom: 1,
-        })
-});
+  fetch('http://143.198.98.66:86/jan_ice_concentration3031.tif')
+  .then(response => response.arrayBuffer())
+  .then(arrayBuffer => {
+    console.log('fetching geotiff')
+    parseGeoraster(arrayBuffer).then(georaster => {
+      console.log("georaster: ", georaster)
+      var sst = new GeoRasterLayer({
+          georaster: georaster,
+          opacity: 0.4,
+          //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
+          resolution: 64, // optional parameter for adjusting display resolution
+      }).addTo(map);
+      map.fitBounds(sst.getBounds());
+      });
+      });
+
 
     </script>
   </body>
