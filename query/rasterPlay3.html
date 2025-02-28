@@ -62,12 +62,10 @@
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>'
       }).addTo(map);
 
-      var url_to_geotiff_file = 'https://github.com/DaveEdge1/prestoServer/raw/refs/heads/master/query/public/jan_ice_concentration3031.tif';
-
 			//var scale = chroma.scale('Spectral').domain([-19, -2340]);
       console.log("log test")
       
-  fetch('http://143.198.98.66:86/jan_ice_concentration3031.tif')
+  fetch('/sithick_01.tif')
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
