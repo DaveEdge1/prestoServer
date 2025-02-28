@@ -27,7 +27,7 @@ const projection = new ol.proj.Projection({
 
 const sourceExtent = [-7086438, -7094688, 7078250.825320755, 7086665.377306179];
 
-const source = new GeoTIFF({
+const source = new ol.source.GeoTIFF({
   sources: [
     {
       url: '/sithick_01.tif',
