@@ -33,6 +33,8 @@ const projection = new ol.proj.Projection({
   units: 'm',
 });
 
+const sourceExtent = [-7086438, -7094688, 7078250.825320755, 7086665.377306179];
+      
 const map = new ol.Map({
   target: 'map',
   layers: [
@@ -40,7 +42,12 @@ const map = new ol.Map({
       source: source,
     }),
   ],
-  view: source.getView(),
+  view: new ol.View({
+          projection: projection,
+          center: ol.extent.getCenter(sourceExtent),
+          extent: sourceExtent,
+          zoom: 1,
+        })
 });
 
     </script>
