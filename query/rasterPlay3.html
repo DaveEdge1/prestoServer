@@ -64,8 +64,11 @@
       }).addTo(map);
 
 			//var scale = chroma.scale('Spectral').domain([-19, -2340]);
-      console.log("log test")
-      
+var imageUrl = '/jan_ice_concentration3031.png',
+    imageBounds = [[-90, -180], [-30, 180]];
+L.imageOverlay(imageUrl, imageBounds).addTo(map);
+	    
+/*
   fetch('/jan_ice_concentration_merc.tif')
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
@@ -81,7 +84,7 @@
       //map.fitBounds(sst.getBounds());
       });
       });
-
+*/
 
     </script>
   </body>
