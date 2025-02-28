@@ -60,7 +60,7 @@
 			//var scale = chroma.scale('Spectral').domain([-19, -2340]);
       console.log("log test")
       
-  fetch('http://143.198.98.66:86/jan_ice_concentration3857.tif')
+  fetch('/jan_ice_concentration3857.tif')
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
