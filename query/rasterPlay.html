@@ -610,15 +610,18 @@ function updateFilters(){
       '</a>'
   }).addTo(map);
 
+//add layer for points
+var layerGroup = L.layerGroup().addTo(map);
+
 //add sea ice overlay
 fetch("/sithick_01.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
     parseGeoraster(arrayBuffer).then(georaster => {
-      console.log("georaster:", georaster);
-	const maxNum = Math.round(georaster.maxs[0])
-	    const minNum = Math.round(georaster.mins[0])
+    console.log("georaster:", georaster);
+    const maxNum = Math.round(georaster.maxs[0])
+    const minNum = Math.round(georaster.mins[0])
     const rainbow = new Rainbow()
     rainbow.setNumberRange(minNum, maxNum)
     rainbow.setSpectrum('white', 'red')
@@ -629,7 +632,7 @@ fetch("/sithick_01.tif")
 	  //mask_srs: "epsg:3031",
           //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
           //resolution: 64, // optional parameter for adjusting display resolution
-      }).addTo(map);
+      }).addTo(layerGroup);
 	    //console.log("crs:", crs)
 	    //console.log("resolutions: ", resolutions)
       //console.log("rasterbounds: ", sst.getBounds())
@@ -689,9 +692,6 @@ function updateBoundingBox(){
 	rect.editing.enable();
 	return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
 }
-	
-//add layer for points
-var layerGroup = L.layerGroup().addTo(map);
 
 
 function chooseColor(archiveType){
