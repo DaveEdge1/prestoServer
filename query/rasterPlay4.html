@@ -41,13 +41,11 @@
         32.297834777961228,
         16.148917388980614]
 
-    const crs = new L.Proj.CRS('EPSG:3857',{
-      resolutions: resolutions
-    })
+
     
       // initalize leaflet map
       var map = L.map("map", {
-      crs,
+      resolutions: resolutions,
       center: [0,0],
       zoom: 3,
       minZoom: 2,
