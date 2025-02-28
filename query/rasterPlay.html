@@ -589,6 +589,10 @@ function updateFilters(){
     crs: EPSG3031
   });
 
+
+//add layer for points
+var layerGroup = L.layerGroup().addTo(map);
+
   var template =
     '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
     '{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
@@ -608,10 +612,8 @@ function updateFilters(){
       '<a href="https://github.com/nasa-gibs/web-examples/blob/main/examples/leaflet/antarctic-epsg3031.js">' +
       'View Source' +
       '</a>'
-  }).addTo(map);
+  }).addTo(layerGroup);
 
-//add layer for points
-var layerGroup = L.layerGroup().addTo(map);
 
 //add sea ice overlay
 fetch("/sithick_01.tif")
