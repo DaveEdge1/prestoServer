@@ -75,7 +75,7 @@
       var sst = new GeoRasterLayer({
           georaster: georaster,
           opacity: 0.4,
-	  debugLevel:2,
+	  debugLevel:5,
           //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
           resolution: 64, // optional parameter for adjusting display resolution
       }).addTo(map);
