@@ -560,7 +560,7 @@ function updateFilters(){
 	sendQuery();
 	return(filters1)
 }
-/*
+
 //initiate leaflet map
   var EPSG3031 = new L.Proj.CRS(
     'EPSG:3031',
@@ -588,30 +588,7 @@ function updateFilters(){
     maxZoom: 5,
     crs: EPSG3031
   });
-*/
-proj4.defs("EPSG:3031","+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
-ol.proj.proj4.register(proj4);
-
-ol.proj.get('EPSG:3031').setExtent([-3299207.53, -3333134.03, 3299207.53, 3333134.03]);
-
-var map = new ol.Map({
-    target : 'map',
-    layers: [
-        new ol.layer.Tile({
-          source: new ol.source.OSM()
-        })
-      ],
-    view : new ol.View({
-        center: [0, 0],
-        zoom: 1,
-        projection: 'EPSG:3031',
-    })
-});
-
-
-//add layer for points
-var layerGroup2 = L.layerGroup().addTo(map);
-
+/*
   var template =
     '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
     '{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
@@ -631,8 +608,8 @@ var layerGroup2 = L.layerGroup().addTo(map);
       '<a href="https://github.com/nasa-gibs/web-examples/blob/main/examples/leaflet/antarctic-epsg3031.js">' +
       'View Source' +
       '</a>'
-  }).addTo(layerGroup2);
-
+  }).addTo(map);
+*/
 
 //add sea ice overlay
 fetch("/sithick_01.tif")
