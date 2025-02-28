@@ -588,7 +588,7 @@ function updateFilters(){
     maxZoom: 5,
     crs: EPSG3031
   });
-/*
+ 
   var template =
     '//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
     '{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
@@ -609,7 +609,7 @@ function updateFilters(){
       'View Source' +
       '</a>'
   }).addTo(map);
-*/
+
 
 //add sea ice overlay
 fetch("/sithick_01.tif")
@@ -627,6 +627,7 @@ fetch("/sithick_01.tif")
       var sst = new GeoRasterLayer({
           georaster: georaster,
           opacity: 0.4,
+	  debugLevel: 5,
 	  //mask_srs: "epsg:3031",
           //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
           //resolution: 64, // optional parameter for adjusting display resolution
