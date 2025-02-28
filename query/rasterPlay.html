@@ -611,7 +611,7 @@ function updateFilters(){
   }).addTo(map);
 
 //add sea ice overlay
-fetch("/jan_ice_concentration3031.tif")
+fetch("/sithick_01.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
@@ -626,9 +626,9 @@ fetch("/jan_ice_concentration3031.tif")
       var sst = new GeoRasterLayer({
           georaster: georaster,
           opacity: 0.4,
-	  mask_srs: "epsg:3031",
-          pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
-          resolution: 64, // optional parameter for adjusting display resolution
+	  //mask_srs: "epsg:3031",
+          //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
+          //resolution: 64, // optional parameter for adjusting display resolution
       }).addTo(map);
 	    //console.log("crs:", crs)
 	    //console.log("resolutions: ", resolutions)
