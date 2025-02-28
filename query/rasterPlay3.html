@@ -38,7 +38,7 @@ const source = new ol.source.GeoTIFF({
 const map = new ol.Map({
   target: 'map',
   layers: [
-    new TileLayer({
+    new ol.layer.WebGLTile({
       source: source,
     }),
   ],
