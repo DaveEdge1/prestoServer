@@ -34,67 +34,36 @@
 
             layers: [
                 new ol.layer.Group({
-                        title: 'Base maps',
-                        layers: [
-                            new ol.layer.Tile({
-                                title: 'OpenStreetMap',
-                                type: 'base',
-                                visible: true,
-                                source: new ol.source.OSM()
-                            }),
-                            new ol.layer.Tile({
-                                title: 'Bing Roads',
-                                type: 'base',
-                                visible: false,
-                                source: new ol.source.BingMaps({
-                                    key: "INSERT_YOUR_KEY_HERE",
-                                    imagerySet: 'Road'
-                                })
-                            }),
-                            new ol.layer.Tile({
-                                title: 'Bing Aerial',
-                                type: 'base',
-                                visible: false,
-                                source: new ol.source.BingMaps({
-                                    key: "INSERT_YOUR_KEY_HERE",
-                                    imagerySet: 'Aerial'
-                                })
-                            }),
-                            new ol.layer.Tile({
-                                title: 'Bing Hybrid',
-                                type: 'base',
-                                visible: false,
-                                source: new ol.source.BingMaps({
-                                    key: "INSERT_YOUR_KEY_HERE",
-                                    imagerySet: 'AerialWithLabels'
-                                })
-                            }),
-                        ]
-                }),
-                new ol.layer.Group({
                     title: 'Overlay',
                     layers: [
                         new ol.layer.Tile({
                             title: 'Overlay',
                             // opacity: 0.7,
-                            extent: [-20037508.341676, -20040738.449191,20036680.948281, -4141656.908235],
-                            source: new ol.source.XYZ({
+                            source: new ol.source.TileImage({
                                 attributions: '',
-                                minZoom: 2,
-                                maxZoom: 5,
-                                url: './{z}/{x}/{y}.png',
-                                tileSize: [256, 256]
+                                tileGrid: new ol.tilegrid.TileGrid({
+                                    extent: [-4585713.66994994972,-4584258.03182320856,4584432.64838680346,4585888.28651354462],
+                                    origin: [-4585713.66994994972,4585888.28651354462],
+                                    resolutions: [39314.6680314544647,19657.3340157272323,9828.66700786361616,4914.33350393180808,2457.16675196590404,1228.58337598295202],
+                                    tileSize: [256, 256]
+                                }),
+                                tileUrlFunction: function(tileCoord) {
+                                    return ('./{z}/{x}/{y}.png'
+                                        .replace('{z}', String(tileCoord[0]))
+                                        .replace('{x}', String(tileCoord[1]))
+                                        .replace('{y}', String(tileCoord[2])));
+                                },
                             })
                         }),
                     ]
                 }),
             ],
             view: new ol.View({
-                center: [-413.696698, -12091197.678713],
-                zoom: 2,
+                center: [-640.510782, 815.127345],
+                resolution: 9828.667008,
+                projection: new ol.proj.Projection({code: 'EPSG:3031', units:'m'}),
             })
         });
-        map.addControl(new ol.control.LayerSwitcher());
     </script>
 </body>
 </html>
