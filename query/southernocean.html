@@ -734,7 +734,8 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 var geoTIFFLayerGroup = L.layerGroup();
 
 //function addGeoTIFFToGroup(imagePath, groupName) {
-fetch("/jan_ice_concentration.tif")
+/*
+	fetch("/jan_ice_concentration.tif")
   .then(response => response.arrayBuffer())
   .then(arrayBuffer => {
     console.log('fetching geotiff')
@@ -765,8 +766,12 @@ fetch("/jan_ice_concentration.tif")
 
   });
 });
+*/
 //}
 //addGeoTIFFToGroup("/jan_ice_concentration.tif", 'ice_concentration');
+var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png'){
+	tileSize: 128
+}.addTo(geoTIFFLayerGroup);
 
 //var layerGroupings = { "Basemap": basemap, "Outline": outline };
 var pointA = new L.LatLng(-90, 90);
