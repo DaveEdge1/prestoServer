@@ -613,30 +613,6 @@ function updateFilters(){
 	return(filters1)
 }
 
-//initiate leaflet map
-//The South Polar projection
-/*
-const proj = 'EPSG:3031';
-const proj4= '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs';
-const crsOpts={
-		resolutions: [8192, 4096, 2048, 1024, 512, 256], 
-		origin: [-4194304, 4194304],
-		bounds: L.bounds (
-			[-12367396.2185, 12367396.2185],
-		  	[12367396.2185, -12367396.2185]
-			//[-4194304, -4194304],
-		  	//[4194304, 4194304]
-		)
-	} ;
-  
-let crs= new L.Proj.CRS(proj, proj4, crsOpts) ;
-
-var map = L.map('map', {
-  crs:crs,
-  center: [-90, 0],
-  zoom: 0
- });*/
-
 var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
 var max_zoom = 16;
 var tile_size = 512;
@@ -662,67 +638,9 @@ var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + 
 	tileSize: 512
 }).addTo(map);
 console.log("map: ", OpenStreetMap)
-//map.setMaxBounds(map.getBounds());
-/*
-var template =
-'//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/' +
-'{layer}/default/{tileMatrixSet}/{z}/{y}/{x}.jpg';
-//'{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg';
-var BlueMarble = L.tileLayer(template, {
-    //layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
-    layer: 'BlueMarble_ShadedRelief_Bathymetry',
-    tileMatrixSet: '500m',
-    format: 'image%2Fjpeg',
-    //time: '2024-7-13',
-    //time: '2013-12-01',
-    tileSize: 512,
-    subdomains: 'abc',
-    noWrap: true,
-    continuousWorld: true,
-    attribution:
-      '<a href="https://wiki.earthdata.nasa.gov/display/GIBS">' +
-      'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
-      '</a>'
-  })
-var MODIS_Aqua = L.tileLayer('//gibs-{s}.earthdata.nasa.gov/wmts/epsg3031/best/{layer}/default/{time}/{tileMatrixSet}/{z}/{y}/{x}.jpg', {
-    layer: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
-    tileMatrixSet: '250m',
-    format: 'image%2Fjpeg',
-    time: '2013-12-01',
-    tileSize: 512,
-    subdomains: 'abc',
-    noWrap: true,
-    continuousWorld: true,
-    attribution:
-      '<a href="https://wiki.earthdata.nasa.gov/display/GIBS">' +
-      'NASA EOSDIS GIBS</a>&nbsp;&nbsp;&nbsp;' +
-      '</a>'
-  })
-*/
+
 var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.ncd"
-//var testWMS = "https://gis.ngdc.noaa.gov/arcgis/services/PathfinderSST_monthly_averages/ImageServer/WMSServer"
-/*
-var sst = L.tileLayer.wms(testWMS, {
-    crossOrigin: true,
-    layers: 'sst',
-    format: 'image/jpeg',
-    transparent: true,
-    style: 'boxfill/sst_36',
-    colorscalerange: '-3,35',
-    abovemaxcolor: "extend",
-    belowmincolor: "extend",
-    attribution: '<a href="https://www.ncdc.noaa.gov">NOAAs National Climatic Data Center</a>'
-});
 
-
-L.tileLayer("https://cdn.statically.io/gh/freetiler/nasa-bluemarble-labeled/main/tiles/{z}/{x}/{y}.jpeg", {
-    layers:"polarview:coastS10",
-    format:"image/jpeg",
-    attribution:"<a href='https://github.com/freetiler/nasa-bluemarble-labeled'>nasa-bluemarble-labeled</a>",
-    tileSize: 512
-}).addTo(map);
-*/
-//Coastlines
 var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     layers:"polarview:coastS10",
     format:"image/png",
@@ -733,42 +651,6 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
 var geoTIFFLayerGroup = L.layerGroup();
 
-//function addGeoTIFFToGroup(imagePath, groupName) {
-/*
-	fetch("/jan_ice_concentration.tif")
-  .then(response => response.arrayBuffer())
-  .then(arrayBuffer => {
-    console.log('fetching geotiff')
-    parseGeoraster(arrayBuffer).then(georaster => {
-      console.log("georaster:", georaster);
-	const maxNum = Math.round(georaster.maxs[0])
-	    const minNum = Math.round(georaster.mins[0])
-    const rainbow = new Rainbow()
-    rainbow.setNumberRange(minNum, maxNum)
-    rainbow.setSpectrum('white', 'red')
-	    
-      var sst = new GeoRasterLayer({
-          georaster: georaster,
-          opacity: 0.7,
-          //pixelValuesToColorFn: vals => vals[0] <= 0 ? null : '#' + rainbow.colourAt(Math.round(vals[0])),
-          resolution: 64, // optional parameter for adjusting display resolution
-	  debugLevel: 5
-      }).addTo(geoTIFFLayerGroup);
-	    console.log("crs:", crs)
-	    console.log("resolutions: ", resolutions)
-      //console.log("rasterbounds: ", sst.getBounds())
-      //console.log("tiles: ", sst.getTiles())
-      //console.log("activeTiles: ", sst.getActiveTiles())
-      //console.log("projector: ", sst.getProjector())
-      //console.log("georaster: ", sst)
-      //sst.addTo(geoTIFFLayerGroup);
-      //new GeoRasterLayer({ georaster }).addTo(geoTIFFLayerGroup);
-
-  });
-});
-*/
-//}
-//addGeoTIFFToGroup("/jan_ice_concentration.tif", 'ice_concentration');
 var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png'){
 	tileSize: 128
 }.addTo(geoTIFFLayerGroup);
