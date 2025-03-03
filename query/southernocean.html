@@ -651,9 +651,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
 var geoTIFFLayerGroup = L.layerGroup();
 
-var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png'){
-	tileSize: 128
-}.addTo(geoTIFFLayerGroup);
+var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png').addTo(geoTIFFLayerGroup);
 
 //var layerGroupings = { "Basemap": basemap, "Outline": outline };
 var pointA = new L.LatLng(-90, 90);
