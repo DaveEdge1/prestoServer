@@ -661,7 +661,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
 var geoTIFFLayerGroup = L.layerGroup();
 
 var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
-	tileSize: 512
+	tileSize: 256
 }).addTo(geoTIFFLayerGroup);
 
 //var layerGroupings = { "Basemap": basemap, "Outline": outline };
