@@ -636,7 +636,10 @@ var map = L.map('map', {
 	minZoom: 1,
 	maxZoom: 12,
 }).setView([-90, 180], 2);
-var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
+//var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
+//	tileSize: 512
+//})
+var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@256x.png?style=gbif-natural-en', {
 	tileSize: 512
 })
 var PrettyMap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z}/{x}/{y}.png', {
