@@ -617,7 +617,8 @@ var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
 var max_zoom = 5;
 var tile_size = 512;
 
-var extent = 12367396.2185; // To the Equator
+//var extent = 12367396.2185; // To the Equator
+var extent = 4585888.287; // to -50 degrees spot
 var resolutions = Array(max_zoom + 1).fill().map((_, i) => ( extent / tile_size / Math.pow(2, i-1) ));
 
 var crs = new L.Proj.CRS(
