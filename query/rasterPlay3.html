@@ -59,10 +59,10 @@
       })
 
       // add AAD Polar Steregraphic Base Map
-      L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z}/{x}/{y}.png', {
+      L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z-1}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>'
       }).addTo(map);
-      L.tileLayer('/sea_ice_conc_jan/{z+1}/{x}/{y}.png', {
+      L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>'
       }).addTo(map);
 	    
