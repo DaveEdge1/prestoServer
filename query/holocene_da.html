@@ -836,6 +836,10 @@ function updatePoints (coords){
 			var aType = feature.properties.archiveType
 			var shape1 = chooseShape(feature.properties.archiveType)
 			var Opac1 = +chooseOpacity(latlng, rectCoord)
+			var radius1 = 4
+			if (aType == "Documents"){
+				radius1 = 6
+			}
 			if (aType == "GroundIce" && Opac1 == 0.8){
 				return L.marker(latlng, {
 					icon: groundIce
@@ -856,7 +860,7 @@ function updatePoints (coords){
 		                    return L.shapeMarker(latlng, {
 					//icon: chooseIcon(feature.properties.archiveType)
 					
-		                        radius : 4,
+		                        radius : radius1,
 		                        fillColor : col1,
 		                        color : col1,
 		                        weight : 1,
