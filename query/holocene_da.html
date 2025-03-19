@@ -185,7 +185,7 @@ popQueryVariable()
 <br>
 <span id="response"></span>
 <br>
-<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()">
+<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery() onkeydown="return event.key != 'Enter';">
 <button type="button" class="collapsible">Compilation Filter
 </button>
 <div class="content">
