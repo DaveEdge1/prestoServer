@@ -158,6 +158,8 @@
             var innerRadius = outerRadius / 2;
             var cx = this._control.options.symbolWidth / 2;
             var cy = this._control.options.symbolHeight / 2;
+            var x = cx
+            var y = cy
             var step=Math.PI/this._legend.sides;
             ctx.beginPath();
             ctx.moveTo(cx,cy-outerRadius)
