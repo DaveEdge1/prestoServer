@@ -148,7 +148,7 @@
         }
     }
 
-    class StarSymbol extends GeometricSymbol {
+    class starSymbol extends GeometricSymbol {
         _drawSymbol() {
             var ctx = (this._ctx = this._canvas.getContext("2d"));
 
