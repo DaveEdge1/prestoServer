@@ -710,7 +710,7 @@ const htmlString = String.raw`<!DOCTYPE html>` + `\n`
 + String.raw`<br>` + `\n`
 + String.raw`<span id="response"></span>` + `\n`
 + String.raw`<br>` + `\n`
-+ String.raw`<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()">` + `\n`
++ String.raw`<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()" onkeydown="return event.key != 'Enter';">` + `\n`
 + configs(recon)
 + String.raw`</form>` + `\n`
 + String.raw`<br><br>` + `\n`
