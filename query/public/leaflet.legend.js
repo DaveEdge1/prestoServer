@@ -148,7 +148,36 @@
         }
     }
 
-        class PolygonRSymbol extends GeometricSymbol {
+    class StarSymbol extends GeometricSymbol {
+        _drawSymbol() {
+            var ctx = (this._ctx = this._canvas.getContext("2d"));
+
+            var linelWeight = this._legend.weight || 3;
+            var rot=Math.PI/2*3;
+            var outerRadius = this._control.options.symbolWidth / 2;
+            var innerRadius = outerRadius / 2;
+            var x = this._control.options.symbolWidth / 2;
+            var y = this._control.options.symbolHeight / 2;
+            var step=Math.PI/this._legend.sides;
+            ctx.beginPath();
+            ctx.moveTo(cx,cy-outerRadius)
+              for(i=0;i<this._legend.sides;i++){
+                x=cx+Math.cos(rot)*outerRadius;
+                y=cy+Math.sin(rot)*outerRadius;
+                ctx.lineTo(x,y)
+                rot+=step
+        
+                x=cx+Math.cos(rot)*innerRadius;
+                y=cy+Math.sin(rot)*innerRadius;
+                ctx.lineTo(x,y)
+                rot+=step
+              }
+          ctx.lineTo(cx,cy-outerRadius);
+          ctx.closePath();
+        }
+    }
+
+    class PolygonRSymbol extends GeometricSymbol {
         _drawSymbol() {
             var ctx = (this._ctx = this._canvas.getContext("2d"));
             var linelWeight = this._legend.weight || 3;
@@ -156,9 +185,8 @@
             var y0 = this._control.options.symbolHeight / 2;
             var r = Math.min(x0, y0) - linelWeight;
             var a = 360 / this._legend.sides;
-            ctx.beginPath();
             var rot1 = 360/(this._legend.sides*2);
-            
+            ctx.beginPath();
             for (var i = 0; i <= this._legend.sides; i++) {
                 var x1 = x0 + r * Math.cos(((a * i + (90 - a / 2) + rot1) * Math.PI) / 180);
                 var y1 = y0 + r * Math.sin(((a * i + (90 - a / 2) + rot1) * Math.PI) / 180);
@@ -221,7 +249,7 @@
     L.Control.Legend = L.Control.extend({
         options: {
             position: "topleft",
-            //title: "Legend",
+            title: "Legend",
             legends: [],
             symbolWidth: 24,
             symbolHeight: 24,
@@ -248,11 +276,11 @@
 
             this._contents = L.DomUtil.create("section", "leaflet-legend-contents", this._container);
             this._link = L.DomUtil.create("a", "leaflet-legend-toggle", this._container);
-            //this._link.title = "Legend";
+            this._link.title = "Legend";
             this._link.href = "#";
 
-            //var title = L.DomUtil.create("h3", "leaflet-legend-title", this._contents);
-            //title.innerText = this.options.title || "Legend";
+            var title = L.DomUtil.create("h3", "leaflet-legend-title", this._contents);
+            title.innerText = this.options.title || "Legend";
 
             var len = this.options.legends.length;
             var colSize = Math.ceil(len / this.options.column);
@@ -282,6 +310,8 @@
                 legendSymbol = new RectangleSymbol(this, symbolContainer, legend);
             } else if (legend.type === "polygon") {
                 legendSymbol = new PolygonSymbol(this, symbolContainer, legend);
+            } else if (legend.type === "star") {
+                legendSymbol = new starSymbol(this, symbolContainer, legend);
             } else if (legend.type === "polygonR") {
                 legendSymbol = new PolygonRSymbol(this, symbolContainer, legend);
             } else if (legend.type === "polyline") {
