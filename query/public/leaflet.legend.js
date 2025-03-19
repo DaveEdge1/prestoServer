@@ -156,8 +156,8 @@
             var rot=Math.PI/2*3;
             var outerRadius = this._control.options.symbolWidth / 2;
             var innerRadius = outerRadius / 2;
-            var x = this._control.options.symbolWidth / 2;
-            var y = this._control.options.symbolHeight / 2;
+            var cx = this._control.options.symbolWidth / 2;
+            var cy = this._control.options.symbolHeight / 2;
             var step=Math.PI/this._legend.sides;
             ctx.beginPath();
             ctx.moveTo(cx,cy-outerRadius)
