@@ -19,7 +19,8 @@ if(length(TSIndex)==0){
 
 tsPick <- qt$paleoData_TSid[TSIndex]
 dsPick <- unique(qt$datasetId[TSIndex])
-
+datsets <- qt[qt$datasetId %in% dsPick,]
+tsPick <- c(tsPick, which(datsets$paleoData_variableName %in% c("age","year")))
 
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
