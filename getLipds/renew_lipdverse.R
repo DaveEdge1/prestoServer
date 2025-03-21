@@ -3,10 +3,10 @@ library(lipdR)
 write(Sys.Date(), file="/root/presto/getLipds/lipdverse_and_md5_update.txt")
 
 #update the lipdverse tts file for TSID-based filtering
-load("/root/presto/getLipds/lipdverse.RData")
+D <- lipdR::readLipd(qt$datasetId)
 rm(D)
 gc()
-tts <- as.lipdTsTibble(TS)
+tts <- as.lipdTsTibble(D)
 rm(TS)
 gc()
 save(tts, file="/root/presto/getLipds/lipdverse_tts.RData")
