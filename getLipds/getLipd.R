@@ -26,6 +26,8 @@ print(paste0("ISIDs (including time coulmns): ", tsPick))
 
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
+print(paste0("dim(tts): ", dim(tts)))
+print(paste0("unique datasets: ", length(unique(tts$datasetId))))
 
 if (length(dsPick) == 1){
 	D <- lipdR::as.lipd(tts)
