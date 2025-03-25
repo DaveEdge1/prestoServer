@@ -20,7 +20,7 @@ if(length(TSIndex)==0){
 dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("datasetIDs: ", dsPick))
 
-D = readLipd(dsPick, paralell=T)
+D <- readLipd(dsPick, parallel = T)
 
 destPath <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPath)
