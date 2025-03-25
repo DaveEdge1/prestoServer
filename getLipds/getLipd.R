@@ -20,17 +20,7 @@ if(length(TSIndex)==0){
 dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("datasetIDs: ", dsPick))
 
-load("/root/presto/getLipds/lipdverse_tts.RData")
-tts <- tts[tts$datasetId %in% dsPick,]
-print(paste0("dim(tts): ", dim(tts)))
-print(paste0("unique datasets: ", length(unique(tts$datasetId))))
-
-if (length(dsPick) == 1){
-	D <- lipdR::as.lipd(tts)
-} else {
-	D <- lipdR::as.multiLipd(tts)
-}
-
+D = readLipd(dsPick, paralell=T)
 
 destPath <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPath)
