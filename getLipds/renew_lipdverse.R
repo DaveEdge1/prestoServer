@@ -26,4 +26,6 @@ if (latestMD5 != prevMD5){
   tts <- as.lipdTsTibble(D)
   save(tts, file="/root/presto/getLipds/lipdverse_tts.RData")
   print("lipdverse updates complete!")
+} else {
+  print("no changes to lipdverse since last update, quitting...")
 }
