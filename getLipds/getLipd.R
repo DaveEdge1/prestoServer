@@ -17,10 +17,10 @@ if(length(TSIndex)==0){
 	stop("Error: Some of the listed TSids not located in query table")
 }
 
-tsPick <- qt$paleoData_TSid[TSIndex]
 dsPick <- unique(qt$datasetId[TSIndex])
-datsets <- qt[qt$datasetId %in% dsPick,]
-tsPick <- c(tsPick, which(datsets$paleoData_variableName %in% c("age","year")))
+tsPick <- qt$paleoData_TSid[TSIndex]
+timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% c("age","year")))
+tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
 
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
