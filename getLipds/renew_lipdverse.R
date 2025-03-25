@@ -20,8 +20,11 @@ if (latestMD5 != prevMD5){
   print("lipdverse updates available, downloading latest")
   write(latestMD5, file="/root/presto/getLipds/lipdverseQuery.md5")
   
+  #update the lipdverse query table
+  qt <- read.csv("https://lipdverse.org/lipdverse/lipdverseQuery.csv")
+  write.csv(qt, "lipdverseQuery.csv")
+
   #update the lipdverse tts file for TSID-based filtering
-  qt <- lipdR:::getQueryTable()
   D <- lipdR::readLipd(qt$datasetId)
   tts <- as.lipdTsTibble(D)
   save(tts, file="/root/presto/getLipds/lipdverse_tts.RData")
