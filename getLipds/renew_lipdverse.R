@@ -1,13 +1,5 @@
 library(lipdR)
 
-write(Sys.Date(), file="/root/presto/getLipds/lipdverse_and_md5_update.txt")
-
-#update the lipdverse tts file for TSID-based filtering
-qt <- lipdR:::getQueryTable()
-D <- lipdR::readLipd(qt$datasetId)
-tts <- as.lipdTsTibble(D)
-save(tts, file="/root/presto/getLipds/lipdverse_tts.RData")
-
 #update the available downloads based on TSID lists
 setwd("/root/presto/userRecons")
 a1 <- list.files(pattern = "TSIDs.json$", recursive = TRUE)
@@ -16,4 +8,18 @@ if (length(a1 > 0)){
   a1 <- lapply(a1, function(x) tools::md5sum(x))
   df1 <- data.frame("location" = a2, "md5" = unname(unlist(a1)))
   write.csv(df1, "/root/presto/getLipds/TSIDmd5.csv")
+}
+
+#update the local lipdverse copy
+latestMD5 <- readLines("https://lipdverse.org/lipdverse/lipdverseQuery.md5")
+prevMD5 <- readLines("/root/presto/getLipds/lipdverseQuery.md5")
+
+if (latestMD5 != prevMD5){
+  write(latestMD5, file="/root/presto/getLipds/lipdverseQuery.md5")
+  
+  #update the lipdverse tts file for TSID-based filtering
+  qt <- lipdR:::getQueryTable()
+  D <- lipdR::readLipd(qt$datasetId)
+  tts <- as.lipdTsTibble(D)
+  save(tts, file="/root/presto/getLipds/lipdverse_tts.RData")
 }
