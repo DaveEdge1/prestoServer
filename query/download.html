@@ -1531,22 +1531,28 @@ function getLipds(loc1){
 			var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
 			console.log("Total time series: " + IDs.length);
 			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-			console.log("json body sent to 'getLipds': " + tsJSON)
-			console.log("sending post TSids")
-			postTSids(tsJSON);
+
 			var TSIDsArray = JSON.parse(tsJSON).TSIDs
 			var numTSids = TSIDsArray.length
-			alert('Proceeding with ' + numTSids + ' climate proxy time series')
-			compileLipds(tsJSON);
-			if (loc1 == "donwload"){
-				resolve("https://www.google.com")
-			} else if (loc1 == "reconstruct"){
-				var queryParams = params(useCoords=true)
-				queryParams = '&' + queryParams.substring(1);
-				queryParams = queryParams.replace(/\s/g, '');
-				resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
-			} else {
-				resolve("https://paleopresto.com/")
+			console.log("post request for port 92: " + tsJSON)
+
+			if (confirm('Proceed with ' + numTSids + ' time series?')){
+			
+				console.log("json body sent to 'getLipds': " + tsJSON)
+				console.log("sending post TSids")
+				postTSids(tsJSON);
+				
+				compileLipds(tsJSON);
+				if (loc1 == "donwload"){
+					resolve("https://www.google.com")
+				} else if (loc1 == "reconstruct"){
+					var queryParams = params(useCoords=true)
+					queryParams = '&' + queryParams.substring(1);
+					queryParams = queryParams.replace(/\s/g, '');
+					resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
+				} else {
+					resolve("https://paleopresto.com/")
+				}
 			}
 		});
 	});
