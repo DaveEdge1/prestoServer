@@ -23,22 +23,21 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-function newStatus(TSIDs, uniqueID) {
+async function newStatus(TSIDs, uniqueID) {
     if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined') {
         console.log('Missing TSID or uniqueID');
         return 400;
     }
 
     const path1 = path.join(__dirname, '../userRecons', uniqueID);
-    fs.mkdirSync(path1, (err) => {
-        if (err) {
-            console.log('function "mkdir" failed: ' + path1);
-            return 400;
-        } else {
-            console.log('Directory created successfully at: ' + path1);
-            return 200;
-        }
-    });
+    try {
+        await fs.mkdir(path1);
+        console.log('Directory created successfully at: ' + path1);
+        return 200;
+    } catch (err) {
+        console.log('function "mkdir" failed: ' + path1);
+        return 400;
+    }
 }
 
 
@@ -112,54 +111,34 @@ newDir = function(dirname) {
 }
 
 app.post('/lipds', function(req, res) {
-	console.log('status: ' + newStatus(req.body.TSIDs, req.body.uniqueID))
-	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID));
-	var dir1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon))
+	newStatus(req.body.TSIDs, req.body.uniqueID).then(status => {
+	    console.log('Final status:', status);
+	    res.sendStatus(status)
+		
+		var dir1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon))
+		
+		if (status == 200){
+			var path0 = path.join(dir1, 'TSIDs.json')
+			var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
+			fs.writeFile(path0, fullJSON, (err) => {
+				  if (err)
+					    console.log(err);
+				  else {
+					      console.log("File written successfully at: " + path0);
+					    }
+			});
 	
-	if (newStatus(req.body.TSIDs, req.body.uniqueID) == 200){
-		var path0 = path.join(dir1, 'TSIDs.json')
-		var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
-		fs.writeFile(path0, fullJSON, (err) => {
-			  if (err)
-				    console.log(err);
-			  else {
-				      console.log("File written successfully at: " + path0);
-				    }
-		});
-		/*rspawn1(req.body.TSIDs, req.body.uniqueID, req.body.language).then(reso => {
-			var path2 = path.join(path1, "processCode.txt")
-			fs.writeFile(path2, reso.toString(), (err) => {
+		} else {
+			var path0 = path.join(dir1, 'TSIDs_err.txt')
+			fs.writeFile(path0, "Rserver error! TSIDs not written.", (err) => {
 				  if (err)
 					    console.log(err);
 				  else {
-					      console.log("File written successfully\n");
-					      console.log("The written has the following contents:");
-					      console.log(fs.readFileSync(path2, "utf8"));
+					      console.log("File written successfully at: " + path0);
 					    }
 			});
-			fs.writeFile('TSIDs.txt', JSON.stringify(req.body.TSIDs), (err) => {
-				  if (err)
-					    console.log(err);
-				  else {
-					      console.log("File written successfully\n");
-					      console.log("The written has the following contents:");
-					      console.log(fs.readFileSync(path2, "utf8"));
-					    }
-			});
-			if (reso == 0 && req.body.language == "Python"){
-				pickleEm(path1)
-			}
-		});*/
-	} else {
-		var path0 = path.join(dir1, 'TSIDs_err.txt')
-		fs.writeFile(path0, "Rserver error! TSIDs not written.", (err) => {
-			  if (err)
-				    console.log(err);
-			  else {
-				      console.log("File written successfully at: " + path0);
-				    }
-		});
-	}
+		}
+	});
 });
 
 app.listen(PORT, function () {
