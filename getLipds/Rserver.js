@@ -111,8 +111,8 @@ newDir = function(dirname) {
 }
 
 app.post('/lipds', function(req, res) {
-	var dir1 = req.body.uniqueID + '_' + req.body.recon
-        fs.mkdirSync(path1, { recursive: true });
+	var dir1 = '/root/presto/userRecons/' + req.body.uniqueID + '_' + req.body.recon
+        fs.mkdirSync(dir1, { recursive: true });
 	newStatus(req.body.TSIDs, req.body.uniqueID, dir1).then(status => {
 	    console.log('Final status:', status);
 	    res.sendStatus(status)
