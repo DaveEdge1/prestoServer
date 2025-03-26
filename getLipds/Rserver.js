@@ -23,6 +23,29 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
+function createDirectory(TSIDs, uniqueID, dirPath) {
+  try {
+    fs.mkdirSync(dirPath);
+    console.log(`Directory "${dirPath}" created successfully.`);
+    return 200;
+  } catch (error) {
+    if (error.code === 'EEXIST') {
+      console.error(`Directory "${dirPath}" already exists.`);
+	    return 400;
+    } else if (error.code === 'EACCES' || error.code === 'EPERM') {
+        console.error(`Permission denied to create directory "${dirPath}".`);
+	    return 400;
+    } else if (error.code === 'ENOENT'){
+        console.error(`Path "${dirPath}" is invalid.`);
+	    return 400;
+    }
+     else {
+      console.error(`An error occurred while creating directory "${dirPath}":`, error);
+	     return 400;
+    }
+  }
+}
+
 async function newStatus(TSIDs, uniqueID, dir1) {
     if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined') {
         console.log('Missing TSID or uniqueID');
@@ -30,7 +53,7 @@ async function newStatus(TSIDs, uniqueID, dir1) {
     }
     const path1 = path.join(__dirname, '../userRecons', dir1);
     try {
-        await fs.mkdir(path1, { recursive: true });
+        createDirectory(dirPath)
 	console.log('Directory created successfully at: ' + path1);
 	return 200;
 
@@ -113,7 +136,7 @@ newDir = function(dirname) {
 app.post('/lipds', function(req, res) {
 	var dir1 = '/root/presto/userRecons/' + req.body.uniqueID + '_' + req.body.recon
         fs.mkdirSync(dir1, { recursive: true });
-	newStatus(req.body.TSIDs, req.body.uniqueID, dir1).then(status => {
+	createDirectory(req.body.TSIDs, req.body.uniqueID, dir1).then(status => {
 	    console.log('Final status:', status);
 	    res.sendStatus(status)
 		
