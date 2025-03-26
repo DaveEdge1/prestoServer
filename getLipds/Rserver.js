@@ -23,7 +23,7 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-function createDirectory(TSIDs, uniqueID, dirPath) {
+asnyc function createDirectory(TSIDs, uniqueID, dirPath) {
   try {
     fs.mkdirSync(dirPath);
     console.log(`Directory "${dirPath}" created successfully.`);
@@ -135,7 +135,6 @@ newDir = function(dirname) {
 
 app.post('/lipds', function(req, res) {
 	var dir1 = '/root/presto/userRecons/' + req.body.uniqueID + '_' + req.body.recon
-        fs.mkdirSync(dir1, { recursive: true });
 	createDirectory(req.body.TSIDs, req.body.uniqueID, dir1).then(status => {
 	    console.log('Final status:', status);
 	    res.sendStatus(status)
