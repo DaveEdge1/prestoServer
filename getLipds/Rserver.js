@@ -113,6 +113,7 @@ newDir = function(dirname) {
 }
 
 app.post('/lipds', function(req, res) {
+	console.log('status: ' + newStatus(req.body.TSIDs, req.body.uniqueID))
 	res.sendStatus(newStatus(req.body.TSIDs, req.body.uniqueID));
 	var dir1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon))
 	
