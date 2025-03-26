@@ -23,20 +23,20 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-function newStatus(TSIDs, uniqueID, callback) {
+function newStatus(TSIDs, uniqueID) {
     if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined') {
         console.log('Missing TSID or uniqueID');
-        return callback(400);
+        return 400;
     }
 
     const path1 = path.join(__dirname, '../userRecons', uniqueID);
-    fs.mkdir(path1, (err) => {
+    fs.mkdirSync(path1, (err) => {
         if (err) {
             console.log('function "mkdir" failed: ' + path1);
-            return callback(400);
+            return 400;
         } else {
             console.log('Directory created successfully at: ' + path1);
-            return callback(200);
+            return 200;
         }
     });
 }
