@@ -24,22 +24,24 @@ let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
 var newStatus = function(TSIDs, uniqueID){
+	var status1 = NULL;
 	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined'){
 		console.log('Missing TSID or uniqueID: ' + path1)
-		return(400)
+		status1 = 400;
 	} else {
 		path1 = path.join(__dirname, '../userRecons', uniqueID)
 		fs.mkdir(path1,
 			(err) => {
 			if (err) {
 				console.log('function "mkdir" failed: ' + path1)
-				return(400)
+				status1 = 400;
 			} else {
 				console.log('Directory created successfully at: ' + path1);
-				return(200)
+				status1 = 200;
 			}
 		});
 	}
+	return status1;
 }
 
 
