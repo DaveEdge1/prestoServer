@@ -25,12 +25,14 @@ let path1 = '';
 
 var newStatus = function(TSIDs, uniqueID){
 	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined'){
+		console.log('Missing TSID or uniqueID: ' + path1)
 		return(400)
 	} else {
 		path1 = path.join(__dirname, '../userRecons', uniqueID)
 		fs.mkdir(path1,
 			(err) => {
 			if (err) {
+				console.log('function "mkdir" failed: ' + path1)
 				return(400)
 			} else {
 				console.log('Directory created successfully at: ' + path1);
