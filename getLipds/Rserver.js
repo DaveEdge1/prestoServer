@@ -35,6 +35,7 @@ async function newStatus(TSIDs, uniqueID, dir1) {
         return 200;
     } catch (err) {
         console.log('function "mkdir" failed: ' + path1);
+	console.log('err: ' + err);
         return 400;
     }
 }
