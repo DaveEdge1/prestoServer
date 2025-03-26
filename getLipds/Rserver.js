@@ -23,7 +23,7 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-var newStatus = function(TSIDs, uniqueID){
+function newStatus(TSIDs, uniqueID){
 	var status1 = null;
 	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined'){
 		console.log('Missing TSID or uniqueID: ' + path1)
