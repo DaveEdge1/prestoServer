@@ -28,7 +28,6 @@ async function newStatus(TSIDs, uniqueID) {
         console.log('Missing TSID or uniqueID');
         return 400;
     }
-
     const path1 = path.join(__dirname, '../userRecons', uniqueID);
     try {
         await fs.mkdir(path1);
