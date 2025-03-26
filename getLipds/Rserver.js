@@ -46,24 +46,6 @@ async function createDirectory(TSIDs, uniqueID, dirPath) {
   }
 }
 
-async function newStatus(TSIDs, uniqueID, dir1) {
-    if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined') {
-        console.log('Missing TSID or uniqueID');
-        return 400;
-    }
-    const path1 = path.join(__dirname, '../userRecons', dir1);
-    try {
-        createDirectory(dirPath)
-	console.log('Directory created successfully at: ' + path1);
-	return 200;
-
-    } catch (err) {
-        console.log('function "mkdir" failed: ' + path1);
-        return 400;
-    }
-}
-
-
 var rspawn1 = function (TSIDs, uniqueID, language){
 	path1 = path.join(__dirname, '../userRecons', uniqueID)
 	if (language == "Python"){
@@ -124,13 +106,6 @@ pickleEm = function(path1){
 									                                                                                                console.log('child process exited with code ' + code);
 									                                                                                                return(code)
 									                                                                                        });
-}
-
-newDir = function(dirname) {
-	        fs.mkdirSync(dirname, { recursive: true }, (err) => {
-			                  if (err) throw err;
-			        });
-	        return (dirname)
 }
 
 app.post('/lipds', function(req, res) {
