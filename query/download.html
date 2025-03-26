@@ -1561,7 +1561,8 @@ function getLipds(loc1){
 			    })
 			    .catch(error => {
 			        console.error("Error:", error.message);
-				alert("Error:", error.message);
+				alert("Error: failed to write data selection to server. Please start over.");
+				resolve("https://paleopresto.com/");
 		        });
 		});
 	});
