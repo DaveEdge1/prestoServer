@@ -23,7 +23,7 @@ var r_comm = '/usr/bin/Rscript';
 let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
-function createDirectory(TSIDs, uniqueID, dirPath) {
+async function createDirectory(TSIDs, uniqueID, dirPath) {
   try {
     fs.mkdirSync(dirPath);
     console.log(`Directory "${dirPath}" created successfully.`);
