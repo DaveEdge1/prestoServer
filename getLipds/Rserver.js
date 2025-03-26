@@ -24,7 +24,7 @@ let path1 = '';
 //var args = '--vanilla ' + file_path + ' ' + process.argv[2] + ' ' + process.argv[3];
 
 var newStatus = function(TSIDs, uniqueID){
-	var status1 = NULL;
+	var status1 = null;
 	if (typeof TSIDs == 'undefined' || typeof uniqueID == 'undefined'){
 		console.log('Missing TSID or uniqueID: ' + path1)
 		status1 = 400;
