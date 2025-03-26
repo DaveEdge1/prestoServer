@@ -30,13 +30,12 @@ async function newStatus(TSIDs, uniqueID, dir1) {
     }
     const path1 = path.join(__dirname, '../userRecons', dir1);
     try {
-        var err = await fs.mkdir(path1, { recursive: true });
+        await fs.mkdir(path1, { recursive: true });
 	console.log('Directory created successfully at: ' + path1);
 	return 200;
 
     } catch (err) {
         console.log('function "mkdir" failed: ' + path1);
-	console.error("Error:", err.message);
         return 400;
     }
 }
