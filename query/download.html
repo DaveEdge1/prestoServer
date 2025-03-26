@@ -1380,29 +1380,37 @@ getAllMonths = function(startSpan,endSpan){
         xhr0.send();
     }
 
-compileLipds = function(Body){
-	    var xhr1 = new XMLHttpRequest();
-	    //xhr.timeout = 2000;
-		return new Promise((resolve, reject) => {
-	    	xhr1.onreadystatechange = (e) => {
-			if (xhr1.readyState !== 4) {
-				return;
-			}
-			if (xhr1.status === 200){
-				//console.log("time series: ");
-				//console.log(xhr.responseText);
-				resolve(xhr1.responseText);
-			} else {
-				var resp1 = "XHR didn't work: " + xhr1.status;
-				console.log(resp1);
-				resolve();
-			}
-		};
-		xhr1.open("post", "http://143.198.98.66:90/lipds", /*async*/ true);
-		xhr1.setRequestHeader("Content-type", "application/json");
-		xhr1.send(Body);
-		});
-}
+const compileLipds = function(Body) {
+    return new Promise((resolve, reject) => {
+        var xhr1 = new XMLHttpRequest();
+
+        xhr1.onreadystatechange = () => {
+            if (xhr1.readyState !== 4) return;
+
+            if (xhr1.status === 200) {
+                resolve(xhr1.responseText);
+            } else {
+                console.error("XHR didn't work: " + xhr1.status);
+                reject(new Error("XHR failed with status " + xhr1.status));
+            }
+        };
+
+        xhr1.onerror = () => {
+            reject(new Error("XHR encountered a network error"));
+        };
+
+        xhr1.ontimeout = () => {
+            reject(new Error("XHR request timed out"));
+        };
+
+        xhr1.open("POST", "http://143.198.98.66:90/lipds", true);
+        xhr1.setRequestHeader("Content-type", "application/json");
+
+        xhr1.timeout = 5000; // Set a timeout (optional)
+        
+        xhr1.send(Body);
+    });
+};
 
 postTSids = function(Body){
 	    var xhr7 = new XMLHttpRequest();
@@ -1533,21 +1541,17 @@ function getLipds(loc1){
 			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
 			console.log("json body sent to 'getLipds': " + tsJSON)
 			console.log("sending post TSids")
-			postTSids(tsJSON);
+			//postTSids(tsJSON);
 			var TSIDsArray = JSON.parse(tsJSON).TSIDs
 			var numTSids = TSIDsArray.length
 			alert('Proceeding with ' + numTSids + ' climate proxy time series')
-			compileLipds(tsJSON);
-			if (loc1 == "donwload"){
-				resolve("https://www.google.com")
-			} else if (loc1 == "reconstruct"){
-				var queryParams = params(useCoords=true)
-				queryParams = '&' + queryParams.substring(1);
-				queryParams = queryParams.replace(/\s/g, '');
-				resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
-			} else {
-				resolve("https://paleopresto.com/")
-			}
+			compileLipds(tsJSON)
+			    .then(response => {
+			        console.log("Success:", response);
+			    })
+			    .catch(error => {
+			        console.error("Error:", error.message);
+		        });
 		});
 	});
 }
