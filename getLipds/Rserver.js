@@ -114,8 +114,6 @@ app.post('/lipds', function(req, res) {
 	    console.log('Final status:', status);
 	    res.sendStatus(status)
 		
-		var dir1 = newDir(path.join(__dirname, '../userRecons', req.body.uniqueID+'_'+req.body.recon))
-		
 		if (status == 200){
 			var path0 = path.join(dir1, 'TSIDs.json')
 			var fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`
