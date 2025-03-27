@@ -29,28 +29,8 @@ print(paste0("Total TSIDs (including time coulmns): ", length(tsPick)))
 
 print("filter ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
-tts <- tts[tts$datasetId %in% dsPick,]
-print(dsPick)
-print(which(tts$datasetId %in% dsPick))
-print(which(dsPick %in% tts$datasetId))
-print(apply(tts, 2, function(x) sum(!is.na(x))))
+tts <- tts[tts$datasetId %in% dsPick,
 tts <- tts[,unname(apply(tts, 2, function(x) sum(!is.na(x))))!=0]
-print(apply(tts, 2, function(x) sum(!is.na(x))))
-print(paste0("dimensions of tibble: ", paste0(dim(tts),collapse=", ")))
-
-print("write big tts")
-destPaths22 <- file.path(args[2], "lipd_big_tts.rds") 
-saveRDS(tts, destPaths22)
-
-print("write multilipd")	    
-if (length(dsPick) == 1){
-	D <- lipdR::as.lipd(tts)
-} else {
-	D <- lipdR::as.multiLipd(tts)
-}
-destPath <- file.path(args[2], "lipd.rds") 
-saveRDS(D, destPath)
-writeLipd(D, args[2])
 
 print("write filtered tts")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
