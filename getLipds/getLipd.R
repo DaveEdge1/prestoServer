@@ -21,7 +21,7 @@ if(length(TSIndex)==0){
 
 print("filter for datasets, then time series")
 dsPick <- unique(qt$datasetId[TSIndex])
-print(paste0("datasetIDs: ", dsPick))
+print(paste0("Total datasetIDs: ", length(dsPick)))
 tsPick <- qt$paleoData_TSid[TSIndex]
 timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% c("age","year")))
 tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
@@ -30,6 +30,7 @@ print(paste0("Total TSIDs (including time coulmns): ", length(tsPick)))
 print("write ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$datasetId %in% dsPick,]
+print(paste0("dimensions of tibble: ", dim(tts))
 if (length(dsPick) == 1){
 	D <- lipdR::as.lipd(tts)
 } else {
