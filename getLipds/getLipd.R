@@ -30,11 +30,11 @@ print(paste0("Total TSIDs (including time coulmns): ", length(tsPick)))
 print("write ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$datasetId %in% dsPick,]
-print(paste0("dimensions of tibble: ", paste0(dim(tts),collapse=",")))
+print(paste0("dimensions of tibble: ", paste0(dim(tts),collapse=", ")))
 if (length(dsPick) == 1){
 	D <- lipdR::as.lipd(tts)
 } else {
-	D <- lipdR::collapseTs(tts, verbose=T)
+	D <- lipdR::collapseTs(as.lipdTs(tts), verbose=T)
 }
 destPath <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPath)
