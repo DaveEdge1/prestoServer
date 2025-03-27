@@ -17,6 +17,7 @@ if(length(TSIndex)==0){
 	stop("Error: Some of the listed TSids not located in query table")
 }
 
+#filter for datasets, then time series
 dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("datasetIDs: ", dsPick))
 tsPick <- qt$paleoData_TSid[TSIndex]
@@ -24,19 +25,27 @@ timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variab
 tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
 print(paste0("ISIDs (including time coulmns): ", tsPick))
 
+#write ts tibble
 load("/root/presto/getLipds/lipdverse_tts.RData")
-tts <- tts[tts$paleoData_TSid %in% tsPick,]
-print(paste0("dim(tts): ", dim(tts)))
-print(paste0("unique datasets: ", length(unique(tts$datasetId))))
-
+tts <- tts[tts$datasetId %in% dsPick,]
 if (length(dsPick) == 1){
 	D <- lipdR::as.lipd(tts)
 } else {
 	D <- lipdR::as.multiLipd(tts)
 }
-
-
 destPath <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPath)
 writeLipd(D, args[2])
 
+#write multilipd
+tts <- tts[tts$paleoData_TSid %in% tsPick,]
+print(paste0("dim(tts): ", dim(tts)))
+print(paste0("unique datasets: ", length(unique(tts$datasetId))))
+destPaths2 <- file.path(args[2], "lipd_tts.rds") 
+saveRDS(tts, destPaths2)
+
+destPaths3 <- file.path(args[2], "TSIDs.rds") 
+saveRDS(tsPick, destPaths3)
+
+destPaths34 <- file.path(args[2], "datasetIds.rds") 
+saveRDS(dsPick, destPaths4)
