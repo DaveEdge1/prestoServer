@@ -29,7 +29,7 @@ print(paste0("Total TSIDs (including time coulmns): ", length(tsPick)))
 
 print("filter ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
-tts <- tts[tts$datasetId %in% dsPick,
+tts <- tts[tts$datasetId %in% dsPick,]
 tts <- tts[,unname(apply(tts, 2, function(x) sum(!is.na(x))))!=0]
 
 print("write filtered tts")
