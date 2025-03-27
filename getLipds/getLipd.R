@@ -1,4 +1,5 @@
 args = commandArgs(trailingOnly=TRUE)
+print("starting getLipd.R")
 library(lipdR)
 library(jsonlite)
 print(paste0("args: ", args))
@@ -18,7 +19,7 @@ if(length(TSIndex)==0){
 	stop("Error: Some of the listed TSids not located in query table")
 }
 
-#filter for datasets, then time series
+print("filter for datasets, then time series")
 dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("datasetIDs: ", dsPick))
 tsPick <- qt$paleoData_TSid[TSIndex]
@@ -26,7 +27,7 @@ timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variab
 tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
 print(paste0("ISIDs (including time coulmns): ", tsPick))
 
-#write ts tibble
+print("write ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$datasetId %in% dsPick,]
 if (length(dsPick) == 1){
@@ -38,17 +39,14 @@ destPath <- file.path(args[2], "lipd.rds")
 saveRDS(D, destPath)
 writeLipd(D, args[2])
 
-#write multilipd
+print("write multilipd")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
 print(paste0("dim(tts): ", dim(tts)))
 print(paste0("unique datasets: ", length(unique(tts$datasetId))))
 destPaths2 <- file.path(args[2], "lipd_tts.rds") 
 saveRDS(tts, destPaths2)
 
-TSIDS <- jsonlite::toJSON(as.list(data.frame("TSIds"=tsPick)))
-destPaths3 <- file.path(args[2], "TSIDs.json") 
-write(TSIDS, file = destPaths3)
-
+print("write datasetIds.json")
 DSids <- jsonlite::toJSON(as.list(data.frame("datasetIds"=dsPick)))
-destPaths4 <- file.path(args[2], "datasetIds.rds") 
+destPaths4 <- file.path(args[2], "datasetIds.json") 
 write(DSids, destPaths4)
