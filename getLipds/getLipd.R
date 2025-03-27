@@ -47,5 +47,5 @@ saveRDS(tts, destPaths2)
 destPaths3 <- file.path(args[2], "TSIDs.rds") 
 saveRDS(tsPick, destPaths3)
 
-destPaths34 <- file.path(args[2], "datasetIds.rds") 
+destPaths4 <- file.path(args[2], "datasetIds.rds") 
 saveRDS(dsPick, destPaths4)
