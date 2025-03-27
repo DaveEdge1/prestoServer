@@ -1,5 +1,6 @@
 args = commandArgs(trailingOnly=TRUE)
 library(lipdR)
+library(jsonlite)
 print(paste0("args: ", args))
 if (length(args) != 3){
 	stop("TSIDs, uniqueID, and language required")
@@ -44,8 +45,10 @@ print(paste0("unique datasets: ", length(unique(tts$datasetId))))
 destPaths2 <- file.path(args[2], "lipd_tts.rds") 
 saveRDS(tts, destPaths2)
 
-destPaths3 <- file.path(args[2], "TSIDs.rds") 
-saveRDS(tsPick, destPaths3)
+TSIDS <- jsonlite::toJSON(as.list(data.frame("TSIds"=tsPick)))
+destPaths3 <- file.path(args[2], "TSIDs.json") 
+write(TSIDS, file = destPaths3)
 
+DSids <- jsonlite::toJSON(as.list(data.frame("datasetIds"=dsPick)))
 destPaths4 <- file.path(args[2], "datasetIds.rds") 
-saveRDS(dsPick, destPaths4)
+write(DSids, destPaths4)
