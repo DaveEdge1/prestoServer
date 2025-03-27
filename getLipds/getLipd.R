@@ -32,7 +32,8 @@ load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$datasetId %in% dsPick,]
 print(dsPick)
 print(which(tts$datasetId %in% dsPick))
-print(which(dsPick %in% dsPick))
+print(which(dsPick %in% tts$datasetId))
+print(apply(tts, 2, function(x) sum(!is.na(x))))
 print(paste0("dimensions of tibble: ", paste0(dim(tts),collapse=", ")))
 if (length(dsPick) == 1){
 	D <- lipdR::as.lipd(tts)
