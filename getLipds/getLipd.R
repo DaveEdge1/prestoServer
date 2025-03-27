@@ -34,7 +34,7 @@ print(paste0("dimensions of tibble: ", paste0(dim(tts),collapse=", ")))
 if (length(dsPick) == 1){
 	D <- lipdR::as.lipd(tts)
 } else {
-	D <- lipdR::collapseTs(as.lipdTs(tts), verbose=T)
+	D <- lipdR::as.multiLipd(tts)
 }
 destPath <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPath)
