@@ -39,6 +39,18 @@ print(paste0("unique datasets: ", length(unique(tts$datasetId))))
 destPaths2 <- file.path(args[2], "lipd_tts.rds") 
 saveRDS(tts, destPaths2)
 
+print("write filtered multi-lipd")
+if (length(dsPick) == 1){
+  D <- lipdR::as.lipd(tts)
+} else {
+  D <- lipdR::as.multiLipd(tts)
+}
+destPaths3 <- file.path(args[2], "lipd.rds") 
+saveRDS(D, destPaths3)
+
+print("write temporary lipd files for pkl")
+writeLipd(D, args[2])
+
 print("write datasetIds.json")
 DSids <- jsonlite::toJSON(as.list(data.frame("datasetIds"=dsPick)))
 destPaths4 <- file.path(args[2], "datasetIds.json") 
