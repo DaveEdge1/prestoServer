@@ -16,17 +16,24 @@ async function routeExistingLipds(uniqueID){
 	var root1 = path.join(root0, uniqueID)
 	var path99 = path.join(root1, '/pointer.txt')
 	if (checkFileExistsSync(path99)){
+		console.log(path99 + ' exists')
 		var s1 = fs.readFileSync(path99,'utf8');
 		s1 = s1.replace(/(\r\n|\n|\r)/gm, "");
 		var origpkl = root0 + s1 + '/lipd.pkl'
 		var origrds = root0 + s1 + '/lipd.rds'
-		if (checkFileExistsSync(origpkl) && checkFileExistsSync(origrds)){
+		var origdsid = root0 + s1 + '/datasetIds.json'
+		var origtts = root0 + s1 + '/lipd_tts.rds'
+		if (checkFileExistsSync(origpkl) && checkFileExistsSync(origrds) && checkFileExistsSync(origdsid) && checkFileExistsSync(origtts)){
+			console.log(origpkl + ' and ' + origpkl + ' exist')
+			console.log('linking files')
 			var bashText2 = 'ln -s ' + origpkl + ' ' + root1
 			var bashText3 = 'ln -s ' + origrds + ' ' + root1
 			shelljs.exec(bashText2).stdout
 			shelljs.exec(bashText3).stdout
 			return true
 		} else {
+			console.log('failed to link previously created data files!')
+			console.log('creating new files from lipdverse')
 			return false
 		}
 	} else {
@@ -40,6 +47,7 @@ function checkFileExistsSync(filepath){
   try{
     fs.accessSync(filepath, fs.constants.F_OK);
   }catch(e){
+    console.log('file not found!')
     flag = false;
   }
   return flag;
@@ -280,7 +288,15 @@ var downloadEm = async function(uniqueID, language){
 	if (process.argv.length == 4){
 		var runStatus = await newStatus(uniqueID, language)
 		updateTSIDmd5()
-	
+
+		if (runStatus == 2){
+			if (await routeExistingLipds(uniqueID){
+				console.log("downloadLipds.js successful, found existing TSID set")
+				process.exit(0);
+			} else {
+				runStatus = 1;
+			}
+		}
 		if (runStatus == 1){
 			console.log("no matching TSIDs set, building new collection")
 			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
@@ -300,10 +316,6 @@ var downloadEm = async function(uniqueID, language){
 					})
 			});
 
-		} else if (runStatus == 2){
-			await routeExistingLipds(uniqueID)
-			console.log("downloadLipds.js successful, found existing TSID set")
-			process.exit(0);
 		} else {
 			console.log("Error: num args to downloadLipds.js: " + process.argv.length)
 			console.log("runStatus: " + runStatus)
