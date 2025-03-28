@@ -238,11 +238,11 @@ dockerStatus = async function (uniqueID) {
 }
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
-   var vizURL = function(configLoc){ 
-	   if (configLoc == true) {
+   var vizURL = function(configLoc, recon){ 
+	   if (configLoc == true || recon == 'temp12k') {
 		   return '<br>'
 	   } else {
-		   return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '" download>Copy and paste this URL into a new browser window to VISUALIZE your results</a><br>'
+		   return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '" download>Click here to VISUALIZE your results</a><br>'
 	   }
    };
    var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
@@ -256,8 +256,8 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 		   return s
 	   }
    }
-	console.log("vizURL(configLoc): " + vizURL(configLoc))
-	console.log("destURL: " + destURL)
+	//console.log("vizURL(configLoc): " + vizURL(configLoc))
+	//console.log("destURL: " + destURL)
 	/*
 	if (dockerSuccess > 0) {
 		var text1 = '<p>Thank you for using Presto! Unfortunately the combination of parameters selected caused an error in the reconstruction code. The output of the code up the the point of error is shown in the log file at the linked URL. This link will expire after 7 days.</p>'
@@ -269,7 +269,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	text1 = text1
 		+ '<br>'
 		+ vizURL(configLoc)
-	        + '<a href="' + indexURL + '" download>Copy and paste this URL into a new browser window to BROWSE ALL files created</a>'
+	        + '<a href="' + indexURL + '" download>Click here to BROWSE ALL files created</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
 		+ '<pre>' + configFileTxt(configLoc) + '</pre>'
