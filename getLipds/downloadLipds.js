@@ -290,7 +290,7 @@ var downloadEm = async function(uniqueID, language){
 		updateTSIDmd5()
 
 		if (runStatus == 2){
-			if (await routeExistingLipds(uniqueID){
+			if (await routeExistingLipds(uniqueID)){
 				console.log("downloadLipds.js successful, found existing TSID set")
 				process.exit(0);
 			} else {
