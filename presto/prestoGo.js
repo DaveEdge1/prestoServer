@@ -485,7 +485,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	});
 
 	}
-			async function writeViz(uniqueID, dirname) {
+	async function writeViz(uniqueID, dirname) {
 		const dirCont = fs.readdirSync( '/root/presto/userRecons/' + uniqueID );
 		const files = dirCont.filter( ( elm ) => elm.match(/.*\.(nc?)/ig));
 		if (files.length < 1) {
@@ -517,10 +517,12 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 			}
 			console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
 		});
-		}
-	if (recon != "download" || "temp12k"){
+	}
+	if (recon != "download"){
 		await startContainer(launchText)
-		await writeViz(uniqueID, dirname, recon)
+		if (recon != "temp12k"){
+			await writeViz(uniqueID, dirname, recon)
+		}
 	}
 	  await sleep(1000)
 	  //await zipIt('/root/presto/userRecons/' + uniqueID)
