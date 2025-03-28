@@ -12,7 +12,7 @@ var app = express();
 
 
 
-app.use('/customRecons', express.static('/root/presto/userRecons/'), serveIndex('/root/presto/userRecons/', {'icons': true}))
+app.use('/customRecons', express.static('/root/presto/userRecons/'), serveIndex('/root/presto/userRecons/', {'icons': true, 'view': 'details'}))
 
 
 /*
