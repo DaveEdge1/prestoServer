@@ -495,7 +495,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 				          return console.log(err)
 				}
 			});
-			process.exit(1)
+			return ;
 	    	}
 			
 		fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz launched" + "\n", function(err) {
