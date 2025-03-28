@@ -458,20 +458,6 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	  }
 	};
 	console.log(gatherLipds(lipdText));
-	/*
-	async function gatherLipds(lipdText) {
-		  console.log('gathering lipd data... ' + lipdText);
-		  console.log(execSync(lipdText).toString())
-		  //stdout.pipe(fs.createWriteStream(dirname+'docker_stdout.txt'));
-		  //stderr.pipe(fs.createWriteStream(dirname+'docker_stderr.txt'));
-	
-		  console.log('dir: ' + '/root/presto/userRecons/' + uniqueID)
-	
-		  await sleep(1000)
-	}
-	await gatherLipds(lipdText)
-	*/
-	//}
 	
 	async function startContainer(launchText) {
 	fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "container launched" + "\n", function(err) {
@@ -499,49 +485,46 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	});
 
 	}
-	if (recon != "download"){
-		await startContainer(launchText)
-	}
-	
-	async function writeViz(uniqueID, dirname) {
-	const dirCont = fs.readdirSync( '/root/presto/userRecons/' + uniqueID );
-	const files = dirCont.filter( ( elm ) => elm.match(/.*\.(nc?)/ig));
-	if (files.length < 1 & recon != 'temp12k') {
-	        console.log("no nc files in dir!");
-	        fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz halted, nc file missing! Check docker logs" + "\n", function(err) {
+			async function writeViz(uniqueID, dirname) {
+		const dirCont = fs.readdirSync( '/root/presto/userRecons/' + uniqueID );
+		const files = dirCont.filter( ( elm ) => elm.match(/.*\.(nc?)/ig));
+		if (files.length < 1) {
+		        console.log("no nc files in dir!");
+		        fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "Presto Viz not run, no nc file. See docker logs for details." + "\n", function(err) {
+				if(err) {
+				          return console.log(err)
+				}
+			});
+			process.exit(1)
+	    	}
+			
+		fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz launched" + "\n", function(err) {
 			if(err) {
 			          return console.log(err)
 			}
+			console.log('viz launched!');
 		});
-		process.exit(1)
-    	}
-	fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz launched" + "\n", function(err) {
-		if(err) {
-		          return console.log(err)
+			var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
+			var { stdout, stderr } = exec(bashText);
+			stdout.pipe(fs.createWriteStream(dirname+'viz_stdout.txt'));
+		  	stderr.pipe(fs.createWriteStream(dirname+'viz_stderr.txt'));
+	
+			await sleep(1000)
+		  	await vizStatus(uniqueID);
+		fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz completed" + "\n", function(err) {
+			if(err) {
+			          return console.log(err)
+			}
+			console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
+		});
 		}
-		console.log('viz launched!');
-	});
-		var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
-		var { stdout, stderr } = exec(bashText);
-		stdout.pipe(fs.createWriteStream(dirname+'viz_stdout.txt'));
-	  	stderr.pipe(fs.createWriteStream(dirname+'viz_stderr.txt'));
-
-		await sleep(1000)
-	  	await vizStatus(uniqueID);
-	fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "viz completed" + "\n", function(err) {
-		if(err) {
-		          return console.log(err)
-		}
-		console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
-	});
-	}
-
-	if (recon != "download"){
+	if (recon != "download" || "temp12k"){
+		await startContainer(launchText)
 		await writeViz(uniqueID, dirname, recon)
 	}
 	  await sleep(1000)
 	  //await zipIt('/root/presto/userRecons/' + uniqueID)
-	  console.log('files zipped');
+	  //console.log('files zipped');
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
 
