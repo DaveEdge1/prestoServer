@@ -24,7 +24,7 @@ dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("Total datasetIDs: ", length(dsPick)))
 print(paste0("Total TSIDs: ", length(TSIndex)))
 tsPick <- qt$paleoData_TSid[TSIndex]
-timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% c("age","year")))
+timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% "age"))
 print(paste0("Total number of time columns: ", length(timePick)))
 tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
 print(paste0("Total TSIDs including time coulmns (BEFORE age filter): ", length(tsPick)))
@@ -39,10 +39,8 @@ for (ii in dsPick){
 	print(paste0("unique variableNames in this dataset: ", unique(this.dataset$paleoData_variableName)))
 	if ("age" %in% this.dataset$paleoData_variableName){
 		print(paste0(ii, " has age"))
-	} else if ("year" %in% this.dataset$paleoData_variableName){
-		print(paste0(ii, " has year"))
 	} else {
-		warning(paste0(ii, " has no age/year! Removing!"))
+		warning(paste0(ii, " has no age! Removing!"))
 		dsPick <- dsPick[!(dsPick %in% ii)]
 	}
 }
