@@ -33,7 +33,7 @@ filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
 #for each dataset, ensure we have an age/year
 #if we only have year, convert to age
 for (ii in dsPick){
-	this.dataset <- filtered_qt[qt$datasetId == ii,]
+	this.dataset <- filtered_qt[filtered_qt$datasetId == ii,]
 	print(paste0("dataset: ", ii))
 	print(paste0("total time series in this dataset: ", nrow(this.dataset)))
 	print(paste0("unique variableNames in this dataset: ", unique(this.dataset$paleoData_variableName)))
