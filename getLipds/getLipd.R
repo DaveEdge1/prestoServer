@@ -33,7 +33,7 @@ filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
 #for each dataset, ensure we have an age/year
 #if we only have year, convert to age
 for (ii in dsPick){
-	this.dataset <- filtered_qt[qt$datasetId == ii]
+	this.dataset <- filtered_qt[qt$datasetId == ii,]
 	if ("age" %in% this.dataset$paleoData_variableName){
 		print(paste0(ii, " has age"))
 	} else if ("year" %in% this.dataset$paleoData_variableName){
