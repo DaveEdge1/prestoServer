@@ -22,10 +22,30 @@ if(length(TSIndex)==0){
 print("filter for datasets, then time series")
 dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("Total datasetIDs: ", length(dsPick)))
+print(paste0("Total TSIDs: ", length(TSIndex)))
 tsPick <- qt$paleoData_TSid[TSIndex]
 timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% c("age","year")))
+print(paste0("Total number of time columns: ", length(timePick)))
 tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
-print(paste0("Total TSIDs (including time coulmns): ", length(tsPick)))
+print(paste0("Total TSIDs including time coulmns (BEFORE age filter): ", length(tsPick)))
+filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
+
+#for each dataset, ensure we have an age/year
+#if we only have year, convert to age
+for (ii in dsPick){
+	this.dataset <- filtered_qt[qt$datasetId == ii]
+	if ("age" %in% this.dataset$paleoData_variableName){
+		print(paste0(ii, " has age"))
+	} else if ("year" %in% this.dataset$paleoData_variableName){
+		print(paste0(ii, " has year"))
+	} else {
+		warning(paste0(ii, " has no age/year! Removing!"))
+		dsPick <- dsPick[!(dsPick %in% ii)]
+	}
+}
+tsPick <- filtered_qt$paleoData_TSid[filtered_qt$datasetId %in% dsPick]
+
+print(paste0("Total TSIDs including time coulmns (AFTER age filter): ", length(tsPick)))
 
 print("filter ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
