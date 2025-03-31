@@ -72,18 +72,24 @@ if (length(dsPick) == 1){
 #create age columns where needed
 if (length(year.only.datasets) > 0){
 	for (iii in year.only.datasets){
-		L <- D[names(D)==ii]
-		D[names(D)==ii] <- createColumn(
-					  L,
-					  paleo.or.chron = "paleo",
-					  paleo.or.chron.number = 1,
-					  table.type = "measurement",
-					  table.number = 1,
-					  variableName = "age",
-					  units = "yr BP",
-					  values = 1950 - L$paleoData[[1]]$measurementTable[[1]]$year$values,
-					  additional.metadata = NA
-						)
+		tryCatch({
+				L <- D[names(D)==ii]
+				D[names(D)==ii] <- createColumn(
+							  L,
+							  paleo.or.chron = "paleo",
+							  paleo.or.chron.number = 1,
+							  table.type = "measurement",
+							  table.number = 1,
+							  variableName = "age",
+							  units = "yr BP",
+							  values = 1950 - L$paleoData[[1]]$measurementTable[[1]]$year$values,
+							  additional.metadata = NA
+								)
+			},
+				error = function(cond){
+					message(conditionMessage(cond))
+					}
+			)
 	}
 }
 			 
