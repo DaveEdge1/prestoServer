@@ -45,7 +45,7 @@ function checkFileExistsSync(filepath){
   console.log("checking for file: " + filepath)
   let flag = true;
   try{
-    path.existsSync(filepath);
+    fs.existsSync(filepath);
   }catch(e){
     console.log(e.message)
     console.log('file not found!')
