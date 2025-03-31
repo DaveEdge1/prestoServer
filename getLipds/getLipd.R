@@ -24,14 +24,15 @@ dsPick <- unique(qt$datasetId[TSIndex])
 print(paste0("Total datasetIDs: ", length(dsPick)))
 print(paste0("Total TSIDs: ", length(TSIndex)))
 tsPick <- qt$paleoData_TSid[TSIndex]
-timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% "age"))
+timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% c("age","year")))
 print(paste0("Total number of time columns: ", length(timePick)))
 tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
 print(paste0("Total TSIDs including time coulmns (BEFORE age filter): ", length(tsPick)))
 filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
 
 #for each dataset, ensure we have an age/year
-#if we only have year, convert to age
+#if we only have year, convert to age after retrieving data
+year.only.datasets <- c()
 for (ii in dsPick){
 	this.dataset <- filtered_qt[filtered_qt$datasetId == ii,]
 	print(paste0("dataset: ", ii))
@@ -39,33 +40,58 @@ for (ii in dsPick){
 	print(paste0("unique variableNames in this dataset: ", unique(this.dataset$paleoData_variableName)))
 	if ("age" %in% this.dataset$paleoData_variableName){
 		print(paste0(ii, " has age"))
+	} else if ("year" %in% this.dataset$paleoData_variableName){
+		print(paste0(ii, " has year"))
+		year.only.datasets <- c(year.only.datasets, ii)
 	} else {
 		warning(paste0(ii, " has no age! Removing!"))
 		dsPick <- dsPick[!(dsPick %in% ii)]
 	}
 }
 tsPick <- filtered_qt$paleoData_TSid[filtered_qt$datasetId %in% dsPick]
-
-print(paste0("Total TSIDs including time coulmns (AFTER age filter): ", length(tsPick)))
+print(paste0("Total TSIDs including time coulmns (AFTER age/year filter): ", length(tsPick)))
+if (length(tsPick) == 0){
+	stop("No data remaining after removing data that lack an 'age' column")
+}
 
 print("filter ts tibble")
 load("/root/presto/getLipds/lipdverse_tts.RData")
 tts <- tts[tts$datasetId %in% dsPick,]
 tts <- tts[,unname(apply(tts, 2, function(x) sum(!is.na(x))))!=0]
-
-print("write filtered tts")
 tts <- tts[tts$paleoData_TSid %in% tsPick,]
 print(paste0("dim(tts): ", dim(tts)))
 print(paste0("unique datasets: ", length(unique(tts$datasetId))))
-destPaths2 <- file.path(args[2], "lipd_tts.rds") 
-saveRDS(tts, destPaths2)
 
-print("write filtered multi-lipd")
+#convert to multipilp
 if (length(dsPick) == 1){
   D <- lipdR::as.lipd(tts)
 } else {
   D <- lipdR::as.multiLipd(tts)
 }
+
+#create age columns where needed
+if (length(year.only.datasets) > 0){
+	for (iii in year.only.datasets){
+		L <- D[names(D)==ii]
+		D[names(D)==ii] <- createColumn(
+					  L,
+					  paleo.or.chron = "paleo",
+					  paleo.or.chron.number = 1,
+					  table.type = "measurement",
+					  table.number = 1,
+					  variableName = "age",
+					  units = "yr BP",
+					  values = 1950 - L$paleoData[[1]]$measurementTable[[1]]$year$values,
+					  additional.metadata = NA
+						)
+	}
+}
+			 
+print("write filtered tts")		 
+destPaths2 <- file.path(args[2], "lipd_tts.rds") 
+saveRDS(tts, destPaths2)
+			 
+print("write filtered multi-lipd") 
 destPaths3 <- file.path(args[2], "lipd.rds") 
 saveRDS(D, destPaths3)
 
