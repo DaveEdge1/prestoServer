@@ -47,6 +47,7 @@ function checkFileExistsSync(filepath){
   try{
     path.existsSync(filepath);
   }catch(e){
+    console.log(e.message)
     console.log('file not found!')
     flag = false;
   }
@@ -87,7 +88,7 @@ var checkmd5 = async function (uniqueID){
 	var path9999 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
 	const exists1 = await checkFileExistsSync(path9999)
 	if (!exists1){
-		console.log("no TSID.json file in directory: " + uniqueID)
+		console.log("no TSIDs.json file in directory: " + uniqueID)
 		process.exit(1);
 	}
 	var args2 = '--vanilla ' + path9 + ' ' + path99;
