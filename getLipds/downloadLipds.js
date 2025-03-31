@@ -45,12 +45,13 @@ function checkFileExistsSync(filepath){
   console.log("checking for file: " + filepath)
   let flag = true;
   try{
-    fs.existsSync(filepath);
+    flag = fs.existsSync(filepath);
   }catch(e){
     console.log(e.message)
     console.log('file not found!')
     flag = false;
   }
+	return flag;
 }
 
 var updateTSIDmd5 = async function (){
