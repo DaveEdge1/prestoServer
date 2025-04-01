@@ -88,6 +88,8 @@ if (length(year.only.datasets) > 0){
 			},
 				error = function(cond){
 					message(conditionMessage(cond))
+					print(paste0("removing ", ii))
+					D[names(D)==ii] <- NULL
 					}
 			)
 	}
