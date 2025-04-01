@@ -19,35 +19,31 @@ if(length(TSIndex)==0){
 	stop("Error: Some of the listed TSids not located in query table")
 }
 
-print("filter for datasets, then time series")
 dsPick <- unique(qt$datasetId[TSIndex])
-print(paste0("Total datasetIDs: ", length(dsPick)))
-print(paste0("Total TSIDs: ", length(TSIndex)))
 tsPick <- qt$paleoData_TSid[TSIndex]
-timePick <- which(which(qt$datasetId %in% dsPick) %in% which(qt$paleoData_variableName %in% c("age","year")))
-print(paste0("Total number of time columns: ", length(timePick)))
-tsPick <- c(tsPick, qt$paleoData_TSid[timePick])
-print(paste0("Total TSIDs including time coulmns (BEFORE age filter): ", length(tsPick)))
-filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
+age.year.Inices <- which(qt$paleoData_variableName %in% c("age","year"))
+timePick <- qt$paleoData_TSid[age.year.Inices[age.year.Inices %in% which(qt$datasetId %in% dsPick)]]
+tsPick <- c(tsPick, timePick)
 
-#for each dataset, ensure we have an age/year
-#if we only have year, convert to age after retrieving data
+filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
 year.only.datasets <- c()
+
 for (ii in dsPick){
-	this.dataset <- filtered_qt[filtered_qt$datasetId == ii,]
-	print(paste0("dataset: ", ii))
-	print(paste0("total time series in this dataset: ", nrow(this.dataset)))
-	print(paste0("unique variableNames in this dataset: ", unique(this.dataset$paleoData_variableName)))
-	if ("age" %in% this.dataset$paleoData_variableName){
-		print(paste0(ii, " has age"))
-	} else if ("year" %in% this.dataset$paleoData_variableName){
-		print(paste0(ii, " has year"))
-		year.only.datasets <- c(year.only.datasets, ii)
-	} else {
-		warning(paste0(ii, " has no age! Removing!"))
-		dsPick <- dsPick[!(dsPick %in% ii)]
-	}
+  this.dataset <- filtered_qt[filtered_qt$datasetId == ii,]
+  print(paste0("dataset: ", ii))
+  print(paste0("total time series in this dataset: ", nrow(this.dataset)))
+  print(paste0("unique variableNames in this dataset: ", unique(this.dataset$paleoData_variableName)))
+  if ("age" %in% this.dataset$paleoData_variableName){
+    print(paste0(ii, " has age"))
+  } else if ("year" %in% this.dataset$paleoData_variableName){
+    print(paste0(ii, " has year"))
+    year.only.datasets <- c(year.only.datasets, ii)
+  } else {
+    warning(paste0(ii, " has no age! Removing!"))
+    dsPick <- dsPick[!(dsPick %in% ii)]
+  }
 }
+
 tsPick <- filtered_qt$paleoData_TSid[filtered_qt$datasetId %in% dsPick]
 print(paste0("Total TSIDs including time coulmns (AFTER age/year filter): ", length(tsPick)))
 if (length(tsPick) == 0){
