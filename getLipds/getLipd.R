@@ -24,22 +24,18 @@ tsPick <- qt$paleoData_TSid[TSIndex]
 age.year.Inices <- which(qt$paleoData_variableName %in% c("age","year"))
 timePick <- qt$paleoData_TSid[age.year.Inices[age.year.Inices %in% which(qt$datasetId %in% dsPick)]]
 tsPick <- c(tsPick, timePick)
+print(paste0("Total TSIDs including time coulmns (BEFORE age/year filter): ", length(tsPick)))
 
 filtered_qt <- qt[qt$paleoData_TSid %in% tsPick,]
 year.only.datasets <- c()
 
 for (ii in dsPick){
   this.dataset <- filtered_qt[filtered_qt$datasetId == ii,]
-  print(paste0("dataset: ", ii))
-  print(paste0("total time series in this dataset: ", nrow(this.dataset)))
-  print(paste0("unique variableNames in this dataset: ", unique(this.dataset$paleoData_variableName)))
   if ("age" %in% this.dataset$paleoData_variableName){
-    print(paste0(ii, " has age"))
   } else if ("year" %in% this.dataset$paleoData_variableName){
-    print(paste0(ii, " has year"))
     year.only.datasets <- c(year.only.datasets, ii)
   } else {
-    warning(paste0(ii, " has no age! Removing!"))
+    print(paste0(ii, " has no age! Removing!"))
     dsPick <- dsPick[!(dsPick %in% ii)]
   }
 }
@@ -70,6 +66,7 @@ if (length(year.only.datasets) > 0){
 	for (iii in year.only.datasets){
 		tryCatch({
 				L <- D[names(D)==ii]
+				print(paste0("creating age column for ", ii))
 				D[names(D)==ii] <- createColumn(
 							  L,
 							  paleo.or.chron = "paleo",
