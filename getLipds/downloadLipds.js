@@ -20,10 +20,8 @@ async function routeExistingLipds(uniqueID){
 		var s1 = fs.readFileSync(path99,'utf8');
 		s1 = s1.replace(/(\r\n|\n|\r)/gm, "");
 		var origpkl = root0 + s1 + '/lipd.pkl'
-		var origrds = root0 + s1 + '/lipd.rds'
-		var origdsid = root0 + s1 + '/datasetIds.json'
 		var origtts = root0 + s1 + '/lipd_tts.rds'
-		if (checkFileExistsSync(origpkl) && checkFileExistsSync(origrds) && checkFileExistsSync(origdsid) && checkFileExistsSync(origtts)){
+		if (checkFileExistsSync(origpkl) && checkFileExistsSync(origtts)){
 			console.log(origpkl + ' and ' + origpkl + ' exist')
 			console.log('linking files')
 			var bashText2 = 'ln -s ' + origpkl + ' ' + root1
