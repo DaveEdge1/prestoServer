@@ -25,7 +25,7 @@ async function routeExistingLipds(uniqueID){
 			console.log(origpkl + ' and ' + origpkl + ' exist')
 			console.log('linking files')
 			var bashText2 = 'ln -s ' + origpkl + ' ' + root1
-			var bashText3 = 'ln -s ' + origrds + ' ' + root1
+			var bashText3 = 'ln -s ' + origtts + ' ' + root1
 			shelljs.exec(bashText2).stdout
 			shelljs.exec(bashText3).stdout
 			return true
