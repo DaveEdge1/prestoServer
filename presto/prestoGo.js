@@ -242,7 +242,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	   console.log('recon within emailHTML(): ' + recon);
 	   console.log("configLoc: " + configLoc)
 	   if (configLoc == true || recon == 'temp12k') {
-		   return '<br>'
+		   return ''
 	   } else {
 		   return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '" download>Click here to VISUALIZE your results</a><br>'
 	   }
@@ -270,7 +270,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	var text1 = '<p>Thank you for using PReSto! Use the URL below to download the results of your custom ' + reconParams(recon).title + '. This link will expire after 7 days.</p>'
 	text1 = text1
 		+ '<br>'
-		+ vizURL(configLoc)
+		+ vizURL(configLoc, recon)
 	        + '<a href="' + indexURL + '" download>Click here to BROWSE ALL files created</a>'
 		+ '<br><br>'
 		+ '<p style="font-size: 16px; font-weight: 700">Custom Parameters:</p>'
