@@ -239,7 +239,7 @@ dockerStatus = async function (uniqueID) {
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
    var vizURL = function(configLoc, recon){ 
-	   console.log("recon: " + recon)
+	   console.log('recon within emailHTML(): ' + recon);
 	   console.log("configLoc: " + configLoc)
 	   if (configLoc == true || recon == 'temp12k') {
 		   return '<br>'
@@ -300,6 +300,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 
   sendEmail = function (user, domain, uniqueID, configLoc, recon) {
     console.log('attempting to send email')
+    console.log('recon within sendEmail(): ' + recon);
     var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
@@ -528,7 +529,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	}
 	  await sleep(1000)
 	  //await zipIt('/root/presto/userRecons/' + uniqueID)
-	  //console.log('files zipped');
+	  console.log('recon within runRecon(): ' + recon);
 	  sendEmail(user, domain, uniqueID, configLoc, recon)
 }
 
