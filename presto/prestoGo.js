@@ -190,7 +190,7 @@ var translate = function (uniqueID, recon){
 	});
 }
 
-let transporter = nodemailer.createTransport({
+let transporter = noder.createTransport({
     host: 'smtp.zoho.com',
 	    port: 465,
 	    name: 'zoho.com',
@@ -239,6 +239,8 @@ dockerStatus = async function (uniqueID) {
 
 emailHTML = function (uniqueID, destURL, configLoc, recon) {
    var vizURL = function(configLoc, recon){ 
+	   console.log("recon: " + recon)
+	   console.log("configLoc: " + configLoc)
 	   if (configLoc == true || recon == 'temp12k') {
 		   return '<br>'
 	   } else {
