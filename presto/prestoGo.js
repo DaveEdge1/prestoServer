@@ -190,7 +190,7 @@ var translate = function (uniqueID, recon){
 	});
 }
 
-let transporter = noder.createTransport({
+let transporter = nodemailer.createTransport({
     host: 'smtp.zoho.com',
 	    port: 465,
 	    name: 'zoho.com',
