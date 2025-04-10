@@ -62,12 +62,12 @@
       // add AAD Polar Steregraphic Base Map
 var basemap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
-	tileSize: 256
+	tileSize: 128
       })
 basemap.addTo(map);
 var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
-	tileSize: 128
+	tileSize: 60
       })
 seaIce.addTo(map);
 var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@256x.png?style=gbif-natural-en', {
