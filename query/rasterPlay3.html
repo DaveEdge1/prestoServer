@@ -65,7 +65,7 @@ var basemap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-n
 	tileSize: 256
       })
 basemap.addTo(map);
-var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}-10/{y}.png', {
+var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
 	tileSize: 110
       })
