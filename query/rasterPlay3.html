@@ -67,7 +67,7 @@ var basemap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-n
 basemap.addTo(map);
 var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
-	tileSize: 512
+	tileSize: 200
       })
 seaIce.addTo(map);
 var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@256x.png?style=gbif-natural-en', {
