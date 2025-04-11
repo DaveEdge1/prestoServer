@@ -12,6 +12,10 @@ if (length(a1 > 0)){
 }
 print("updated TSIDmd5!")
 
+print("updating compilation metadata")
+compilationMetadata <- readLines("https://lipdverse.org/lipdverse/compilationMetadata.json")
+write(compilationMetadata, "C:/users/dce25/Downloads/compilationMetadata.json")
+
 #update the local lipdverse copy
 latestMD5 <- readLines("https://lipdverse.org/lipdverse/lipdverseQuery.md5")
 prevMD5 <- readLines("/root/presto/getLipds/lipdverseQuery.md5")
