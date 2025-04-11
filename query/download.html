@@ -36,7 +36,7 @@
 	<script type="text/javascript">
 		//const urlParams = new URLSearchParams(window.location.search);
 		var params111 = ''
-		var path2compilationMetadata = "https://lipdverse.org/lipdverse/compilationMetadata.json"
+		var path2compilationMetadata = "https://cors-anywhere.herokuapp.com/https://lipdverse.org/lipdverse/compilationMetadata.json"
 		//async function grabParams() {
 	  	//	const response = await fetch(jsonPath);
 	  	//	let params1 = await response.json();
@@ -44,7 +44,6 @@
 		//	return params1
 		//}
 		fetch(path2compilationMetadata, {
-		    credentials: "include",
 		    method: "GET",
 		    headers: {
 		      Accept: "application/json",
