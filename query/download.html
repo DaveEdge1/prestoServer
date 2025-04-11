@@ -35,29 +35,21 @@
 
 	<script type="text/javascript">
 		//const urlParams = new URLSearchParams(window.location.search);
-		var params111 = ''
-		var path2compilationMetadata = "https://lipdverse.org/lipdverse/compilationMetadata.json"
+		//var params111 = ''
+		//var path2compilationMetadata = "https://lipdverse.org/lipdverse/compilationMetadata.json"
 		//async function grabParams() {
 	  	//	const response = await fetch(jsonPath);
 	  	//	let params1 = await response.json();
 	  	//	//console.log("params1: " + Object.keys(params1));
 		//	return params1
 		//}
-		fetch(path2compilationMetadata, {
-		    mode: "no-cors",
-		    method: "GET",
-		    headers: {
-		      Accept: "application/json",
-		      "Content-Type": "application/json"
-		    }
-		})
-		.then(response => {
-		    console.log(response.text());
-		    return response.text();
-		})
-		.then(data => {
-		    console.log("compilation metadata: " + JSON.stringify(data))
-		})
+		const fetchPromise = fetch("https://lipdverse.org/lipdverse/compilationMetadata.json");
+
+		fetchPromise
+		  .then((response) => response.json())
+		  .then((data) => {
+		    console.log('compilation metadata: ' + data);
+		  });
 
 		
 		//fetch(path2compilationMetadata)
