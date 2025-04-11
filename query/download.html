@@ -43,14 +43,29 @@
 	  	//	//console.log("params1: " + Object.keys(params1));
 		//	return params1
 		//}
-		fetch(path2compilationMetadata)
+		fetch(path2compilationMetadata, {
+		    credentials: "include",
+		    method: "GET",
+		    headers: {
+		      Accept: "application/json",
+		      "Content-Type": "application/json",
+		      Authorization: "Bearer eLrw3eXlljyFRjaul5UoYZLNgpUeapbXSFKmLc5SVaBgv8azUtoKn7B062PjbYoS",
+		      "User-Agent": "any-name"
+		    }
+		})
+		.then(response => {
+		    return response.text();
+		})
+
+		
+		//fetch(path2compilationMetadata)
 		     //.then(function(res){
 		     //    return res.json()
 		     //})
-		     .then(function(data){
-			     console.log("compilation metadata: " + JSON.stringify(data))
-			     params111 = data
-		     })
+		 //    .then(function(data){
+		//	     console.log("compilation metadata: " + JSON.stringify(data))
+		//	     params111 = data
+		 //    })
 		
 	</script>
 	
