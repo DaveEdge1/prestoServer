@@ -55,6 +55,9 @@
 		    console.log(response.text());
 		    return response.text();
 		})
+		.then(data => {
+		    console.log("compilation metadata: " + JSON.stringify(data))
+		})
 
 		
 		//fetch(path2compilationMetadata)
