@@ -33,26 +33,26 @@
 
 	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>
 
-	<!--script type="text/javascript">
-		const urlParams = new URLSearchParams(window.location.search);
-		//var params1 = ''
-		var jsonPath = "/" + urlParams.get('recon') + "_params.json"
-		async function grabParams() {
-	  		const response = await fetch(jsonPath);
-	  		let params1 = await response.json();
-	  		//console.log("params1: " + Object.keys(params1));
-			return params1
-		}
-		fetch(jsonPath)
+	<script type="text/javascript">
+		//const urlParams = new URLSearchParams(window.location.search);
+		var params111 = ''
+		var path2compilationMetadata = "https://lipdverse.org/lipdverse/compilationMetadata.json"
+		//async function grabParams() {
+	  	//	const response = await fetch(jsonPath);
+	  	//	let params1 = await response.json();
+	  	//	//console.log("params1: " + Object.keys(params1));
+		//	return params1
+		//}
+		fetch(path2compilationMetadata)
 		     .then(function(res){
 		         return res.json()
 		     })
 		     .then(function(data){
-			     console.log("data: " + JSON.stringify(data))
-			     params1 = data
+			     console.log("compilation metadata: " + JSON.stringify(data))
+			     params111 = data
 		     })
 		
-	</script-->
+	</script>
 	
     <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
 
