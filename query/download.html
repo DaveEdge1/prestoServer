@@ -43,13 +43,10 @@
 	  	//	//console.log("params1: " + Object.keys(params1));
 		//	return params1
 		//}
-		const fetchPromise = fetch("https://lipdverse.org/lipdverse/compilationMetadata.json");
 
-		fetchPromise
-		  .then((response) => response.json())
-		  .then((data) => {
-		    console.log('compilation metadata: ' + data);
-		  });
+		$.getJSON("/compilationMetadata.json", function(json) {
+		    console.log(json); // this will show the info it in firebug console
+		});
 
 		
 		//fetch(path2compilationMetadata)
