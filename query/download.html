@@ -44,9 +44,10 @@
 		//	return params1
 		//}
 
-		$.getJSON("/compilationMetadata.json", function(json) {
-		    console.log(json); // this will show the info it in firebug console
-		});
+
+		fetch("/compilationMetadata.json")
+		  .then(response => response.json())
+		  .then(json => console.log(json));
 
 		
 		//fetch(path2compilationMetadata)
