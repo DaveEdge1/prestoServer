@@ -25,8 +25,8 @@
     <script>
     	// set CRS
       const EPSGRef = 'EPSG:3031'
-      const proj4Definition =
-        "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs";
+      //const proj4Definition =
+      //  "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs";
       const resolutions = [
         78271.484, 
         33072.982812632297,
@@ -42,7 +42,7 @@
         32.297834777961228,
         16.148917388980614]
 
-    const crs = new L.Proj.CRS(EPSGRef, proj4Definition, {
+    const crs = new L.Proj.CRS(EPSGRef, {
       origin: [-8929486, 6564912],
       //origin: [-4529486, 3264912],
       projectedBounds: L.bounds(L.point(-50, -30), L.point(130, -9)),
