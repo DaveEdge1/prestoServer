@@ -69,7 +69,7 @@
       var map = L.map("map", {
       crs,
       center: [-90,0],
-      zoom: 3,
+      zoom: 1,
       minZoom: 1,
       maxZoom: 9,
       })
@@ -82,7 +82,7 @@ var basemap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-n
       })
 basemap.addTo(map);
 var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
-	tileSize: 256,
+	tileSize: 1028,
   	continuousWorld: true,
   	noWrap: true,
   	tms: false,     // VERY IMPORTANT if using --xyz
