@@ -43,22 +43,6 @@ const resolutions = [
         32.297834777961228,
         16.148917388980614]
 
-	const res2 = [
-	  78271.484,
-	  39135.742,
-	  19567.871,
-	  9783.936,
-	  4891.968,
-	  2445.984,
-	  1222.992,
-	  611.496,
-	  305.748,
-	  152.874,
-	  76.437,
-	  38.218,
-	  19.109
-	]
-
     const crs = new L.Proj.CRS(EPSGRef, proj4Definition, {
       origin: [-8929486, 6564912],
       //origin: [-4529486, 3264912],
@@ -94,7 +78,8 @@ var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@256x
 	tileSize: 256
 })
 
-var marker = L.marker([-90, 0]).addTo(map);
+var marker = L.marker([-30, 0]).addTo(map);
+var marker = L.marker([-30, 180]).addTo(map);
 	    
 
 			//var scale = chroma.scale('Spectral').domain([-19, -2340]);
