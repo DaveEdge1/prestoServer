@@ -779,7 +779,7 @@ var SAF = new L.Polyline(pointListSAF, {
     smoothFactor: 1
 }).addTo(map);
 
-var layerControl = new L.control.layers({ "PrettyMap": PrettyMap, "OpenStreetMap": OpenStreetMap}, { "iceConcentration": geoTIFFLayerGroup, "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "PrettyMap": PrettyMap}, { "iceConcentration": geoTIFFLayerGroup, "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
