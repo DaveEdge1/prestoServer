@@ -66,6 +66,10 @@ var basemap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-n
 	tileSize: 256
       })
 basemap.addTo(map);
+var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@256x.png?style=gbif-natural-en', {
+	tileSize: 256
+})
+OpenStreetMap.addTo(map);
 var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
 	tileSize: 256,
   	continuousWorld: true,
@@ -74,9 +78,7 @@ var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
   	crs: crs    
       })
 seaIce.addTo(map);
-var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@256x.png?style=gbif-natural-en', {
-	tileSize: 256
-})
+
 
 var marker = L.marker([-30, 0]).addTo(map);
 var marker = L.marker([-30, 180]).addTo(map);
