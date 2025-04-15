@@ -23,10 +23,10 @@
     <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
     <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
     <script>
-    	// set CRS
-      const EPSGRef = 'EPSG:3031'
-      const proj4Definition =
-        "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs";
+// set CRS
+const EPSGRef = 'EPSG:3031'
+const proj4Definition =
+"+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs";
 // unused basemap res:	78271.484,       
 const resolutions = [
 	66145.97,
@@ -76,9 +76,6 @@ var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
       })
 seaIce.addTo(map);
 
-
-var marker = L.marker([-30, 0]).addTo(map);
-var marker = L.marker([-30, 180]).addTo(map);
 	    
 
 			//var scale = chroma.scale('Spectral').domain([-19, -2340]);
