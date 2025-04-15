@@ -643,7 +643,7 @@ const resolutions = [
       var map = L.map("map", {
       crs,
       center: [-90,0],
-      zoom: 1,
+      zoom: 2,
       minZoom: 1,
       maxZoom: 9,
       })
@@ -702,7 +702,7 @@ var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     tileSize: 256,
   });
 //var url_to_geotiff_file = "/jan_ice_concentration.tiff";
-var geoTIFFLayerGroup = L.layerGroup();
+var  = L.layerGroup();
 
 var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
 	tileSize: 256,
@@ -710,8 +710,7 @@ var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
   	noWrap: true,
   	tms: false,     // VERY IMPORTANT if using --xyz
   	crs: crs    
-      })
-seaIce.addTo(geoTIFFLayerGroup);
+      });
 	
 //var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
 //	tileSize: 256
@@ -771,15 +770,15 @@ var STF = new L.Polyline(pointListSTF, {
     weight: 3,
     opacity: 0.5,
     smoothFactor: 1
-}).addTo(map);
+});
 var SAF = new L.Polyline(pointListSAF, {
     color: '#df03fc',
     weight: 3,
     opacity: 0.5,
     smoothFactor: 1
-}).addTo(map);
+});
 
-var layerControl = new L.control.layers({ "PrettyMap": PrettyMap}, { "iceConcentration": geoTIFFLayerGroup, "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
+var layerControl = new L.control.layers({ "PrettyMap": PrettyMap}, { "iceConcentration": seaIce, "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
   
 
