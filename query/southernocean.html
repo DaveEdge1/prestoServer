@@ -780,27 +780,7 @@ var SAF = new L.Polyline(pointListSAF, {
 var layerControl = new L.control.layers({ "PrettyMap": PrettyMap}, { "Jan_iceConcentration": seaIce, "Coastlines": outline, "Boundary": Boundary, "SACCF": SACCF, "PF": PF, "SAF": SAF, "STF": STF }, { collapsed: false });
 layerControl.addTo(map);
 
-var customActionToPrint = function(context, mode) {
-	return function() {
-		window.alert("We are printing the MAP. Let's do Custom print here!");
-		context._printMode(mode);
-	}
-};
-
-L.control.browserPrint({
-	title: 'Just print me!',
-	documentTitle: 'PReSto Map',
-	closePopupsOnPrint: false,
-	printModes: [
-            L.BrowserPrint.Mode.Landscape("Tabloid",{title: "Tabloid VIEW"}),
-            L.browserPrint.mode("Alert",{title:"User specified print action",pageSize: "A6", action: customActionToPrint, invalidateBounds: false}),
-            L.BrowserPrint.Mode.Landscape(),
-            "Portrait",
-            L.BrowserPrint.Mode.Auto("B4",{title: "Auto"}),
-            L.BrowserPrint.Mode.Custom("B5",{title:"Select area"})
-	],
-	manualMode: false
-}).addTo(map);
+L.control.browserPrint().addTo(map);
   
 
 /*
