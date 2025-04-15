@@ -82,6 +82,7 @@ var basemap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-n
       })
 basemap.addTo(map);
 var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
+	zoomOffset: -1,
 	tileSize: 1028,
   	continuousWorld: true,
   	noWrap: true,
