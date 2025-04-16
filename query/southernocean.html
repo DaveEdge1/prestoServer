@@ -643,7 +643,7 @@ const resolutions = [
       var map = L.map("map", {
       crs,
       center: [-90,0],
-      zoom: 3,
+      zoom: 2,
       minZoom: 1,
       maxZoom: 9,
       })
@@ -656,44 +656,6 @@ var PrettyMap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles
       })
 PrettyMap.addTo(map);
 
-
-/*
-var pixel_ratio = parseInt(window.devicePixelRatio) || 1;
-var max_zoom = 12;
-var tile_size = 512;
-
-//var extent = 12367396.2185; // To the Equator
-var extent = 4585888.287; // to -50 degrees spot
-var resolutions = Array(max_zoom + 1).fill().map((_, i) => ( extent / tile_size / Math.pow(2, i-1) ));
-
-var crs = new L.Proj.CRS(
-	'EPSG:3031',
-	"+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs",
-	{
-		origin: [-extent, extent],
-		projectedBounds: L.bounds(L.point(-extent, extent), L.point(extent, -extent)),
-		resolutions: resolutions
-	}
-);
-
-var map = L.map('map', {
-	crs: crs, 
-	minZoom: 1,
-	maxZoom: 12,
-}).setView([-90, 180], 2);
-var OpenStreetMap = L.tileLayer('https://tile.gbif.org/3031/omt/{z}/{x}/{y}@' + pixel_ratio + 'x.png?style=gbif-natural-en', {
-	tileSize: tile_size
-}).addTo(map);
-
-var PrettyMap = L.tileLayer('https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z}/{x}/{y}.png', {
-attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
-tileSize: 512,
-origin: [-4585713.670, 4585888.287]
-})
-console.log("map: ", OpenStreetMap)
-
-var testWMS = "https://www.ncei.noaa.gov/thredds/wms/ncFC/fc-oisst-daily-avhrr-only-dly/OISST_Daily_AVHRR-only_Feature_Collection_best.ncd"
-*/
 var outline = L.tileLayer.wms("https://geos.polarview.aq/geoserver/wms", {
     layers:"polarview:coastS10",
     format:"image/png",
@@ -710,7 +672,7 @@ var seaIce = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
   	tms: false,     // VERY IMPORTANT if using --xyz
   	crs: crs    
       });
-var blank = L.tileLayer('')
+var blank = L.tileLayer('').addTo(map);
 	
 //var tiles2 = L.tileLayer('/sea_ice_conc_jan/{z}/{x}/{y}.png', {
 //	tileSize: 256
