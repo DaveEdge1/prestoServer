@@ -1279,7 +1279,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-loadVersions(document.getElementById("archivedCompilationIn").name), extractLast( request.term ) ) );
+loadVersions(document.getElementById("archivedCompilationIn").value), extractLast( request.term ) ) );
 },
 
 //    source:projects,    
