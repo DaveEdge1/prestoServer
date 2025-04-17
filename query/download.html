@@ -199,7 +199,7 @@ Selected values:
 <br><br>
 
 <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="sendCompilation()">
-<button type="button" class="collapsible">Compilation Filter
+<button type="button" class="collapsible" visibility="collapsed">Archived Compilation
 </button>
 <div class="content">
 <br>
@@ -212,13 +212,13 @@ Selected values:
 	<input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
 	<br><br><br>
 </div>
-<div class="form-group"> 
+<div id="archivedCompilationGroup" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilation_label" for="archivedCompilation">Compilation</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="archivedCompilation" id="archivedCompilation" value="">
+<input style="width:80%;" name="archivedCompilationSelection" id="archivedCompilationSelection" value="">
 </div>
 <br>
 <hr class="solid">
@@ -254,7 +254,7 @@ function hideForm(){
 		document.getElementById("Instructions").style.visibility = "hidden";
 		document.getElementById("proceedButton").style.visibility = "hidden";
 		document.getElementById("datasetCount").style.visibility = "hidden";
-		document.getElementById("archivedCompilation").style.visibility = "visible";
+		document.getElementById("archivedCompilationGroup").style.visibility = "visible";
 	} else {
 		document.getElementById("queryForm").style.visibility = "visible";
 		document.getElementById("map").style.visibility = "visible";
@@ -262,7 +262,7 @@ function hideForm(){
 		document.getElementById("Instructions").style.visibility = "visible";
 		document.getElementById("proceedButton").style.visibility = "visible";
 		document.getElementById("datasetCount").style.visibility = "visible";
-		document.getElementById("archivedCompilation").style.visibility = "hidden";
+		document.getElementById("archivedCompilationGroup").style.visibility = "hidden";
 	}
 }
 	
