@@ -36,6 +36,7 @@
 	<script type="text/javascript">
 
 	var compilationJson = {}; // Global variable
+	var compilationNames = {};
 	
 	async function fetchJson(url) {
 	  try {
@@ -61,6 +62,7 @@
 	  const compilationJson = await fetchJson(url);
 		// Call this at some point, e.g., on page load
 	console.log("fetched compilation json: " + compilationJson)
+	compilationNames = Object.keys(compilationJson);
 	
 				
 	for (const key in compilationJson) {
@@ -70,8 +72,6 @@
 	    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
 	  }
 	}
-	
-	const compilationNames = Object.keys(compilationJson);
 	}
 	
 loadCompilationJson();
