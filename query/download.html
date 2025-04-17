@@ -61,7 +61,7 @@
 		  }
 		}
 */
-async function fetchJson(url, saveToStorage = false) {
+async function fetchJson(url) {
   try {
     const response = await fetch(url);
 
@@ -70,11 +70,6 @@ async function fetchJson(url, saveToStorage = false) {
     }
 
     const jsonData = await response.json();
-    
-    // Optionally save to localStorage
-    if (saveToStorage) {
-      localStorage.setItem('myJsonData', JSON.stringify(jsonData));
-    }
 
     console.log(jsonData); // Log the data (previously in loadData)
     return jsonData;
@@ -88,10 +83,9 @@ async function fetchJson(url, saveToStorage = false) {
 const url = '/compilationMetadata.json';
 
 // To use it in an async context:
-(async () => {
-  const compilationJson = await fetchJson(url, true);
-  // Now you can use compilationJson here
-})();
+
+const compilationJson = await fetchJson(url);
+
 			
 	      for (const key in compilationJson) {
 		  console.log('key: ' + key)
