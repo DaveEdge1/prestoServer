@@ -59,7 +59,7 @@
 	// Wrapper to load the JSON and assign to global variable
 	async function loadCompilationJson() {
 	  const url = '/compilationMetadata.json';
-	  const compilationJson = await fetchJson(url);
+	  compilationJson = await fetchJson(url);
 		// Call this at some point, e.g., on page load
 	console.log("fetched compilation json: ", compilationJson)
 	compilationNames = Object.keys(compilationJson);
