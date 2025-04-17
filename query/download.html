@@ -45,11 +45,12 @@
 		//}
 
 
+		var compMeta = {}
 		fetch("/compilationMetadata.json")
 		  .then(response => response.json())
 		  .then(json => {
 			  console.log(json)
-			  var compMeta = json
+			  compMeta = json
 		  });
 		for (const key in compMeta) {
 		  if (compMeta.hasOwnProperty(key)) {
