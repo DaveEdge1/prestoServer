@@ -197,6 +197,15 @@ Selected values:
 
 <h1 style="text-align: center; font-size:40px"><img src="/img/lipdverse_logo_text.png" alt="LiPDverse Logo" width="200" height="45"> Query</h1>
 <br><br>
+
+<div style="width: 10%; vertical-align: middle; float: left;">
+	<br><br><br>
+	<label id="archivedCompilation_label" for="archivedCompilation">Use an archived compilation</label>
+	<br>
+	<input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
+	<br><br><br>
+</div>
+<br>
   <!-- </form> -->
 <div class="leaflet-container" id="map" style="width: 1200px; height: 700px;"></div>
 <br>
@@ -210,6 +219,18 @@ Selected values:
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
 <input id="language" name="language" type="hidden" value="">
 <script>
+function hideForm(){
+	if (document.getElementById("hideForm").checked){
+		document.getElementById("queryForm").style.visibility = "hidden";
+		document.getElementById("map").style.visibility = "hidden";
+		document.getElementById("mapUpdateButton").style.visibility = "hidden";
+	} else {
+		document.getElementById("queryForm").style.visibility = "visible";
+		document.getElementById("map").style.visibility = "visible";
+		document.getElementById("mapUpdateButton").style.visibility = "visible";
+	}
+}
+	
     function getQueryVariable(variable)
     {
            var query = window.location.search.substring(1);
@@ -239,7 +260,7 @@ popQueryVariable()
 	<img id="dataAvail" alt="data Availability Plot" src="" />
 </div-->
 <br>
-<div class="button-submit">
+<div id="mapUpdateButton" class="button-submit">
 <button style="height:30px; width:150px; font-size:13px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
 </div>
 <br>
