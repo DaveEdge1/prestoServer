@@ -58,7 +58,12 @@
 	// Wrapper to load the JSON and assign to global variable
 	async function loadCompilationJson() {
 	  const url = '/compilationMetadata.json';
-	  compilationJson = await fetchJson(url);
+	  const data = await fetchJson(url);
+	  if (data) {
+	    return data;
+	  } else {
+	    throw new Error("Failed to load compilation JSON");
+	  }
 	}
 	
 	// Call this at some point, e.g., on page load
