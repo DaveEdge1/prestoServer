@@ -61,7 +61,7 @@
 		  }
 		}
 */
-		function fetchAndSaveJson(url) {
+		async function fetchAndSaveJson(url) {
 		  try {
 		    const response = fetch(url);
 		
@@ -90,7 +90,7 @@
 		// Example usage:
 		const url = '/compilationMetadata.json';
 		
-		const compilationJson = fetchAndSaveJson(url)
+		const compilationJson = await fetchAndSaveJson(url)
 			
 	      for (const key in compilationJson) {
 		  console.log('key: ' + key)
