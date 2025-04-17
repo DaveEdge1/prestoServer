@@ -198,13 +198,40 @@ Selected values:
 <h1 style="text-align: center; font-size:40px"><img src="/img/lipdverse_logo_text.png" alt="LiPDverse Logo" width="200" height="45"> Query</h1>
 <br><br>
 
-<div style="width: 10%; vertical-align: middle; float: left;">
+<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="sendQuery()">
+<button type="button" class="collapsible">Compilation Filter
+</button>
+<div class="content">
+<br>
+<p></p>
+<br>
+<div style="width: 100%; vertical-align: middle; float: left;">
 	<br><br><br>
 	<label id="archivedCompilation_label" for="archivedCompilation">Use an archived compilation</label>
 	<br>
 	<input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
 	<br><br><br>
 </div>
+<div class="form-group"> 
+<label style="font-size:20px; padding-right:10px; color:black" id="compilation_label" for="compilation">Compilation</label>
+<div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+<span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
+</div>
+<br>
+<input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn" value="">
+</div>
+<br>
+<hr class="solid">
+<hr class="solid">
+<br>
+<br>
+</div>
+</form>
+</div>
+
+
+
+	
 <br>
   <!-- </form> -->
 <div class="leaflet-container" id="map" style="width: 1200px; height: 700px;"></div>
@@ -224,10 +251,16 @@ function hideForm(){
 		document.getElementById("queryForm").style.visibility = "hidden";
 		document.getElementById("map").style.visibility = "hidden";
 		document.getElementById("mapUpdateButton").style.visibility = "hidden";
+		document.getElementById("Instructions").style.visibility = "hidden";
+		document.getElementById("proceedButton").style.visibility = "hidden";
+		document.getElementById("datasetCount").style.visibility = "hidden";
 	} else {
 		document.getElementById("queryForm").style.visibility = "visible";
 		document.getElementById("map").style.visibility = "visible";
 		document.getElementById("mapUpdateButton").style.visibility = "visible";
+		document.getElementById("Instructions").style.visibility = "visible";
+		document.getElementById("proceedButton").style.visibility = "visible";
+		document.getElementById("datasetCount").style.visibility = "visible";
 	}
 }
 	
@@ -537,9 +570,9 @@ popQueryVariable()
 <!--div>
 	<button style="font-size: 16px;" type="button" onclick="getAvailPlot()">Make Plot</button>
 </div-->
-<div class="button-submit">
+<!--div class="button-submit">
 	<button class="btn btn-primary" style="font-size: 13px;height:30px; width:250px; " type="button" onclick="grabCSV()">Download Time Series (csv)</button>
-</div>
+</div-->
 <br><br>
 <div class="button-submit">
 	<button id="proceedButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds()">Use selected Proxies</button>
