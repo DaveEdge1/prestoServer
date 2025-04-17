@@ -34,79 +34,48 @@
 	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>
 
 	<script type="text/javascript">
-		//const urlParams = new URLSearchParams(window.location.search);
-		//var params111 = ''
-		//var path2compilationMetadata = "https://lipdverse.org/lipdverse/compilationMetadata.json"
-		//async function grabParams() {
-	  	//	const response = await fetch(jsonPath);
-	  	//	let params1 = await response.json();
-	  	//	//console.log("params1: " + Object.keys(params1));
-		//	return params1
-		//}
 
-/*
-		var compMeta = {}
-		fetch("/compilationMetadata.json")
-		  .then(response => response.json())
-		  .then(json => {
-			  console.log(json)
-			  compMeta = json
-		  });
-		console.log('compMeta: ' + compMeta)
-		for (const key in compMeta) {
-		  console.log(key)
-		  if (compMeta.hasOwnProperty(key)) {
-		    const value = compMeta[key];
-		    console.log(`Key: ${key}, Value: ${value}`);
-		  }
-		}
-*/
-async function fetchJson(url) {
-  try {
-    const response = await fetch(url);
+	let compilationJson = null; // Global variable
+	
+	async function fetchJson(url) {
+	  try {
+	    const response = await fetch(url);
+	
+	    if (!response.ok) {
+	      throw new Error(`HTTP error! status: ${response.status}`);
+	    }
+	
+	    const jsonData = await response.json();
+	
+	    console.log(jsonData); // Log the data
+	    return jsonData;
+	  } catch (error) {
+	    console.error("Failed to fetch JSON data:", error);
+	    return null;
+	  }
+	}
+	
+	// Wrapper to load the JSON and assign to global variable
+	async function loadCompilationJson() {
+	  const url = '/compilationMetadata.json';
+	  compilationJson = await fetchJson(url);
+	}
+	
+	// Call this at some point, e.g., on page load
+	loadCompilationJson();
+	
+	
+				
+	for (const key in compilationJson) {
+	  console.log('key: ' + key)
+	  if (data.hasOwnProperty(key)) {
+	    const value = data[key];
+	    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
+	  }
+	}
+	
+	const compilationNames = Object.keys(compilationJson);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const jsonData = await response.json();
-
-    console.log(jsonData); // Log the data (previously in loadData)
-    return jsonData;
-  } catch (error) {
-    console.error("Failed to fetch JSON data:", error);
-    return null;
-  }
-}
-
-// Example usage:
-const url = '/compilationMetadata.json';
-
-// To use it in an async context:
-
-const compilationJson = await fetchJson(url);
-
-			
-	      for (const key in compilationJson) {
-		  console.log('key: ' + key)
-		  if (data.hasOwnProperty(key)) {
-		    const value = data[key];
-		    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
-		  }
-		}
-
-		const compilationNames = Object.keys(compilationJson);
-
-
-		
-		//fetch(path2compilationMetadata)
-		     //.then(function(res){
-		     //    return res.json()
-		     //})
-		 //    .then(function(data){
-		//	     console.log("compilation metadata: " + JSON.stringify(data))
-		//	     params111 = data
-		 //    })
 		
 	</script>
 	
