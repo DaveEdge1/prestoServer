@@ -61,7 +61,7 @@
 		  }
 		}
 */
-		async function fetchAndSaveJson(url) {
+		function fetchAndSaveJson(url) {
 		  try {
 		    const response = await fetch(url);
 		
@@ -90,19 +90,18 @@
 		// Example usage:
 		const url = '/compilationMetadata.json';
 		
-		fetchAndSaveJson(url)
-		  .then(data => {
-		    if (data) {
-		      console.log("JSON data fetched and saved:", data);
-		      for (const key in data) {
-		  	  console.log('key: ' + key)
-			  if (data.hasOwnProperty(key)) {
-			    const value = data[key];
-			    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
-			  }
-			}
-		    }
-		  });
+		const compilationJson = fetchAndSaveJson(url)
+			
+	      for (const key in compilationJson) {
+		  console.log('key: ' + key)
+		  if (data.hasOwnProperty(key)) {
+		    const value = data[key];
+		    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
+		  }
+		}
+
+		const compilationNames = Object.keys(compilationJson);
+
 
 		
 		//fetch(path2compilationMetadata)
@@ -216,12 +215,8 @@ Selected values:
 <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
 </div>
 <br>
-<input style="width:80%;" name="archivedCompilationSelection" id="archivedCompilationSelection" value="">
+<input style="width:80%;" name="archivedCompilationIn" id="archivedCompilationIn" value="">
 </div>
-<br>
-<hr class="solid">
-<hr class="solid">
-<br>
 <br>
 </form>
 </div>
@@ -233,7 +228,7 @@ Selected values:
   <!-- </form> -->
 <div class="leaflet-container" id="map" style="width: 1200px; height: 700px;"></div>
 <br>
-<div style="width: 1200px; margin: auto; border-width:3px; border-style:groove; border-color:#899877; border-radius: 10px;"><p style="text-align: center; font-size:14px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" id="Instructions">The map above offers a preview of the data returned by the LiPDverse Query. Each point represents a dataset with one or more paleoclimate proxy time series. Provide queries below and click <b>Update Map</b> to view available data. When you are satisfied with your query, click <b>Submit</b> at the bottom of the page to continue.</p></div>
+<div id="InstructionBox" style="width: 1200px; margin: auto; border-width:3px; border-style:groove; border-color:#899877; border-radius: 10px;"><p style="text-align: center; font-size:14px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" id="Instructions">The map above offers a preview of the data returned by the LiPDverse Query. Each point represents a dataset with one or more paleoclimate proxy time series. Provide queries below and click <b>Update Map</b> to view available data. When you are satisfied with your query, click <b>Submit</b> at the bottom of the page to continue.</p></div>
 <br>
 <div><p style="text-align: center; font-size:16px;" id="datasetCount"></p></div>
 <br>
@@ -248,7 +243,7 @@ function hideForm(){
 		document.getElementById("queryForm").style.visibility = "hidden";
 		document.getElementById("map").style.visibility = "hidden";
 		document.getElementById("mapUpdateButton").style.visibility = "hidden";
-		document.getElementById("Instructions").style.visibility = "hidden";
+		document.getElementById("InstructionBox").style.visibility = "hidden";
 		document.getElementById("proceedButton").style.visibility = "hidden";
 		document.getElementById("datasetCount").style.visibility = "hidden";
 		document.getElementById("archivedCompilationGroup").style.visibility = "visible";
@@ -256,7 +251,7 @@ function hideForm(){
 		document.getElementById("queryForm").style.visibility = "visible";
 		document.getElementById("map").style.visibility = "visible";
 		document.getElementById("mapUpdateButton").style.visibility = "visible";
-		document.getElementById("Instructions").style.visibility = "visible";
+		document.getElementById("InstructionBox").style.visibility = "visible";
 		document.getElementById("proceedButton").style.visibility = "visible";
 		document.getElementById("datasetCount").style.visibility = "visible";
 		document.getElementById("archivedCompilationGroup").style.visibility = "hidden";
@@ -991,7 +986,8 @@ function updatePoints (coords){
 
 
 var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}]
-
+var 
+	
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
 var countrylist = [{"value":"Afghanistan","label":"Afghanistan"},{"value":"Aland","label":"Aland"},{"value":"Albania","label":"Albania"},{"value":"Algeria","label":"Algeria"},{"value":"Antarctica","label":"Antarctica"},{"value":"Argentina","label":"Argentina"},{"value":"Armenia","label":"Armenia"},{"value":"Australia","label":"Australia"},{"value":"Austria","label":"Austria"},{"value":"Belarus","label":"Belarus"},{"value":"Belgium","label":"Belgium"},{"value":"Belize","label":"Belize"},{"value":"Bermuda","label":"Bermuda"},{"value":"Bhutan","label":"Bhutan"},{"value":"Bolivia","label":"Bolivia"},{"value":"Botswana","label":"Botswana"},{"value":"Brazil","label":"Brazil"},{"value":"Bulgaria","label":"Bulgaria"},{"value":"Burundi","label":"Burundi"},{"value":"Canada","label":"Canada"},{"value":"Cayman Islands","label":"Cayman Islands"},{"value":"Chad","label":"Chad"},{"value":"Chile","label":"Chile"},{"value":"China","label":"China"},{"value":"Colombia","label":"Colombia"},{"value":"Cook Islands","label":"Cook Islands"},{"value":"Costa Rica","label":"Costa Rica"},{"value":"Cuba","label":"Cuba"},{"value":"Czech Republic","label":"Czech Republic"},{"value":"Democratic Republic of the Congo","label":"Democratic Republic of the Congo"},{"value":"Denmark","label":"Denmark"},{"value":"Djibouti","label":"Djibouti"},{"value":"Dominican Republic","label":"Dominican Republic"},{"value":"Ecuador","label":"Ecuador"},{"value":"Egypt","label":"Egypt"},{"value":"Estonia","label":"Estonia"},{"value":"Ethiopia","label":"Ethiopia"},{"value":"Faroe Islands","label":"Faroe Islands"},{"value":"Finland","label":"Finland"},{"value":"France","label":"France"},{"value":"French Polynesia","label":"French Polynesia"},{"value":"Georgia","label":"Georgia"},{"value":"Germany","label":"Germany"},{"value":"Ghana","label":"Ghana"},{"value":"Greece","label":"Greece"},{"value":"Greenland","label":"Greenland"},{"value":"Guam","label":"Guam"},{"value":"Guatemala","label":"Guatemala"},{"value":"Haiti","label":"Haiti"},{"value":"Hungary","label":"Hungary"},{"value":"Iceland","label":"Iceland"},{"value":"India","label":"India"},{"value":"Indonesia","label":"Indonesia"},{"value":"Iran","label":"Iran"},{"value":"Ireland","label":"Ireland"},{"value":"Israel","label":"Israel"},{"value":"Italy","label":"Italy"},{"value":"Jamaica","label":"Jamaica"},{"value":"Japan","label":"Japan"},{"value":"Jordan","label":"Jordan"},{"value":"Kazakhstan","label":"Kazakhstan"},{"value":"Kenya","label":"Kenya"},{"value":"Kyrgyzstan","label":"Kyrgyzstan"},{"value":"Laos","label":"Laos"},{"value":"Lebanon","label":"Lebanon"},{"value":"Libya","label":"Libya"},{"value":"Lithuania","label":"Lithuania"},{"value":"Luxembourg","label":"Luxembourg"},{"value":"Macedonia","label":"Macedonia"},{"value":"Madagascar","label":"Madagascar"},{"value":"Malawi","label":"Malawi"},{"value":"Malaysia","label":"Malaysia"},{"value":"Mali","label":"Mali"},{"value":"Malta","label":"Malta"},{"value":"Mauritania","label":"Mauritania"},{"value":"Mexico","label":"Mexico"},{"value":"Mongolia","label":"Mongolia"},{"value":"Morocco","label":"Morocco"},{"value":"Namibia","label":"Namibia"},{"value":"Nauru","label":"Nauru"},{"value":"Nepal","label":"Nepal"},{"value":"Netherlands","label":"Netherlands"},{"value":"New Zealand","label":"New Zealand"},{"value":"Nicaragua","label":"Nicaragua"},{"value":"Niger","label":"Niger"},{"value":"Nigeria","label":"Nigeria"},{"value":"Norway","label":"Norway"},{"value":"Oman","label":"Oman"},{"value":"Pakistan","label":"Pakistan"},{"value":"Papua New Guinea","label":"Papua New Guinea"},{"value":"Peru","label":"Peru"},{"value":"Poland","label":"Poland"},{"value":"Portugal","label":"Portugal"},{"value":"Romania","label":"Romania"},{"value":"Russia","label":"Russia"},{"value":"Saudi Arabia","label":"Saudi Arabia"},{"value":"Senegal","label":"Senegal"},{"value":"Seychelles","label":"Seychelles"},{"value":"Slovakia","label":"Slovakia"},{"value":"Slovenia","label":"Slovenia"},{"value":"South Africa","label":"South Africa"},{"value":"South Korea","label":"South Korea"},{"value":"South Sudan","label":"South Sudan"},{"value":"Spain","label":"Spain"},{"value":"Sudan","label":"Sudan"},{"value":"Sweden","label":"Sweden"},{"value":"Switzerland","label":"Switzerland"},{"value":"Syria","label":"Syria"},{"value":"Taiwan","label":"Taiwan"},{"value":"Tajikistan","label":"Tajikistan"},{"value":"Thailand","label":"Thailand"},{"value":"The Bahamas","label":"The Bahamas"},{"value":"Togo","label":"Togo"},{"value":"Tunisia","label":"Tunisia"},{"value":"Turkey","label":"Turkey"},{"value":"Uganda","label":"Uganda"},{"value":"Ukraine","label":"Ukraine"},{"value":"United Kingdom","label":"United Kingdom"},{"value":"United Republic of Tanzania","label":"United Republic of Tanzania"},{"value":"United States of America","label":"United States of America"},{"value":"Uzbekistan","label":"Uzbekistan"},{"value":"Vanuatu","label":"Vanuatu"},{"value":"Venezuela","label":"Venezuela"},{"value":"Vietnam","label":"Vietnam"},{"value":"West Bank","label":"West Bank"},{"value":"Western Sahara","label":"Western Sahara"},{"value":"Yemen","label":"Yemen"},{"value":"Zambia","label":"Zambia"}]
@@ -1241,6 +1237,51 @@ source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
 compilationlist, extractLast( request.term ) ) );
+},
+
+//    source:projects,    
+focus: function() {
+// prevent value inserted on focus
+return false;
+},
+select: function( event, ui ) {
+var terms = split( this.value );
+// remove the current input
+terms.pop();
+// add the selected item
+terms.push( ui.item.value );
+// add placeholder to get the comma-and-space at the end
+terms.push( "" );
+this.value = terms.join( "," );
+return false;
+}
+});
+});
+
+
+
+ $(function() {
+function split( val ) {
+return val.split( /,\s*/ );
+}
+function extractLast( term ) {
+return split( term ).pop();
+}
+	
+$( "#archivedCompilationIn" )
+ // don't navigate away from the field on tab when selecting an item
+.bind( "keydown", function( event ) {
+if ( event.keyCode === $.ui.keyCode.TAB &&
+$( this ).autocomplete( "instance" ).menu.active ) {
+event.preventDefault();
+}
+})
+.autocomplete({
+minLength: 0,
+source: function( request, response ) {
+// delegate back to autocomplete, but extract the last term
+response( $.ui.autocomplete.filter(
+compilationNames, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
