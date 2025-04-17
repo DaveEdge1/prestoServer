@@ -47,7 +47,16 @@
 
 		fetch("/compilationMetadata.json")
 		  .then(response => response.json())
-		  .then(json => console.log(json));
+		  .then(json => {
+			  console.log(json)
+			  var compMeta = json
+		  });
+		for (const key in compMeta) {
+		  if (compMeta.hasOwnProperty(key)) {
+		    const value = compMeta[key];
+		    console.log(`Key: ${key}, Value: ${value}`);
+		  }
+		}
 
 		
 		//fetch(path2compilationMetadata)
