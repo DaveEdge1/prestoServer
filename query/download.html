@@ -75,12 +75,8 @@
 	}
 
 	function loadVersions(compilation){
-		console.log("compilation: " + compilation)
-		console.log("compilationJson: ", compilationJson)
-		console.log("compilationJson[compilation]: " + compilationJson[compilation])
 		console.log("compilationJson[compilation].versions: " + compilationJson[compilation].versions)
-		console.log("compilationJson['Temp12k']: " + compilationJson['Temp12k'])
-		compilationJson[compilation].versions
+		return compilationJson[compilation].versions
 	}
 	
 	loadCompilationJson();
