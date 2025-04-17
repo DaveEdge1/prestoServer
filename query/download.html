@@ -61,7 +61,7 @@
 	  const url = '/compilationMetadata.json';
 	  const compilationJson = await fetchJson(url);
 		// Call this at some point, e.g., on page load
-	console.log("fetched compilation json: " + compilationJson)
+	console.log("fetched compilation json: ", compilationJson)
 	compilationNames = Object.keys(compilationJson);
 	
 				
@@ -76,7 +76,7 @@
 
 	function loadVersions(compilation){
 		console.log("compilation: " + compilation)
-		console.log("compilationJson: " + compilationJson)
+		console.log("compilationJson: ", compilationJson)
 		console.log("compilationJson[compilation]: " + compilationJson[compilation])
 		console.log("compilationJson[compilation].versions: " + compilationJson[compilation].versions)
 		console.log("compilationJson['Temp12k']: " + compilationJson['Temp12k'])
