@@ -61,41 +61,37 @@
 		  }
 		}
 */
-		function fetchJson(url) {
-		  try {
-		    const response = fetch(url);
-		
-		    if (!response.ok) {
-		      throw new Error(`HTTP error! status: ${response.status}`);
-		    }
-		
-		    const jsonData = response.json();
-		    // Save the JSON data to a variable
-		    let myJson = jsonData;
-		
-		    // Optionally, save to local storage
-		    localStorage.setItem('myJsonData', JSON.stringify(jsonData));
-		
-		    // Optionally, save to a file (Node.js environment)
-		    // const fs = require('fs');
-		    // fs.writeFileSync('data.json', JSON.stringify(jsonData));
-		
-		     return myJson; // Return the fetched and saved JSON data
-		  } catch (error) {
-		    console.error("Failed to fetch or save data:", error);
-		    return null;
-		  }
-		}
+async function fetchJson(url, saveToStorage = false) {
+  try {
+    const response = await fetch(url);
 
-		async function SaveJson() {
-		  const data = await fetchJson('https://api.example.com/data');
-		  console.log(data);
-		}
-		
-		// Example usage:
-		const url = '/compilationMetadata.json';
-		
-		const compilationJson = SaveJson(url)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const jsonData = await response.json();
+    
+    // Optionally save to localStorage
+    if (saveToStorage) {
+      localStorage.setItem('myJsonData', JSON.stringify(jsonData));
+    }
+
+    console.log(jsonData); // Log the data (previously in loadData)
+    return jsonData;
+  } catch (error) {
+    console.error("Failed to fetch JSON data:", error);
+    return null;
+  }
+}
+
+// Example usage:
+const url = '/compilationMetadata.json';
+
+// To use it in an async context:
+(async () => {
+  const compilationJson = await fetchJson(url, true);
+  // Now you can use compilationJson here
+})();
 			
 	      for (const key in compilationJson) {
 		  console.log('key: ' + key)
