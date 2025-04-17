@@ -65,8 +65,8 @@
 				
 	for (const key in compilationJson) {
 	  console.log('key: ' + key)
-	  if (data.hasOwnProperty(key)) {
-	    const value = data[key];
+	  if (compilationJson.hasOwnProperty(key)) {
+	    const value = compilationJson[key];
 	    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
 	  }
 	}
