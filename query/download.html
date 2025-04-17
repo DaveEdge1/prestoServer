@@ -44,7 +44,7 @@
 		//	return params1
 		//}
 
-
+/*
 		var compMeta = {}
 		fetch("/compilationMetadata.json")
 		  .then(response => response.json())
@@ -60,6 +60,49 @@
 		    console.log(`Key: ${key}, Value: ${value}`);
 		  }
 		}
+*/
+		async function fetchAndSaveJson(url) {
+		  try {
+		    const response = await fetch(url);
+		
+		    if (!response.ok) {
+		      throw new Error(`HTTP error! status: ${response.status}`);
+		    }
+		
+		    const jsonData = await response.json();
+		    // Save the JSON data to a variable
+		    let myJson = jsonData;
+		
+		    // Optionally, save to local storage
+		    localStorage.setItem('myJsonData', JSON.stringify(jsonData));
+		
+		    // Optionally, save to a file (Node.js environment)
+		    // const fs = require('fs');
+		    // fs.writeFileSync('data.json', JSON.stringify(jsonData));
+		
+		     return myJson; // Return the fetched and saved JSON data
+		  } catch (error) {
+		    console.error("Failed to fetch or save data:", error);
+		    return null;
+		  }
+		}
+		
+		// Example usage:
+		const url = '/compilationMetadata.json';
+		
+		fetchAndSaveJson(url)
+		  .then(data => {
+		    if (data) {
+		      console.log("JSON data fetched and saved:", data);
+		      for (const key in data) {
+		  	  console.log('key: ' + key)
+			  if (data.hasOwnProperty(key)) {
+			    const value = data[key];
+			    console.log(`Key: ${key}, Value: ${value}`);
+			  }
+			}
+		    }
+		  });
 
 		
 		//fetch(path2compilationMetadata)
