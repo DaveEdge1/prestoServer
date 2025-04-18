@@ -17,7 +17,7 @@ app.use(bodyParser.json({
 }));
 app.use(cors({origin: 'http://143.198.98.66:86'}));
 
-async function createDirectory(TSIDs, uniqueID, dirPath) {
+async function createDirectory(dirPath) {
   try {
     fs.mkdirSync(dirPath);
     console.log(`Directory "${dirPath}" created successfully.`);
@@ -40,26 +40,11 @@ async function createDirectory(TSIDs, uniqueID, dirPath) {
   }
 }
 
-function parseLipdSource(bodyIn) {
-	if ("TSIDs" in bodyIn) {
-	  return 'TSIDs'
-	  console.log(`Writing TSIDs`);
-	} else if ("archivedComp" in bodyIn) {
-	  return 'archivedComp'
-	  console.log(`Using Archived Compilation`);
-	} else {
-	  return NULL
-	  console.log(`No TSIDs or archivedComp found!`);
-	}
-}
-
 app.post('/lipds', function(req, res) {
 	var dir1 = '/root/presto/userRecons/' + req.body.uniqueID + '_' + req.body.recon
 
-	const lipdSource = parseLipdSource(req.body)
-
 	if ("TSIDs" in req.body){
-		createDirectory(req.body.TSIDs, req.body.uniqueID, dir1).then(status => {
+		createDirectory(dir1).then(status => {
 		    console.log('Final status:', status);
 		    res.sendStatus(status)
 			if (status == 200){
@@ -83,13 +68,14 @@ app.post('/lipds', function(req, res) {
 				});
 			}
 		});
-	} else if ("archivedComp" in req.body){
-		createDirectory2(req.body.archivedComp, req.body.uniqueID, dir1).then(status => {
+	} else if ("compilation" in req.body){
+		const archivedCompURL = 'https://lipdverse.org/' + req.body.compilation + '/' + req.body.version
+		createDirectory(dir1).then(status => {
 		    console.log('Final status:', status);
 		    res.sendStatus(status)
 			if (status == 200){
 				var path0 = path.join(dir1, 'archivedComp.txt')
-				fs.writeFile(path0, req.body.archivedComp, (err) => {
+				fs.writeFile(path0, archivedCompURL, (err) => {
 					  if (err)
 						    console.log(err);
 					  else {
