@@ -1588,30 +1588,31 @@ postTSids = function(Body){
 }
 	
 getTSIDs = function(){
-	if (document.getElementById("archivedCompilation").checked) {
-		resolve();
-	} else {
+	
 	    var xhr2 = new XMLHttpRequest();
 	    //xhr.timeout = 2000;
 		return new Promise((resolve, reject) => {
-	    	xhr2.onreadystatechange = (e) => {
-			if (xhr2.readyState !== 4) {
-				return;
-			}
-			if (xhr2.status === 200){
-				//console.log("TSIDs: ");
-				//console.log(xhr.responseText);
-				resolve(xhr2.responseText);
-			} else {
-				var resp1 = "XHR didn't work: " + xhr2.status;
-				console.log(resp1);
+			if (document.getElementById("archivedCompilation").checked) {
 				resolve();
+			} else {
+			    	xhr2.onreadystatechange = (e) => {
+					if (xhr2.readyState !== 4) {
+						return;
+					}
+					if (xhr2.status === 200){
+						//console.log("TSIDs: ");
+						//console.log(xhr.responseText);
+						resolve(xhr2.responseText);
+					} else {
+						var resp1 = "XHR didn't work: " + xhr2.status;
+						console.log(resp1);
+						resolve();
+					}
+				};
+				xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
+				xhr2.send();
 			}
-		};
-		xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
-		xhr2.send();
-		});
-	}
+			});
 }
 
 retTimeSeries = function(TSIDs){
