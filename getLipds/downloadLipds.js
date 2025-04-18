@@ -282,22 +282,40 @@ TSIDs = function(path1, uniqueID){
 	}
 };
 
+function grabCompilationInfo(path){
+	try {
+	      const data = fs.readFileSync(path, 'utf8');
+	      return JSON.parse(data);
+	      // Work with jsonData
+	    } catch (err) {
+	      console.error("An error occurred while reading " + path + " :", err);
+		return null;
+	    }
+}
+
+function addExt(allButExt, language) {
+	if (language == 'R'){
+		return allButExt + '.RData';
+	} else if (language == 'Python'){
+		return allButExt + '.pkl';
+	}
+}
+
 
 
 async function downloadCompilation(uniqueID, URL, language) {
 
 	const userDir = "/root/presto/userRecons/" + uniqueID
-	const path2archiveURL = userDir + "/archivedComp.txt"
+	const path2archiveJSON = userDir + "/archivedComp.json"
+	var archivedComp = '';
+	var archivedVers = '';
+	const compilationDetails = grabCompilationInfo(path2archiveJSON);
+	const allButExt = const RDataURL = 'https://lipdverse.org/' + JSON.parse(compilationDetails.compilation) + '/' + JSON.parse(compilationDetails.version) + '/' + JSON.parse(compilationDetails.compilation) + JSON.parse(compilationDetails.version)
+	const dataURL = addExt(allButExt, language)
 	
-	if (language == 'R'){
-		const serializedURL = 
-		
-	
-	var s12 = fs.readFileSync(path2archiveURL,'utf8');
-	s12 = s12.replace(/(\r\n|\n|\r)/gm, "");
 		return new Promise((resolve, reject) => {
 			  console.log('downloading compilation...');
-				var downloadRDataSpawn = child_process.spawn('curl ' + s12 + ' -o ' + userDir);
+				var downloadRDataSpawn = child_process.spawn('curl ' + dataURL + ' -o ' + userDir);
 				
 				downloadRDataSpawn.stdout.on('data', function (data) {
 					console.log(data.toString());
