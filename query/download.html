@@ -171,8 +171,8 @@ Selected values:
 	<input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
 	<br><br><br>
 </div>
-<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
-<div id="archivedCompilationGroup"  style="visibility: hidden;" class="form-group"> 
+<form style="max-width: 90%; display:none; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
+<div id="archivedCompilationGroup"  style="display:none;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilation_label" for="archivedCompilation">Archived Compilation</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
 <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
@@ -184,7 +184,7 @@ Selected values:
 </div>
 </form>
 <div class="button-submit">
-	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; visibility:hidden; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use Archived Compilation</button>
+	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; display:none; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use Archived Compilation</button>
 </div>
 
 <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
