@@ -282,9 +282,66 @@ TSIDs = function(path1, uniqueID){
 	}
 };
 
+
+
+async function downloadCompilation(uniqueID, URL, language) {
+
+	const userDir = "/root/presto/userRecons/" + uniqueID
+	const path2archiveURL = userDir + "/archivedComp.txt"
+	
+	if (language == 'R'){
+		const serializedURL = 
+		
+	
+	var s12 = fs.readFileSync(path2archiveURL,'utf8');
+	s12 = s12.replace(/(\r\n|\n|\r)/gm, "");
+		return new Promise((resolve, reject) => {
+			  console.log('downloading compilation...');
+				var downloadRDataSpawn = child_process.spawn('curl ' + s12 + ' -o ' + userDir);
+				
+				downloadRDataSpawn.stdout.on('data', function (data) {
+					console.log(data.toString());
+				});
+		
+				downloadRDataSpawn.stderr.on('data', function (data) {
+					console.log('rspawn2 stderr: ' + data);
+					console.log(data.toString().search("error"));
+					console.log(downloadRDataSpawn.connected);
+					if ((data.toString().search("error") != -1) ) {
+						console.log('downloadRDataSpawn process has been killed - "error" keyword found in stderr!');
+						downloadRDataSpawn.kill('SIGTERM');
+					}
+				});
+				
+				downloadRDataSpawn.on('close', function (code) {
+					console.log('downloadRDataSpawn exited with code ' + code);
+					resolve(code)
+				});
+		
+				fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "downloaded archived compilation" + "\n", function(err) {
+					if(err) {
+					          return console.log(err)
+					}
+					console.log('archived compilation download completed!');
+				});
+		});
+
+}
+
 var downloadEm = async function(uniqueID, language){
 
+	const path1111 = path.join(__dirname, '../userRecons', uniqueID, 'archivedComp.txt')
+	const exists1111 = await checkFileExistsSync(path1111)
+
 	if (process.argv.length == 4){
+
+		if (exists1111){
+			await downloadCompilation(uniqueID, URL, language);
+			console.log("downloadLipds.js successful, downloaded archived compilation")
+			process.exit(0);
+		}
+
+		
 		var runStatus = await newStatus(uniqueID, language)
 		updateTSIDmd5()
 
