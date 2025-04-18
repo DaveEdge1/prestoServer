@@ -315,7 +315,7 @@ async function downloadCompilation(uniqueID, URL, language) {
 	
 		return new Promise((resolve, reject) => {
 			  console.log('downloading compilation...');
-				shell.exec('curl ' + dataURL + ' -o ' + userDir);
+				shelljs.exec('curl ' + dataURL + ' -o ' + userDir);
 		
 				fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "downloaded archived compilation" + "\n", function(err) {
 					if(err) {
