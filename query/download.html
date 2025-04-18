@@ -186,7 +186,7 @@ Selected values:
 <div class="button-submit">
 	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use Archived Compilation</button>
 </div>
-<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
+<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
 <button id="compilationButton" type="button" class="collapsible">Compilation Filter
 </button>
   <!-- </form> -->
@@ -212,6 +212,7 @@ function hideForm(){
 		document.getElementById("datasetCount").style.visibility = "hidden";
 		document.getElementById("archivedCompilationGroup").style.visibility = "visible";
 		document.getElementById("compilationButton").style.visibility = "visible";
+		document.getElementById("compilationForm").style.visibility = "visible";
 	} else {
 		document.getElementById("queryForm").style.visibility = "visible";
 		document.getElementById("map").style.visibility = "visible";
@@ -221,6 +222,7 @@ function hideForm(){
 		document.getElementById("datasetCount").style.visibility = "visible";
 		document.getElementById("archivedCompilationGroup").style.visibility = "hidden";
 		document.getElementById("compilationButton").style.visibility = "hidden";
+		document.getElementById("compilationForm").style.visibility = "hidden";
 	}
 }
 	
