@@ -310,7 +310,7 @@ async function downloadCompilation(uniqueID, URL, language) {
 	var archivedComp = '';
 	var archivedVers = '';
 	const compilationDetails = grabCompilationInfo(path2archiveJSON);
-	const allButExt = 'https://lipdverse.org/' + JSON.parse(compilationDetails.compilation) + '/' + JSON.parse(compilationDetails.version) + '/' + JSON.parse(compilationDetails.compilation) + JSON.parse(compilationDetails.version)
+	const allButExt = 'https://lipdverse.org/' + compilationDetails.compilation + '/' + compilationDetails.version + '/' + compilationDetails.compilation + compilationDetails.version
 	const dataURL = addExt(allButExt, language)
 	
 		return new Promise((resolve, reject) => {
