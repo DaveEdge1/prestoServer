@@ -348,7 +348,7 @@ async function downloadCompilation(uniqueID, URL, language) {
 
 var downloadEm = async function(uniqueID, language){
 
-	const path1111 = path.join(__dirname, '../userRecons', uniqueID, 'archivedComp.txt')
+	const path1111 = path.join(__dirname, '../userRecons', uniqueID, 'archivedComp.json')
 	const exists1111 = await checkFileExistsSync(path1111)
 
 	if (process.argv.length == 4){
