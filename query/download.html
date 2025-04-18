@@ -1702,7 +1702,7 @@ function getLipds(loc1, lipdSource){
 				var TSIDsArray = JSON.parse(tsJSON).TSIDs
 				var numTSids = TSIDsArray.length
 			} else {
-				const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
+				const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
 				var tsJSON = '{"archivedComp": '+ archivedCompURL + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
 				console.log("sending post for archived compilation: " + archivedCompURL)
 			}
