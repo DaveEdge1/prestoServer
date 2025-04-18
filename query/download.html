@@ -189,7 +189,7 @@ Selected values:
 </div>
 </form>
 <div class="button-submit">
-	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getArchivedComp()">Use selected Proxies</button>
+	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp')">Use selected Proxies</button>
 </div>
   <!-- </form> -->
 <div class="leaflet-container" id="map" style="width: 1200px; height: 700px;"></div>
@@ -1682,32 +1682,35 @@ function downloadCurrentDocument(resp1) {
   a.dispatchEvent(e);
 }
 
-function getLipds(loc1){
+function getLipds(loc1, lipdSource){
 	return new Promise((resolve, reject) => {
 		//alert(params(useCoords=true))
 		getTSIDs().then(reso => {
-			var resoJSON = JSON.parse(reso);
-			var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-			console.log("Total time series: " + IDs.length);
-			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-			console.log("json body sent to 'getLipds': " + tsJSON)
-			console.log("sending post TSids")
-			//postTSids(tsJSON);
-			var TSIDsArray = JSON.parse(tsJSON).TSIDs
-			var numTSids = TSIDsArray.length
-			alert('Proceeding with ' + numTSids + ' climate proxy time series')
+			if (lipdSource == 'TSIDs'){
+				var resoJSON = JSON.parse(reso);
+				var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
+				console.log("Total time series: " + IDs.length);
+				var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
+				console.log("json body sent to 'getLipds': " + tsJSON)
+				console.log("sending post TSids")
+				//postTSids(tsJSON);
+				var TSIDsArray = JSON.parse(tsJSON).TSIDs
+				var numTSids = TSIDsArray.length
+			} else {
+				const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
+				var tsJSON = '{"archivedComp": '+ archivedCompURL + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
+				console.log("sending post for archived compilation: " + archivedCompURL)
+			}
 			compileLipds(tsJSON)
 			    .then(response => {
 			        console.log("Success:", response);
 				if (loc1 == "donwload"){
 					resolve("https://www.google.com")
-				} else if (loc1 == "reconstruct"){
+				} else if {
 					var queryParams = params(useCoords=true)
 					queryParams = '&' + queryParams.substring(1);
 					queryParams = queryParams.replace(/\s/g, '');
 					resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
-				} else {
-					resolve("https://paleopresto.com/")
 				}
 			    })
 			    .catch(error => {
@@ -1942,11 +1945,11 @@ var recon1 = document.getElementById('recon').value
 if (recon1 == 'false'){
 	//console.log("recon undefined, using downloads pathway")
 	document.getElementById('proceedButton').innerHTML = "Download selected Proxies"
-	document.getElementById('proceedButton').onclick = function () { getLipds('download').then(reso1 => location.href = reso1)};
+	document.getElementById('proceedButton').onclick = function () { getLipds('download', 'TSIDs').then(reso1 => location.href = reso1)};
 } else {
 	//console.log(recon1)
 	document.getElementById('proceedButton').innerHTML = "Use selected Proxies"
-	document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct').then(reso1 => location.href = reso1)};
+	document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct', 'TSIDs').then(reso1 => location.href = reso1)};
 }
 
 
