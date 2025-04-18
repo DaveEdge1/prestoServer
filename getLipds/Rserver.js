@@ -69,7 +69,7 @@ app.post('/lipds', function(req, res) {
 			}
 		});
 	} else if ("compilation" in req.body){
-		const archivedCompJSON = '{"compilation: "' + JSON.stringify(req.body.compilation) + '", "version": "' + JSON.stringify(req.body.version) + '"}'
+		const archivedCompJSON = '{"compilation: ' + JSON.stringify(req.body.compilation) + ', "version": ' + JSON.stringify(req.body.version) + '}'
 		createDirectory(dir1).then(status => {
 		    console.log('Final status:', status);
 		    res.sendStatus(status)
