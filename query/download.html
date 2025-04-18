@@ -189,7 +189,7 @@ Selected values:
 </div>
 </form>
 <div class="button-submit">
-	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp')">Use selected Proxies</button>
+	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use selected Proxies</button>
 </div>
   <!-- </form> -->
 <div class="leaflet-container" id="map" style="width: 1200px; height: 700px;"></div>
