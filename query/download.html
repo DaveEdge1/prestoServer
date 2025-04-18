@@ -178,29 +178,7 @@ Selected values:
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
 <input id="language" name="language" type="hidden" value="">
 <script>
-/*function hideForm(){
-	if (document.getElementById("archivedCompilation").checked){
-		document.getElementById("queryForm").style.visibility = "hidden";
-		document.getElementById("map").style.visibility = "hidden";
-		document.getElementById("mapUpdateButton").style.visibility = "hidden";
-		document.getElementById("InstructionBox").style.visibility = "hidden";
-		document.getElementById("proceedButton").style.visibility = "hidden";
-		document.getElementById("datasetCount").style.visibility = "hidden";
-		document.getElementById("archivedCompilationGroup").style.visibility = "visible";
-		document.getElementById("archivedCompButton").style.visibility = "visible";
-		document.getElementById("compilationForm").style.visibility = "visible";
-	} else {
-		document.getElementById("queryForm").style.visibility = "visible";
-		document.getElementById("map").style.visibility = "visible";
-		document.getElementById("mapUpdateButton").style.visibility = "visible";
-		document.getElementById("InstructionBox").style.visibility = "visible";
-		document.getElementById("proceedButton").style.visibility = "visible";
-		document.getElementById("datasetCount").style.visibility = "visible";
-		document.getElementById("archivedCompilationGroup").style.visibility = "hidden";
-		document.getElementById("archivedCompButton").style.visibility = "hidden";
-		document.getElementById("compilationForm").style.visibility = "hidden";
-	}
-}*/
+
 function hideForm(){
 	if (document.getElementById("archivedCompilation").checked){
 		document.getElementById("queryForm").style.display = "none";
@@ -281,7 +259,9 @@ popQueryVariable()
 </div>
 </div>
 </form>
-<button id="archivedCompButton" class="btn btn-primary" style="font-size: 16px;height:35px; width:300px; display:none; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use Archived Compilation</button>
+<div id="mapUpdateButton" class="button-submit">
+<button style="height:30px; width:150px; font-size:13px display:none;" id="archivedCompButton" type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)" class="btn btn-primary">Use Archived Compilation</button>
+</div>
 </div>
 <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
 <button id="compilationButton" type="button" class="collapsible">Compilation Filter
