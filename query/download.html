@@ -171,7 +171,7 @@ Selected values:
 	<input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
 	<br><br><br>
 </div>
-<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="sendCompilation()">
+<form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
 <div id="archivedCompilationGroup"  style="visibility: hidden;" class="form-group"> 
 <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilation_label" for="archivedCompilation">Archived Compilation</label>
 <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
@@ -184,7 +184,7 @@ Selected values:
 </div>
 </form>
 <div class="button-submit">
-	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use Archived Compilation</button>
+	<button id="archivedCompButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; visibility:hidden; " type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)">Use Archived Compilation</button>
 </div>
 
 <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
@@ -203,7 +203,7 @@ Selected values:
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
 <input id="language" name="language" type="hidden" value="">
 <script>
-function hideForm(){
+/*function hideForm(){
 	if (document.getElementById("archivedCompilation").checked){
 		document.getElementById("queryForm").style.visibility = "hidden";
 		document.getElementById("map").style.visibility = "hidden";
@@ -224,6 +224,29 @@ function hideForm(){
 		document.getElementById("archivedCompilationGroup").style.visibility = "hidden";
 		document.getElementById("archivedCompButton").style.visibility = "hidden";
 		document.getElementById("compilationForm").style.visibility = "hidden";
+	}
+}*/
+function hideForm(){
+	if (document.getElementById("archivedCompilation").checked){
+		document.getElementById("queryForm").style.display = "none";
+		document.getElementById("map").style.display = "none";
+		document.getElementById("mapUpdateButton").style.display = "none";
+		document.getElementById("InstructionBox").style.display = "none";
+		document.getElementById("proceedButton").style.display = "none";
+		document.getElementById("datasetCount").style.display = "none";
+		document.getElementById("archivedCompilationGroup").style.display = "block";
+		document.getElementById("archivedCompButton").style.display = "block";
+		document.getElementById("compilationForm").style.display = "block";
+	} else {
+		document.getElementById("queryForm").style.display = "block";
+		document.getElementById("map").style.display = "block";
+		document.getElementById("mapUpdateButton").style.display = "block";
+		document.getElementById("InstructionBox").style.display = "block";
+		document.getElementById("proceedButton").style.display = "block";
+		document.getElementById("datasetCount").style.display = "block";
+		document.getElementById("archivedCompilationGroup").style.display = "none";
+		document.getElementById("archivedCompButton").style.display = "none";
+		document.getElementById("compilationForm").style.display = "none";
 	}
 }
 	
