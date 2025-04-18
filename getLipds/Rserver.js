@@ -69,13 +69,13 @@ app.post('/lipds', function(req, res) {
 			}
 		});
 	} else if ("compilation" in req.body){
-		const archivedCompURL = 'https://lipdverse.org/' + req.body.compilation + '/' + req.body.version
+		const archivedCompJSON = '{"compilation: "' + JSON.stringify(req.body.compilation) + '", "version": "' + JSON.stringify(req.body.version) + '"}'
 		createDirectory(dir1).then(status => {
 		    console.log('Final status:', status);
 		    res.sendStatus(status)
 			if (status == 200){
-				var path0 = path.join(dir1, 'archivedComp.txt')
-				fs.writeFile(path0, archivedCompURL, (err) => {
+				var path0 = path.join(dir1, 'archivedComp.json')
+				fs.writeFile(path0, archivedCompJSON, (err) => {
 					  if (err)
 						    console.log(err);
 					  else {
