@@ -315,26 +315,7 @@ async function downloadCompilation(uniqueID, URL, language) {
 	
 		return new Promise((resolve, reject) => {
 			  console.log('downloading compilation...');
-				var downloadRDataSpawn = child_process.spawn('curl ' + dataURL + ' -o ' + userDir);
-				
-				downloadRDataSpawn.stdout.on('data', function (data) {
-					console.log(data.toString());
-				});
-		
-				downloadRDataSpawn.stderr.on('data', function (data) {
-					console.log('rspawn2 stderr: ' + data);
-					console.log(data.toString().search("error"));
-					console.log(downloadRDataSpawn.connected);
-					if ((data.toString().search("error") != -1) ) {
-						console.log('downloadRDataSpawn process has been killed - "error" keyword found in stderr!');
-						downloadRDataSpawn.kill('SIGTERM');
-					}
-				});
-				
-				downloadRDataSpawn.on('close', function (code) {
-					console.log('downloadRDataSpawn exited with code ' + code);
-					resolve(code)
-				});
+				shell.exec('curl ' + dataURL + ' -o ' + userDir);
 		
 				fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "downloaded archived compilation" + "\n", function(err) {
 					if(err) {
