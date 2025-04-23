@@ -9,6 +9,7 @@ const shelljs = require("shelljs")
 
 var child_process = require('child_process');
 var file_path = "/root/presto/getLipds/getLipd.R";
+var file_path2 = "/root/presto/getLipds/getLipd.R";
 var r_comm = '/usr/bin/Rscript';
 
 async function routeExistingLipds(uniqueID){
@@ -50,6 +51,35 @@ function checkFileExistsSync(filepath){
     flag = false;
   }
 	return flag;
+}
+
+var writeTTS = async function (){
+	var path899 = path.join(__dirname, '/writeTTS.R')
+	var args2 = '--vanilla ' + path899;
+	return new Promise((resolve, reject) => {
+		console.log("coverting Rdata to tts")
+		console.log("rspawn2 args: " + args2)
+		var rspawn2 = child_process.spawn(r_comm,[args2]);
+		
+		rspawn2.stdout.on('data', function (data) {
+			console.log(data.toString());
+		});
+
+		rspawn2.stderr.on('data', function (data) {
+			console.log('rspawn2 stderr: ' + data);
+			console.log(data.toString().search("error"));
+			console.log(rspawn2.connected);
+			if ((data.toString().search("error") != -1) ) {
+				console.log('rspawn2 process has been killed - "error" keyword found in stderr!');
+				rspawn2.kill('SIGTERM');
+			}
+		});
+		
+		rspawn2.on('close', function (code) {
+			console.log('rspawn2 exited with code ' + code);
+			resolve(code)
+		});
+	});
 }
 
 var updateTSIDmd5 = async function (){
@@ -337,6 +367,7 @@ var downloadEm = async function(uniqueID, language){
 
 		if (exists1111){
 			await downloadCompilation(uniqueID, URL, language);
+			await writeTTS();
 			console.log("downloadLipds.js successful, downloaded archived compilation")
 			process.exit(0);
 		}
