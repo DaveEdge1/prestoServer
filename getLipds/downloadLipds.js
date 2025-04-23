@@ -53,9 +53,9 @@ function checkFileExistsSync(filepath){
 	return flag;
 }
 
-var writeTTS = async function (){
+var writeTTS = async function (RData_path){
 	var path899 = path.join(__dirname, '/writeTTS.R')
-	var args2 = '--vanilla ' + path899;
+	var args2 = '--vanilla ' + path899 + ' ' + RData_path;
 	return new Promise((resolve, reject) => {
 		console.log("coverting Rdata to tts")
 		console.log("rspawn2 args: " + args2)
@@ -342,7 +342,7 @@ async function downloadCompilation(uniqueID, URL, language) {
 	const compilationDetails = grabCompilationInfo(path2archiveJSON);
 	const allButExt = 'https://lipdverse.org/' + compilationDetails.compilation + '/' + compilationDetails.version + '/' + compilationDetails.compilation + compilationDetails.version
 	const dataURL = addExt(allButExt, language)
-	const destPath = addExt(userDir+'/lipd', language)
+	const destPath = addExt(+'/lipd', language)
 	
 		return new Promise((resolve, reject) => {
 			  console.log('downloading compilation...');
@@ -367,7 +367,10 @@ var downloadEm = async function(uniqueID, language){
 
 		if (exists1111){
 			await downloadCompilation(uniqueID, URL, language);
-			await writeTTS();
+			if (language == 'R')
+				{
+					await writeTTS("/root/presto/userRecons/" + uniqueID + '/lipd.RData');
+				}
 			console.log("downloadLipds.js successful, downloaded archived compilation")
 			process.exit(0);
 		}
