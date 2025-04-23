@@ -1,4 +1,5 @@
+args = commandArgs(trailingOnly=TRUE)
 library(lipdR)
-load("C:/Users/dce25/Downloads/wNAm1_0_0.RData")
+load(args[1])
 D <- structure(D, class = c("multi_lipd", class(list())))
 tts <- as.lipdTsTibble(D)
