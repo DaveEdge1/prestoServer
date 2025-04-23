@@ -369,7 +369,7 @@ var downloadEm = async function(uniqueID, language){
 			await downloadCompilation(uniqueID, URL, language);
 			if (language == 'R')
 				{
-					await writeTTS("/root/presto/userRecons/" + uniqueID + '/lipd.RData');
+					await writeTTS("/root/presto/userRecons/" + uniqueID);
 				}
 			console.log("downloadLipds.js successful, downloaded archived compilation")
 			process.exit(0);
