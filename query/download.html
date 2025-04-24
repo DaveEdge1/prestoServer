@@ -565,12 +565,13 @@ popQueryVariable()
       </footer>
 
 <script>
-async function transformToLabelValueArray(data) {
-  await loadCompilationJson();
+async function transformToLabelValueArray() {
+  await loadCompilationJson(); // Ensures compilationJson is ready
+
   function getLatestVersion(key) {
-    const versions = Array.isArray(data[key].versions)
-      ? data[key].versions
-      : [data[key].versions];
+    const versions = Array.isArray(compilationJson[key].versions)
+      ? compilationJson[key].versions
+      : [compilationJson[key].versions];
 
     const parsed = versions.map(v => v.split('_').map(Number));
     parsed.sort((a, b) => {
@@ -583,7 +584,7 @@ async function transformToLabelValueArray(data) {
     return parsed[0].join('_');
   }
 
-  return Object.keys(data).map(key => {
+  return Object.keys(compilationJson).map(key => {
     const latest = getLatestVersion(key);
     return {
       value: `${key}-${latest}`,
@@ -591,10 +592,12 @@ async function transformToLabelValueArray(data) {
     };
   });
 }
-var latestCompilations = transformToLabelValueArray(compilationJson);
-console.log(latestCompilations);
+var latestCompilations = {};
+(async () => {
+  latestCompilations = await transformToLabelValueArray();
+  console.log(latestCompilations);
+})();
 
-	
 var opts = {
   lines: 13, // The number of lines to draw
   length: 38, // The length of each line
