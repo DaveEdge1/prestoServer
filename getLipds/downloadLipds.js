@@ -361,20 +361,28 @@ async function downloadCompilation(uniqueID, URL, language) {
 }
 
 var downloadEm = async function(uniqueID, language){
-
-	const path1111 = path.join(__dirname, '../userRecons', uniqueID, 'archivedComp.json')
+	const userDir1 = path.join(__dirname, '../userRecons', uniqueID)
+	const path1111 = path.join(userDir1, 'archivedComp.json')
 	const exists1111 = await checkFileExistsSync(path1111)
 
 	if (process.argv.length == 4){
 
 		if (exists1111){
+			console.log('found request for archived compilation: ' + path1111)
 			await downloadCompilation(uniqueID, URL, language);
-			if (language == 'R')
-				{
+			const path2222 = addExt(userDir1+'/lipd', language)
+			const exists2222 = await checkFileExistsSync(path2222)
+			if (language == 'R'){
+				if (exists2222){
 					await writeTTS("/root/presto/userRecons/" + uniqueID);
+					console.log("downloadLipds.js successful, downloaded archived compilation")
+					process.exit(0);
+				} else {
+					console.log("no file at expected path: " + path2222)
+					process.exit(1);
 				}
-			console.log("downloadLipds.js successful, downloaded archived compilation")
-			process.exit(0);
+			}
+			
 		}
 
 		
