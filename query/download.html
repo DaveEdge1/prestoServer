@@ -66,16 +66,16 @@
 	
 				
 	for (const key in compilationJson) {
-	  console.log('key: ' + key)
+	  //console.log('key: ' + key)
 	  if (compilationJson.hasOwnProperty(key)) {
 	    const value = compilationJson[key];
-	    console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
+	    //console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
 	  }
 	}
 	}
 
 	function loadVersions(compilation){
-		console.log("compilationJson[compilation].versions: " + compilationJson[compilation].versions)
+		//console.log("compilationJson[compilation].versions: " + compilationJson[compilation].versions)
 		return compilationJson[compilation].versions
 	}
 	
@@ -591,8 +591,8 @@ async function transformToLabelValueArray(data) {
     };
   });
 }
-latestCompilations = transformToLabelValueArray(compilationJson);
-
+var latestCompilations = transformToLabelValueArray(compilationJson);
+console.log(latestCompilations);
 
 	
 var opts = {
