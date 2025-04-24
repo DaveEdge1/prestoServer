@@ -565,8 +565,8 @@ popQueryVariable()
       </footer>
 
 <script>
-await loadCompilationJson();
-function transformToLabelValueArray(data) {
+async function transformToLabelValueArray(data) {
+  await loadCompilationJson();
   function getLatestVersion(key) {
     const versions = Array.isArray(data[key].versions)
       ? data[key].versions
