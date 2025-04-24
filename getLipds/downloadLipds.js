@@ -342,10 +342,12 @@ async function downloadCompilation(uniqueID, URL, language) {
 	const compilationDetails = grabCompilationInfo(path2archiveJSON);
 	const allButExt = 'https://lipdverse.org/' + compilationDetails.compilation + '/' + compilationDetails.version + '/' + compilationDetails.compilation + compilationDetails.version
 	const dataURL = addExt(allButExt, language)
-	const destPath = addExt(+'/lipd', language)
+	const destPath = addExt(userDir+'/lipd', language)
 	
 		return new Promise((resolve, reject) => {
 			  console.log('downloading compilation...');
+			var bashCommand = 'curl ' + dataURL + ' -o ' + destPath
+			 console.log('bash command: ' + bashCommand);
 				shelljs.exec('curl ' + dataURL + ' -o ' + destPath);
 		
 				fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "downloaded archived compilation" + "\n", function(err) {
