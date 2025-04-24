@@ -34,7 +34,7 @@
 	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>
 
 	<script type="text/javascript">
-
+		
 	var compilationJson = {}; // Global variable
 	var compilationNames = {};
 	
@@ -79,7 +79,7 @@
 		return compilationJson[compilation].versions
 	}
 	
-	loadCompilationJson();
+	
 		
 	</script>
 	
@@ -565,6 +565,36 @@ popQueryVariable()
       </footer>
 
 <script>
+await loadCompilationJson();
+function transformToLabelValueArray(data) {
+  function getLatestVersion(key) {
+    const versions = Array.isArray(data[key].versions)
+      ? data[key].versions
+      : [data[key].versions];
+
+    const parsed = versions.map(v => v.split('_').map(Number));
+    parsed.sort((a, b) => {
+      for (let i = 0; i < 3; i++) {
+        if (a[i] !== b[i]) return b[i] - a[i];
+      }
+      return 0;
+    });
+
+    return parsed[0].join('_');
+  }
+
+  return Object.keys(data).map(key => {
+    const latest = getLatestVersion(key);
+    return {
+      value: `${key}-${latest}`,
+      label: key
+    };
+  });
+}
+latestCompilations = transformToLabelValueArray(compilationJson);
+
+
+	
 var opts = {
   lines: 13, // The number of lines to draw
   length: 38, // The length of each line
@@ -954,7 +984,7 @@ function updatePoints (coords){
 }
 
 
-var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}]
+//var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}]
 	
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
@@ -1204,7 +1234,7 @@ minLength: 0,
 source: function( request, response ) {
 // delegate back to autocomplete, but extract the last term
 response( $.ui.autocomplete.filter(
-compilationNames, extractLast( request.term ) ) );
+latestCompilations, extractLast( request.term ) ) );
 },
 
 //    source:projects,    
@@ -1344,6 +1374,7 @@ return false;
 function split( val ) {
 return val.split( /,\s*/ );
 }
+/*
 function rmBlanksCompilation(val){
 	    if (val.length > 0) {
 		    val = split(val)
@@ -1353,6 +1384,7 @@ function rmBlanksCompilation(val){
 	    }
 	return val;
 }
+*/
 function rmBlanks(val){
 	    if (val.length > 0) {
 		    val = split(val)
@@ -1362,10 +1394,8 @@ function rmBlanks(val){
 	return val;
 }
 	
-function qString(val1,name1,isCompilation){
-	if (isCompilation){
-		var x1 = rmBlanksCompilation(val1)
-	} else {
+function qString(val1,name1){
+	else {
 		var x1 = rmBlanks(val1)
 	}
 	if (x1.length == 0){
@@ -1377,9 +1407,9 @@ function qString(val1,name1,isCompilation){
 }
 </script>
 <script>
-var compVals = compilationlist.map(function(d) { return d.value })
+//var compVals = compilationlist.map(function(d) { return d.value })
 //console.log(compVals)
-host2 = compVals.map(function(aa) {
+/*host2 = compVals.map(function(aa) {
     var splitup = aa.split("-")
     var indexLast = splitup.length - 1
     if (indexLast == 0){
@@ -1387,7 +1417,7 @@ host2 = compVals.map(function(aa) {
     } else{
     	return splitup[indexLast]
     }
-  })
+  })*/
 //console.log(host2)
 arrayGrep = function (arr1, arr2, selectedString){
 var indices = [];
@@ -1403,7 +1433,7 @@ return arr3.at(-1)
 }
 
 //if true, return the compilation versions
-grabLatest = function(selectedString){
+/*grabLatest = function(selectedString){
 	//console.log("selectedString: " + selectedString)
 	//if pulling latest, return the compilation versions
 	//console.log("!!!test if getting latest!!!: " + Object.is(host2[compVals.indexOf(selectedString)],null))
@@ -1416,7 +1446,7 @@ grabLatest = function(selectedString){
   		//otherwise, preserve version entered
   		return selectedString
   }
-}
+}*/
 getAllMonths = function(startSpan,endSpan){
 	var monthText = seasonality2.map(function(d) { return d.label; });
 	var allMonths = [];
