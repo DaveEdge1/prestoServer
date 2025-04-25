@@ -345,17 +345,26 @@ async function downloadCompilation(uniqueID, URL, language) {
 	const destPath = addExt(userDir+'/lipd', language)
 	
 		return new Promise((resolve, reject) => {
-			  console.log('downloading compilation...');
+			console.log('downloading compilation...');
 			var bashCommand = 'curl ' + dataURL + ' -o ' + destPath
-			 console.log('bash command: ' + bashCommand);
-				shelljs.exec('curl ' + dataURL + ' -o ' + destPath);
-		
-				fs.appendFileSync('/root/presto/userRecons/' + uniqueID  + '/request-status.txt', "downloaded archived compilation" + "\n", function(err) {
-					if(err) {
-					          return console.log(err)
-					}
-					console.log('archived compilation download completed!');
-				});
+			console.log('bash command: ' + bashCommand);
+			shelljs.exec('curl ' + dataURL + ' -o ' + destPath, {async: true}, function(code, stdout, stderr) {
+			  if (code !== 0) {
+			    console.log('curl failed with code:', code);
+			    console.log('stderr:', stderr);
+			    // Handle error if needed
+			    return;
+			  }
+			  console.log('curl succeeded:', stdout);
+			
+			  fs.appendFile('/root/presto/userRecons/' + uniqueID + '/request-status.txt', "downloaded archived compilation\n", function(err) {
+			    if (err) {
+			      return console.log('Failed to append to status file:', err);
+			    }
+			    console.log('archived compilation download completed!');
+			    // Continue logic or resolve promise/call next step here
+			  });
+			});
 		});
 
 }
