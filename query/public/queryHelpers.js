@@ -504,7 +504,6 @@ getAllMonths = function(startSpan,endSpan){
                 xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
                 // xhr.responseType = "text";
                 xhr0.send();
-		spinner.stop();
             }
         
 
