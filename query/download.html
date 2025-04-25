@@ -492,7 +492,7 @@ var opts = {
     position: 'absolute', // Element positioning
   };
 var target = document.getElementById('map');
-
+var spinner = new Spinner(opts).spin(target);
 	
 let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
@@ -772,7 +772,7 @@ if (recon1 == 'false'){
 }
 
 function updatePoints (coords){
-    var spinner = new Spinner(opts).spin(target);
+    spin(target);
     inRectCount = 0;
     layerGroup.clearLayers();
     if (!document.getElementById("coordsOn").checked) {
