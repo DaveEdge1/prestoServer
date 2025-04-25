@@ -81,6 +81,15 @@ return this.value;
 });
 });
 
+$(function() {
+    // Split function to separate terms by comma and optional space
+    function split(val) {
+        return val.split(/,\s*/);
+    }
+    // Extract the last term for autocomplete
+    function extractLast(term) {
+        return split(term).pop();
+    }
     /**
      * General autocomplete initializer
      * @param {string} selector - jQuery selector for the input
@@ -176,323 +185,323 @@ function hideForm(){
         document.getElementById('uniqueID').value = getQueryVariable("uniqueID");
         document.getElementById('language').value = getQueryVariable("language");
         }
-        async function transformToLabelValueArray() {
-            //await loadCompilationJson(); // Ensures compilationJson is ready
-          
-            function getLatestVersion(key) {
-              const versions = Array.isArray(compilationJson[key].versions)
-                ? compilationJson[key].versions
-                : [compilationJson[key].versions];
-          
-              const parsed = versions.map(v => v.split('_').map(Number));
-              parsed.sort((a, b) => {
-                for (let i = 0; i < 3; i++) {
-                  if (a[i] !== b[i]) return b[i] - a[i];
-                }
-                return 0;
-              });
-          
-              return parsed[0].join('_');
-            }
-          
-            return Object.keys(compilationJson).map(key => {
-              const latest = getLatestVersion(key);
-              return {
-                value: `${key}-${latest}`,
-                label: key
-              };
-            });
-          }
-          function updateBoundingBox(){
-            rect.editing.disable();
-            var latMin = +document.getElementById("lat_min").value
-            var latMax = +document.getElementById("lat_max").value
-            if (latMin > latMax){
-                if (latMin < 90){
-                    latMax = latMin + .001
-                    document.getElementById("lat_max").value = latMax
-                } else {
-                    latMin = latMax - .001
-                    document.getElementById("lat_min").value = latMin
-                }
-            }
-            var lonMin = +document.getElementById("lon_min").value
-            var lonMax = +document.getElementById("lon_max").value
-            if (lonMin > lonMax){
-                if (lonMin < 180){
-                    lonMax = lonMin + .001
-                    document.getElementById("lon_max").value = lonMax
-                } else {
-                    lonMin = lonMax - .001
-                    document.getElementById("lon_min").value = lonMin
-                }
-            }
-            rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
-            rect.editing.enable();
-            return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
-        }
-        function chooseColor(archiveType){
-            archiveType = archiveType.toString();
-            var color1 = colorPal[archiveType]
-            if (typeof color1 !== 'undefined'){
-                return color1
-            } else {
-                //console.log(archiveType)
-                return "black"
-            }
-        }
-        function chooseShape(archiveType){
-            archiveType = archiveType.toString();
-            var shape1 = shapePal[archiveType]
-            if (typeof shape1 !== 'undefined'){
-                return shape1
-            } else {
-                //console.log(archiveType)
-                return "diamond"
-            }
-        }
-        function chooseOpacity(coords, rect1){
-            //rectSW = regExp.exec(rect._bounds._southWest)[1]
-            //rect1 = changeBoxCoord()
-            var point = regExp.exec(coords)[1]
-            var pointLat = dec4(point.split(',')[0])
-            var pointLon = dec4(point.split(',')[1])
-        
-            if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
-                inRectCount = inRectCount + 1
-                return 0.8
-            } else {
-                return 0.1
-            }
-        }
-        function changeBoxCoord(){
-            var SW = regExp.exec(rect._bounds._southWest)[1]
-            var South = dec4(SW.split(',')[0])
-            var West = dec4(SW.split(',')[1])
-            //var South = dec4(0)
-            //var West = dec4(-90)
-            var NE = regExp.exec(rect._bounds._northEast)[1]
-            var North = dec4(NE.split(',')[0])
-            var East = dec4(NE.split(',')[1])
-            //var North = dec4(45)
-            //var East = dec4(0)
-            //var newCoords = South + ', ' + West + ', ' + North + ', ' + East
-            var rectWidth = +(East-West)
-            rect.editing.disable();
-            if (North > 90){
-                    rect.setBounds([[South, West], [90, East]]);
-        
-            }
-            if (South < -90){
-        
-                    rect.setBounds([[-90, West], [North, East]]);
-                
-            }
-            if (West < -360){
-        
-                    rect.setBounds([[South, -360], [North, East]]);
-        
-            }
-            if (East > 360){
-        
-                    rect.setBounds([[South, West], [North, 360]]);
-                
-            }
-            if (rectWidth > 360){
-                if (West < -360){
-                    var newWest = +(+East - 360)
-                    rect.setBounds([[South, newWest], [North, East]]);
-                } else {
-                    var newEast = +(+West + 360)
-                    rect.setBounds([[South, West], [North, newEast]]);
-                }
-                
-            }
-            
-                
-            document.getElementById("lat_min").value = South
-            document.getElementById("lat_max").value = North
-            document.getElementById("lon_min").value = West
-            document.getElementById("lon_max").value = East
-            rect.editing.enable();
-            return {"South":South,"West":West,"North":North,"East":East}
-        }
-        function loadLatLon (a1){
-            var x1 = a1.filter((arr, index, self) =>
-            index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
-            var geojson = {
-            "name":"NewFeatureType",
-            "type":"FeatureCollection",
-            "features": [],
-            };
-        var numdata = +Object.values(x1).length
-        var numPoints = +(numdata * 2)
-            
-          for (let i = 0; i < numPoints; i++) {
-            if (i >= numdata){
-                ii = i - numdata
-            } else {
-                ii = i
-            }
-            var ptLon = +Object.values(x1)[ii].geo_longitude
-            if (i < numdata){
-                lat = Object.values(x1)[ii].geo_latitude
-                    lon = Object.values(x1)[ii].geo_longitude
-            } else if (i >= numdata && ptLon < 0) {
-                lat = Object.values(x1)[ii].geo_latitude
-                    lon = (ptLon + 360)
-            } else {
-                lat = Object.values(x1)[ii].geo_latitude
-                    lon = (ptLon - 360)
-            }
-            aType = Object.values(x1)[ii].archiveType
-            dName = Object.values(x1)[ii].dataSetName
-            dID = Object.values(x1)[ii].datasetId
-            proxy1 = Object.values(x1)[ii].paleoData_proxy
-            minAge = Object.values(x1)[ii].minAge
-            maxAge = Object.values(x1)[ii].maxAge
-            geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
-            geojson.features[i].geometry.coordinates.push(lon,lat);
-            geojson.features[i].properties.archiveType.push(aType);
-            geojson.features[i].properties.dataSetName.push(dName);
-            geojson.features[i].properties.datasetId.push(dID);
-            geojson.features[i].properties.paleoData_proxy.push(proxy1);
-            geojson.features[i].properties.minAge.push(minAge);
-            geojson.features[i].properties.maxAge.push(maxAge);
-          }
-        
-          return(geojson)
-        }
-        function updatePoints (coords){
-            spinner.spin();
-            inRectCount = 0;
-            layerGroup.clearLayers();
-            if (!document.getElementById("coordsOn").checked) {
-                document.getElementById("lat_min").value = -90
-                document.getElementById("lat_max").value = 90
-                document.getElementById("lon_min").value = -180
-                document.getElementById("lon_max").value = 180
-                //rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
-                updateBoundingBox();
-                rectCoord = {"South":-90,"West":-180,"North":90,"East":180};
-                rect.editing.disable();
-                
-            } else {
-                rect.editing.enable();
-                rectCoord = changeBoxCoord();
-            }
-         L.geoJSON([loadLatLon(coords)], {
-        
-                        style : function(feature) {
-                            return feature.properties && feature.properties.style;
-                        },
-        
-                        onEachFeature: function (feature, layer) {
-                    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {
-                           maxWidth : 600
-                    });
-                },
-        /*
-                    filter: function(feature, layer) {
-                         return feature.properties.archiveType == 'Wood';
-                    },
-        */
-                        pointToLayer : function(feature, latlng) {
-                    var col1 = chooseColor(feature.properties.archiveType)
-                    var aType = feature.properties.archiveType
-                    var shape1 = chooseShape(feature.properties.archiveType)
-                    var Opac1 = +chooseOpacity(latlng, rectCoord)
-                    var radius1 = 4
-                    if (aType == "Documents"){
-                        radius1 = 6
-                    }
-                    if (aType == "GroundIce" && Opac1 == 0.8){
-                        return L.marker(latlng, {
-                            icon: groundIce
-                        });
-                    } else if (aType == "GlacierIce" && Opac1 == 0.8){
-                        return L.marker(latlng, {
-                            icon: glacierIce
-                        });
-                    } else if (aType == "GroundIce" && Opac1 == 0.1){
-                        return L.marker(latlng, {
-                            icon: groundIceOpac
-                        });
-                    } else if (aType == "GlacierIce" && Opac1 == 0.1){
-                        return L.marker(latlng, {
-                            icon: glacierIceOpac
-                        });
-                    } else {
-                                    return L.shapeMarker(latlng, {
-                            //icon: chooseIcon(feature.properties.archiveType)
-                            
-                                        radius : radius1,
-                                        fillColor : col1,
-                                        color : col1,
-                                        weight : 1,
-                            fillOpacity : Opac1,
-                            shape : shape1,
-                            opacity : 0.1
-                            
-                                    });
-                    }
-                        }
-                    }).addTo(layerGroup);
-            spinner.stop();
-            document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
-        }
-        function rmBlanks(val){
-            if (val.length > 0) {
-                val = split(val)
-                val = val.filter(Boolean)
-                    val = val.join( "," );
-            }
-        return val;
+async function transformToLabelValueArray() {
+    //await loadCompilationJson(); // Ensures compilationJson is ready
+  
+    function getLatestVersion(key) {
+      const versions = Array.isArray(compilationJson[key].versions)
+	? compilationJson[key].versions
+	: [compilationJson[key].versions];
+  
+      const parsed = versions.map(v => v.split('_').map(Number));
+      parsed.sort((a, b) => {
+	for (let i = 0; i < 3; i++) {
+	  if (a[i] !== b[i]) return b[i] - a[i];
+	}
+	return 0;
+      });
+  
+      return parsed[0].join('_');
     }
-        
-    function qString(val1,name1){
-        
-        var x1 = rmBlanks(val1)
-        
-        if (x1.length == 0){
-            return '';
-        } else {
-            return name1 + '=' + x1;
-        }
+  
+    return Object.keys(compilationJson).map(key => {
+      const latest = getLatestVersion(key);
+      return {
+	value: `${key}-${latest}`,
+	label: key
+      };
+    });
+  }
+  function updateBoundingBox(){
+    rect.editing.disable();
+    var latMin = +document.getElementById("lat_min").value
+    var latMax = +document.getElementById("lat_max").value
+    if (latMin > latMax){
+	if (latMin < 90){
+	    latMax = latMin + .001
+	    document.getElementById("lat_max").value = latMax
+	} else {
+	    latMin = latMax - .001
+	    document.getElementById("lat_min").value = latMin
+	}
+    }
+    var lonMin = +document.getElementById("lon_min").value
+    var lonMax = +document.getElementById("lon_max").value
+    if (lonMin > lonMax){
+	if (lonMin < 180){
+	    lonMax = lonMin + .001
+	    document.getElementById("lon_max").value = lonMax
+	} else {
+	    lonMin = lonMax - .001
+	    document.getElementById("lon_min").value = lonMin
+	}
+    }
+    rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
+    rect.editing.enable();
+    return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
+}
+function chooseColor(archiveType){
+    archiveType = archiveType.toString();
+    var color1 = colorPal[archiveType]
+    if (typeof color1 !== 'undefined'){
+	return color1
+    } else {
+	//console.log(archiveType)
+	return "black"
+    }
+}
+function chooseShape(archiveType){
+    archiveType = archiveType.toString();
+    var shape1 = shapePal[archiveType]
+    if (typeof shape1 !== 'undefined'){
+	return shape1
+    } else {
+	//console.log(archiveType)
+	return "diamond"
+    }
+}
+function chooseOpacity(coords, rect1){
+    //rectSW = regExp.exec(rect._bounds._southWest)[1]
+    //rect1 = changeBoxCoord()
+    var point = regExp.exec(coords)[1]
+    var pointLat = dec4(point.split(',')[0])
+    var pointLon = dec4(point.split(',')[1])
+
+    if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
+	inRectCount = inRectCount + 1
+	return 0.8
+    } else {
+	return 0.1
+    }
+}
+function changeBoxCoord(){
+    var SW = regExp.exec(rect._bounds._southWest)[1]
+    var South = dec4(SW.split(',')[0])
+    var West = dec4(SW.split(',')[1])
+    //var South = dec4(0)
+    //var West = dec4(-90)
+    var NE = regExp.exec(rect._bounds._northEast)[1]
+    var North = dec4(NE.split(',')[0])
+    var East = dec4(NE.split(',')[1])
+    //var North = dec4(45)
+    //var East = dec4(0)
+    //var newCoords = South + ', ' + West + ', ' + North + ', ' + East
+    var rectWidth = +(East-West)
+    rect.editing.disable();
+    if (North > 90){
+	    rect.setBounds([[South, West], [90, East]]);
+
+    }
+    if (South < -90){
+
+	    rect.setBounds([[-90, West], [North, East]]);
+	
+    }
+    if (West < -360){
+
+	    rect.setBounds([[South, -360], [North, East]]);
+
+    }
+    if (East > 360){
+
+	    rect.setBounds([[South, West], [North, 360]]);
+	
+    }
+    if (rectWidth > 360){
+	if (West < -360){
+	    var newWest = +(+East - 360)
+	    rect.setBounds([[South, newWest], [North, East]]);
+	} else {
+	    var newEast = +(+West + 360)
+	    rect.setBounds([[South, West], [North, newEast]]);
+	}
+	
+    }
     
+	
+    document.getElementById("lat_min").value = South
+    document.getElementById("lat_max").value = North
+    document.getElementById("lon_min").value = West
+    document.getElementById("lon_max").value = East
+    rect.editing.enable();
+    return {"South":South,"West":West,"North":North,"East":East}
+}
+function loadLatLon (a1){
+    var x1 = a1.filter((arr, index, self) =>
+    index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
+    var geojson = {
+    "name":"NewFeatureType",
+    "type":"FeatureCollection",
+    "features": [],
+    };
+var numdata = +Object.values(x1).length
+var numPoints = +(numdata * 2)
+    
+  for (let i = 0; i < numPoints; i++) {
+    if (i >= numdata){
+	ii = i - numdata
+    } else {
+	ii = i
     }
-    arrayGrep = function (arr1, arr2, selectedString){
-        var indices = [];
-        for (var i=0; i < arr1.length; i++){
-            if (arr1.at(i).includes(selectedString)){
-            indices.push(i)
-          }
-        }
-        var arr3 = indices.map(i => arr2[i]);
-        arr3 = arr3.filter(n => n)
-        arr3 = arr3.sort()
-        return arr3.at(-1)
-        }
-        getAllMonths = function(startSpan,endSpan){
-            var monthText = seasonality2.map(function(d) { return d.label; });
-            var allMonths = [];
-          startSpan=startSpan-1
-          //var spanMax = (endSpan-startSpan)+1
-          for (var i=startSpan; i < endSpan; i++){
-            var startmonth = monthText[i]
-            var monthSpan = endSpan - i
-            for (var ii=0; ii < monthSpan; ii++){
-              var endMonth = monthText[(ii+i)]
-              if (startmonth==endMonth){
-                allMonths.push(startmonth)
-              } else {
-                allMonths.push(startmonth + "-" + endMonth)
-              }
-            }
-          }
-          allMonths = allMonths.join(",")
-          return(allMonths)
-        }
+    var ptLon = +Object.values(x1)[ii].geo_longitude
+    if (i < numdata){
+	lat = Object.values(x1)[ii].geo_latitude
+	    lon = Object.values(x1)[ii].geo_longitude
+    } else if (i >= numdata && ptLon < 0) {
+	lat = Object.values(x1)[ii].geo_latitude
+	    lon = (ptLon + 360)
+    } else {
+	lat = Object.values(x1)[ii].geo_latitude
+	    lon = (ptLon - 360)
+    }
+    aType = Object.values(x1)[ii].archiveType
+    dName = Object.values(x1)[ii].dataSetName
+    dID = Object.values(x1)[ii].datasetId
+    proxy1 = Object.values(x1)[ii].paleoData_proxy
+    minAge = Object.values(x1)[ii].minAge
+    maxAge = Object.values(x1)[ii].maxAge
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
+    geojson.features[i].geometry.coordinates.push(lon,lat);
+    geojson.features[i].properties.archiveType.push(aType);
+    geojson.features[i].properties.dataSetName.push(dName);
+    geojson.features[i].properties.datasetId.push(dID);
+    geojson.features[i].properties.paleoData_proxy.push(proxy1);
+    geojson.features[i].properties.minAge.push(minAge);
+    geojson.features[i].properties.maxAge.push(maxAge);
+  }
+
+  return(geojson)
+}
+function updatePoints (coords){
+    spinner.spin();
+    inRectCount = 0;
+    layerGroup.clearLayers();
+    if (!document.getElementById("coordsOn").checked) {
+	document.getElementById("lat_min").value = -90
+	document.getElementById("lat_max").value = 90
+	document.getElementById("lon_min").value = -180
+	document.getElementById("lon_max").value = 180
+	//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
+	updateBoundingBox();
+	rectCoord = {"South":-90,"West":-180,"North":90,"East":180};
+	rect.editing.disable();
+	
+    } else {
+	rect.editing.enable();
+	rectCoord = changeBoxCoord();
+    }
+ L.geoJSON([loadLatLon(coords)], {
+
+		style : function(feature) {
+		    return feature.properties && feature.properties.style;
+		},
+
+		onEachFeature: function (feature, layer) {
+	    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {
+		   maxWidth : 600
+	    });
+	},
+/*
+	    filter: function(feature, layer) {
+		 return feature.properties.archiveType == 'Wood';
+	    },
+*/
+		pointToLayer : function(feature, latlng) {
+	    var col1 = chooseColor(feature.properties.archiveType)
+	    var aType = feature.properties.archiveType
+	    var shape1 = chooseShape(feature.properties.archiveType)
+	    var Opac1 = +chooseOpacity(latlng, rectCoord)
+	    var radius1 = 4
+	    if (aType == "Documents"){
+		radius1 = 6
+	    }
+	    if (aType == "GroundIce" && Opac1 == 0.8){
+		return L.marker(latlng, {
+		    icon: groundIce
+		});
+	    } else if (aType == "GlacierIce" && Opac1 == 0.8){
+		return L.marker(latlng, {
+		    icon: glacierIce
+		});
+	    } else if (aType == "GroundIce" && Opac1 == 0.1){
+		return L.marker(latlng, {
+		    icon: groundIceOpac
+		});
+	    } else if (aType == "GlacierIce" && Opac1 == 0.1){
+		return L.marker(latlng, {
+		    icon: glacierIceOpac
+		});
+	    } else {
+			    return L.shapeMarker(latlng, {
+		    //icon: chooseIcon(feature.properties.archiveType)
+		    
+				radius : radius1,
+				fillColor : col1,
+				color : col1,
+				weight : 1,
+		    fillOpacity : Opac1,
+		    shape : shape1,
+		    opacity : 0.1
+		    
+			    });
+	    }
+		}
+	    }).addTo(layerGroup);
+    spinner.stop();
+    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
+}
+function rmBlanks(val){
+    if (val.length > 0) {
+	val = split(val)
+	val = val.filter(Boolean)
+	    val = val.join( "," );
+    }
+return val;
+}
+        
+function qString(val1,name1){
+
+var x1 = rmBlanks(val1)
+
+if (x1.length == 0){
+    return '';
+} else {
+    return name1 + '=' + x1;
+}
+
+}
+arrayGrep = function (arr1, arr2, selectedString){
+var indices = [];
+for (var i=0; i < arr1.length; i++){
+    if (arr1.at(i).includes(selectedString)){
+    indices.push(i)
+  }
+}
+var arr3 = indices.map(i => arr2[i]);
+arr3 = arr3.filter(n => n)
+arr3 = arr3.sort()
+return arr3.at(-1)
+}
+getAllMonths = function(startSpan,endSpan){
+    var monthText = seasonality2.map(function(d) { return d.label; });
+    var allMonths = [];
+  startSpan=startSpan-1
+  //var spanMax = (endSpan-startSpan)+1
+  for (var i=startSpan; i < endSpan; i++){
+    var startmonth = monthText[i]
+    var monthSpan = endSpan - i
+    for (var ii=0; ii < monthSpan; ii++){
+      var endMonth = monthText[(ii+i)]
+      if (startmonth==endMonth){
+	allMonths.push(startmonth)
+      } else {
+	allMonths.push(startmonth + "-" + endMonth)
+      }
+    }
+  }
+  allMonths = allMonths.join(",")
+  return(allMonths)
+}
         function params(useCoords=false){
             var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
             var x2 = rmBlanks(document.getElementById("variableName").value)
