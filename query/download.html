@@ -542,6 +542,7 @@ function updateFilters(){
 
 //initiate leaflet map
 var map = L.map('map', {attributionControl: false}).setView([0, 0], 2);
+spinner.spin(target);
 var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
 	minZoom: 1
@@ -772,7 +773,6 @@ if (recon1 == 'false'){
 }
 
 function updatePoints (coords){
-    spinner.spin(target);
     inRectCount = 0;
     layerGroup.clearLayers();
     if (!document.getElementById("coordsOn").checked) {
@@ -846,15 +846,20 @@ function updatePoints (coords){
 	    }
 		}
 	    }).addTo(layerGroup);
-    spinner.stop();
     document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 
-updatePoints(prevResp);
+sendQuery():
+
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   
-updatePoints(prevResp);
+	updatePoints(prevResp);
 });
+
+updateBoundingBox();
+window.onload = function() {
+    spinner.stop();
+};
 </script>
 </html>
