@@ -2,6 +2,10 @@
   z-index: 999999999 !important;
 }
 
+.leaflet-container .leaflet-loading {
+  display: none !important;
+}
+
 @keyframes spinner-line-fade-more {
   0%, 100% {
     opacity: 0; /* minimum opacity */
