@@ -117,6 +117,7 @@ Selected values:
 <br>
 <br>
   <!-- </form> -->
+<div id="spinner-overlay"></div>
 <div class="leaflet-container" id="map" style="height: 90vh; width: 90vw;"></div><br>
 <br>
 <div id="InstructionBox" style="width: 1200px; margin: auto; border-width:3px; border-style:groove; border-color:#899877; border-radius: 10px;"><p style="text-align: center; font-size:14px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" id="Instructions">The map above offers a preview of the data returned by the LiPDverse Query. Each point represents a dataset with one or more paleoclimate proxy time series. Provide queries below and click <b>Update Map</b> to view available data. When you are satisfied with your query, click <b>Submit</b> at the bottom of the page to continue.</p></div>
@@ -491,7 +492,7 @@ var opts = {
     className: 'spinner', // The CSS class to assign to the spinner
     position: 'absolute', // Element positioning
   };
-var target = document.getElementById('map');
+var target = document.getElementById('spinner-overlay');
 var spinner = new Spinner(opts);
 	
 let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
