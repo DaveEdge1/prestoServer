@@ -1,3 +1,65 @@
+$(function() {
+    // Split function to separate terms by comma and optional space
+    function split(val) {
+        return val.split(/,\s*/);
+    }
+    // Extract the last term for autocomplete
+    function extractLast(term) {
+        return split(term).pop();
+    }
+
+    /**
+     * General autocomplete initializer
+     * @param {string} selector - jQuery selector for the input
+     * @param {Array} dataSource - Array of autocomplete options
+     */
+    function setupAutocomplete(selector, dataSource) {
+        $(selector)
+            // Don't navigate away from the field on tab when selecting an item
+            .bind("keydown", function(event) {
+                if (event.keyCode === $.ui.keyCode.TAB &&
+                    $(this).autocomplete("instance") &&
+                    $(this).autocomplete("instance").menu.active) {
+                    event.preventDefault();
+                }
+            })
+            .autocomplete({
+                minLength: 0,
+                source: function(request, response) {
+                    response(
+                        $.ui.autocomplete.filter(
+                            dataSource, extractLast(request.term)
+                        )
+                    );
+                },
+                focus: function() {
+                    // Prevent value inserted on focus
+                    return false;
+                },
+                select: function(event, ui) {
+                    var terms = split(this.value);
+                    // remove the current input
+                    terms.pop();
+                    // add the selected item
+                    terms.push(ui.item.value);
+                    // add placeholder to get the comma-and-space at the end
+                    terms.push("");
+                    this.value = terms.join(", ");
+                    return false;
+                }
+            });
+    }
+
+    // Example usage for your elements
+    setupAutocomplete("#proxy", proxylist);
+    setupAutocomplete("variableName", variablelist);
+    setupAutocomplete("archiveTypeIn", archivelist);
+    setupAutocomplete("countryIn", countrylist);
+    setupAutocomplete("continentIn", continentlist);
+    setupAutocomplete("compilationIn", latestCompilations);
+    setupAutocomplete("seasonality1", seasonalitylist);
+
+});
 function hideForm(){
 	if (document.getElementById("archivedCompilation").checked){
 		document.getElementById("queryForm").style.display = "none";
