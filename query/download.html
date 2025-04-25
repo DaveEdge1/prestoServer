@@ -1036,78 +1036,7 @@ function rmBlanksCompilation(val){
 */
 
 </script>
-	<script>
-            const compileLipds = function(Body) {
-            return new Promise((resolve, reject) => {
-                var xhr1 = new XMLHttpRequest();
-        
-                xhr1.onreadystatechange = () => {
-                    if (xhr1.readyState !== 4) return;
-        
-                    if (xhr1.status === 200) {
-                        resolve(xhr1.responseText);
-                    } else {
-                        console.error("XHR didn't work: " + xhr1.status);
-                        reject(new Error("XHR failed with status " + xhr1.status));
-                    }
-                };
-        
-                xhr1.onerror = () => {
-                    reject(new Error("XHR encountered a network error"));
-                };
-        
-                xhr1.ontimeout = () => {
-                    reject(new Error("XHR request timed out"));
-                };
-        
-                xhr1.open("POST", "http://143.198.98.66:90/lipds", true);
-                xhr1.setRequestHeader("Content-type", "application/json");
-        
-                xhr1.timeout = 5000; // Set a timeout (optional)
-                
-                xhr1.send(Body);
-            });
-        };
-        function getLipds(loc1, lipdSource){
-            return new Promise((resolve, reject) => {
-                //alert(params(useCoords=true))
-                getTSIDs().then(reso => {
-                    if (lipdSource == 'TSIDs'){
-                        var resoJSON = JSON.parse(reso);
-                        var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-                        console.log("Total time series: " + IDs.length);
-                        var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-                        console.log("json body sent to 'getLipds': " + tsJSON)
-                        console.log("sending post TSids")
-                        //postTSids(tsJSON);
-                        var TSIDsArray = JSON.parse(tsJSON).TSIDs
-                        var numTSids = TSIDsArray.length
-                    } else {
-                        const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
-                        var tsJSON = '{"compilation": "' + document.getElementById('archivedCompilationIn').value + '", "version": "' + document.getElementById('archivedCompilationVersionIn').value + '", "recon": "' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-                        console.log("sending post for archived compilation: ", tsJSON)
-                    }
-                    compileLipds(tsJSON)
-                        .then(response => {
-                            console.log("Success:", response);
-                        if (loc1 == "donwload"){
-                            resolve("https://www.google.com")
-                        } else {
-                            var queryParams = params(useCoords=true)
-                            queryParams = '&' + queryParams.substring(1);
-                            queryParams = queryParams.replace(/\s/g, '');
-                            resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
-                        }
-                        })
-                        .catch(error => {
-                            console.error("Error:", error.message);
-                        alert("Error: failed to write data selection to server. Please start over.");
-                        resolve("https://paleopresto.com/custom.html");
-                        });
-                });
-            });
-        }
-</script>
+
 <script>
 //var compVals = compilationlist.map(function(d) { return d.value })
 //console.log(compVals)
