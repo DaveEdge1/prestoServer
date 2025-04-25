@@ -18,6 +18,11 @@ var latestCompilations = {};
   console.log(latestCompilations);
 })();
 
+function loadVersions(compilation){
+	//console.log("compilationJson[compilation].versions: " + compilationJson[compilation].versions)
+	return compilationJson[compilation].versions
+}
+
  $(function() {
 function split( val ) {
 return val.split( /,\s*/ );
@@ -179,7 +184,10 @@ function hideForm(){
         document.getElementById('language').value = getQueryVariable("language");
         }
 async function transformToLabelValueArray() {
-    //await loadCompilationJson(); // Ensures compilationJson is ready
+	  if (compilationJson.hasOwnProperty(key)) {
+	    const value = compilationJson[key];
+	    //console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
+	  }
   
     function getLatestVersion(key) {
       const versions = Array.isArray(compilationJson[key].versions)
