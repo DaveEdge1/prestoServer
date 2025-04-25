@@ -362,7 +362,7 @@ async function downloadCompilation(uniqueID, URL, language) {
 			      return console.log('Failed to append to status file:', err);
 			    }
 			    console.log('archived compilation download completed!');
-			    // Continue logic or resolve promise/call next step here
+			    resolve();
 			  });
 			});
 		});
