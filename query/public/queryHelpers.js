@@ -100,7 +100,6 @@ $(function() {
             // Don't navigate away from the field on tab when selecting an item
             .bind("keydown", function(event) {
                 if (event.keyCode === $.ui.keyCode.TAB &&
-                    $(this).autocomplete("instance") &&
                     $(this).autocomplete("instance").menu.active) {
                     event.preventDefault();
                 }
