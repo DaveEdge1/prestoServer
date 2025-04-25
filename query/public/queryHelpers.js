@@ -33,10 +33,6 @@ var opts = {
   position: 'absolute', // Element positioning
 };
 
-
-var target = document.getElementById('map');
-var spinner = new Spinner(opts).spin(target);
-
 function split( val ) {
 return val.split( /,\s*/ );
 }
@@ -398,8 +394,8 @@ var numPoints = +(numdata * 2)
 
   return(geojson)
 }
-function updatePoints (coords){
-    spinner.spin();
+function updatePoints (coords, spinnerLocal){
+    spinnerLocal.spin();
     inRectCount = 0;
     layerGroup.clearLayers();
     if (!document.getElementById("coordsOn").checked) {
@@ -473,7 +469,7 @@ function updatePoints (coords){
 	    }
 		}
 	    }).addTo(layerGroup);
-    spinner.stop();
+    spinnerLocal.stop();
     document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 function rmBlanks(val){
@@ -581,7 +577,7 @@ getAllMonths = function(startSpan,endSpan){
                         resolve();
                     });
                     promise1.then(() => {
-                      updatePoints(prevResp)
+                      updatePoints(prevResp, spinner)
                       xhr0 = null;
                       // Expected output: "Success!"
                     });
