@@ -31,59 +31,9 @@
 	<script src="/leaflet.legend.js"></script>
 	<script src="/spin.js"></script>
 	<script src="/compilationMetadata.js"></script>
+	<script src="/queryHelpers.js"></script>
 	<script language="javascript" type="text/javascript" src="/data_forge.js"></script>
-
-	<!--script type="text/javascript">
-		
-	var compilationJson = {}; // Global variable
-	var compilationNames = {};
 	
-	async function fetchJson(url) {
-	  try {
-	    const response = await fetch(url);
-	
-	    if (!response.ok) {
-	      throw new Error(`HTTP error! status: ${response.status}`);
-	    }
-	
-	    const jsonData = await response.json();
-	
-	    console.log(jsonData); // Log the data
-	    return jsonData;
-	  } catch (error) {
-	    console.error("Failed to fetch JSON data:", error);
-	    return null;
-	  }
-	}
-	
-	// Wrapper to load the JSON and assign to global variable
-	async function loadCompilationJson() {
-	  const url = '/compilationMetadata.json';
-	  compilationJson = await fetchJson(url);
-		// Call this at some point, e.g., on page load
-	console.log("fetched compilation json: ", compilationJson)
-	compilationNames = Object.keys(compilationJson);
-	
-				
-	for (const key in compilationJson) {
-	  //console.log('key: ' + key)
-	  if (compilationJson.hasOwnProperty(key)) {
-	    const value = compilationJson[key];
-	    //console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
-	  }
-	}
-	}
-
-	function loadVersions(compilation){
-		//console.log("compilationJson[compilation].versions: " + compilationJson[compilation].versions)
-		return compilationJson[compilation].versions
-	}
-	
-	
-		
-</script-->
-	
-    <!--script src="https://unpkg.com/@bopen/leaflet-area-selection@0.6.1/dist/index.umd.js"></script-->
 
 	<style>
 		html, body {
@@ -177,53 +127,7 @@ Selected values:
 <input id="domain" name="domain" type="hidden" value="">
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
 <input id="language" name="language" type="hidden" value="">
-<script>
 
-function hideForm(){
-	if (document.getElementById("archivedCompilation").checked){
-		document.getElementById("queryForm").style.display = "none";
-		document.getElementById("map").style.display = "none";
-		document.getElementById("mapUpdateButton").style.display = "none";
-		document.getElementById("InstructionBox").style.display = "none";
-		document.getElementById("proceedButton").style.display = "none";
-		document.getElementById("datasetCount").style.display = "none";
-		document.getElementById("archivedCompilationGroup").style.display = "block";
-		document.getElementById("archivedCompButton").style.display = "block";
-		document.getElementById("compilationForm").style.display = "block";
-	} else {
-		document.getElementById("queryForm").style.display = "block";
-		document.getElementById("map").style.display = "block";
-		document.getElementById("mapUpdateButton").style.display = "block";
-		document.getElementById("InstructionBox").style.display = "block";
-		document.getElementById("proceedButton").style.display = "block";
-		document.getElementById("datasetCount").style.display = "block";
-		document.getElementById("archivedCompilationGroup").style.display = "none";
-		document.getElementById("archivedCompButton").style.display = "none";
-		document.getElementById("compilationForm").style.display = "none";
-	}
-}
-	
-    function getQueryVariable(variable)
-    {
-           var query = window.location.search.substring(1);
-           var vars = query.split("&");
-           for (var i=0;i<vars.length;i++) {
-                   var pair = vars[i].split("=");
-                   if(pair[0] == variable){
-                     return pair[1];}
-           }
-           return(false);
-    }
-</script>
-<script>
-    function popQueryVariable(){
-    document.getElementById('recon').value = getQueryVariable("recon");
-    document.getElementById('user').value = getQueryVariable("user");
-    document.getElementById('domain').value = getQueryVariable("domain");
-    document.getElementById('uniqueID').value = getQueryVariable("uniqueID");
-    document.getElementById('language').value = getQueryVariable("language");
-    }
-</script>
 <script>
 popQueryVariable()
 </script>
@@ -565,33 +469,7 @@ popQueryVariable()
       </footer>
 
 <script>
-async function transformToLabelValueArray() {
-  //await loadCompilationJson(); // Ensures compilationJson is ready
 
-  function getLatestVersion(key) {
-    const versions = Array.isArray(compilationJson[key].versions)
-      ? compilationJson[key].versions
-      : [compilationJson[key].versions];
-
-    const parsed = versions.map(v => v.split('_').map(Number));
-    parsed.sort((a, b) => {
-      for (let i = 0; i < 3; i++) {
-        if (a[i] !== b[i]) return b[i] - a[i];
-      }
-      return 0;
-    });
-
-    return parsed[0].join('_');
-  }
-
-  return Object.keys(compilationJson).map(key => {
-    const latest = getLatestVersion(key);
-    return {
-      value: `${key}-${latest}`,
-      label: key
-    };
-  });
-}
 var latestCompilations = {};
 (async () => {
   latestCompilations = await transformToLabelValueArray();
@@ -694,134 +572,24 @@ map.on('drag', function() {
     map.panInsideBounds(bounds, { animate: false });
 });
 */
-function updateBoundingBox(){
-	rect.editing.disable();
-	var latMin = +document.getElementById("lat_min").value
-	var latMax = +document.getElementById("lat_max").value
-	if (latMin > latMax){
-		if (latMin < 90){
-			latMax = latMin + .001
-			document.getElementById("lat_max").value = latMax
-		} else {
-			latMin = latMax - .001
-			document.getElementById("lat_min").value = latMin
-		}
-	}
-	var lonMin = +document.getElementById("lon_min").value
-	var lonMax = +document.getElementById("lon_max").value
-	if (lonMin > lonMax){
-		if (lonMin < 180){
-			lonMax = lonMin + .001
-			document.getElementById("lon_max").value = lonMax
-		} else {
-			lonMin = lonMax - .001
-			document.getElementById("lon_min").value = lonMin
-		}
-	}
-	rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
-	rect.editing.enable();
-	return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
-}
+
 	
 //add layer for points
 var layerGroup = L.layerGroup().addTo(map);
 
 
-function chooseColor(archiveType){
-	archiveType = archiveType.toString();
-	var color1 = colorPal[archiveType]
-	if (typeof color1 !== 'undefined'){
-		return color1
-	} else {
-		//console.log(archiveType)
-		return "black"
-	}
-}
-function chooseShape(archiveType){
-	archiveType = archiveType.toString();
-	var shape1 = shapePal[archiveType]
-	if (typeof shape1 !== 'undefined'){
-		return shape1
-	} else {
-		//console.log(archiveType)
-		return "diamond"
-	}
-}
+
 var regExp = /\(([^)]+)\)/;
 function dec4(x) {
   return Number.parseFloat(x).toFixed(4);
 }
 
-function chooseOpacity(coords, rect1){
-	//rectSW = regExp.exec(rect._bounds._southWest)[1]
-	//rect1 = changeBoxCoord()
-	var point = regExp.exec(coords)[1]
-	var pointLat = dec4(point.split(',')[0])
-	var pointLon = dec4(point.split(',')[1])
 
-	if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
-		inRectCount = inRectCount + 1
-		return 0.8
-	} else {
-		return 0.1
-	}
-}
 
 //regex helper
 
 //extract leaflet rectangle coords
-function changeBoxCoord(){
-	var SW = regExp.exec(rect._bounds._southWest)[1]
-	var South = dec4(SW.split(',')[0])
-	var West = dec4(SW.split(',')[1])
-	//var South = dec4(0)
-	//var West = dec4(-90)
-	var NE = regExp.exec(rect._bounds._northEast)[1]
-	var North = dec4(NE.split(',')[0])
-	var East = dec4(NE.split(',')[1])
-	//var North = dec4(45)
-	//var East = dec4(0)
-	//var newCoords = South + ', ' + West + ', ' + North + ', ' + East
-	var rectWidth = +(East-West)
-	rect.editing.disable();
-	if (North > 90){
-			rect.setBounds([[South, West], [90, East]]);
 
-	}
-	if (South < -90){
-
-			rect.setBounds([[-90, West], [North, East]]);
-		
-	}
-	if (West < -360){
-
-			rect.setBounds([[South, -360], [North, East]]);
-
-	}
-	if (East > 360){
-
-			rect.setBounds([[South, West], [North, 360]]);
-		
-	}
-	if (rectWidth > 360){
-		if (West < -360){
-			var newWest = +(+East - 360)
-			rect.setBounds([[South, newWest], [North, East]]);
-		} else {
-			var newEast = +(+West + 360)
-			rect.setBounds([[South, West], [North, newEast]]);
-		}
-		
-	}
-	
-		
-	document.getElementById("lat_min").value = South
-	document.getElementById("lat_max").value = North
-	document.getElementById("lon_min").value = West
-	document.getElementById("lon_max").value = East
-	rect.editing.enable();
-	return {"South":South,"West":West,"North":North,"East":East}
-}
 
 
 </script>
@@ -830,52 +598,7 @@ function changeBoxCoord(){
 //var latLon = [{"dataSetName":"TR04EVLI","archiveType":"Wood","geo_latitude":10,"geo_longitude":-85},{"dataSetName":"TR04EVLI","archiveType":"Wood","geo_latitude":10,"geo_longitude":-85},{"dataSetName":"TR04EVLI","archiveType":"Wood","geo_latitude":10,"geo_longitude":-85},{"dataSetName":"TR06TRBO","archiveType":"Wood","geo_latitude":36.62,"geo_longitude":74.98},{"dataSetName":"TR06TRBO","archiveType":"Wood","geo_latitude":36.62,"geo_longitude":74.98},{"dataSetName":"TR07RECA","archiveType":"Wood","geo_latitude":46.35,"geo_longitude":8.6},{"dataSetName":"TR07RECA","archiveType":"Wood","geo_latitude":46.35,"geo_longitude":8.6},{"dataSetName":"TR07REVI","archiveType":"Wood","geo_latitude":46.5,"geo_longitude":8.77},{"dataSetName":"TR07REVI","archiveType":"Wood","geo_latitude":46.5,"geo_longitude":8.77},{"dataSetName":"TR08HORA","archiveType":"Wood","geo_latitude":68.1,"geo_longitude":60},{"dataSetName":"TR08HORA","archiveType":"Wood","geo_latitude":68.1,"geo_longitude":60},{"dataSetName":"TR08THCO","archiveType":"Wood","geo_latitude":52.5,"geo_longitude":-118},{"dataSetName":"TR08THCO","archiveType":"Wood","geo_latitude":52.5,"geo_longitude":-118},{"dataSetName":"TR08THCO","archiveType":"Wood","geo_latitude":52.5,"geo_longitude":-118},{"dataSetName":"TR08THCO","archiveType":"Wood","geo_latitude":52.5,"geo_longitude":-118},{"dataSetName":"TR08VOOL","archiveType":"Wood","geo_latitude":53.2833,"geo_longitude":107.6333},{"dataSetName":"TR08VOOL","archiveType":"Wood","geo_latitude":53.2833,"geo_longitude":107.6333},{"dataSetName":"TR10ANMO","archiveType":"Wood","geo_latitude":10.2,"geo_longitude":-85.35},{"dataSetName":"TR10ANMO","archiveType":"Wood","geo_latitude":10.2,"geo_longitude":-85.35},{"dataSetName":"TR10ANMO","archiveType":"Wood","geo_latitude":10.2,"geo_longitude":-85.35},{"dataSetName":"TR11BAPU","archiveType":"Wood","geo_latitude":-12.6,"geo_longitude":-69.2},{"dataSetName":"TR11BAPU","archiveType":"Wood","geo_latitude":-12.6,"geo_longitude":-69.2},{"dataSetName":"TR11BAPU","archiveType":"Wood","geo_latitude":-12.6,"geo_longitude":-69.2},{"dataSetName":"TR11BAVO","archiveType":"Wood","geo_latitude":-22,"geo_longitude":-66},{"dataSetName":"TR11BAVO","archiveType":"Wood","geo_latitude":-22,"geo_longitude":-66},{"dataSetName":"TR11BAVO","archiveType":"Wood","geo_latitude":-22,"geo_longitude":-66},{"dataSetName":"TR11GRTP","archiveType":"Wood","geo_latitude":30.3083,"geo_longitude":91.5167},{"dataSetName":"TR11GRTP","archiveType":"Wood","geo_latitude":30.3083,"geo_longitude":91.5167},{"dataSetName":"TR11MAJA","archiveType":"Wood","geo_latitude":19.08,"geo_longitude":82.33},{"dataSetName":"TR11MAJA","archiveType":"Wood","geo_latitude":19.08,"geo_longitude":82.33},{"dataSetName":"TR11MAJA","archiveType":"Wood","geo_latitude":19.08,"geo_longitude":82.33},{"dataSetName":"TR11MAJA","archiveType":"Wood","geo_latitude":19.08,"geo_longitude":82.33},{"dataSetName":"TR11MAPE","archiveType":"Wood","geo_latitude":10.43,"geo_longitude":76.93},{"dataSetName":"TR11MAPE","archiveType":"Wood","geo_latitude":10.43,"geo_longitude":76.93},{"dataSetName":"TR11MAPE","archiveType":"Wood","geo_latitude":10.43,"geo_longitude":76.93},{"dataSetName":"TR11SAHU00","archiveType":"Wood","geo_latitude":29.85,"geo_longitude":81.93},{"dataSetName":"TR11SAHU00","archiveType":"Wood","geo_latitude":29.85,"geo_longitude":81.93},{"dataSetName":"TR11SIMO","archiveType":"Wood","geo_latitude":50.23,"geo_longitude":89.04},{"dataSetName":"TR11SIMO","archiveType":"Wood","geo_latitude":50.23,"geo_longitude":89.04},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR11XUPH","archiveType":"Wood","geo_latitude":19.9,"geo_longitude":101.2},{"dataSetName":"TR12BECO","archiveType":"Wood","geo_latitude":38.8,"geo_longitude":-105},{"dataSetName":"TR12BECO","archiveType":"Wood","geo_latitude":38.8,"geo_longitude":-105},{"dataSetName":"TR12BRBO","archiveType":"Wood","geo_latitude":-11.4,"geo_longitude":-68.716},{"dataSetName":"TR12BRBO","archiveType":"Wood","geo_latitude":-11.4,"geo_longitude":-68.716},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR12SAMU","archiveType":"Wood","geo_latitude":21.67,"geo_longitude":104.1},{"dataSetName":"TR13BROA","archiveType":"Wood","geo_latitude":16.65,"geo_longitude":-95},{"dataSetName":"TR13BROA","archiveType":"Wood","geo_latitude":16.65,"geo_longitude":-95},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOAR","archiveType":"Wood","geo_latitude":40.875,"geo_longitude":-124.0683},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOJS","archiveType":"Wood","geo_latitude":41.7883,"geo_longitude":-124.0767},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13JOPC","archiveType":"Wood","geo_latitude":41.4567,"geo_longitude":-124.0467},{"dataSetName":"TR13POMA","archiveType":"Wood","geo_latitude":68.4,"geo_longitude":-133.8},{"dataSetName":"TR13POMA","archiveType":"Wood","geo_latitude":68.4,"geo_longitude":-133.8},{"dataSetName":"TR13SAWA00","archiveType":"Wood","geo_latitude":27.983,"geo_longitude":90},{"dataSetName":"TR13SAWA00","archiveType":"Wood","geo_latitude":27.983,"geo_longitude":90},{"dataSetName":"TR13SIKO","archiveType":"Wood","geo_latitude":49,"geo_longitude":86},{"dataSetName":"TR13SIKO","archiveType":"Wood","geo_latitude":49,"geo_longitude":86},{"dataSetName":"TR13SITA","archiveType":"Wood","geo_latitude":72,"geo_longitude":100},{"dataSetName":"TR13SITA","archiveType":"Wood","geo_latitude":72,"geo_longitude":100},{"dataSetName":"TR14KOSP","archiveType":"Wood","geo_latitude":42.6411,"geo_longitude":1.0025},{"dataSetName":"TR14KOSP","archiveType":"Wood","geo_latitude":42.6411,"geo_longitude":1.0025},{"dataSetName":"TR15BABO","archiveType":"Wood","geo_latitude":-10.0833,"geo_longitude":-66.3},{"dataSetName":"TR15BABO","archiveType":"Wood","geo_latitude":-10.0833,"geo_longitude":-66.3},{"dataSetName":"TR15NACA","archiveType":"Wood","geo_latitude":54.56,"geo_longitude":-71.2},{"dataSetName":"TR15NACA","archiveType":"Wood","geo_latitude":54.56,"geo_longitude":-71.2},{"dataSetName":"TR15YOLL","archiveType":"Wood","geo_latitude":52.2217,"geo_longitude":-4.228},{"dataSetName":"TR15YOLL","archiveType":"Wood","geo_latitude":52.2217,"geo_longitude":-4.228},{"dataSetName":"TR15YONW","archiveType":"Wood","geo_latitude":51.8399,"geo_longitude":-4.1515},{"dataSetName":"TR15YONW","archiveType":"Wood","geo_latitude":51.8399,"geo_longitude":-4.1515},{"dataSetName":"TR16LAAN","archiveType":"Wood","geo_latitude":45.7333,"geo_longitude":0.3},{"dataSetName":"TR16LAAN","archiveType":"Wood","geo_latitude":45.7333,"geo_longitude":0.3},{"dataSetName":"TR16LAFO","archiveType":"Wood","geo_latitude":48.3833,"geo_longitude":2.6667},{"dataSetName":"TR16LAFO","archiveType":"Wood","geo_latitude":48.3833,"geo_longitude":2.6667},{"dataSetName":"TR16WEMI","archiveType":"Wood","geo_latitude":29.45,"geo_longitude":96.43},{"dataSetName":"TR16WEMI","archiveType":"Wood","geo_latitude":29.45,"geo_longitude":96.43},{"dataSetName":"TR16WEXI","archiveType":"Wood","geo_latitude":30.42,"geo_longitude":95.07},{"dataSetName":"TR16WEXI","archiveType":"Wood","geo_latitude":30.42,"geo_longitude":95.07},{"dataSetName":"TR17EDSW","archiveType":"Wood","geo_latitude":57.815,"geo_longitude":15.26},{"dataSetName":"TR17EDSW","archiveType":"Wood","geo_latitude":57.815,"geo_longitude":15.26},{"dataSetName":"TR17GRTP","archiveType":"Wood","geo_latitude":31.15,"geo_longitude":97.033},{"dataSetName":"TR17GRTP","archiveType":"Wood","geo_latitude":31.15,"geo_longitude":97.033},{"dataSetName":"TR17SAMA","archiveType":"Wood","geo_latitude":32.2167,"geo_longitude":77.2167},{"dataSetName":"TR17SAMA","archiveType":"Wood","geo_latitude":32.2167,"geo_longitude":77.2167},{"dataSetName":"TR18GRPM","archiveType":"Wood","geo_latitude":-50.5167,"geo_longitude":-70.1167},{"dataSetName":"TR18GRPM","archiveType":"Wood","geo_latitude":-50.5167,"geo_longitude":-70.1167},{"dataSetName":"TR18XUGA00","archiveType":"Wood","geo_latitude":28.183,"geo_longitude":85.183},{"dataSetName":"TR18XUGA00","archiveType":"Wood","geo_latitude":28.183,"geo_longitude":85.183},{"dataSetName":"TR18XUJA00","archiveType":"Wood","geo_latitude":29.633,"geo_longitude":79.85},{"dataSetName":"TR18XUJA00","archiveType":"Wood","geo_latitude":29.633,"geo_longitude":79.85},{"dataSetName":"TR19LEBR","archiveType":"Wood","geo_latitude":41.4,"geo_longitude":-74.0167},{"dataSetName":"TR19LEBR","archiveType":"Wood","geo_latitude":41.4,"geo_longitude":-74.0167},{"dataSetName":"TR19LEBR","archiveType":"Wood","geo_latitude":41.4,"geo_longitude":-74.0167},{"dataSetName":"TR19LECR","archiveType":"Wood","geo_latitude":37.0667,"geo_longitude":-89.6},{"dataSetName":"TR19LECR","archiveType":"Wood","geo_latitude":37.0667,"geo_longitude":-89.6},{"dataSetName":"TR19LEFC","archiveType":"Wood","geo_latitude":34.6667,"geo_longitude":-84.1833},{"dataSetName":"TR19LEFC","archiveType":"Wood","geo_latitude":34.6667,"geo_longitude":-84.1833},{"dataSetName":"TR19LEFC","archiveType":"Wood","geo_latitude":34.6667,"geo_longitude":-84.1833},{"dataSetName":"TR19LEOU","archiveType":"Wood","geo_latitude":34.6833,"geo_longitude":-94.6333},{"dataSetName":"TR19LEOU","archiveType":"Wood","geo_latitude":34.6833,"geo_longitude":-94.6333},{"dataSetName":"Arc-Avam-Taimyr.Briffa.2008","archiveType":"Wood","geo_latitude":72,"geo_longitude":101},{"dataSetName":"Arc-Avam-Taimyr.Briffa.2008","archiveType":"Wood","geo_latitude":72,"geo_longitude":101},{"dataSetName":"Arc-Forfjorddalen.McCarroll.2013","archiveType":"Wood","geo_latitude":68.73,"geo_longitude":15.73},{"dataSetName":"Arc-Forfjorddalen.McCarroll.2013","archiveType":"Wood","geo_latitude":68.73,"geo_longitude":15.73},{"dataSetName":"Arc-GulfofAlaska.Wilson.2014","archiveType":"Wood","geo_latitude":61.03,"geo_longitude":-146.59},{"dataSetName":"Arc-GulfofAlaska.Wilson.2014","archiveType":"Wood","geo_latitude":61.03,"geo_longitude":-146.59},{"dataSetName":"Arc-Jamtland.Wilson.2016","archiveType":"Wood","geo_latitude":63.2475,"geo_longitude":13.3375},{"dataSetName":"Arc-Jamtland.Wilson.2016","archiveType":"Wood","geo_latitude":63.2475,"geo_longitude":13.3375},{"dataSetName":"Arc-LenaRiver.McDonald.1998","archiveType":"Wood","geo_latitude":70.67,"geo_longitude":125.87},{"dataSetName":"Arc-LenaRiver.McDonald.1998","archiveType":"Wood","geo_latitude":70.67,"geo_longitude":125.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-MackenzieDelta.Porter.2013","archiveType":"Wood","geo_latitude":68.625,"geo_longitude":-133.87},{"dataSetName":"Arc-PolarUrals.Wilson.2015","archiveType":"Wood","geo_latitude":66.9,"geo_longitude":65.6},{"dataSetName":"Arc-PolarUrals.Wilson.2015","archiveType":"Wood","geo_latitude":66.9,"geo_longitude":65.6},{"dataSetName":"Arc-Yukon.D'Arrigo.2006","archiveType":"Wood","geo_latitude":67.9,"geo_longitude":-140.7},{"dataSetName":"Arc-Yukon.D'Arrigo.2006","archiveType":"Wood","geo_latitude":67.9,"geo_longitude":-140.7},{"dataSetName":"Asi-AltaiAktru.Cook.2005","archiveType":"Wood","geo_latitude":50.08,"geo_longitude":87.77},{"dataSetName":"Asi-AltaiAktru.Cook.2005","archiveType":"Wood","geo_latitude":50.08,"geo_longitude":87.77},{"dataSetName":"Asi-AltaiDjasator.Cook.2011","archiveType":"Wood","geo_latitude":49.62,"geo_longitude":88.1},{"dataSetName":"Asi-AltaiDjasator.Cook.2011","archiveType":"Wood","geo_latitude":49.62,"geo_longitude":88.1},{"dataSetName":"Asi-AltaiJablonsky.Cook.2000","archiveType":"Wood","geo_latitude":50.87,"geo_longitude":85.23},{"dataSetName":"Asi-AltaiJablonsky.Cook.2000","archiveType":"Wood","geo_latitude":50.87,"geo_longitude":85.23},{"dataSetName":"Asi-AltaiKorumdu.Cook.2005","archiveType":"Wood","geo_latitude":50.14,"geo_longitude":87.72},{"dataSetName":"Asi-AltaiKorumdu.Cook.2005","archiveType":"Wood","geo_latitude":50.14,"geo_longitude":87.72},{"dataSetName":"Asi-AltaiKuraisky.Cook.2011","archiveType":"Wood","geo_latitude":50.3,"geo_longitude":87.83},{"dataSetName":"Asi-AltaiKuraisky.Cook.2011","archiveType":"Wood","geo_latitude":50.3,"geo_longitude":87.83},{"dataSetName":"Asi-AltaiKuraiskySteppe.Cook.2011","archiveType":"Wood","geo_latitude":50.27,"geo_longitude":87.83},{"dataSetName":"Asi-AltaiKuraiskySteppe.Cook.2011","archiveType":"Wood","geo_latitude":50.27,"geo_longitude":87.83},{"dataSetName":"Asi-AltaiSamakhaSteppe.Cook.2011","archiveType":"Wood","geo_latitude":49.72,"geo_longitude":87.28},{"dataSetName":"Asi-AltaiSamakhaSteppe.Cook.2011","archiveType":"Wood","geo_latitude":49.72,"geo_longitude":87.28},{"dataSetName":"Asi-AltaiTjute.Cook.2011","archiveType":"Wood","geo_latitude":50.12,"geo_longitude":87.92},{"dataSetName":"Asi-AltaiTjute.Cook.2011","archiveType":"Wood","geo_latitude":50.12,"geo_longitude":87.92},{"dataSetName":"Asi-AltaiUlaganValley.Cook.2011","archiveType":"Wood","geo_latitude":50.68,"geo_longitude":87.97},{"dataSetName":"Asi-AltaiUlaganValley.Cook.2011","archiveType":"Wood","geo_latitude":50.68,"geo_longitude":87.97},{"dataSetName":"Asi-AltaiUstUlaganLake.Cook.2005","archiveType":"Wood","geo_latitude":50.48,"geo_longitude":87.67},{"dataSetName":"Asi-AltaiUstUlaganLake.Cook.2005","archiveType":"Wood","geo_latitude":50.48,"geo_longitude":87.67},{"dataSetName":"Asi-BARELC.PAGES2k.2013","archiveType":"Wood","geo_latitude":33.75,"geo_longitude":107.8},{"dataSetName":"Asi-BARELC.PAGES2k.2013","archiveType":"Wood","geo_latitude":33.75,"geo_longitude":107.8},{"dataSetName":"Asi-BHUTSP.PAGES2k.2013","archiveType":"Wood","geo_latitude":27.45,"geo_longitude":90},{"dataSetName":"Asi-BHUTSP.PAGES2k.2013","archiveType":"Wood","geo_latitude":27.45,"geo_longitude":90},{"dataSetName":"Asi-BHUTTD.PAGES2k.2013","archiveType":"Wood","geo_latitude":27.67,"geo_longitude":90.72},{"dataSetName":"Asi-BHUTTD.PAGES2k.2013","archiveType":"Wood","geo_latitude":27.67,"geo_longitude":90.72},{"dataSetName":"Asi-BT001.Cook.2010","archiveType":"Wood","geo_latitude":27.58,"geo_longitude":90.65},{"dataSetName":"Asi-BT001.Cook.2010","archiveType":"Wood","geo_latitude":27.58,"geo_longitude":90.65},{"dataSetName":"Asi-BT002.Cook.2010","archiveType":"Wood","geo_latitude":27.67,"geo_longitude":90.73},{"dataSetName":"Asi-BT002.Cook.2010","archiveType":"Wood","geo_latitude":27.67,"geo_longitude":90.73},{"dataSetName":"Asi-BT003.Cook.2010","archiveType":"Wood","geo_latitude":27.7,"geo_longitude":90.77},{"dataSetName":"Asi-BT003.Cook.2010","archiveType":"Wood","geo_latitude":27.7,"geo_longitude":90.77},{"dataSetName":"Asi-BT004.Cook.2010","archiveType":"Wood","geo_latitude":27.7,"geo_longitude":90.68},{"dataSetName":"Asi-BT004.Cook.2010","archiveType":"Wood","geo_latitude":27.7,"geo_longitude":90.68},{"dataSetName":"Asi-BT005.Cook.2010","archiveType":"Wood","geo_latitude":27.45,"geo_longitude":90.15},{"dataSetName":"Asi-BT005.Cook.2010","archiveType":"Wood","geo_latitude":27.45,"geo_longitude":90.15},{"dataSetName":"Asi-BT006.Cook.2010","archiveType":"Wood","geo_latitude":27.63,"geo_longitude":90.13},{"dataSetName":"Asi-BT006.Cook.2010","archiveType":"Wood","geo_latitude":27.63,"geo_longitude":90.13},{"dataSetName":"Asi-BT008.Cook.2010","archiveType":"Wood","geo_latitude":27.58,"geo_longitude":90.65},{"dataSetName":"Asi-BT008.Cook.2010","archiveType":"Wood","geo_latitude":27.58,"geo_longitude":90.65},{"dataSetName":"Asi-BT009.Cook.2010","archiveType":"Wood","geo_latitude":27.42,"geo_longitude":90.97},{"dataSetName":"Asi-BT009.Cook.2010","archiveType":"Wood","geo_latitude":27.42,"geo_longitude":90.97},{"dataSetName":"Asi-BT010.Cook.2010","archiveType":"Wood","geo_latitude":27.25,"geo_longitude":89.38},{"dataSetName":"Asi-BT010.Cook.2010","archiveType":"Wood","geo_latitude":27.25,"geo_longitude":89.38},{"dataSetName":"Asi-BT011.Cook.2010","archiveType":"Wood","geo_latitude":27.45,"geo_longitude":90.15},{"dataSetName":"Asi-BT011.Cook.2010","archiveType":"Wood","geo_latitude":27.45,"geo_longitude":90.15},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"Delingha.Yang.2021","archiveType":"Wood","geo_latitude":37.48,"geo_longitude":97.78},{"dataSetName":"FinnishLapland.Helama.2022","archiveType":"Wood","geo_latitude":68.665,"geo_longitude":24.93},{"dataSetName":"FinnishLapland.Helama.2022","archiveType":"Wood","geo_latitude":68.665,"geo_longitude":24.93},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"Gaglioti.NorthSlope.2017","archiveType":"Wood","geo_latitude":69.5,"geo_longitude":-155},{"dataSetName":"GreatBasin.Salzer.2014","archiveType":"Wood","geo_latitude":38,"geo_longitude":-116.5},{"dataSetName":"GreatBasin.Salzer.2014","archiveType":"Wood","geo_latitude":38,"geo_longitude":-116.5},{"dataSetName":"GreatBasin.Salzer.2014","archiveType":"Wood","geo_latitude":38,"geo_longitude":-116.5},{"dataSetName":"GreatBasin.Salzer.2014","archiveType":"Wood","geo_latitude":38,"geo_longitude":-116.5},{"dataSetName":"GreatBasin.Salzer.2014","archiveType":"Wood","geo_latitude":38,"geo_longitude":-116.5},{"dataSetName":"Lapland.Helama.2009","archiveType":"Wood","geo_latitude":69,"geo_longitude":25},{"dataSetName":"Lapland.Helama.2009","archiveType":"Wood","geo_latitude":69,"geo_longitude":25},{"dataSetName":"NevadaPrecip.Hughes.1996","archiveType":"Wood","geo_latitude":37.8,"geo_longitude":-115.8},{"dataSetName":"NevadaPrecip.Hughes.1996","archiveType":"Wood","geo_latitude":37.8,"geo_longitude":-115.8},{"dataSetName":"NevadaPrecip.Hughes.1996","archiveType":"Wood","geo_latitude":37.8,"geo_longitude":-115.8},{"dataSetName":"Tornetrask.Grudd.2002","archiveType":"Wood","geo_latitude":68,"geo_longitude":20},{"dataSetName":"Tornetrask.Grudd.2002","archiveType":"Wood","geo_latitude":68,"geo_longitude":20}]
 
 
-function loadLatLon (a1){
-	var x1 = a1.filter((arr, index, self) =>
-    index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
-	var geojson = {
-    "name":"NewFeatureType",
-    "type":"FeatureCollection",
-    "features": [],
-	};
-var numdata = +Object.values(x1).length
-var numPoints = +(numdata * 2)
-	
-  for (let i = 0; i < numPoints; i++) {
-    if (i >= numdata){
-	    ii = i - numdata
-    } else {
-	    ii = i
-    }
-    var ptLon = +Object.values(x1)[ii].geo_longitude
-    if (i < numdata){
-	    lat = Object.values(x1)[ii].geo_latitude
-    	    lon = Object.values(x1)[ii].geo_longitude
-    } else if (i >= numdata && ptLon < 0) {
-	    lat = Object.values(x1)[ii].geo_latitude
-    	    lon = (ptLon + 360)
-    } else {
-	    lat = Object.values(x1)[ii].geo_latitude
-    	    lon = (ptLon - 360)
-    }
-    aType = Object.values(x1)[ii].archiveType
-    dName = Object.values(x1)[ii].dataSetName
-    dID = Object.values(x1)[ii].datasetId
-    proxy1 = Object.values(x1)[ii].paleoData_proxy
-    minAge = Object.values(x1)[ii].minAge
-    maxAge = Object.values(x1)[ii].maxAge
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
-    geojson.features[i].geometry.coordinates.push(lon,lat);
-    geojson.features[i].properties.archiveType.push(aType);
-    geojson.features[i].properties.dataSetName.push(dName);
-    geojson.features[i].properties.datasetId.push(dID);
-    geojson.features[i].properties.paleoData_proxy.push(proxy1);
-    geojson.features[i].properties.minAge.push(minAge);
-    geojson.features[i].properties.maxAge.push(maxAge);
-  }
 
-  return(geojson)
-}
 let inRectCount = 0;
 
 var glacierIce = L.icon({
@@ -907,84 +630,7 @@ var groundIceOpac = L.icon({
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 //let AllPoints = {};
-function updatePoints (coords){
-	spinner.spin();
-	inRectCount = 0;
-	layerGroup.clearLayers();
-	if (!document.getElementById("coordsOn").checked) {
-		document.getElementById("lat_min").value = -90
-		document.getElementById("lat_max").value = 90
-		document.getElementById("lon_min").value = -180
-		document.getElementById("lon_max").value = 180
-		//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
-		updateBoundingBox();
-		rectCoord = {"South":-90,"West":-180,"North":90,"East":180};
-		rect.editing.disable();
-		
-	} else {
-		rect.editing.enable();
-		rectCoord = changeBoxCoord();
-	}
- L.geoJSON([loadLatLon(coords)], {
 
-                style : function(feature) {
-                    return feature.properties && feature.properties.style;
-                },
-
-                onEachFeature: function (feature, layer) {
-		    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {
-				   maxWidth : 600
-		    });
-		},
-/*
-	        filter: function(feature, layer) {
-     			return feature.properties.archiveType == 'Wood';
-    		},
-*/
-                pointToLayer : function(feature, latlng) {
-			var col1 = chooseColor(feature.properties.archiveType)
-			var aType = feature.properties.archiveType
-			var shape1 = chooseShape(feature.properties.archiveType)
-			var Opac1 = +chooseOpacity(latlng, rectCoord)
-			var radius1 = 4
-			if (aType == "Documents"){
-				radius1 = 6
-			}
-			if (aType == "GroundIce" && Opac1 == 0.8){
-				return L.marker(latlng, {
-					icon: groundIce
-				});
-			} else if (aType == "GlacierIce" && Opac1 == 0.8){
-				return L.marker(latlng, {
-					icon: glacierIce
-				});
-			} else if (aType == "GroundIce" && Opac1 == 0.1){
-				return L.marker(latlng, {
-					icon: groundIceOpac
-				});
-			} else if (aType == "GlacierIce" && Opac1 == 0.1){
-				return L.marker(latlng, {
-					icon: glacierIceOpac
-				});
-			} else {
-		                    return L.shapeMarker(latlng, {
-					//icon: chooseIcon(feature.properties.archiveType)
-					
-		                        radius : radius1,
-		                        fillColor : col1,
-		                        color : col1,
-		                        weight : 1,
-					fillOpacity : Opac1,
-					shape : shape1,
-					opacity : 0.1
-					
-		                    });
-			}
-                }
-            }).addTo(layerGroup);
-	spinner.stop();
-	document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
-}
 
 
 //var compilationlist = [{"value":"iso2k","label":"iso2k-*latest*"},{"value":"iso2k-1_0_0","label":"iso2k-1_0_0"},{"value":"iso2k-1_0_1","label":"iso2k-1_0_1"},{"value":"Pages2kTemperature","label":"Pages2kTemperature-*latest*"},{"value":"Pages2kTemperature-2_1_2","label":"Pages2kTemperature-2_1_2"},{"value":"SISAL","label":"SISAL-*latest*"},{"value":"SISAL-LiPD-2_0_0","label":"SISAL-LiPD-2_0_0"},{"value":"SISAL-LiPD-2_0_1","label":"SISAL-LiPD-2_0_1"},{"value":"Temp12k","label":"Temp12k-*latest*"},{"value":"Temp12k-1_0_1","label":"Temp12k-1_0_1"},{"value":"Temp12k-1_0_2","label":"Temp12k-1_0_2"},{"value":"Temp12k-1_1_0","label":"Temp12k-1_1_0"},{"value":"Temp12k-1_2_0","label":"Temp12k-1_2_0"},{"value":"wNAm","label":"wNAm-*latest*"},{"value":"wNAm-0_15_1","label":"wNAm-0_15_1"},{"value":"wNAm-0_3_0","label":"wNAm-0_3_0"},{"value":"wNAm-0_6_0","label":"wNAm-0_6_0"},{"value":"wNAm-1_0_0","label":"wNAm-1_0_0"}]
@@ -1388,26 +1034,7 @@ function rmBlanksCompilation(val){
 	return val;
 }
 */
-function rmBlanks(val){
-	    if (val.length > 0) {
-		    val = split(val)
-		    val = val.filter(Boolean)
-	    	    val = val.join( "," );
-	    }
-	return val;
-}
-	
-function qString(val1,name1){
-	
-	var x1 = rmBlanks(val1)
-	
-	if (x1.length == 0){
-		return '';
-	} else {
-	    return name1 + '=' + x1;
-	}
 
-}
 </script>
 <script>
 //var compVals = compilationlist.map(function(d) { return d.value })
@@ -1422,18 +1049,7 @@ function qString(val1,name1){
     }
   })*/
 //console.log(host2)
-arrayGrep = function (arr1, arr2, selectedString){
-var indices = [];
-for (var i=0; i < arr1.length; i++){
-	if (arr1.at(i).includes(selectedString)){
-    indices.push(i)
-  }
-}
-var arr3 = indices.map(i => arr2[i]);
-arr3 = arr3.filter(n => n)
-arr3 = arr3.sort()
-return arr3.at(-1)
-}
+
 
 //if true, return the compilation versions
 /*grabLatest = function(selectedString){
@@ -1450,66 +1066,10 @@ return arr3.at(-1)
   		return selectedString
   }
 }*/
-getAllMonths = function(startSpan,endSpan){
-	var monthText = seasonality2.map(function(d) { return d.label; });
-	var allMonths = [];
-  startSpan=startSpan-1
-  //var spanMax = (endSpan-startSpan)+1
-  for (var i=startSpan; i < endSpan; i++){
-    var startmonth = monthText[i]
-    var monthSpan = endSpan - i
-    for (var ii=0; ii < monthSpan; ii++){
-      var endMonth = monthText[(ii+i)]
-      if (startmonth==endMonth){
-        allMonths.push(startmonth)
-      } else {
-        allMonths.push(startmonth + "-" + endMonth)
-      }
-    }
-  }
-  allMonths = allMonths.join(",")
-  return(allMonths)
-}
+
 //console.log(getAllMonths(5,10))
     //send mySQL query to queryDB and show response
-    function params(useCoords=false){
-	    var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
-	    var x2 = rmBlanks(document.getElementById("variableName").value)
-	    qstring = '?'
-	    qstring = qstring + qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name,false)
-	    qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name,false)
-	    qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name,false)
-	    qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name,false)
-	    qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name,false)
-	    qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name,true)
-	    if (!JSON.parse(filters1['seasonality'])){
-	    	qstring = qstring + '&' + qString(document.getElementById("seasonality1").value,document.getElementById("seasonality1").name,false)
-	    }
-	    if (useCoords=true){
-		    if (JSON.parse(filters1['coords'])){
-			    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
-			    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
-			    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
-			    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
-		    }
-	    }
-	    if (JSON.parse(filters1['ages'])){
-		    
-		    qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
-		    qstring = qstring + '& maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value
-	    }
-	    if (JSON.parse(filters1['resolution'])){
-	    	qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
-	    }
-	    if (JSON.parse(filters1['terrestrial'])){
-	    	qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
-	    }
-	    if (JSON.parse(filters1['seasonality'])){
-		    qstring = qstring + '& ' + document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value))
-	    }
-	    console.log("qstring from params(): " + qstring)
-	    return qstring;
-    };
+
     let prevResp = {};
     updateRes = function(a1){
 	    return(a1)
@@ -1525,261 +1085,7 @@ getAllMonths = function(startSpan,endSpan){
     }
   */  
     //var xhr = new XMLHttpRequest();
-    sendQuery = function(){
-	var param1 = params(useCoords=false)
-	var xhr0 = new XMLHttpRequest();
-        xhr0.timeout = 2000;
-        xhr0.onreadystatechange = function(e){
-            //console.log(this);
-            if (xhr0.readyState === 4){
-                if (xhr0.status === 200){
-		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("query: " + param1)
-			    prevResp = updateRes(JSON.parse(xhr0.response));
-		            
-			    resolve();
-		    });
-			promise1.then(() => {
-			  updatePoints(prevResp)
-			  xhr0 = null;
-			  // Expected output: "Success!"
-			});
-                } else {
-		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("XHR didn't work: " + xhr0.status);
-			    resolve();
-		    });
-			
-			promise1.then(() => {
-			  xhr0 = null;
-			  // Expected output: "Success!"
-			});
-			
-                    
-                }
-            }
-        }
-        xhr0.ontimeout = function (){
-            console.error("request timedout: ", xhr0);
-        }
-        xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
-        // xhr.responseType = "text";
-        xhr0.send();
-    }
 
-const compileLipds = function(Body) {
-    return new Promise((resolve, reject) => {
-        var xhr1 = new XMLHttpRequest();
-
-        xhr1.onreadystatechange = () => {
-            if (xhr1.readyState !== 4) return;
-
-            if (xhr1.status === 200) {
-                resolve(xhr1.responseText);
-            } else {
-                console.error("XHR didn't work: " + xhr1.status);
-                reject(new Error("XHR failed with status " + xhr1.status));
-            }
-        };
-
-        xhr1.onerror = () => {
-            reject(new Error("XHR encountered a network error"));
-        };
-
-        xhr1.ontimeout = () => {
-            reject(new Error("XHR request timed out"));
-        };
-
-        xhr1.open("POST", "http://143.198.98.66:90/lipds", true);
-        xhr1.setRequestHeader("Content-type", "application/json");
-
-        xhr1.timeout = 5000; // Set a timeout (optional)
-        
-        xhr1.send(Body);
-    });
-};
-
-postTSids = function(Body){
-	    var xhr7 = new XMLHttpRequest();
-	    //xhr.timeout = 2000;
-		return new Promise((resolve, reject) => {
-	    	xhr7.onreadystatechange = (e) => {
-			if (xhr7.readyState !== 4) {
-				return;
-			}
-			if (xhr7.status === 200){
-				//console.log("time series: ");
-				//console.log(xhr.responseText);
-				resolve(xhr7.responseText);
-			} else {
-				var resp1 = "XHR didn't work: " + xhr7.status;
-				console.log(resp1);
-				resolve();
-			}
-		};
-		xhr7.open("post", "http://143.198.98.66:92/", /*async*/ true);
-		xhr7.setRequestHeader("Content-type", "application/json");
-		xhr7.send(Body);
-		});
-}
-	
-getTSIDs = function(){
-	
-	    var xhr2 = new XMLHttpRequest();
-	    //xhr.timeout = 2000;
-		return new Promise((resolve, reject) => {
-			if (document.getElementById("archivedCompilation").checked) {
-				resolve();
-			} else {
-			    	xhr2.onreadystatechange = (e) => {
-					if (xhr2.readyState !== 4) {
-						return;
-					}
-					if (xhr2.status === 200){
-						//console.log("TSIDs: ");
-						//console.log(xhr.responseText);
-						resolve(xhr2.responseText);
-					} else {
-						var resp1 = "XHR didn't work: " + xhr2.status;
-						console.log(resp1);
-						resolve();
-					}
-				};
-				xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
-				xhr2.send();
-			}
-			});
-}
-
-retTimeSeries = function(TSIDs){
-	    var xhr3 = new XMLHttpRequest();
-	    //xhr.timeout = 2000;
-		return new Promise((resolve, reject) => {
-	    	xhr3.onreadystatechange = (e) => {
-			if (xhr3.readyState !== 4) {
-				return;
-			}
-			if (xhr3.status === 200){
-				//console.log("time series: ");
-				//console.log(xhr.responseText);
-				resolve(xhr3.responseText);
-			} else {
-				//var resp1 = xhr.status;
-				console.log(xhr3.status);
-				resolve(xhr3.status);
-			}
-		};
-		xhr3.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
-		xhr3.setRequestHeader("Content-type", "application/json");
-		xhr3.send(TSIDs);
-		});
-}
-
-function writeCSV(json1){
-	console.log(json1)
-	json1 = JSON.parse(JSON.parse(json1))
-	//console.log(typeof json1)
-	var keys1 = Object.keys(json1)
-	/*
-	if (keys1.length > 100){
-		var alertText = "Preparing csv file with " + keys1.length + " records"
-		alert(alertText);
-	}
- 	*/
-	//console.log(keys1.length)
-	var numKeys = keys1.length;
-	var len1 = 0;
-	var lenMax = 0;
-	for (let i=0; i < numKeys; i++){
-	len1 = Object.values(json1)[i].length
-	if (len1 > lenMax){
-	lenMax = len1
-	}
-	}
-	//console.log(lenMax)
-	
-	var string1 = keys1.join(", ") + "\n"
-	for (let j=0; j<lenMax; j++){
-		for (var key of keys1){
-	  	var val1 = Object.values(json1[key])[j]
-	    if (typeof val1 === "undefined"){
-	    	string1 += ","
-	    } else {
-	    	string1 += val1 + ","
-	    }
-	  }
-	  string1 += "\n"
-	}
-	return string1
-}
-
-function downloadCurrentDocument(resp1) {
-  var csvContent = encodeURI(writeCSV(resp1)),
-      a = document.createElement('a'),
-      e = new MouseEvent('click');
-
-  a.download = 'PrestoTS.csv';
-  a.href = 'data:text/csv;charset=utf-8,' + csvContent;
-  a.dispatchEvent(e);
-}
-
-function getLipds(loc1, lipdSource){
-	return new Promise((resolve, reject) => {
-		//alert(params(useCoords=true))
-		getTSIDs().then(reso => {
-			if (lipdSource == 'TSIDs'){
-				var resoJSON = JSON.parse(reso);
-				var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-				console.log("Total time series: " + IDs.length);
-				var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-				console.log("json body sent to 'getLipds': " + tsJSON)
-				console.log("sending post TSids")
-				//postTSids(tsJSON);
-				var TSIDsArray = JSON.parse(tsJSON).TSIDs
-				var numTSids = TSIDsArray.length
-			} else {
-				const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
-				var tsJSON = '{"compilation": "' + document.getElementById('archivedCompilationIn').value + '", "version": "' + document.getElementById('archivedCompilationVersionIn').value + '", "recon": "' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-				console.log("sending post for archived compilation: ", tsJSON)
-			}
-			compileLipds(tsJSON)
-			    .then(response => {
-			        console.log("Success:", response);
-				if (loc1 == "donwload"){
-					resolve("https://www.google.com")
-				} else {
-					var queryParams = params(useCoords=true)
-					queryParams = '&' + queryParams.substring(1);
-					queryParams = queryParams.replace(/\s/g, '');
-					resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
-				}
-			    })
-			    .catch(error => {
-			        console.error("Error:", error.message);
-				alert("Error: failed to write data selection to server. Please start over.");
-				resolve("https://paleopresto.com/custom.html");
-		        });
-		});
-	});
-}
-	
-function grabCSV() {
-	getTSIDs().then(reso => {
-		var resoJSON = JSON.parse(reso);
-		var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-		if (IDs.length > 300){
-			var alertText = "Sorry, " + IDs.length + " is too many records to compile here"
-			alert(alertText);
-		} else {
-			console.log("Total time series: " + IDs.length);
-			var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + '}'
-			var TS1 = retTimeSeries(tsJSON).then(resp1 => {
-			downloadCurrentDocument(resp1);
-			return true
-			});
-		}
-	});
-}
 
 
 /*	
@@ -1847,16 +1153,7 @@ firstRun = function (){
 }
 AllPoints = firstRun();*/
 changeBoxCoord();
-	function getColor(d) {
-    return d > 1000 ? '#800026' :
-           d > 500  ? '#BD0026' :
-           d > 200  ? '#E31A1C' :
-           d > 100  ? '#FC4E2A' :
-           d > 50   ? '#FD8D3C' :
-           d > 20   ? '#FEB24C' :
-           d > 10   ? '#FED976' :
-                      '#FFEDA0';
-}
+
 const legend = L.control.Legend({
             position: "topright",
 	    title: "Archive Type",
@@ -1994,44 +1291,6 @@ if (recon1 == 'false'){
 }
 
 
-/*
-grabParams().then(reso => {
-	return new Promise((resolve, reject) => {
-		//for each parameter prescribed by the given recon, turn on the filter (if applicable) and alter the limits/options
-		var filterkeys = Object.keys(filters1)
-		console.log("filterkeys: " + filterkeys)
-		Object.keys(reso).forEach(function(key,index) {
-			console.log("key: " + key)
-			var findFilter =  filters1[key]
-			var inputId = key + 'In'
-			var inputFinder = document.getElementById(inputId)
-			console.log("findFilter: " + typeof findFilter)
-			console.log("inputFinder: " + inputFinder)
-			if (typeof findFilter != 'undefined'){
-				var docID = key+"On"
-				document.getElementById(docID).checked = 'true'
-				updateFilters();
-				if (typeof reso[key].value == 'number'){
-					var inputID = key + "Input"
-					var sliderID = key+"Slider"
-					document.getElementById(inputID).value = reso[key].default
-					document.getElementById(inputID).min = reso[key].limits[0]
-					document.getElementById(inputID).max = reso[key].limits[1]
-					document.getElementById(inputID).step = reso[key].precision
-					document.getElementById(sliderID).min = reso[key].limits[0]
-					document.getElementById(sliderID).max = reso[key].limits[1]
-					document.getElementById(sliderID).step = reso[key].precision
-					
-				}
-				resolve()
-			} else if (!(Object.is(inputFinder, undefined) || Object.is(inputFinder, null))){
-				document.getElementById(inputId).value = reso[key].default
-				resolve()
-			}
-		})
-	}).then(reso77 => sendQuery())
-});
-*/
 sendQuery()
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
