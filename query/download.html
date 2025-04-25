@@ -1023,136 +1023,17 @@ return false;
 function split( val ) {
 return val.split( /,\s*/ );
 }
-/*
-function rmBlanksCompilation(val){
-	    if (val.length > 0) {
-		    val = split(val)
-		    val = val.filter(Boolean)
-		    val = val.map(element => grabLatest(element))
-	    	    val = val.join( "," );
-	    }
-	return val;
-}
-*/
 
 </script>
 
 <script>
-//var compVals = compilationlist.map(function(d) { return d.value })
-//console.log(compVals)
-/*host2 = compVals.map(function(aa) {
-    var splitup = aa.split("-")
-    var indexLast = splitup.length - 1
-    if (indexLast == 0){
-    	return null
-    } else{
-    	return splitup[indexLast]
-    }
-  })*/
-//console.log(host2)
 
-
-//if true, return the compilation versions
-/*grabLatest = function(selectedString){
-	//console.log("selectedString: " + selectedString)
-	//if pulling latest, return the compilation versions
-	//console.log("!!!test if getting latest!!!: " + Object.is(host2[compVals.indexOf(selectedString)],null))
-	if(Object.is(host2[compVals.indexOf(selectedString)],null)){
-		//console.log("recognized choice of LATEST compilation")
-		var ret1 = arrayGrep(compVals, compVals, selectedString)
-		//console.log("ret1: " + ret1)
-  		return ret1
-  	} else {
-  		//otherwise, preserve version entered
-  		return selectedString
-  }
-}*/
-
-//console.log(getAllMonths(5,10))
-    //send mySQL query to queryDB and show response
 
     let prevResp = {};
     updateRes = function(a1){
 	    return(a1)
     }
-/*
-    getDatasetIds = function(resp){
-	    //console.log("Dataset IDs: ");
-	    //console.log(resp.length)
-	    var allIds = resp.map(function(d) { return d['datasetId']; });
-	    //console.log(allIds);
-	    let formData = new FormData({"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"});
-	    return formData
-    }
-  */  
-    //var xhr = new XMLHttpRequest();
 
-
-
-/*	
-let dsidArray = [];
-let dataString = ""
-let jsbody = '{"datasetId":""}';
-	getAvailPlot = function(){
-	xhr = new XMLHttpRequest();
-        xhr.timeout = 5000;
-        xhr.onreadystatechange = function(e){
-            //console.log(this);
-            if (xhr.readyState === 4){
-                if (xhr.status === 200){
-		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("Changing image source")
-			    document.getElementById("iframediv").innerHTML = xhr.response;
-			    console.log("Changed")
-			    resolve();
-		    });
-			promise1.then(() => {
-			  xhr = null;
-			  // Expected output: "Success!"
-			});
-                } else {
-		    const promise1 = new Promise((resolve, reject) => {
-			    console.log("XHR didn't work: " + xhr.status);
-			    resolve();
-		    });
-			
-			promise1.then(() => {
-			  xhr = null;
-			  // Expected output: "Success!"
-			});
-			
-                    
-                }
-            }
-        }
-        xhr.ontimeout = function (){
-            console.error("request timedout: ", xhr);
-        }
-	//let formData = new FormData([{"datasetId":"02FdjjuIUmFedlZZi5cu,03eOxNMUzDCSVIFCSv10,0aKTjXiLVTdaErc7kgdD,0bwV9Qx7wW5DfaO34xz4,0Fu8raGb33rs9Vl3qUiV,0jq8riIobvRZQnR8Q4Xe,0JQU7qHx9jTMVDDqHa38"}]); // creates an object, optionally fill from <form>
-	//formData.append(name, value); // appends a field
-        xhr.open("post", "http://146.190.152.170/date/", true);
-	xhr.setRequestHeader("Content-type", "application/json");
-	dsidArray = prevResp.map(function(d) { return d['datasetId']; })
-	dsidArray = dsidArray.map(function(e){
-  		return (e);
-	});
-
-	dataString = dsidArray.join(",");
-	console.log(dataString)
-        jsbody = '{"datasetId":"'+ dataString + '"}';
-        console.log(jsbody);
-	xhr.send(jsbody);
-    }*/
-//$getReposBtn.onclick = sendQuery();
-/*
-firstRun = function (){
-	//a1 = loadLatLon(prevResp);
-	b1 = sendQuery();
-	a1 = loadLatLon(b1);
-	updatePoints(b1);
-	return(a1)
-}
-AllPoints = firstRun();*/
 changeBoxCoord();
 
 const legend = L.control.Legend({
