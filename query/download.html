@@ -471,9 +471,8 @@ popQueryVariable()
 
 <script>
 
-
-
-
+var target = document.getElementById('map');
+var spinner = new Spinner(opts).spin(target);
 	
 let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
 function updateFilters(){
@@ -757,7 +756,7 @@ sendQuery()
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   
-  updatePoints(prevResp);
+  updatePoints(prevResp, spinner);
 });
 updateBoundingBox();
 </script>
