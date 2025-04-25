@@ -12,6 +12,10 @@ var proxylist = [{"value":"10Be","label":"10Be"},{"value":"accumulation rate","l
 
 var compilationNames = Object.keys(compilationJson);
 
+function split( val ) {
+return val.split( /,\s*/ );
+}
+
 var latestCompilations = {};
 (async () => {
   latestCompilations = await transformToLabelValueArray();
