@@ -850,12 +850,11 @@ function updatePoints (coords){
     document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
 }
 
-sendQuery()
+updatePoints(prevResp);
 rect.on('edit', function() {
   //setTimeout(function () {}, 100);
   
-  updatePoints(prevResp, spinner);
+updatePoints(prevResp);
 });
-updateBoundingBox();
 </script>
 </html>
