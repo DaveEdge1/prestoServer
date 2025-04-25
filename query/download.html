@@ -471,6 +471,26 @@ popQueryVariable()
 
 <script>
 
+var opts = {
+    lines: 13, // The number of lines to draw
+    length: 38, // The length of each line
+    width: 17, // The line thickness
+    radius: 45, // The radius of the inner circle
+    scale: 1, // Scales overall size of the spinner
+    corners: 1, // Corner roundness (0..1)
+    speed: 2, // Rounds per second
+    rotate: 0, // The rotation offset
+    animation: 'spinner-line-fade-quick', // The CSS animation name for the lines
+    direction: 1, // 1: clockwise, -1: counterclockwise
+    color: 'black', // CSS color or array of colors
+    fadeColor: 'transparent', // CSS color or array of colors
+    top: '50%', // Top position relative to parent
+    left: '50%', // Left position relative to parent
+    shadow: '0 0 1px transparent', // Box-shadow for the lines
+    zIndex: 2000000000, // The z-index (defaults to 2e9)
+    className: 'spinner', // The CSS class to assign to the spinner
+    position: 'absolute', // Element positioning
+  };
 var target = document.getElementById('map');
 var spinner = new Spinner(opts).spin(target);
 	
@@ -751,6 +771,84 @@ if (recon1 == 'false'){
 	document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct', 'TSIDs').then(reso1 => location.href = reso1)};
 }
 
+function updatePoints (coords){
+    spinner.spin();
+    inRectCount = 0;
+    layerGroup.clearLayers();
+    if (!document.getElementById("coordsOn").checked) {
+	document.getElementById("lat_min").value = -90
+	document.getElementById("lat_max").value = 90
+	document.getElementById("lon_min").value = -180
+	document.getElementById("lon_max").value = 180
+	//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
+	updateBoundingBox();
+	rectCoord = {"South":-90,"West":-180,"North":90,"East":180};
+	rect.editing.disable();
+	
+    } else {
+	rect.editing.enable();
+	rectCoord = changeBoxCoord();
+    }
+ L.geoJSON([loadLatLon(coords)], {
+
+		style : function(feature) {
+		    return feature.properties && feature.properties.style;
+		},
+
+		onEachFeature: function (feature, layer) {
+	    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {
+		   maxWidth : 600
+	    });
+	},
+/*
+	    filter: function(feature, layer) {
+		 return feature.properties.archiveType == 'Wood';
+	    },
+*/
+		pointToLayer : function(feature, latlng) {
+	    var col1 = chooseColor(feature.properties.archiveType)
+	    var aType = feature.properties.archiveType
+	    var shape1 = chooseShape(feature.properties.archiveType)
+	    var Opac1 = +chooseOpacity(latlng, rectCoord)
+	    var radius1 = 4
+	    if (aType == "Documents"){
+		radius1 = 6
+	    }
+	    if (aType == "GroundIce" && Opac1 == 0.8){
+		return L.marker(latlng, {
+		    icon: groundIce
+		});
+	    } else if (aType == "GlacierIce" && Opac1 == 0.8){
+		return L.marker(latlng, {
+		    icon: glacierIce
+		});
+	    } else if (aType == "GroundIce" && Opac1 == 0.1){
+		return L.marker(latlng, {
+		    icon: groundIceOpac
+		});
+	    } else if (aType == "GlacierIce" && Opac1 == 0.1){
+		return L.marker(latlng, {
+		    icon: glacierIceOpac
+		});
+	    } else {
+			    return L.shapeMarker(latlng, {
+		    //icon: chooseIcon(feature.properties.archiveType)
+		    
+				radius : radius1,
+				fillColor : col1,
+				color : col1,
+				weight : 1,
+		    fillOpacity : Opac1,
+		    shape : shape1,
+		    opacity : 0.1
+		    
+			    });
+	    }
+		}
+	    }).addTo(layerGroup);
+    spinner.stop();
+    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
+}
 
 sendQuery()
 rect.on('edit', function() {
