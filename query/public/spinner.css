@@ -1,3 +1,30 @@
+/* Ensure all spin.js spinner bars use intended color and animation */
+.spinjs-spinner > div,
+.spinjs-spinner > div > div {
+  background: black !important;         /* Force background color */
+  border-radius: 50% !important;        /* Optional: make lines rounded */
+  box-shadow: transparent 0 0 1px !important;
+  animation: spinner-line-fade-quick 0.2s linear infinite !important; /* or your intended animation */
+  transform: none !important;           /* Let spin.js control transforms */
+  opacity: 1 !important;                /* Let spin.js control opacity */
+}
+
+/* If you want to allow the JS options to set color, you may use attribute selectors: */
+.spinjs-spinner > div[style*="background"],
+.spinjs-spinner > div > div[style*="background"] {
+  /* Remove this background rule if you want to let JS set it via inline styles */
+  /* background: unset !important; */
+}
+
+/* Prevent global animation disabling */
+.spinjs-spinner,
+.spinjs-spinner * {
+  animation-play-state: running !important;
+  animation: inherit !important;
+  transition: inherit !important;
+  opacity: inherit !important;
+}
+
 .spinjs-spinner {
   z-index: 999999999 !important;
 }
