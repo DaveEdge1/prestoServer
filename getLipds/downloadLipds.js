@@ -374,6 +374,7 @@ var downloadEm = async function(uniqueID, language){
 			const exists2222 = await checkFileExistsSync(path2222)
 			if (language == 'R'){
 				if (exists2222){
+					console.log("writing lipd tts file")
 					await writeTTS("/root/presto/userRecons/" + uniqueID);
 					console.log("downloadLipds.js successful, downloaded archived compilation")
 					process.exit(0);
