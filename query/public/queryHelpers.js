@@ -132,12 +132,12 @@ $(function() {
 
     // Example usage for your elements
     setupAutocomplete("#proxy", proxylist);
-    setupAutocomplete("variableName", variablelist);
-    setupAutocomplete("archiveTypeIn", archivelist);
-    setupAutocomplete("countryIn", countrylist);
-    setupAutocomplete("continentIn", continentlist);
-    setupAutocomplete("compilationIn", latestCompilations);
-    setupAutocomplete("seasonality1", seasonalitylist);
+    setupAutocomplete("#variableName", variablelist);
+    setupAutocomplete("#archiveTypeIn", archivelist);
+    setupAutocomplete("#countryIn", countrylist);
+    setupAutocomplete("#continentIn", continentlist);
+    setupAutocomplete("#compilationIn", latestCompilations);
+    setupAutocomplete("#seasonality1", seasonalitylist);
 
 });
 function hideForm(){
@@ -184,10 +184,6 @@ function hideForm(){
         document.getElementById('language').value = getQueryVariable("language");
         }
 async function transformToLabelValueArray() {
-	  if (compilationJson.hasOwnProperty(key)) {
-	    const value = compilationJson[key];
-	    //console.log(`Key: ${key}, name: ${value.compilationName}, versions: ${value.versions}`);
-	  }
   
     function getLatestVersion(key) {
       const versions = Array.isArray(compilationJson[key].versions)
