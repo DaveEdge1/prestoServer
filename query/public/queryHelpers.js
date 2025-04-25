@@ -81,23 +81,6 @@ return this.value;
 });
 });
 
- $(function() {
-function split( val ) {
-return val.split( /,\s*/ );
-}
-function extractLast( term ) {
-return split( term ).pop();
-}
-$(function() {
-    // Split function to separate terms by comma and optional space
-    function split(val) {
-        return val.split(/,\s*/);
-    }
-    // Extract the last term for autocomplete
-    function extractLast(term) {
-        return split(term).pop();
-    }
-
     /**
      * General autocomplete initializer
      * @param {string} selector - jQuery selector for the input
