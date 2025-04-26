@@ -11,6 +11,12 @@
 }
 
 
+.spinjs-spinner,
+.spinjs-spinner * {
+  animation-play-state: running !important;
+}
+
+
 .spinjs-spinner {
   z-index: 999999999 !important;
 }
