@@ -8,6 +8,13 @@
 .spinjs-spinner > div,
 .spinjs-spinner > div > div {
   animation: inherit !important;
+  animation-name: inherit !important;
+  animation-duration: inherit !important;
+  animation-play-state: running !important;
+  animation-timing-function: inherit !important;
+  animation-delay: inherit !important;
+  animation-iteration-count: inherit !important;
+  transform: inherit !important;
 }
 
 
