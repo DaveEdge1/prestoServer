@@ -4,6 +4,28 @@
   background: black !important;         /* Force background color */
 }
 
+/* Force spin.js spinner lines and their children to animate and transform */
+.spinjs-spinner > div,
+.spinjs-spinner > div > div {
+  animation: inherit !important;
+  animation-name: inherit !important;
+  animation-duration: inherit !important;
+  animation-play-state: running !important;
+  animation-timing-function: inherit !important;
+  animation-delay: inherit !important;
+  animation-iteration-count: inherit !important;
+  transform: inherit !important;
+  opacity: inherit !important;
+  /* Only if you previously forced width/height to 100%, remove it: */
+  width: unset !important;
+  height: unset !important;
+}
+
+.spinjs-spinner,
+.spinjs-spinner * {
+  animation-play-state: running !important;
+}
+
 .spinjs-spinner {
   z-index: 999999999 !important;
 }
