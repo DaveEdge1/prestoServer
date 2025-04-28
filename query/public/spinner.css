@@ -5,6 +5,7 @@
 }
 
 /* Force spin.js spinner lines and their children to animate and transform */
+/*
 .spinjs-spinner > div,
 .spinjs-spinner > div > div {
   animation: inherit !important;
@@ -16,7 +17,7 @@
   animation-iteration-count: inherit !important;
 
 }
-
+*/
 
 .spinjs-spinner,
 .spinjs-spinner * {
