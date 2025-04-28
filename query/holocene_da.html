@@ -130,7 +130,7 @@ popQueryVariable()
 <br>
 <span id="response"></span>
 <br>
-<div style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;"></div>
+<div style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;">
 	<div style="width: 100%; vertical-align: middle; float: left;">
 		<br><br><br>
 		<label id="archivedCompilation_label" for="archivedCompilation">Use an archived compilation</label>
@@ -156,7 +156,7 @@ popQueryVariable()
 </div>
 <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
 
-<button type="button" class="collapsible">Compilation Filter
+<button id="compilationButton" type="button" class="collapsible">Compilation Filter
 </button>
 <div class="content">
 <br>
@@ -422,9 +422,6 @@ popQueryVariable()
 </div>
 </form>
 <br><br>
-<div class="button-submit">
-	<button class="btn btn-primary" style="font-size: 13px;height:30px; width:250px; " type="button" onclick="grabCSV()">Download Time Series (csv)</button>
-</div>
 <br><br>
 <div class="button-submit">
 	<button id="proceedButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds()">Use selected Proxies</button>
@@ -533,16 +530,7 @@ let inRectCount = 0;
     }
 
 changeBoxCoord();
-	function getColor(d) {
-    return d > 1000 ? '#800026' :
-           d > 500  ? '#BD0026' :
-           d > 200  ? '#E31A1C' :
-           d > 100  ? '#FC4E2A' :
-           d > 50   ? '#FD8D3C' :
-           d > 20   ? '#FEB24C' :
-           d > 10   ? '#FED976' :
-                      '#FFEDA0';
-}
+
 const legend = L.control.Legend({
             position: "topright",
 	    title: "Archive Type",
