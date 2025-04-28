@@ -1,73 +1,19 @@
-/* Ensure all spin.js spinner bars use intended color and animation */
-.spinjs-spinner > div,
-.spinjs-spinner > div > div {
-  background: black !important;         /* Force background color */
+/* Add this to your CSS */
+.css-spinner {
+  border: 8px solid #f3f3f3; /* Light grey */
+  border-top: 8px solid #333; /* Black */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: css-spin 1s linear infinite;
+  position: absolute; /* or fixed, as needed */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000000000;
 }
 
-/* Force spin.js spinner lines and their children to animate and transform */
-/*
-.spinjs-spinner > div,
-.spinjs-spinner > div > div {
-  animation: inherit !important;
-  animation-name: inherit !important;
-  animation-duration: inherit !important;
-  animation-play-state: running !important;
-  animation-timing-function: inherit !important;
-  animation-delay: inherit !important;
-  animation-iteration-count: inherit !important;
-
-}
-*/
-
-.spinjs-spinner,
-.spinjs-spinner * {
-  animation-play-state: running !important;
-}
-
-
-.spinjs-spinner {
-  z-index: 999999999 !important;
-}
-
-.leaflet-container .leaflet-loading {
-  display: none !important;
-}
-
-@keyframes spinner-line-fade-more {
-  0%, 100% {
-    opacity: 0; /* minimum opacity */
-  }
-  1% {
-    opacity: 1;
-  }
-}
-
-@keyframes spinner-line-fade-quick {
-  0%, 39%, 100% {
-    opacity: 0.25; /* minimum opacity */
-  }
-  40% {
-    opacity: 1;
-  }
-}
-
-@keyframes spinner-line-fade-default {
-  0%, 100% {
-    opacity: 0.22; /* minimum opacity */
-  }
-  1% {
-    opacity: 1;
-  }
-}
-
-@keyframes spinner-line-shrink {
-  0%, 25%, 100% {
-    /* minimum scale and opacity */
-    transform: scale(0.5);
-    opacity: 0.25;
-  }
-  26% {
-    transform: scale(1);
-    opacity: 1;
-  }
+@keyframes css-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg);}
+  100% { transform: translate(-50%, -50%) rotate(360deg);}
 }
