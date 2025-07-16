@@ -1,0 +1,192 @@
+{
+  "recon_output_indices": {
+    "orig": "output_indices",
+    "first": "recon",
+    "last": "output_indices"
+  },
+  "recon_period": {
+    "orig": "recon_period",
+    "first": "recon",
+    "last": "period"
+  },
+  "recon_seeds": {
+    "orig": "recon_seeds",
+    "first": "recon",
+    "last": "seeds"
+  },
+  "recon_vars": {
+    "orig": "recon_vars",
+    "first": "recon",
+    "last": "vars"
+  },
+  "recon_loc_rad": {
+    "orig": "recon_loc_rad",
+    "first": "recon",
+    "last": "loc_rad"
+  },
+  "recon_sampling_mode": {
+    "orig": "recon_sampling_mode",
+    "first": "recon",
+    "last": "sampling_mode"
+  },
+  "recon_timescale": {
+    "orig": "recon_timescale",
+    "first": "recon",
+    "last": "timescale"
+  },
+  "recon_output_full_ens": {
+    "orig": "output_full_ens",
+    "first": "recon",
+    "last": "output_full_ens"
+  },
+  "recon_save_dirpath": {
+    "orig": "save_dirpath",
+    "first": "recon",
+    "last": "save_dirpath"
+  },
+  "prior_annualize_months": {
+    "orig": "prior_annualize_months",
+    "first": "prior",
+    "last": "annualize_months"
+  },
+  "prior_anom_period": {
+    "orig": "prior_anom_period",
+    "first": "prior",
+    "last": "anom_period"
+  },
+  "prior_regrid_nlat": {
+    "orig": "prior_regrid_nlat",
+    "first": "prior",
+    "last": "regrid_nlat"
+  },
+  "prior_regrid_nlon": {
+    "orig": "prior_regrid_nlon",
+    "first": "prior",
+    "last": "regrid_nlon"
+  },
+  "prior_path": {
+    "orig": "prior_path",
+    "first": "prior",
+    "last": "path"
+  },
+  "prior_lat_name": {
+    "orig": "prior_lat_name",
+    "first": "prior",
+    "last": "lat_name"
+  },
+  "prior_lon_name": {
+    "orig": "prior_lon_name",
+    "first": "prior",
+    "last": "lon_name"
+  },
+  "prior_time_name": {
+    "orig": "prior_time_name",
+    "first": "prior",
+    "last": "time_name"
+  },
+  "prior_trim_prior": {
+    "orig": "trim_prior",
+    "first": "prior",
+    "last": "trim_prior"
+  },
+  "proxy_db_path": {
+    "orig": "proxydb_path",
+    "first": "proxy",
+    "last": "db_path"
+  },
+  "proxy_assim_frac": {
+    "orig": "assim_frac",
+    "first": "proxy",
+    "last": "assim_frac"
+  },
+  "proxy_nens": {
+    "orig": "nens",
+    "first": "proxy",
+    "last": "nens"
+  },
+  "proxy_filter_proxydb_kwargs": {
+    "orig": "filter_proxydb_kwargs",
+    "first": "proxy",
+    "last": "filter_proxydb_kwargs"
+  },
+  "proxy_filter_proxydb_args": {
+    "orig": "filter_proxydb_args",
+    "first": "proxy",
+    "last": "filter_proxydb_args"
+  },
+  "proxy_annualize_proxydb_ptypes": {
+    "orig": "annualize_proxydb_ptypes",
+    "first": "proxy",
+    "last": "annualize_proxydb_ptypes"
+  },
+  "proxy_annualize_proxydb_months": {
+    "orig": "annualize_proxydb_months",
+    "first": "proxy",
+    "last": "annualize_proxydb_months"
+  },
+  "proxy_nobs_lb": {
+    "orig": "nobs_lb",
+    "first": "proxy",
+    "last": "nobs_lb"
+  },
+  "proxy_allownan": {
+    "orig": "allownan",
+    "first": "proxy",
+    "last": "allownan"
+  },
+  "model_obs_path": {
+    "orig": "obs_path",
+    "first": "model",
+    "last": "obs_path"
+  },
+  "model_obs_rename_dict": {
+    "orig": "obs_rename_dict",
+    "first": "model",
+    "last": "obs_rename_dict"
+  },
+  "model_obs_lat_name": {
+    "orig": "obs_lat_name",
+    "first": "model",
+    "last": "obs_lat_name"
+  },
+  "model_obs_lon_name": {
+    "orig": "obs_lon_name",
+    "first": "model",
+    "last": "obs_lon_name"
+  },
+  "model_obs_time_name": {
+    "orig": "obs_time_name",
+    "first": "model",
+    "last": "obs_time_name"
+  },
+  "model_obs_anom_period": {
+    "orig": "obs_anom_period",
+    "first": "model",
+    "last": "obs_anom_period"
+  },
+  "psm_ptype_clim_dict": {
+    "orig": "ptype_clim_dict",
+    "first": "psm",
+    "last": "ptype_clim_dict"
+  },
+  "psm_ptype_psm_dict": {
+    "orig": "ptype_psm_dict",
+    "first": "psm",
+    "last": "ptype_psm_dict"
+  },
+  "psm_ptype_season_dict": {
+    "orig": "ptype_season_dict",
+    "first": "psm",
+    "last": "ptype_season_dict"
+  },
+  "psm_ptype_forward_dict": {
+    "orig": "ptype_forward_dict",
+    "first": "psm",
+    "last": "ptype_forward_dict"
+  },
+  "uncertainty_compress_params": {
+    "orig": "compress_params",
+    "first": "uncertainty",
+    "last": "compress_params"
+  }
+}
