@@ -103,24 +103,6 @@ const advAll = document.querySelectorAll('.form-group-advanced');
 
 var val1 = 0;
 
-function showAdv() {
-	//document.getElementById("advCheck").value = 0;
-	//document.getElementById("advancedShow").innerHTML = val1
-         if (Boolean(document.getElementById("advCheck").checked)) {
-             //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
-	     //document.getElementById("advancedShow").innerHTML = "TRUE"
-	     advAll.forEach(adv1 => {
-	        adv1.style.display = 'block';
-	        })
-	 } else {
-	     //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
-	     //document.getElementById("advancedShow").innerHTML = "FALSE"
-	     advAll.forEach(adv1 => {
-	        adv1.style.display = 'none';
-	     })
-	 }
-}
-
 var coll = document.getElementsByClassName("collapsible");
 var i;
 
@@ -139,6 +121,25 @@ for (i = 0; i < coll.length; i++) {
 			        }
 }
 
+function showAdv() {
+	//document.getElementById("advCheck").value = 0;
+	//document.getElementById("advancedShow").innerHTML = val1
+         if (Boolean(document.getElementById("advCheck").checked)) {
+             //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
+	     //document.getElementById("advancedShow").innerHTML = "TRUE"
+	     advAll.forEach(adv1 => {
+	        adv1.style.display = 'block';
+	        })
+	 } else {
+	     //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
+	     //document.getElementById("advancedShow").innerHTML = "FALSE"
+	     advAll.forEach(adv1 => {
+	        adv1.style.display = 'none';
+	     })
+	 }
+}
+
+
 function uncheckAll(divid, checkCycle) {
 	                    var checks = document.querySelectorAll('#' + divid + ' input[type="checkbox"]');
 	                    for(var i =0; i< checks.length;i++){
@@ -152,7 +153,7 @@ function uncheckAll(divid, checkCycle) {
 				    }
 			    }
 }
-/*
+
 var canvas = document.getElementById('canvas'),
 	    ctx = canvas.getContext('2d'),
 	    rect = {
@@ -355,7 +356,7 @@ function updateRect(maxOfMap) {
 }
 
 init();
-*/
+
 const time_range_to_reconstruct_fromSilder = document.getElementById("time_range_to_reconstruct_fromSilder");
 const time_range_to_reconstruct_toSilder = document.getElementById("time_range_to_reconstruct_toSilder");
 const time_range_to_reconstruct_fromInput = document.getElementById("time_range_to_reconstruct_fromInput");
