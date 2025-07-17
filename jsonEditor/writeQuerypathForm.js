@@ -48,7 +48,7 @@ var buildJS2 = function(a, b){
 	                        + a + '.oninput = () => changeInput(' + a + ', ' + b + ');\n'
 	                        + b + '.onchange = () => changeSlider(' + b + ', ' + a + ');\n'
 	                        + 'fillSingleSlider(' + a + ')\n'
-	                return(jsExt2)
+	                        return(jsExt2)
 }
 
 jsExt3 = '';
@@ -63,13 +63,7 @@ buildJS3 = function(id) {
 	return (jsExt3)
 }
 
-jsExt4 = '';
-
-buildJS4 = function(mapNum, mapMax) {
-	jsExt4 = jsExt4
-	+ 'updateRect(' + mapMax + ')\n'
-	return(jsExt4)
-}
+// REMOVED: buildJS4 function (map-related functionality not used in holocene_da)
 
 const configs = function (recon) {
     const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/querypathconfigs.yml','utf8');
@@ -154,34 +148,8 @@ function dataTypeHTML (configJSON, key, id1) {
 		                + '<br>\n'
 		                + '<br>\n'
 		                + '<br>\n'
-        } else if (configJSON[key].data_type === 'lat-lon'){
-		var canvasHeight = 540
-		if (configJSON[key].options[0] == "double"){
-			var canvasHeight = 270
-		}
-		var mapLoc = '/SimpleWorld' + configJSON[key].options[0] + configJSON[key].options[1] + '.png'
-		buildJS4(configJSON[key].options[0],configJSON[key].options[1]);
-		console.log(key)
-		console.log("mapMax: " + configJSON[key].options[1]);
-		console.log("defaults: " + configJSON[key].default + " limits: " + configJSON[key].limits)
-		dataHTML = dataHTML
-		+ '<p style="color: red;">Hint: At the four corners of the map, you will find draggable handles<p>\n'
-		+ '<div class="mapall-container">\n'
-		+ '<canvas id="canvas" width="1080" height="' + canvasHeight + '" style="margin-right:10px; background: url(' + mapLoc + ')"></canvas>\n'
-		+ '<div class="map-numeric">\n'
-		+ '<label style="font-size:16px; margin-right:8px;">Latitude</label>\n'
-		+ '<input style="-moz-appearance: textfield;" class="coord-input" type="number" name="'+id1+'" id="lat_min" value="' + configJSON[key].default[0] + '" min="' + configJSON[key].limits[0] + '" max="' + configJSON[key].limits[1] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
-		+ '<label style="margin-right:8px;">min</label>\n'
-		+ '<input class="coord-input" type="number" name="'+id1+'" id="lat_max" value="' + configJSON[key].default[1] + '" min="' + configJSON[key].limits[0] + '" max="' + configJSON[key].limits[1] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
-		+ '<label style="margin-right:30px;">max</label>\n'
-		+ '<label style="font-size:16px; margin-right:8px;">Longitude</label>\n'
-		+ '<input class="coord-input" type="number" name="'+id1+'" id="lon_min" value="' + configJSON[key].default[2] + '" min="' + configJSON[key].limits[2] + '" max="' + configJSON[key].limits[3] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
-		+ '<label style="margin-right:8px;">min</label>\n'
-		+ '<input class="coord-input" type="number" name="'+id1+'" id="lon_max" value="' + configJSON[key].default[3] + '" min="' + configJSON[key].limits[2] + '" max="' + configJSON[key].limits[3] + '" step="' + configJSON[key].precision + '" onchange="updateRect(' + configJSON[key].options[1] + ');">\n'
-		+ '<label>max</label>\n'
-		+ '</div>\n'
-		+ '</div>\n'
-	} else if (configJSON[key].data_type === 'list'){
+        // REMOVED: lat-lon data type handling (map functionality not used in holocene_da)
+        } else if (configJSON[key].data_type === 'list'){
 		buildJS3(id1);
 	        dataHTML = dataHTML
 	        + '<div name="' + id1 + '" id="' + id1 + '" class="form-check">\n'
@@ -472,7 +440,8 @@ function buildHtml(configs, recon) {
        + 'if (confirm("Submit Custom Reconstruction request?")){\n'
        + 'var urlParams = new URLSearchParams(window.location.search);\n'
        + 'document.getElementById("paramsForm").method = "POST"\n'
-       + 'document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain")\n'
+       // CHANGED: Added language parameter to match actual HTML output
+       + 'document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")\n'
        + 'return true;\n'
        + '} else {\n'
        + 'document.getElementById("paramsForm").action = ""\n'
@@ -506,28 +475,10 @@ fs.writeFile("/root/presto/jsonEditor/forms-query/" + recon  + ".html", html, fu
 	    console.log("The " + recon + ".html file was saved!");
 }); 
 
-
-fs.writeFile("/root/presto/jsonEditor/public/slider" + recon + ".js", jsExt + jsExt2 + jsExt3 + jsExt4, function(err) {
+// CHANGED: Removed jsExt4 (map-related JavaScript) from output
+fs.writeFile("/root/presto/jsonEditor/public/slider" + recon + ".js", jsExt + jsExt2 + jsExt3, function(err) {
 	            if(err) {
 			                                return console.log(err);
 			                            }
 	            console.log("The slider" + recon + ".js file was saved!");
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
