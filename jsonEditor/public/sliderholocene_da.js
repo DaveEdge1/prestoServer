@@ -103,24 +103,6 @@ const advAll = document.querySelectorAll('.form-group-advanced');
 
 var val1 = 0;
 
-var coll = document.getElementsByClassName("collapsible");
-var i;
-
-for (i = 0; i < coll.length; i++) {
-	          coll[i].addEventListener("click", function() {
-			                        this.classList.toggle("active");
-			                        var content = this.nextElementSibling;
-			                        if (content.style.display === "block") {
-							                                    content.style.display = "none";
-							                                  } else {
-												                                                  content.style.display = "block";
-												                                                }
-			                      });
-	        if (i==0) {
-			                coll[i].click()
-			        }
-}
-
 function showAdv() {
 	//document.getElementById("advCheck").value = 0;
 	//document.getElementById("advancedShow").innerHTML = val1
@@ -139,6 +121,23 @@ function showAdv() {
 	 }
 }
 
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+	          coll[i].addEventListener("click", function() {
+			                        this.classList.toggle("active");
+			                        var content = this.nextElementSibling;
+			                        if (content.style.display === "block") {
+							                                    content.style.display = "none";
+							                                  } else {
+												                                                  content.style.display = "block";
+												                                                }
+			                      });
+	        if (i==0) {
+			                coll[i].click()
+			        }
+}
 
 function uncheckAll(divid, checkCycle) {
 	                    var checks = document.querySelectorAll('#' + divid + ' input[type="checkbox"]');
@@ -153,7 +152,7 @@ function uncheckAll(divid, checkCycle) {
 				    }
 			    }
 }
-
+/*
 var canvas = document.getElementById('canvas'),
 	    ctx = canvas.getContext('2d'),
 	    rect = {
@@ -356,7 +355,7 @@ function updateRect(maxOfMap) {
 }
 
 init();
-
+*/
 const time_range_to_reconstruct_fromSilder = document.getElementById("time_range_to_reconstruct_fromSilder");
 const time_range_to_reconstruct_toSilder = document.getElementById("time_range_to_reconstruct_toSilder");
 const time_range_to_reconstruct_fromInput = document.getElementById("time_range_to_reconstruct_fromInput");
