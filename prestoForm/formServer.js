@@ -93,7 +93,7 @@ app.use('/', express.static(path.join(__dirname, 'public')))
 
 //app.use('/scripts', express.static('/root/prestoForm/node_modules/fs/'));
 
-const ejs_helpers = require('/root/presto/prestoForm/helpers.js')
+const ejs_helpers = require('./helpers.js')
 
 var doSomething = function(){
   console.log('selection changed');
@@ -110,7 +110,7 @@ app.get('/down', function (req, res) {
 
 app.get('/', function (req, res) {
 	console.log(req.ip)
-	res.sendFile("/root/presto/prestoForm/index.html")
+	res.sendFile(path.join(__dirname, "index.html"))
 	//res.send("Sorry, the Presto Custom Recontruction Engine is currently down for maintenance.<br>We'll be back soon!.<br><br><br>" + '<a href="https://paleopresto.com/" target="_blank"><img src="https://paleopresto.com/img/logo.png" alt="Presto logo" height="50" width="141"></a>')
 
 });
@@ -126,18 +126,18 @@ app.post('/getUserInfo', function (req, res) {
         var hrefConfig = 'https://github.com/paleopresto/temp12k-regional-composites'
    }
    
-    res.sendFile('/root/presto/prestoForm/index2.html');
+    res.sendFile(path.join(__dirname, 'index2.html'));
 
 });
 
 app.get('/configDownload', function(req, res) {
 	if (reconPicker === 'holocene_da') {
         //const s = fs.readFileSync('/root/presto/holocene_da/config_default.yml','utf8');
-	const s = fs.readFileSync('/root/presto/presto/holocene_da/holoceneDA_configs_standardized.yml','utf8');
+	const s = fs.readFileSync(path.join(__dirname, 'holocene_da', 'holoceneDA_configs_standardized.yml'),'utf8');
 	res.send(YAML.parse(s))
 	}
 	if (reconPicker === 'temp12k') {
-	  const s = fs.readFileSync('/root/presto/presto/temp12k/params.json','utf8');
+	  const s = fs.readFileSync(path.join(__dirname, 'temp12k', 'params.json'),'utf8');
           res.send(JSON.parse(s))
 	  console.log(JSON.parse(s))
 	}
