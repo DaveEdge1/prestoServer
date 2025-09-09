@@ -507,10 +507,25 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 			}
 			console.log('viz launched!');
 		});
-			var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
-			var { stdout, stderr } = exec(bashText);
-			stdout.pipe(fs.createWriteStream(dirname+'viz_stdout.txt'));
-		  	stderr.pipe(fs.createWriteStream(dirname+'viz_stderr.txt'));
+			//var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
+
+			var bashText = (process.env.BASH_PATH || '/usr/bin/bash') + ' -c "ulimit -v && free -h && /root/presto/viz/run_script.sh ' + uniqueID + '"'
+			const childProcess = exec(bashText);
+			childProcess.stdout.pipe(fs.createWriteStream('/root/presto/userRecons/' + uniqueID  +'/viz_stdout.txt'));
+  			childProcess.stderr.pipe(fs.createWriteStream('/root/presto/userRecons/' + uniqueID  +'/viz_stderr.txt'));
+
+		  childProcess.on('exit', (code, signal) => {
+		      const processInfo = `Process exit info: code=${code}, signal=${signal}, timestamp=${new Date().toISOString()}\n`;
+		      fs.appendFileSync('/root/presto/userRecons/' + uniqueID  +'/viz_process_info.txt', processInfo);
+		      console.log(`Viz process exited: code=${code}, signal=${signal}`);
+		  });
+		
+		  childProcess.on('error', (error) => {
+		      const errorInfo = `Process error: ${error.message}, timestamp=${new Date().toISOString()}\n`;
+		      fs.appendFileSync('/root/presto/userRecons/' + uniqueID  +'/viz_process_info.txt', errorInfo);
+		      console.log(`Viz process error: ${error.message}`);
+		  });
+
 	
 			await sleep(1000)
 		  	await vizStatus(uniqueID);
