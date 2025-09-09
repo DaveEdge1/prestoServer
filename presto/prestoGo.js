@@ -507,9 +507,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 			}
 			console.log('viz launched!');
 		});
-			//var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
-
-			var bashText = (process.env.BASH_PATH || '/usr/bin/bash') + ' -c "ulimit -v && free -h && /root/presto/viz/run_script.sh ' + uniqueID + '"'
+			var bashText = '/usr/bin/bash /root/presto/viz/run_script.sh ' + uniqueID
 			const childProcess = exec(bashText);
 			childProcess.stdout.pipe(fs.createWriteStream('/root/presto/userRecons/' + uniqueID  +'/viz_stdout.txt'));
   			childProcess.stderr.pipe(fs.createWriteStream('/root/presto/userRecons/' + uniqueID  +'/viz_stderr.txt'));
