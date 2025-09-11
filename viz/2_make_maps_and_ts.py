@@ -359,7 +359,7 @@ for i,time in enumerate(time_var):
     ax1.set_xlim(time_start,time_end+(time_end-time_start)/100)
     ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
     if save_instead_of_plot:
-        plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
+        plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
         plt.close()
     else:
         plt.show()
@@ -412,7 +412,12 @@ for i,time in enumerate(time_var):
     plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=ccrs.PlateCarree())
     #
     if save_instead_of_plot:
-        plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
+        # Use time_var[i] instead of time to ensure correct indexing
+        time_for_filename = time_var[i]
+        filename_str = str(int(np.ceil(time_for_filename))).zfill(5)
+        if i % 100 == 0:  # Debug filename generation
+            print(f'Iteration {i}: time_var[i]={time_var[i]}, filename={filename_str}')
+        plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
         plt.close()
     else:
         plt.show()
