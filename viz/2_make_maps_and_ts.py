@@ -346,11 +346,8 @@ for i,time in enumerate(time_var):
     #
     #%%
     # Make a text box to show on the website (monitor matplotlib operations)
-    if i % 100 == 0:  # Every 100th iteration, check memory
-        print(f'Creating figure {i+1}/{len(time_var)} - checking memory usage')
-        import psutil
-        memory_percent = psutil.virtual_memory().percent
-        print(f'Memory usage: {memory_percent:.1f}%')
+    if i % 100 == 0:  # Every 100th iteration, basic progress check
+        print(f'Creating figure {i+1}/{len(time_var)} - progress checkpoint')
     
     plt.figure(figsize=(4,2))
     ax1 = plt.subplot2grid((1,1),(0,0))
