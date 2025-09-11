@@ -8,6 +8,7 @@ import os
 import sys
 import numpy as np
 import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend to prevent memory leaks
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import cartopy.crs as ccrs
@@ -164,9 +165,19 @@ if ('mean' in list(ens_spatial)) or (list(ens_spatial) == [1]):
 elif (all(isinstance(x,np.integer) for x in ens_spatial)) or (all(isinstance(x,float) for x in ens_spatial)) or (all(isinstance(x,np.float32) for x in ens_spatial)) or (all(isinstance(x,np.float64) for x in ens_spatial)):
     # Spatial members are ensembles
     print('Spatial bounds - Members are ensembles')
+    print(f'Data shape: {var_spatial_members.shape}, Computing quantiles for {var_spatial_members.shape[1]} ensemble members')
     spatial_uncertainty_txt = '2.5 - 97.5th percentile range'; skip_spatial_ens = False
+    
+    print('Computing 2.5th percentile (this may take several minutes for large datasets)...')
+    starttime_quantile = timekeeping.time()
     var_spatial_lowerbound = var_spatial_members.quantile(0.025,dim='ens_spatial')
+    print(f'2.5th percentile computed in {timekeeping.time() - starttime_quantile:.1f} seconds')
+    
+    print('Computing 97.5th percentile...')  
+    starttime_quantile = timekeeping.time()
     var_spatial_upperbound = var_spatial_members.quantile(0.975,dim='ens_spatial')
+    print(f'97.5th percentile computed in {timekeeping.time() - starttime_quantile:.1f} seconds')
+    print('Quantile calculations completed successfully')
     #
 elif ('p2.5' in list(ens_spatial)) and ('p97.5' in list(ens_spatial)):
     # Percentiles 2.5 and 97.5 found
@@ -232,9 +243,19 @@ if ('mean' in list(ens_global)) or (list(ens_global) == [1]):
 elif globalens_allnumbers:
     # global members are ensembles
     print('Global bounds - Members are ensembles')
+    print(f'Global data shape: {var_global_members_reshape.shape}, Computing global quantiles')
     global_uncertainty_txt = '2.5 - 97.5th percentile range'; skip_global_ens = False
+    
+    print('Computing global 2.5th percentile...')
+    starttime_global = timekeeping.time()
     var_global_lowerbound = np.quantile(var_global_members_reshape,0.025,axis=0)
+    print(f'Global 2.5th percentile computed in {timekeeping.time() - starttime_global:.1f} seconds')
+    
+    print('Computing global 97.5th percentile...')
+    starttime_global = timekeeping.time()
     var_global_upperbound = np.quantile(var_global_members_reshape,0.975,axis=0)
+    print(f'Global 97.5th percentile computed in {timekeeping.time() - starttime_global:.1f} seconds')
+    print('Global quantile calculations completed successfully')
     #
 elif ('p2.5' in list(ens_global)) and ('p97.5' in list(ens_global)) and (len(method) == 1):
     # Percentiles 2.5 and 97.5 found
@@ -293,10 +314,23 @@ if map_type == 'regions_ipcc_ar6': regions_all = lat
 print('Step 1: Making maps and info panels. N='+str(len(time_var))+' each')
 i=0;time=time_var[i]
 for i,time in enumerate(time_var):
-    print('Processing: '+str(i+1)+'/'+str(len(time_var)))
+    if i % 50 == 0:  # Print every 50th item and timing info
+        elapsed = timekeeping.time() - starttime_total
+        print(f'Processing: {i+1}/{len(time_var)} (elapsed: {elapsed:.1f}s, avg: {elapsed/(i+1):.2f}s per item)')
+    elif i % 10 == 0:  # Print every 10th item 
+        print(f'Processing: {i+1}/{len(time_var)}')
+    else:
+        # Still print original for other items but less verbose
+        print('Processing: '+str(i+1)+'/'+str(len(time_var)))
     #
     #%%
-    # Make a text box to show on the website
+    # Make a text box to show on the website (monitor matplotlib operations)
+    if i % 100 == 0:  # Every 100th iteration, check memory
+        print(f'Creating figure {i+1}/{len(time_var)} - checking memory usage')
+        import psutil
+        memory_percent = psutil.virtual_memory().percent
+        print(f'Memory usage: {memory_percent:.1f}%')
+    
     plt.figure(figsize=(4,2))
     ax1 = plt.subplot2grid((1,1),(0,0))
     ax1.axis('off')
@@ -315,7 +349,10 @@ for i,time in enumerate(time_var):
     #
     #
     #%%
-    # Make the primary map to show
+    # Make the primary map to show (monitor cartopy operations)
+    if i % 200 == 0:  # Every 200th map
+        print(f'Creating cartopy map {i+1}/{len(time_var)} - this may be slow...')
+    
     plt.figure(figsize=(10,10))
     ax1 = plt.subplot2grid((1,1),(0,0),projection=ccrs.Mercator(central_longitude=0,min_latitude=-85,max_latitude=85))
     if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=ccrs.PlateCarree()); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
@@ -342,7 +379,13 @@ for i,time in enumerate(time_var):
             ax1.add_feature(region)
         colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
     if np.isnan(var_spatial_mean_allmethods[i,:,:]).all(): ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
-    ax1.coastlines()
+    
+    # Coastlines can be very slow - monitor this operation
+    if i % 200 == 0:
+        print(f'Rendering coastlines for map {i+1}/{len(time_var)}...')
+    
+    # Use low resolution coastlines to reduce memory usage
+    ax1.coastlines(resolution='50m')
     gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
     gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
     gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
@@ -356,6 +399,13 @@ for i,time in enumerate(time_var):
         plt.close()
     else:
         plt.show()
+    
+    # Aggressive memory management - force garbage collection every 50 iterations
+    if i % 50 == 0:
+        import gc
+        gc.collect()
+        if i % 100 == 0:
+            print(f'Garbage collected at iteration {i+1}, memory cleared')
 
 
 #%% COLORBAR
