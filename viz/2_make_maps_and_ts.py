@@ -168,15 +168,34 @@ elif (all(isinstance(x,np.integer) for x in ens_spatial)) or (all(isinstance(x,f
     print(f'Data shape: {var_spatial_members.shape}, Computing quantiles for {var_spatial_members.shape[1]} ensemble members')
     spatial_uncertainty_txt = '2.5 - 97.5th percentile range'; skip_spatial_ens = False
     
-    print('Computing 2.5th percentile (this may take several minutes for large datasets)...')
+    print('Computing percentiles using optimized method for large datasets...')
     starttime_quantile = timekeeping.time()
-    var_spatial_lowerbound = var_spatial_members.quantile(0.025,dim='ens_spatial')
-    print(f'2.5th percentile computed in {timekeeping.time() - starttime_quantile:.1f} seconds')
     
-    print('Computing 97.5th percentile...')  
-    starttime_quantile = timekeeping.time()
-    var_spatial_upperbound = var_spatial_members.quantile(0.975,dim='ens_spatial')
-    print(f'97.5th percentile computed in {timekeeping.time() - starttime_quantile:.1f} seconds')
+    # Convert to numpy for much faster quantile computation
+    print('Converting xarray to numpy for faster processing...')
+    var_spatial_numpy = var_spatial_members.values  # Shape: (methods, ens_spatial, time, lat, lon)
+    print(f'Data shape: {var_spatial_numpy.shape}')
+    
+    # Compute both quantiles simultaneously using numpy (much faster than xarray)
+    print('Computing 2.5th and 97.5th percentiles simultaneously...')
+    quantiles = np.quantile(var_spatial_numpy, [0.025, 0.975], axis=1)  # Compute along ensemble dimension
+    
+    # Convert back to xarray format
+    print('Converting results back to xarray format...')
+    var_spatial_lowerbound = xr.DataArray(
+        quantiles[0], 
+        dims=var_spatial_mean.dims,
+        coords=var_spatial_mean.coords,
+        attrs=var_spatial_mean.attrs
+    )
+    var_spatial_upperbound = xr.DataArray(
+        quantiles[1], 
+        dims=var_spatial_mean.dims, 
+        coords=var_spatial_mean.coords,
+        attrs=var_spatial_mean.attrs
+    )
+    
+    print(f'Both percentiles computed in {timekeeping.time() - starttime_quantile:.1f} seconds (much faster than xarray method!)')
     print('Quantile calculations completed successfully')
     #
 elif ('p2.5' in list(ens_spatial)) and ('p97.5' in list(ens_spatial)):
@@ -246,15 +265,13 @@ elif globalens_allnumbers:
     print(f'Global data shape: {var_global_members_reshape.shape}, Computing global quantiles')
     global_uncertainty_txt = '2.5 - 97.5th percentile range'; skip_global_ens = False
     
-    print('Computing global 2.5th percentile...')
+    print('Computing global percentiles simultaneously (optimized method)...')
     starttime_global = timekeeping.time()
-    var_global_lowerbound = np.quantile(var_global_members_reshape,0.025,axis=0)
-    print(f'Global 2.5th percentile computed in {timekeeping.time() - starttime_global:.1f} seconds')
-    
-    print('Computing global 97.5th percentile...')
-    starttime_global = timekeeping.time()
-    var_global_upperbound = np.quantile(var_global_members_reshape,0.975,axis=0)
-    print(f'Global 97.5th percentile computed in {timekeeping.time() - starttime_global:.1f} seconds')
+    # Compute both quantiles at once for efficiency
+    global_quantiles = np.quantile(var_global_members_reshape, [0.025, 0.975], axis=0)
+    var_global_lowerbound = global_quantiles[0]
+    var_global_upperbound = global_quantiles[1]
+    print(f'Both global percentiles computed in {timekeeping.time() - starttime_global:.1f} seconds')
     print('Global quantile calculations completed successfully')
     #
 elif ('p2.5' in list(ens_global)) and ('p97.5' in list(ens_global)) and (len(method) == 1):
