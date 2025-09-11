@@ -180,19 +180,23 @@ elif (all(isinstance(x,np.integer) for x in ens_spatial)) or (all(isinstance(x,f
     print('Computing 2.5th and 97.5th percentiles simultaneously...')
     quantiles = np.quantile(var_spatial_numpy, [0.025, 0.975], axis=1)  # Compute along ensemble dimension
     
-    # Convert back to xarray format
+    # Convert back to xarray format with CORRECT coordinates (no ens_spatial dimension)
     print('Converting results back to xarray format...')
+    # Get the correct coordinates by removing ens_spatial from var_spatial_members
+    correct_coords = {k: v for k, v in var_spatial_members.coords.items() if k != 'ens_spatial'}
+    correct_dims = [dim for dim in var_spatial_members.dims if dim != 'ens_spatial']
+    
     var_spatial_lowerbound = xr.DataArray(
         quantiles[0], 
-        dims=var_spatial_mean.dims,
-        coords=var_spatial_mean.coords,
-        attrs=var_spatial_mean.attrs
+        dims=correct_dims,
+        coords=correct_coords,
+        attrs=var_spatial_members.attrs
     )
     var_spatial_upperbound = xr.DataArray(
         quantiles[1], 
-        dims=var_spatial_mean.dims, 
-        coords=var_spatial_mean.coords,
-        attrs=var_spatial_mean.attrs
+        dims=correct_dims, 
+        coords=correct_coords,
+        attrs=var_spatial_members.attrs
     )
     
     print(f'Both percentiles computed in {timekeeping.time() - starttime_quantile:.1f} seconds (much faster than xarray method!)')
