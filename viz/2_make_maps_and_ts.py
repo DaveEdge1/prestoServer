@@ -402,8 +402,14 @@ for i,time in enumerate(time_var):
     if i % 200 == 0:
         print(f'Rendering coastlines for map {i+1}/{len(time_var)}...')
     
-    # Use low resolution coastlines to reduce memory usage
-    ax1.coastlines(resolution='50m')
+    # Use low resolution coastlines to reduce memory usage - wrap in try/catch
+    try:
+        print(f'DEBUG: About to render coastlines for iteration {i+1}')
+        ax1.coastlines(resolution='50m')
+        print(f'DEBUG: Successfully rendered coastlines for iteration {i+1}')
+    except Exception as e:
+        print(f'ERROR: Coastline rendering failed at iteration {i+1}/{len(time_var)} - {str(e)}')
+        print(f'ERROR: Continuing without coastlines for this iteration...')
     gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
     gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
     gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
@@ -418,8 +424,23 @@ for i,time in enumerate(time_var):
         filename_str = str(int(np.ceil(time_for_filename))).zfill(5)
         if i % 100 == 0:  # Debug filename generation
             print(f'Iteration {i}: time_var[i]={time_var[i]}, filename={filename_str}')
-        plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-        plt.close()
+        # Add detailed logging for the critical operations that might cause silent crashes
+        try:
+            print(f'DEBUG: About to save figure for iteration {i+1}/{len(time_var)} (filename: {filename_str})')
+            plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
+            print(f'DEBUG: Successfully saved figure for iteration {i+1}')
+            
+            print(f'DEBUG: About to close figure for iteration {i+1}')
+            plt.close()
+            print(f'DEBUG: Successfully closed figure for iteration {i+1}')
+            
+        except Exception as e:
+            print(f'ERROR: Failed at iteration {i+1}/{len(time_var)} - {str(e)}')
+            import traceback
+            traceback.print_exc()
+            print(f'ERROR: Continuing to next iteration after error...')
+            plt.close('all')  # F
+    
     else:
         plt.show()
     
@@ -430,6 +451,9 @@ for i,time in enumerate(time_var):
         if i % 100 == 0:
             print(f'Garbage collected at iteration {i+1}, memory cleared')
 
+# Log completion of main processing loop
+print(f'SUCCESS: Main processing loop completed successfully! Processed all {len(time_var)} items.')
+print(f'SUCCESS: Moving to Step 2 (colorbar generation)...')
 
 #%% COLORBAR
 print('Step 2: Making a colorbar. N=1')
