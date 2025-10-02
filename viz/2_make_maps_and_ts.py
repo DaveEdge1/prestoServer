@@ -426,7 +426,6 @@ for i,time in enumerate(time_var):
     #%%
     # Make the primary map to show (monitor cartopy operations)
     if i % 200 == 0:  # Every 200th map
-        print(f'Creating cartopy map {i+1}/{len(time_var)} - this may be slow...')
     
     plt.figure(figsize=(10,10))
     ax1 = plt.subplot2grid((1,1),(0,0),projection=crs_mercator)
@@ -457,13 +456,10 @@ for i,time in enumerate(time_var):
     
     # Coastlines can be very slow - monitor this operation
     if i % 200 == 0:
-        print(f'Rendering coastlines for map {i+1}/{len(time_var)}...')
     
     # Use low resolution coastlines to reduce memory usage - wrap in try/catch
     try:
-        print(f'DEBUG: About to render coastlines for iteration {i+1}')
         ax1.coastlines(resolution='50m')
-        print(f'DEBUG: Successfully rendered coastlines for iteration {i+1}')
     except Exception as e:
         print(f'ERROR: Coastline rendering failed at iteration {i+1}/{len(time_var)} - {str(e)}')
         print(f'ERROR: Continuing without coastlines for this iteration...')
@@ -484,11 +480,8 @@ for i,time in enumerate(time_var):
         
         # Add detailed logging for the critical operations that might cause silent crashes
         try:
-            print(f'DEBUG: About to save figure for iteration {i+1}/{len(time_var)} (filename: {filename_str})')
             plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-            print(f'DEBUG: Successfully saved figure for iteration {i+1}')
 
-            print(f'DEBUG: About to close figure for iteration {i+1}')
 
             # Explicitly delete all axes and their artists to break reference cycles
             fig = plt.gcf()
@@ -517,7 +510,6 @@ for i,time in enumerate(time_var):
             if 'ax1' in locals():
                 del ax1
 
-            print(f'DEBUG: Successfully closed figure for iteration {i+1}')
 
         except Exception as e:
             print(f'ERROR: Failed at iteration {i+1}/{len(time_var)} - {str(e)}')
@@ -535,7 +527,7 @@ for i,time in enumerate(time_var):
         import matplotlib
         import matplotlib.pyplot as plt
         from matplotlib import font_manager
-        print(f'DEBUG: Starting comprehensive memory cleanup at iteration {i+1}')
+        print(f'Starting comprehensive memory cleanup at iteration {i+1}')
 
         # 1. Close all matplotlib figures and clear internal state
         plt.close('all')
@@ -583,7 +575,7 @@ for i,time in enumerate(time_var):
         gc.collect()
         gc.collect()
 
-        print(f'DEBUG: Comprehensive memory cleanup completed at iteration {i+1}')
+        print(f'Comprehensive memory cleanup completed at iteration {i+1}')
         if i % 100 == 0:
             print(f'Memory cleanup completed at iteration {i+1}')
 
