@@ -25,6 +25,11 @@ from bokeh.models import HoverTool
 from bokeh.models import Range1d
 from bokeh.models import Span
 
+# Configure Python to minimize traceback retention
+sys.tracebacklimit = 0  # Disable traceback printing entirely to prevent retention
+import gc
+gc.set_debug(0)  # Disable all gc debugging flags that might retain objects
+
 save_instead_of_plot = True
 plt.style.use('ggplot')
 starttime_total = timekeeping.time() # Start timer
@@ -378,67 +383,11 @@ for i,time in enumerate(time_var):
         except Exception as e:
             pass
 
-        # Get file descriptor count
-        try:
-            fd_count = len(os.listdir(f'/proc/{pid}/fd'))
-        except Exception as e:
-            pass
-
-        # Track ALL objects in memory to find the leak source
-        object_counts = {}
-        object_sizes = {}
-
-        for obj in gc.get_objects():
-            try:
-                if hasattr(obj, '__class__'):
-                    class_name = obj.__class__.__name__
-
-                    # Count instances
-                    if class_name not in object_counts:
-                        object_counts[class_name] = 0
-                        object_sizes[class_name] = 0
-
-                    object_counts[class_name] += 1
-
-                    # Track size for certain types - avoid bare except to prevent traceback retention
-                    if class_name in object_sizes:
-                        try:
-                            obj_size = sys.getsizeof(obj)
-                            object_sizes[class_name] += obj_size
-                        except (TypeError, AttributeError):
-                            # Explicitly ignore only expected exceptions, no traceback retention
-                            object_sizes[class_name] += 0
-            except (AttributeError, ReferenceError):
-                # Only catch expected exceptions to avoid retaining tracebacks
-                continue
-
-        # Sort by total size to find biggest memory consumers
-        sorted_by_size = sorted(object_sizes.items(), key=lambda x: x[1], reverse=True)[:20]
-
-        # Print resource check with available data
-        if mem_mb is not None and fd_count is not None:
-            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}, Process Memory: {mem_mb:.1f}MB')
-        elif mem_mb is not None:
+        # Simple resource check without object tracking (which was causing the leak)
+        if mem_mb is not None:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Process Memory: {mem_mb:.1f}MB')
-        elif fd_count is not None:
-            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}')
         else:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%)')
-
-        # Print specific matplotlib object counts
-        fig_count = object_counts.get('Figure', 0)
-        axes_count = sum(v for k, v in object_counts.items() if 'Axes' in k)
-        line_count = object_counts.get('Line2D', 0)
-        collection_count = sum(v for k, v in object_counts.items() if 'Collection' in k)
-        print(f'MATPLOTLIB OBJECTS at iteration {i+1}: Figures: {fig_count}, Axes: {axes_count}, Line2D: {line_count}, Collections: {collection_count}')
-
-        # Print top 20 objects by total memory size
-        print(f'TOP 20 OBJECTS BY SIZE at iteration {i+1}:')
-        for class_name, total_size in sorted_by_size:
-            count = object_counts[class_name]
-            size_mb = total_size / (1024 * 1024)
-            avg_size_kb = (total_size / count) / 1024 if count > 0 else 0
-            print(f'  {class_name}: {count} instances, {size_mb:.2f}MB total, {avg_size_kb:.1f}KB avg')
 
     if i % 50 == 0:  # Print every 50th item and timing info
         elapsed = timekeeping.time() - starttime_total
