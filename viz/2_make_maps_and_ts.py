@@ -341,24 +341,54 @@ for i,time in enumerate(time_var):
         # Resource monitoring
         import os
         import shutil
-        import psutil
+        
         # Check disk space
         disk_usage = shutil.disk_usage(output_dir_full)
         free_gb = disk_usage.free / (1024**3)
         total_gb = disk_usage.total / (1024**3)
         percent_free = (disk_usage.free / disk_usage.total) * 100
 
-        # Check memory usage of this process
+        # Check memory usage of this process - try psutil first, fallback to /proc
+        pid = os.getpid()
+        mem_mb = None
+        fd_count = None
+
+        # Try psutil method
         try:
-            process = psutil.Process(os.getpid())
-            em_info = process.memory_info()
+            import psutil
+            process = psutil.Process(pid)
+            mem_info = process.memory_info()
             mem_mb = mem_info.rss / (1024**2)  # Resident Set Size in MB
-            
-            pid = os.getpid()
+        except ImportError:
+            # Fallback to reading /proc directly
+            try:
+                with open(f'/proc/{pid}/status', 'r') as f:
+                    for line in f:
+                        if line.startswith('VmRSS:'):
+                            mem_kb = int(line.split()[1])
+                            mem_mb = mem_kb / 1024
+                            break
+            except Exception as e:
+                pass
+        except Exception as e:
+            pass
+
+        # Get file descriptor count
+        try:
             fd_count = len(os.listdir(f'/proc/{pid}/fd'))
+        except Exception as e:
+            pass
+
+        # Print resource check with available data
+        if mem_mb is not None and fd_count is not None:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}, Process Memory: {mem_mb:.1f}MB')
-        except:
+        elif mem_mb is not None:
+            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Process Memory: {mem_mb:.1f}MB')
+        elif fd_count is not None:
+            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}')
+        else:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%)')
+
     elif i % 10 == 0:  # Print every 10th item 
         print(f'Processing: {i+1}/{len(time_var)}')
     # Make a text box to show on the website (monitor matplotlib operations)
