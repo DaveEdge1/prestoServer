@@ -338,13 +338,24 @@ for i,time in enumerate(time_var):
     if i % 50 == 0:  # Print every 50th item and timing info
         elapsed = timekeeping.time() - starttime_total
         print(f'Processing: {i+1}/{len(time_var)} (elapsed: {elapsed:.1f}s, avg: {elapsed/(i+1):.2f}s per item)')
+        # Resource monitoring
+        import os
+        import shutil
+        # Check disk space
+        disk_usage = shutil.disk_usage(output_dir_full)
+        free_gb = disk_usage.free / (1024**3)
+        total_gb = disk_usage.total / (1024**3)
+        percent_free = (disk_usage.free / disk_usage.total) * 100
+
+        # Check open file descriptors (Linux)
+        try:
+            pid = os.getpid()
+            fd_count = len(os.listdir(f'/proc/{pid}/fd'))
+            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}')
+        except:
+            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%)')
     elif i % 10 == 0:  # Print every 10th item 
         print(f'Processing: {i+1}/{len(time_var)}')
-    else:
-        # Still print original for other items but less verbose
-        print('Processing: '+str(i+1)+'/'+str(len(time_var)))
-    #
-    #%%
     # Make a text box to show on the website (monitor matplotlib operations)
     if i % 100 == 0:  # Every 100th iteration, basic progress check
         print(f'Creating figure {i+1}/{len(time_var)} - progress checkpoint')
@@ -447,10 +458,15 @@ for i,time in enumerate(time_var):
     # Aggressive memory management - force garbage collection every 50 iterations
     if i % 50 == 0:
         import gc
+        print(f'DEBUG: Starting garbage collection at iteration {i+1}')
         gc.collect()
+        print(f'DEBUG: Garbage collection completed at iteration {i+1}')
         if i % 100 == 0:
             print(f'Garbage collected at iteration {i+1}, memory cleared')
 
+    # Log completion of each iteration to detect if process hangs
+    if (i+1) % 50 == 0 or i == len(time_var) - 1:
+       print(f'ITERATION {i+1} COMPLETE - moving to next iteration')
 # Log completion of main processing loop
 print(f'SUCCESS: Main processing loop completed successfully! Processed all {len(time_var)} items.')
 print(f'SUCCESS: Moving to Step 2 (colorbar generation)...')
