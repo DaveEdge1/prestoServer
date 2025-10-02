@@ -19,11 +19,69 @@ web_data_dir='/root/presto/viz/web_assets/'  # This directory contains an html t
 # Run scripts
 echo "=== Processing reconstruction ==="
 
+# Function to run a script with timeout and monitoring
+run_python_with_timeout() {
+    local script_path="$1"
+    local script_args="$2"
+    local timeout_seconds="$3"
+    local log_file="$4"
+    local script_name="$5"
+    
+    echo "Starting $script_name with timeout of $timeout_seconds seconds" | tee -a "$log_file"
+    echo "$(date): Starting $script_name (PID will be shown when started)" >> "$log_file"
+    
+    # Run the Python script with timeout
+    timeout $timeout_seconds python -u "$script_path" $script_args 2>&1 | tee -a "$log_file" &
+    local python_pid=$!
+    
+    echo "Started $script_name with PID: $python_pid" >> "$log_file"
+    
+    # Wait for the process to complete and capture exit status
+    wait $python_pid
+    local exit_code=$?
+    
+    if [ $exit_code -eq 124 ]; then
+        echo "$(date): ERROR - $script_name timed out after $timeout_seconds seconds" | tee -a "$log_file"
+        echo "Memory at timeout: $(free -h | grep Mem)" >> "$log_file"
+        return 124
+    elif [ $exit_code -ne 0 ]; then
+        echo "$(date): ERROR - $script_name failed with exit code: $exit_code" | tee -a "$log_file"
+        echo "Memory at failure: $(free -h | grep Mem)" >> "$log_file"
+        return $exit_code
+    else
+        echo "$(date): SUCCESS - $script_name completed successfully" | tee -a "$log_file"
+        echo "Memory at completion: $(free -h | grep Mem)" >> "$log_file"
+        return 0
+    fi
+}
+
 source /root/miniconda3/etc/profile.d/conda.sh &&
 conda activate presto_env &&
-python -u /root/presto/viz/1_format_data_daholocene_graphem.py $data_dir 2>&1 | tee -a "$output_dirviz/1_format_data_full.log"; echo "1_format_data exit code: $? Memory: $(free -h | grep Mem)" >> "$output_dirviz/1_format_data_full.log" &&
-python -u /root/presto/viz/2_make_maps_and_ts.py $data_dir $output_dir 2>&1 | tee -a "$output_dirviz/2_make_maps_full.log"; echo "2_make_maps exit code: $? Memory: $(free -h | grep Mem)" >> "$output_dirviz/2_make_maps_full.log" &&
-python -u /root/presto/viz/3_make_html_file.py $data_dir $output_dir $web_data_dir 2>&1 | tee -a "$output_dirviz/3_make_html_full.log"; echo "3_make_html exit code: $? Memory: $(free -h | grep Mem)" >> "$output_dirviz/3_make_html_full.log" &&
+# Script 1: Format data (15 minute timeout)
+run_python_with_timeout "/root/presto/viz/1_format_data_daholocene_graphem.py" "$data_dir" 900 "$output_dir/1_format_data_full.log" "1_format_data" &&
+
+# Script 2: Make maps and time series (45 minute timeout - this is the hanging one)
+# Monitor system resources during execution
+echo "=== Starting Script 2 with resource monitoring ===" >> "$output_dir/resource_monitor.log"
+dmesg | tail -20 >> "$output_dir/resource_monitor_pre.log" 2>&1  # Check for OOM killer before running
+
+run_python_with_timeout "/root/presto/viz/2_make_maps_and_ts.py" "$data_dir $output_dir" 2700 "$output_dir/2_make_maps_full.log" "2_make_maps"
+script2_exit=$?
+
+# Check system logs after script runs
+dmesg | tail -50 >> "$output_dir/resource_monitor_post.log" 2>&1  # Check for OOM killer, process killed, etc
+echo "Script 2 exit code: $script2_exit" >> "$output_dir/resource_monitor.log"
+
+# Continue if successful
+if [ $script2_exit -eq 0 ]; then
+    echo "Script 2 completed successfully" >> "$output_dir/resource_monitor.log"
+else
+    echo "Script 2 failed with exit code $script2_exit" >> "$output_dir/resource_monitor.log"
+    exit $script2_exit
+fi
+
+# Script 3: Make HTML file (10 minute timeout)
+run_python_with_timeout "/root/presto/viz/3_make_html_file.py" "$data_dir $output_dir $web_data_dir" 600 "$output_dir/3_make_html_full.log" "3_make_html" &&
 
 conda activate base
 
