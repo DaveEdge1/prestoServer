@@ -57,7 +57,7 @@ run_python_with_timeout() {
 }
 
 source /root/miniconda3/etc/profile.d/conda.sh &&
-conda activate presto_env &&
+conda activate presto_env && pip install psutil &&
 # Script 1: Format data (15 minute timeout)
 run_python_with_timeout "/root/presto/viz/1_format_data_daholocene_graphem.py" "$data_dir" 900 "$output_dir/1_format_data_full.log" "1_format_data" &&
 
