@@ -418,7 +418,18 @@ for i,time in enumerate(time_var):
     ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
     if save_instead_of_plot:
         plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
-        plt.close()
+
+        # Clean up first figure thoroughly to prevent memory leak
+        fig1 = plt.gcf()
+        for ax in fig1.get_axes():
+            # Remove all line objects and collections that hold array references
+            for line in ax.lines[:]:
+                line.remove()
+            for collection in ax.collections[:]:
+                collection.remove()
+            ax.clear()
+        plt.close('all')
+        del fig1
     else:
         plt.show()
     #
@@ -492,15 +503,24 @@ for i,time in enumerate(time_var):
 
             # Explicitly delete all axes and their artists to break reference cycles
             fig = plt.gcf()
+            total_collections = 0
+            total_patches = 0
+            total_artists = 0
             for ax in fig.get_axes():
                 # Remove all artists (patches, collections, etc.) from axes
+                total_artists += len(ax.artists)
                 for artist in ax.artists[:]:
                     artist.remove()
+                total_patches += len(ax.patches)
                 for patch in ax.patches[:]:
                     patch.remove()
+                total_collections += len(ax.collections)
                 for collection in ax.collections[:]:
                     collection.remove()
                 ax.clear()
+
+            if i % 50 == 0:
+                print(f'DEBUG: Removed {total_collections} collections, {total_patches} patches, {total_artists} artists from figure at iteration {i+1}')
 
             plt.close('all')  # Close ALL figures
             del fig  # Explicitly delete figure reference
@@ -579,11 +599,13 @@ for i,time in enumerate(time_var):
             pass
 
         # 7. Run garbage collection multiple times to clear cyclic references
-        gc.collect()
-        gc.collect()
-        gc.collect()
+        collected1 = gc.collect()
+        collected2 = gc.collect()
+        collected3 = gc.collect()
+        total_collected = collected1 + collected2 + collected3
 
         print(f'DEBUG: Comprehensive memory cleanup completed at iteration {i+1}')
+        print(f'DEBUG: Garbage collector freed {total_collected} objects at iteration {i+1}')
         if i % 100 == 0:
             print(f'Memory cleanup completed at iteration {i+1}')
 
