@@ -421,13 +421,21 @@ for i,time in enumerate(time_var):
 
         # Clean up first figure thoroughly to prevent memory leak
         fig1 = plt.gcf()
+        total_lines = 0
+        total_collections = 0
         for ax in fig1.get_axes():
             # Remove all line objects and collections that hold array references
+            total_lines += len(ax.lines)
             for line in ax.lines[:]:
                 line.remove()
+            total_collections += len(ax.collections)
             for collection in ax.collections[:]:
                 collection.remove()
             ax.clear()
+
+        if i % 50 == 0:
+            print(f'DEBUG: Figure 1 - Removed {total_lines} lines, {total_collections} collections at iteration {i+1}')
+
         plt.close('all')
         del fig1
     else:
