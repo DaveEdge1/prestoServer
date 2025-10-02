@@ -333,15 +333,18 @@ if map_type == 'regions_ipcc_ar6': regions_all = lat
 #%% MAPS
 # Make a map of values
 print('Step 1: Making maps and info panels. N='+str(len(time_var))+' each')
+
+# Create CRS objects ONCE before loop to prevent memory leak from repeated CRS creation
+crs_platecarree = ccrs.PlateCarree()
+crs_mercator = ccrs.Mercator(central_longitude=0, min_latitude=-85, max_latitude=85)
+
 i=0;time=time_var[i]
 for i,time in enumerate(time_var):
-    if i % 50 == 0:  # Print every 50th item and timing info
-        elapsed = timekeeping.time() - starttime_total
-        print(f'Processing: {i+1}/{len(time_var)} (elapsed: {elapsed:.1f}s, avg: {elapsed/(i+1):.2f}s per item)')
-        # Resource monitoring
+    # Resource monitoring at start of each iteration
+    if i % 50 == 0:
         import os
         import shutil
-        
+
         # Check disk space
         disk_usage = shutil.disk_usage(output_dir_full)
         free_gb = disk_usage.free / (1024**3)
@@ -389,8 +392,16 @@ for i,time in enumerate(time_var):
         else:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%)')
 
-    elif i % 10 == 0:  # Print every 10th item 
+    if i % 50 == 0:  # Print every 50th item and timing info
+        elapsed = timekeeping.time() - starttime_total
+        print(f'Processing: {i+1}/{len(time_var)} (elapsed: {elapsed:.1f}s, avg: {elapsed/(i+1):.2f}s per item)')
+    elif i % 10 == 0:  # Print every 10th item
         print(f'Processing: {i+1}/{len(time_var)}')
+    else:
+        # Still print original for other items but less verbose
+        print('Processing: '+str(i+1)+'/'+str(len(time_var)))
+    #
+    #%%
     # Make a text box to show on the website (monitor matplotlib operations)
     if i % 100 == 0:  # Every 100th iteration, basic progress check
         print(f'Creating figure {i+1}/{len(time_var)} - progress checkpoint')
@@ -418,16 +429,16 @@ for i,time in enumerate(time_var):
         print(f'Creating cartopy map {i+1}/{len(time_var)} - this may be slow...')
     
     plt.figure(figsize=(10,10))
-    ax1 = plt.subplot2grid((1,1),(0,0),projection=ccrs.Mercator(central_longitude=0,min_latitude=-85,max_latitude=85))
-    if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=ccrs.PlateCarree()); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
-    elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=ccrs.PlateCarree()); extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
-    elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=ccrs.PlateCarree()); extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
+    ax1 = plt.subplot2grid((1,1),(0,0),projection=crs_mercator)
+    if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
+    elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree); extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
+    elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree); extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
     if map_type == 'contourf':
         var_cyclic,lon_cyclic = cutil.add_cyclic_point(var_spatial_mean_allmethods[i,:,:],coord=lon)
-        map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=ccrs.PlateCarree())
+        map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=crs_platecarree)
         colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
     elif map_type == 'pcolormesh':
-        map1 = ax1.pcolormesh(lon_bounds_2d,lat_bounds_2d,var_spatial_mean_allmethods[i,:,:],cmap=cmap,vmin=levels[0],vmax=levels[-1],transform=ccrs.PlateCarree())
+        map1 = ax1.pcolormesh(lon_bounds_2d,lat_bounds_2d,var_spatial_mean_allmethods[i,:,:],cmap=cmap,vmin=levels[0],vmax=levels[-1],transform=crs_platecarree)
         colorbar = plt.colorbar(map1,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
     elif map_type == 'regions_ipcc_ar6':
         norm = matplotlib.colors.Normalize(vmin=-2,vmax=2,clip=True)
@@ -439,7 +450,7 @@ for i,time in enumerate(time_var):
             else: value_for_region = np.nan
             if np.isnan(value_for_region): facecolor = 'lightgray'
             else: facecolor = colors_from_cmap(norm(value_for_region))
-            region = ShapelyFeature([ar6_all[j]._polygon],facecolor=facecolor,crs=ccrs.PlateCarree())
+            region = ShapelyFeature([ar6_all[j]._polygon],facecolor=facecolor,crs=crs_platecarree)
             ax1.add_feature(region)
         colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
     if np.isnan(var_spatial_mean_allmethods[i,:,:]).all(): ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
@@ -462,7 +473,7 @@ for i,time in enumerate(time_var):
     if ref_period == 'none': colorbar.set_label(colorbar_txt,fontsize=6)
     else: colorbar.set_label(colorbar_txt+', rel. '+ref_period,fontsize=6)
     colorbar.ax.tick_params(labelsize=3)
-    plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=ccrs.PlateCarree())
+    plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=crs_platecarree)
     #
     if save_instead_of_plot:
         # Use time_var[i] instead of time to ensure correct indexing
@@ -470,13 +481,15 @@ for i,time in enumerate(time_var):
         filename_str = str(int(np.ceil(time_for_filename))).zfill(5)
         if i % 100 == 0:  # Debug filename generation
             print(f'Iteration {i}: time_var[i]={time_var[i]}, filename={filename_str}')
+        
         # Add detailed logging for the critical operations that might cause silent crashes
         try:
             print(f'DEBUG: About to save figure for iteration {i+1}/{len(time_var)} (filename: {filename_str})')
             plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
             print(f'DEBUG: Successfully saved figure for iteration {i+1}')
-            
+
             print(f'DEBUG: About to close figure for iteration {i+1}')
+
             # Explicitly delete all axes and their artists to break reference cycles
             fig = plt.gcf()
             for ax in fig.get_axes():
@@ -491,15 +504,28 @@ for i,time in enumerate(time_var):
 
             plt.close('all')  # Close ALL figures
             del fig  # Explicitly delete figure reference
+
+            # Delete any temporary arrays created during plotting to prevent memory accumulation
+            if 'var_cyclic' in locals():
+                del var_cyclic
+            if 'lon_cyclic' in locals():
+                del lon_cyclic
+            if 'map1' in locals():
+                del map1
+            if 'colorbar' in locals():
+                del colorbar
+            if 'ax1' in locals():
+                del ax1
+
             print(f'DEBUG: Successfully closed figure for iteration {i+1}')
-            
+
         except Exception as e:
             print(f'ERROR: Failed at iteration {i+1}/{len(time_var)} - {str(e)}')
             import traceback
             traceback.print_exc()
             print(f'ERROR: Continuing to next iteration after error...')
-            plt.close('all')  # Close ALL figures, not just current
-    
+            plt.close('all')  # Force close all figures
+            continue
     else:
         plt.show()
     
@@ -560,6 +586,11 @@ for i,time in enumerate(time_var):
         print(f'DEBUG: Comprehensive memory cleanup completed at iteration {i+1}')
         if i % 100 == 0:
             print(f'Memory cleanup completed at iteration {i+1}')
+
+    # Log completion of each iteration to detect if process hangs
+    if (i+1) % 50 == 0 or i == len(time_var) - 1:
+        print(f'ITERATION {i+1} COMPLETE - moving to next iteration')
+
 # Log completion of main processing loop
 print(f'SUCCESS: Main processing loop completed successfully! Processed all {len(time_var)} items.')
 print(f'SUCCESS: Moving to Step 2 (colorbar generation)...')
