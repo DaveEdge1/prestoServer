@@ -61,12 +61,12 @@ conda activate presto_env &&
 # Script 1: Format data (15 minute timeout)
 run_python_with_timeout "/root/presto/viz/1_format_data_daholocene_graphem.py" "$data_dir" 900 "$output_dir/1_format_data_full.log" "1_format_data" &&
 
-# Script 2: Make maps and time series (45 minute timeout - this is the hanging one)
+# Script 2: Make maps and time series (120 minute timeout - this is the hanging one)
 # Monitor system resources during execution
 echo "=== Starting Script 2 with resource monitoring ===" >> "$output_dir/resource_monitor.log"
 dmesg | tail -20 >> "$output_dir/resource_monitor_pre.log" 2>&1  # Check for OOM killer before running
 
-run_python_with_timeout "/root/presto/viz/2_make_maps_and_ts.py" "$data_dir $output_dir" 2700 "$output_dir/2_make_maps_full.log" "2_make_maps"
+run_python_with_timeout "/root/presto/viz/2_make_maps_and_ts.py" "$data_dir $output_dir" 7200 "$output_dir/2_make_maps_full.log" "2_make_maps"
 script2_exit=$?
 
 # Check system logs after script runs
