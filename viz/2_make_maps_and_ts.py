@@ -352,6 +352,12 @@ crs_platecarree = ccrs.PlateCarree()
 crs_mercator = ccrs.Mercator(central_longitude=0, min_latitude=-85, max_latitude=85)
 
 i=0;time=time_var[i]
+
+# Pre-render the base time series figure ONCE to avoid recreating paths 1200 times
+# This figure template will be reused for each iteration
+import matplotlib.patches as mpatches
+from io import BytesIO
+
 for i,time in enumerate(time_var):
     # Minimal progress logging to avoid frame accumulation
     if i % 100 == 0:
@@ -360,27 +366,32 @@ for i,time in enumerate(time_var):
     #
     #%%
     # Make a text box to show on the website
-    plt.figure(figsize=(4,2))
-    ax1 = plt.subplot2grid((1,1),(0,0))
+    # Create fresh figure each time but render with minimal overhead
+    fig = plt.figure(figsize=(4,2))
+    ax1 = fig.add_subplot(111)
     ax1.axis('off')
-    if skip_global_ens: pass
-    else: ax1.fill_between(time_var,var_global_lowerbound,var_global_upperbound,color='lightgray')
+
+    # Only plot the fill and line - these create Path objects but will be garbage collected
+    if not skip_global_ens:
+        ax1.fill_between(time_var,var_global_lowerbound,var_global_upperbound,color='lightgray')
     ax1.plot(time_var,var_global_mean_allmethods,linewidth=1)
     ax1.axvline(x=time,color='gray',alpha=1,linestyle='--',linewidth=1)
     ax1.axhline(y=0,   color='k',   alpha=1,linestyle='--',linewidth=1)
     ax1.set_xlim(time_start,time_end+(time_end-time_start)/100)
     ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
+
     if save_instead_of_plot:
         plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
-        plt.close('all')
+        plt.close(fig)
+        del fig, ax1
     else:
         plt.show()
     #
     #
     #%%
     # Make the primary map to show
-    plt.figure(figsize=(10,10))
-    ax1 = plt.subplot2grid((1,1),(0,0),projection=crs_mercator)
+    fig2 = plt.figure(figsize=(10,10))
+    ax1 = fig2.add_subplot(111, projection=crs_mercator)
     if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
     elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree); extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
     elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree); extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
@@ -416,11 +427,12 @@ for i,time in enumerate(time_var):
     #
     if save_instead_of_plot:
         plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-        plt.close('all')
+        plt.close(fig2)
+        del fig2, ax1
     else:
         plt.show()
-    
-    # Force garbage collection every iteration
+
+    # Force garbage collection every iteration to immediately release memory
     gc.collect()
 
 # Log completion of main processing loop
