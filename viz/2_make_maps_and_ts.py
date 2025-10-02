@@ -341,17 +341,22 @@ for i,time in enumerate(time_var):
         # Resource monitoring
         import os
         import shutil
+        import psutil
         # Check disk space
         disk_usage = shutil.disk_usage(output_dir_full)
         free_gb = disk_usage.free / (1024**3)
         total_gb = disk_usage.total / (1024**3)
         percent_free = (disk_usage.free / disk_usage.total) * 100
 
-        # Check open file descriptors (Linux)
+        # Check memory usage of this process
         try:
+            process = psutil.Process(os.getpid())
+            em_info = process.memory_info()
+            mem_mb = mem_info.rss / (1024**2)  # Resident Set Size in MB
+            
             pid = os.getpid()
             fd_count = len(os.listdir(f'/proc/{pid}/fd'))
-            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}')
+            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Open FDs: {fd_count}, Process Memory: {mem_mb:.1f}MB')
         except:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%)')
     elif i % 10 == 0:  # Print every 10th item 
