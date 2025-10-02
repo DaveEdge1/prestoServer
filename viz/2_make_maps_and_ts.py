@@ -400,14 +400,17 @@ for i,time in enumerate(time_var):
 
                     object_counts[class_name] += 1
 
-                    # Track size for certain types
-                    try:
-                        obj_size = sys.getsizeof(obj)
-                        object_sizes[class_name] += obj_size
-                    except:
-                        pass
-            except:
-                pass
+                    # Track size for certain types - avoid bare except to prevent traceback retention
+                    if class_name in object_sizes:
+                        try:
+                            obj_size = sys.getsizeof(obj)
+                            object_sizes[class_name] += obj_size
+                        except (TypeError, AttributeError):
+                            # Explicitly ignore only expected exceptions, no traceback retention
+                            object_sizes[class_name] += 0
+            except (AttributeError, ReferenceError):
+                # Only catch expected exceptions to avoid retaining tracebacks
+                continue
 
         # Sort by total size to find biggest memory consumers
         sorted_by_size = sorted(object_sizes.items(), key=lambda x: x[1], reverse=True)[:20]
@@ -523,14 +526,12 @@ for i,time in enumerate(time_var):
     if i % 200 == 0:
         print(f'Rendering coastlines for map {i+1}/{len(time_var)}...')
     
-    # Use low resolution coastlines to reduce memory usage - wrap in try/catch
-    try:
+    # Use low resolution coastlines to reduce memory usage
+    if i % 200 == 0:
         print(f'DEBUG: About to render coastlines for iteration {i+1}')
-        ax1.coastlines(resolution='50m')
+    ax1.coastlines(resolution='50m')
+    if i % 200 == 0:
         print(f'DEBUG: Successfully rendered coastlines for iteration {i+1}')
-    except Exception as e:
-        print(f'ERROR: Coastline rendering failed at iteration {i+1}/{len(time_var)} - {str(e)}')
-        print(f'ERROR: Continuing without coastlines for this iteration...')
     gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
     gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
     gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
@@ -547,58 +548,53 @@ for i,time in enumerate(time_var):
             print(f'Iteration {i}: time_var[i]={time_var[i]}, filename={filename_str}')
         
         # Add detailed logging for the critical operations that might cause silent crashes
-        try:
+        if i % 50 == 0:
             print(f'DEBUG: About to save figure for iteration {i+1}/{len(time_var)} (filename: {filename_str})')
-            plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-            print(f'DEBUG: Successfully saved figure for iteration {i+1}')
 
+        plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
+
+        if i % 50 == 0:
+            print(f'DEBUG: Successfully saved figure for iteration {i+1}')
             print(f'DEBUG: About to close figure for iteration {i+1}')
 
-            # Explicitly delete all axes and their artists to break reference cycles
-            fig = plt.gcf()
-            total_collections = 0
-            total_patches = 0
-            total_artists = 0
-            for ax in fig.get_axes():
-                # Remove all artists (patches, collections, etc.) from axes
-                total_artists += len(ax.artists)
-                for artist in ax.artists[:]:
-                    artist.remove()
-                total_patches += len(ax.patches)
-                for patch in ax.patches[:]:
-                    patch.remove()
-                total_collections += len(ax.collections)
-                for collection in ax.collections[:]:
-                    collection.remove()
-                ax.clear()
+        # Explicitly delete all axes and their artists to break reference cycles
+        fig = plt.gcf()
+        total_collections = 0
+        total_patches = 0
+        total_artists = 0
+        for ax in fig.get_axes():
+            # Remove all artists (patches, collections, etc.) from axes
+            total_artists += len(ax.artists)
+            for artist in ax.artists[:]:
+                artist.remove()
+            total_patches += len(ax.patches)
+            for patch in ax.patches[:]:
+                patch.remove()
+            total_collections += len(ax.collections)
+            for collection in ax.collections[:]:
+                collection.remove()
+            ax.clear()
 
-            if i % 50 == 0:
-                print(f'DEBUG: Removed {total_collections} collections, {total_patches} patches, {total_artists} artists from figure at iteration {i+1}')
+        if i % 50 == 0:
+            print(f'DEBUG: Removed {total_collections} collections, {total_patches} patches, {total_artists} artists from figure at iteration {i+1}')
 
-            plt.close('all')  # Close ALL figures
-            del fig  # Explicitly delete figure reference
+        plt.close('all')  # Close ALL figures
+        del fig  # Explicitly delete figure reference
 
-            # Delete any temporary arrays created during plotting to prevent memory accumulation
-            if 'var_cyclic' in locals():
-                del var_cyclic
-            if 'lon_cyclic' in locals():
-                del lon_cyclic
-            if 'map1' in locals():
-                del map1
-            if 'colorbar' in locals():
-                del colorbar
-            if 'ax1' in locals():
-                del ax1
+        # Delete any temporary arrays created during plotting to prevent memory accumulation
+        if 'var_cyclic' in locals():
+            del var_cyclic
+        if 'lon_cyclic' in locals():
+            del lon_cyclic
+        if 'map1' in locals():
+            del map1
+        if 'colorbar' in locals():
+            del colorbar
+        if 'ax1' in locals():
+            del ax1
 
+        if i % 50 == 0:
             print(f'DEBUG: Successfully closed figure for iteration {i+1}')
-
-        except Exception as e:
-            print(f'ERROR: Failed at iteration {i+1}/{len(time_var)} - {str(e)}')
-            import traceback
-            traceback.print_exc()
-            print(f'ERROR: Continuing to next iteration after error...')
-            plt.close('all')  # Force close all figures
-            continue
     else:
         plt.show()
     
@@ -615,41 +611,43 @@ for i,time in enumerate(time_var):
         if hasattr(matplotlib, '_pylab_helpers'):
             matplotlib._pylab_helpers.Gcf.destroy_all()
 
-        # 2. Clear matplotlib font cache (can grow large)
-        try:
-            font_manager._load_fontmanager(try_read_cache=False)
-        except:
-            pass
+        # 2. Clear matplotlib font cache (can grow large) - avoid bare except
+        if hasattr(font_manager, '_load_fontmanager'):
+            try:
+                font_manager._load_fontmanager(try_read_cache=False)
+            except (AttributeError, KeyError, OSError):
+                # Only catch expected exceptions
+                font_manager.findfont('DejaVu Sans', rebuild_if_missing=False)
 
-        # 3. Clear matplotlib's image cache
-        if hasattr(matplotlib, 'image'):
+        # 3. Clear matplotlib's image cache - avoid bare except
+        if hasattr(matplotlib, 'image') and hasattr(matplotlib.image, '_AxesImageBase'):
             try:
                 matplotlib.image._AxesImageBase._current = None
-            except:
-                pass
+            except (AttributeError, TypeError):
+                pass  # OK to skip if attribute doesn't exist
 
-        # 4. Clear any colormap instances
-        try:
-            plt.colormaps._cmaps_listed.clear()
-            plt.colormaps._cmap_registry.clear()
-        except:
-            pass
+        # 4. Clear any colormap instances - avoid bare except
+        if hasattr(plt, 'colormaps'):
+            try:
+                plt.colormaps._cmaps_listed.clear()
+                plt.colormaps._cmap_registry.clear()
+            except (AttributeError, KeyError):
+                pass  # OK if these don't exist
 
-        # 5. Clear cartopy cached features (Natural Earth shapefiles)
+        # 5. Clear cartopy cached features (Natural Earth shapefiles) - avoid bare except
         try:
             import cartopy.io.shapereader as shapereader
             if hasattr(shapereader, '_FEATURE_CACHE'):
                 shapereader._FEATURE_CACHE.clear()
-        except:
-            pass
+        except (ImportError, AttributeError):
+            pass  # OK if cartopy features not available
 
-        # 6. Clear cartopy CRS cache
-        try:
-            import cartopy.crs as ccrs
-            if hasattr(ccrs, '_CRS_CACHE'):
+        # 6. Clear cartopy CRS cache - avoid bare except
+        if hasattr(ccrs, '_CRS_CACHE'):
+            try:
                 ccrs._CRS_CACHE.clear()
-        except:
-            pass
+            except (AttributeError, KeyError):
+                pass  # OK if cache doesn't exist
 
         # 7. Run garbage collection multiple times to clear cyclic references
         collected1 = gc.collect()
