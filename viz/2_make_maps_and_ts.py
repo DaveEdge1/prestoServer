@@ -6,6 +6,8 @@
 
 import os
 import sys
+import shutil
+import gc
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend to prevent memory leaks
@@ -27,8 +29,14 @@ from bokeh.models import Span
 
 # Configure Python to minimize traceback retention
 sys.tracebacklimit = 0  # Disable traceback printing entirely to prevent retention
-import gc
 gc.set_debug(0)  # Disable all gc debugging flags that might retain objects
+
+# Try to import psutil for memory monitoring (optional)
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
 
 save_instead_of_plot = True
 plt.style.use('ggplot')
@@ -347,30 +355,23 @@ i=0;time=time_var[i]
 for i,time in enumerate(time_var):
     # Resource monitoring at start of each iteration
     if i % 50 == 0:
-        import os
-        import shutil
-        import sys
-        import gc
-
         # Check disk space
         disk_usage = shutil.disk_usage(output_dir_full)
         free_gb = disk_usage.free / (1024**3)
         total_gb = disk_usage.total / (1024**3)
         percent_free = (disk_usage.free / disk_usage.total) * 100
 
-        # Check memory usage of this process - try psutil first, fallback to /proc
+        # Check memory usage of this process
         pid = os.getpid()
         mem_mb = None
-        fd_count = None
 
-        # Try psutil method
-        try:
-            import psutil
+        # Try psutil method if available
+        if PSUTIL_AVAILABLE:
             process = psutil.Process(pid)
             mem_info = process.memory_info()
             mem_mb = mem_info.rss / (1024**2)  # Resident Set Size in MB
-        except ImportError:
-            # Fallback to reading /proc directly
+        else:
+            # Fallback to reading /proc directly (Linux only)
             try:
                 with open(f'/proc/{pid}/status', 'r') as f:
                     for line in f:
@@ -378,12 +379,10 @@ for i,time in enumerate(time_var):
                             mem_kb = int(line.split()[1])
                             mem_mb = mem_kb / 1024
                             break
-            except Exception as e:
+            except:
                 pass
-        except Exception as e:
-            pass
 
-        # Simple resource check without object tracking (which was causing the leak)
+        # Simple resource check
         if mem_mb is not None:
             print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Process Memory: {mem_mb:.1f}MB')
         else:
@@ -608,6 +607,10 @@ for i,time in enumerate(time_var):
         print(f'DEBUG: Garbage collector freed {total_collected} objects at iteration {i+1}')
         if i % 100 == 0:
             print(f'Memory cleanup completed at iteration {i+1}')
+
+    # Force garbage collection EVERY iteration to prevent accumulation
+    # This ensures we start each iteration with a clean slate
+    gc.collect()
 
     # Log completion of each iteration to detect if process hangs
     if (i+1) % 50 == 0 or i == len(time_var) - 1:
