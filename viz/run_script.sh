@@ -30,20 +30,21 @@ run_python_with_timeout() {
     echo "Starting $script_name with timeout of $timeout_seconds seconds" | tee -a "$log_file"
     echo "$(date): Starting $script_name (PID will be shown when started)" >> "$log_file"
     
-    # Run the Python script with timeout
-    timeout $timeout_seconds python -u "$script_path" $script_args 2>&1 | tee -a "$log_file" &
-    local python_pid=$!
-    
-    echo "Started $script_name with PID: $python_pid" >> "$log_file"
-    
-    # Wait for the process to complete and capture exit status
-    wait $python_pid
+    # Run the Python script WITHOUT the broken pipeline
+    # Direct execution to avoid tee/background issues
+    timeout $timeout_seconds python -u "$script_path" $script_args >> "$log_file" 2>&1
     local exit_code=$?
+
+    echo "$(date): Python process exited with code: $exit_code" >> "$log_file"
     
     if [ $exit_code -eq 124 ]; then
         echo "$(date): ERROR - $script_name timed out after $timeout_seconds seconds" | tee -a "$log_file"
         echo "Memory at timeout: $(free -h | grep Mem)" >> "$log_file"
         return 124
+    elif [ $exit_code -eq 141 ]; then
+        echo "$(date): ERROR - $script_name received SIGPIPE (broken pipe)" | tee -a "$log_file"
+        echo "Memory at SIGPIPE: $(free -h | grep Mem)" >> "$log_file"
+        return 141
     elif [ $exit_code -ne 0 ]; then
         echo "$(date): ERROR - $script_name failed with exit code: $exit_code" | tee -a "$log_file"
         echo "Memory at failure: $(free -h | grep Mem)" >> "$log_file"
