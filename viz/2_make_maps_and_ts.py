@@ -353,55 +353,13 @@ crs_mercator = ccrs.Mercator(central_longitude=0, min_latitude=-85, max_latitude
 
 i=0;time=time_var[i]
 for i,time in enumerate(time_var):
-    # Resource monitoring at start of each iteration
-    if i % 50 == 0:
-        # Check disk space
-        disk_usage = shutil.disk_usage(output_dir_full)
-        free_gb = disk_usage.free / (1024**3)
-        total_gb = disk_usage.total / (1024**3)
-        percent_free = (disk_usage.free / disk_usage.total) * 100
-
-        # Check memory usage of this process
-        pid = os.getpid()
-        mem_mb = None
-
-        # Try psutil method if available
-        if PSUTIL_AVAILABLE:
-            process = psutil.Process(pid)
-            mem_info = process.memory_info()
-            mem_mb = mem_info.rss / (1024**2)  # Resident Set Size in MB
-        else:
-            # Fallback to reading /proc directly (Linux only)
-            try:
-                with open(f'/proc/{pid}/status', 'r') as f:
-                    for line in f:
-                        if line.startswith('VmRSS:'):
-                            mem_kb = int(line.split()[1])
-                            mem_mb = mem_kb / 1024
-                            break
-            except:
-                pass
-
-        # Simple resource check
-        if mem_mb is not None:
-            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%), Process Memory: {mem_mb:.1f}MB')
-        else:
-            print(f'RESOURCE CHECK at iteration {i+1}: Disk free: {free_gb:.2f}GB/{total_gb:.2f}GB ({percent_free:.1f}%)')
-
-    if i % 50 == 0:  # Print every 50th item and timing info
+    # Minimal progress logging to avoid frame accumulation
+    if i % 100 == 0:
         elapsed = timekeeping.time() - starttime_total
-        print(f'Processing: {i+1}/{len(time_var)} (elapsed: {elapsed:.1f}s, avg: {elapsed/(i+1):.2f}s per item)')
-    elif i % 10 == 0:  # Print every 10th item
-        print(f'Processing: {i+1}/{len(time_var)}')
-    else:
-        # Still print original for other items but less verbose
-        print('Processing: '+str(i+1)+'/'+str(len(time_var)))
+        print('Processing: '+str(i+1)+'/'+str(len(time_var))+' (elapsed: '+str(int(elapsed))+'s)')
     #
     #%%
-    # Make a text box to show on the website (monitor matplotlib operations)
-    if i % 100 == 0:  # Every 100th iteration, basic progress check
-        print(f'Creating figure {i+1}/{len(time_var)} - progress checkpoint')
-    
+    # Make a text box to show on the website
     plt.figure(figsize=(4,2))
     ax1 = plt.subplot2grid((1,1),(0,0))
     ax1.axis('off')
@@ -414,35 +372,13 @@ for i,time in enumerate(time_var):
     ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
     if save_instead_of_plot:
         plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
-
-        # Clean up first figure thoroughly to prevent memory leak
-        fig1 = plt.gcf()
-        total_lines = 0
-        total_collections = 0
-        for ax in fig1.get_axes():
-            # Remove all line objects and collections that hold array references
-            total_lines += len(ax.lines)
-            for line in ax.lines[:]:
-                line.remove()
-            total_collections += len(ax.collections)
-            for collection in ax.collections[:]:
-                collection.remove()
-            ax.clear()
-
-        if i % 50 == 0:
-            print(f'DEBUG: Figure 1 - Removed {total_lines} lines, {total_collections} collections at iteration {i+1}')
-
         plt.close('all')
-        del fig1
     else:
         plt.show()
     #
     #
     #%%
-    # Make the primary map to show (monitor cartopy operations)
-    if i % 200 == 0:  # Every 200th map
-        print(f'Creating cartopy map {i+1}/{len(time_var)} - this may be slow...')
-    
+    # Make the primary map to show
     plt.figure(figsize=(10,10))
     ax1 = plt.subplot2grid((1,1),(0,0),projection=crs_mercator)
     if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
@@ -469,17 +405,7 @@ for i,time in enumerate(time_var):
             ax1.add_feature(region)
         colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
     if np.isnan(var_spatial_mean_allmethods[i,:,:]).all(): ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
-    
-    # Coastlines can be very slow - monitor this operation
-    if i % 200 == 0:
-        print(f'Rendering coastlines for map {i+1}/{len(time_var)}...')
-    
-    # Use low resolution coastlines to reduce memory usage
-    if i % 200 == 0:
-        print(f'DEBUG: About to render coastlines for iteration {i+1}')
     ax1.coastlines(resolution='50m')
-    if i % 200 == 0:
-        print(f'DEBUG: Successfully rendered coastlines for iteration {i+1}')
     gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
     gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
     gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
@@ -489,132 +415,13 @@ for i,time in enumerate(time_var):
     plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=crs_platecarree)
     #
     if save_instead_of_plot:
-        # Use time_var[i] instead of time to ensure correct indexing
-        time_for_filename = time_var[i]
-        filename_str = str(int(np.ceil(time_for_filename))).zfill(5)
-        if i % 100 == 0:  # Debug filename generation
-            print(f'Iteration {i}: time_var[i]={time_var[i]}, filename={filename_str}')
-        
-        # Add detailed logging for the critical operations that might cause silent crashes
-        if i % 50 == 0:
-            print(f'DEBUG: About to save figure for iteration {i+1}/{len(time_var)} (filename: {filename_str})')
-
-        plt.savefig(output_dir_full+'map_'+filename_txt+'_'+filename_str+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-
-        if i % 50 == 0:
-            print(f'DEBUG: Successfully saved figure for iteration {i+1}')
-            print(f'DEBUG: About to close figure for iteration {i+1}')
-
-        # Explicitly delete all axes and their artists to break reference cycles
-        fig = plt.gcf()
-        total_collections = 0
-        total_patches = 0
-        total_artists = 0
-        for ax in fig.get_axes():
-            # Remove all artists (patches, collections, etc.) from axes
-            total_artists += len(ax.artists)
-            for artist in ax.artists[:]:
-                artist.remove()
-            total_patches += len(ax.patches)
-            for patch in ax.patches[:]:
-                patch.remove()
-            total_collections += len(ax.collections)
-            for collection in ax.collections[:]:
-                collection.remove()
-            ax.clear()
-
-        if i % 50 == 0:
-            print(f'DEBUG: Removed {total_collections} collections, {total_patches} patches, {total_artists} artists from figure at iteration {i+1}')
-
-        plt.close('all')  # Close ALL figures
-        del fig  # Explicitly delete figure reference
-
-        # Delete any temporary arrays created during plotting to prevent memory accumulation
-        if 'var_cyclic' in locals():
-            del var_cyclic
-        if 'lon_cyclic' in locals():
-            del lon_cyclic
-        if 'map1' in locals():
-            del map1
-        if 'colorbar' in locals():
-            del colorbar
-        if 'ax1' in locals():
-            del ax1
-
-        if i % 50 == 0:
-            print(f'DEBUG: Successfully closed figure for iteration {i+1}')
+        plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
+        plt.close('all')
     else:
         plt.show()
     
-    # Aggressive memory management - force garbage collection every 50 iterations
-    if i % 50 == 0:
-        import gc
-        import matplotlib
-        import matplotlib.pyplot as plt
-        from matplotlib import font_manager
-        print(f'DEBUG: Starting comprehensive memory cleanup at iteration {i+1}')
-
-        # 1. Close all matplotlib figures and clear internal state
-        plt.close('all')
-        if hasattr(matplotlib, '_pylab_helpers'):
-            matplotlib._pylab_helpers.Gcf.destroy_all()
-
-        # 2. Clear matplotlib font cache (can grow large) - avoid bare except
-        if hasattr(font_manager, '_load_fontmanager'):
-            try:
-                font_manager._load_fontmanager(try_read_cache=False)
-            except (AttributeError, KeyError, OSError):
-                # Only catch expected exceptions
-                font_manager.findfont('DejaVu Sans', rebuild_if_missing=False)
-
-        # 3. Clear matplotlib's image cache - avoid bare except
-        if hasattr(matplotlib, 'image') and hasattr(matplotlib.image, '_AxesImageBase'):
-            try:
-                matplotlib.image._AxesImageBase._current = None
-            except (AttributeError, TypeError):
-                pass  # OK to skip if attribute doesn't exist
-
-        # 4. Clear any colormap instances - avoid bare except
-        if hasattr(plt, 'colormaps'):
-            try:
-                plt.colormaps._cmaps_listed.clear()
-                plt.colormaps._cmap_registry.clear()
-            except (AttributeError, KeyError):
-                pass  # OK if these don't exist
-
-        # 5. Clear cartopy cached features (Natural Earth shapefiles) - avoid bare except
-        try:
-            import cartopy.io.shapereader as shapereader
-            if hasattr(shapereader, '_FEATURE_CACHE'):
-                shapereader._FEATURE_CACHE.clear()
-        except (ImportError, AttributeError):
-            pass  # OK if cartopy features not available
-
-        # 6. Clear cartopy CRS cache - avoid bare except
-        if hasattr(ccrs, '_CRS_CACHE'):
-            try:
-                ccrs._CRS_CACHE.clear()
-            except (AttributeError, KeyError):
-                pass  # OK if cache doesn't exist
-
-        # 7. Run garbage collection multiple times to clear cyclic references
-        collected1 = gc.collect()
-        collected2 = gc.collect()
-        collected3 = gc.collect()
-        total_collected = collected1 + collected2 + collected3
-
-        print(f'DEBUG: Comprehensive memory cleanup completed at iteration {i+1}')
-        print(f'DEBUG: Garbage collector freed {total_collected} objects at iteration {i+1}')
-        if i % 100 == 0:
-            print(f'Memory cleanup completed at iteration {i+1}')
-
-    # Force garbage collection EVERY iteration to prevent accumulation
-    # This ensures we start each iteration with a clean slate
+    # Force garbage collection every iteration
     gc.collect()
-
-    # Log completion of each iteration to detect if process hangs
-    if (i+1) % 50 == 0 or i == len(time_var) - 1:
-        print(f'ITERATION {i+1} COMPLETE - moving to next iteration')
 
 # Log completion of main processing loop
 print(f'SUCCESS: Main processing loop completed successfully! Processed all {len(time_var)} items.')
