@@ -477,7 +477,20 @@ for i,time in enumerate(time_var):
             print(f'DEBUG: Successfully saved figure for iteration {i+1}')
             
             print(f'DEBUG: About to close figure for iteration {i+1}')
-            plt.close()
+            # Explicitly delete all axes and their artists to break reference cycles
+            fig = plt.gcf()
+            for ax in fig.get_axes():
+                # Remove all artists (patches, collections, etc.) from axes
+                for artist in ax.artists[:]:
+                    artist.remove()
+                for patch in ax.patches[:]:
+                    patch.remove()
+                for collection in ax.collections[:]:
+                    collection.remove()
+                ax.clear()
+
+            plt.close('all')  # Close ALL figures
+            del fig  # Explicitly delete figure reference
             print(f'DEBUG: Successfully closed figure for iteration {i+1}')
             
         except Exception as e:
@@ -485,7 +498,7 @@ for i,time in enumerate(time_var):
             import traceback
             traceback.print_exc()
             print(f'ERROR: Continuing to next iteration after error...')
-            plt.close('all')  # F
+            plt.close('all')  # Close ALL figures, not just current
     
     else:
         plt.show()
@@ -493,15 +506,60 @@ for i,time in enumerate(time_var):
     # Aggressive memory management - force garbage collection every 50 iterations
     if i % 50 == 0:
         import gc
-        print(f'DEBUG: Starting garbage collection at iteration {i+1}')
-        gc.collect()
-        print(f'DEBUG: Garbage collection completed at iteration {i+1}')
-        if i % 100 == 0:
-            print(f'Garbage collected at iteration {i+1}, memory cleared')
+        import matplotlib
+        import matplotlib.pyplot as plt
+        from matplotlib import font_manager
+        print(f'DEBUG: Starting comprehensive memory cleanup at iteration {i+1}')
 
-    # Log completion of each iteration to detect if process hangs
-    if (i+1) % 50 == 0 or i == len(time_var) - 1:
-       print(f'ITERATION {i+1} COMPLETE - moving to next iteration')
+        # 1. Close all matplotlib figures and clear internal state
+        plt.close('all')
+        if hasattr(matplotlib, '_pylab_helpers'):
+            matplotlib._pylab_helpers.Gcf.destroy_all()
+
+        # 2. Clear matplotlib font cache (can grow large)
+        try:
+            font_manager._load_fontmanager(try_read_cache=False)
+        except:
+            pass
+
+        # 3. Clear matplotlib's image cache
+        if hasattr(matplotlib, 'image'):
+            try:
+                matplotlib.image._AxesImageBase._current = None
+            except:
+                pass
+
+        # 4. Clear any colormap instances
+        try:
+            plt.colormaps._cmaps_listed.clear()
+            plt.colormaps._cmap_registry.clear()
+        except:
+            pass
+
+        # 5. Clear cartopy cached features (Natural Earth shapefiles)
+        try:
+            import cartopy.io.shapereader as shapereader
+            if hasattr(shapereader, '_FEATURE_CACHE'):
+                shapereader._FEATURE_CACHE.clear()
+        except:
+            pass
+
+        # 6. Clear cartopy CRS cache
+        try:
+            import cartopy.crs as ccrs
+            if hasattr(ccrs, '_CRS_CACHE'):
+                ccrs._CRS_CACHE.clear()
+        except:
+            pass
+
+        # 7. Run garbage collection multiple times to clear cyclic references
+        gc.collect()
+        gc.collect()
+        gc.collect()
+
+        print(f'DEBUG: Comprehensive memory cleanup completed at iteration {i+1}')
+        if i % 100 == 0:
+            print(f'Memory cleanup completed at iteration {i+1}')
 # Log completion of main processing loop
 print(f'SUCCESS: Main processing loop completed successfully! Processed all {len(time_var)} items.')
 print(f'SUCCESS: Moving to Step 2 (colorbar generation)...')
