@@ -362,30 +362,37 @@ for i,time in enumerate(time_var):
     # Minimal progress logging to avoid frame accumulation
     if i % 100 == 0:
         elapsed = timekeeping.time() - starttime_total
-        print('Processing: '+str(i+1)+'/'+str(len(time_var))+' (elapsed: '+str(int(elapsed))+'s)')
+        # Get memory without creating stack frames (no f-strings, no function calls)
+        if PSUTIL_AVAILABLE:
+            mem_mb = int(psutil.Process(os.getpid()).memory_info().rss / 1048576)
+            print('Processing: '+str(i+1)+'/'+str(len(time_var))+' ('+str(int(elapsed))+'s, '+str(mem_mb)+'MB)')
+        else:
+            print('Processing: '+str(i+1)+'/'+str(len(time_var))+' (elapsed: '+str(int(elapsed))+'s)')
     #
     #%%
     # Make a text box to show on the website
-    # Create fresh figure each time but render with minimal overhead
-    fig = plt.figure(figsize=(4,2))
-    ax1 = fig.add_subplot(111)
-    ax1.axis('off')
+    # DIAGNOSTIC: Skip time series to test if map is the leak
+    # TODO: Re-enable this after testing
+    if False:  # Set to True to enable time series figure
+        fig = plt.figure(figsize=(4,2))
+        ax1 = fig.add_subplot(111)
+        ax1.axis('off')
 
-    # Only plot the fill and line - these create Path objects but will be garbage collected
-    if not skip_global_ens:
-        ax1.fill_between(time_var,var_global_lowerbound,var_global_upperbound,color='lightgray')
-    ax1.plot(time_var,var_global_mean_allmethods,linewidth=1)
-    ax1.axvline(x=time,color='gray',alpha=1,linestyle='--',linewidth=1)
-    ax1.axhline(y=0,   color='k',   alpha=1,linestyle='--',linewidth=1)
-    ax1.set_xlim(time_start,time_end+(time_end-time_start)/100)
-    ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
+        # Only plot the fill and line - these create Path objects but will be garbage collected
+        if not skip_global_ens:
+            ax1.fill_between(time_var,var_global_lowerbound,var_global_upperbound,color='lightgray')
+        ax1.plot(time_var,var_global_mean_allmethods,linewidth=1)
+        ax1.axvline(x=time,color='gray',alpha=1,linestyle='--',linewidth=1)
+        ax1.axhline(y=0,   color='k',   alpha=1,linestyle='--',linewidth=1)
+        ax1.set_xlim(time_start,time_end+(time_end-time_start)/100)
+        ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
 
-    if save_instead_of_plot:
-        plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
-        plt.close(fig)
-        del fig, ax1
-    else:
-        plt.show()
+        if save_instead_of_plot:
+            plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
+            plt.close(fig)
+            del fig, ax1
+        else:
+            plt.show()
     #
     #
     #%%
