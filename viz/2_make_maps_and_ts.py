@@ -403,230 +403,133 @@ i=0;time=time_var[i]
 import matplotlib.patches as mpatches
 from io import BytesIO
 
-for i,time in enumerate(time_var):
-    # Minimal progress logging to avoid frame accumulation
-    if i % 100 == 0:
-        elapsed = timekeeping.time() - starttime_total
-        # Get memory without creating stack frames (no f-strings, no function calls)
-        if PSUTIL_AVAILABLE:
-            mem_mb = int(psutil.Process(os.getpid()).memory_info().rss / 1048576)
-            print('Processing: '+str(i+1)+'/'+str(len(time_var))+' ('+str(int(elapsed))+'s, '+str(mem_mb)+'MB)')
-        else:
-            print('Processing: '+str(i+1)+'/'+str(len(time_var))+' (elapsed: '+str(int(elapsed))+'s)')
-    #
-    #%%
-    # Make a text box to show on the website
-    # DIAGNOSTIC: Test time series figure only
-    if True:  # Set to False to disable time series figure
-        fig = plt.figure(figsize=(4,2))
-        ax1 = fig.add_subplot(111)
-        ax1.axis('off')
+import multiprocessing as mp
 
-        # Only plot the fill and line - these create Path objects but will be garbage collected
-        if not skip_global_ens:
-            ax1.fill_between(time_var,var_global_lowerbound,var_global_upperbound,color='lightgray')
-        ax1.plot(time_var,var_global_mean_allmethods,linewidth=1)
-        ax1.axvline(x=time,color='gray',alpha=1,linestyle='--',linewidth=1)
-        ax1.axhline(y=0,   color='k',   alpha=1,linestyle='--',linewidth=1)
-        ax1.set_xlim(time_start,time_end+(time_end-time_start)/100)
-        ax1.set_title('Mean : '+str('{:.2f}'.format(var_global_mean_allmethods[i]))+' '+info_unit_txt,fontsize=18)
+def make_one_plot(i, time_value,
+                  var_cyclic, var_global_lowerbound, var_global_upperbound,
+                  var_global_mean_allmethods,
+                  x_transformed, y_transformed,
+                  lon_bounds_2d, lat_bounds_2d,
+                  output_dir_full, filename_txt,
+                  cmap, levels, tick_levels,
+                  colors_selected,
+                  crs_mercator, crs_platecarree,
+                  ref_period, colorbar_txt,
+                  info_unit_txt, time_var,
+                  time_start, time_end, dataset_name, version_txt,
+                  map_region, map_type,
+                  skip_global_ens,
+                  ar6_all=None, ar6_abbreviations=None, regions_all=None,
+                  colors_from_cmap=None):
 
-        if save_instead_of_plot:
-            plt.savefig(output_dir_full+'info_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=50,format='png',bbox_inches='tight')
-            plt.close(fig)
-            del fig, ax1
-        else:
-            plt.show()
-    #
-    #
-    #%%
-    # Make the primary map to show
-    # Testing pcolormesh workaround for contourf memory leak
+    # === Time series panel ===
+    fig = plt.figure(figsize=(4, 2))
+    ax1 = fig.add_subplot(111)
+    ax1.axis("off")
 
-    ENABLE_PROJECTION = True   # Create figure with cartopy projection
-    ENABLE_EXTENT = True        # Set map extent
-    ENABLE_CONTOUR = True       # Plot the actual data - now using pcolormesh instead of contourf
-    ENABLE_COLORBAR = False     # Add colorbar
-    ENABLE_COASTLINES = False   # Add coastlines
-    ENABLE_GRIDLINES = False    # Add gridlines
-    ENABLE_TEXT = False         # Add text annotation
+    if not skip_global_ens and (var_global_lowerbound is not None and var_global_upperbound is not None):
+        ax1.fill_between(time_var, var_global_lowerbound, var_global_upperbound,
+                         color="lightgray")
 
-    if ENABLE_PROJECTION:
-        fig2 = plt.figure(figsize=(10,10))
-        ax1 = fig2.add_subplot(111, projection=crs_mercator)
+    ax1.plot(time_var, var_global_mean_allmethods, linewidth=1)
+    ax1.axvline(x=time_value, color="gray", alpha=1, linestyle="--", linewidth=1)
+    ax1.axhline(y=0, color="k", alpha=1, linestyle="--", linewidth=1)
+    ax1.set_xlim(time_start, time_end + (time_end - time_start) / 100)
+    ax1.set_title("Mean : " +
+                  str("{:.2f}".format(var_global_mean_allmethods[i])) +
+                  " " + info_unit_txt, fontsize=18)
 
-        if ENABLE_EXTENT:
-            # Set extent using pre-determined values
-            if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree)
-            elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree)
-            elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree)
+    plt.savefig(output_dir_full + "info_" + filename_txt + "_" +
+                str(int(np.ceil(time_var[i]))).zfill(5) + ".png",
+                dpi=50, format="png", bbox_inches="tight")
+    plt.close(fig)
 
-        if ENABLE_CONTOUR:
-            # CRITICAL FIX: Use pre-transformed coordinates WITHOUT transform parameter
-            # The transform=crs_platecarree was causing memory leak from repeated coordinate transformation
-            if map_type == 'contourf':
-                var_cyclic = var_spatial_with_cyclic[i]
-                # Plot with pre-transformed coordinates - NO transform parameter!
-                map1 = ax1.contourf(x_transformed, y_transformed, var_cyclic,
-                                   colors=colors_selected, levels=levels, extend='both')
-                if ENABLE_COLORBAR:
-                    colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
-            elif map_type == 'pcolormesh':
-                map1 = ax1.pcolormesh(lon_bounds_2d,lat_bounds_2d,var_spatial_mean_allmethods[i,:,:],cmap=cmap,vmin=levels[0],vmax=levels[-1],transform=crs_platecarree)
-                if ENABLE_COLORBAR:
-                    colorbar = plt.colorbar(map1,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
-            elif map_type == 'regions_ipcc_ar6':
-                norm = matplotlib.colors.Normalize(vmin=-2,vmax=2,clip=True)
-                for j in range(len(ar6_all)):
-                    region_txt = ar6_abbreviations[j]
-                    if region_txt in regions_all:
-                        ind_region = np.where(region_txt==regions_all)[0][0]
-                        value_for_region = var_spatial_mean_allmethods[i,ind_region,0]
-                    else: value_for_region = np.nan
-                    if np.isnan(value_for_region): facecolor = 'lightgray'
-                    else: facecolor = colors_from_cmap(norm(value_for_region))
-                    region = ShapelyFeature([ar6_all[j]._polygon],facecolor=facecolor,crs=crs_platecarree)
-                    ax1.add_feature(region)
-                if ENABLE_COLORBAR:
-                    colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
+    # === Map panel ===
+    fig2 = plt.figure(figsize=(10, 10))
+    ax2 = fig2.add_subplot(111, projection=crs_mercator)
 
-            if np.isnan(var_spatial_mean_allmethods[i,:,:]).all():
-                ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
+    if   map_region == 'global':    ax2.set_extent([-179.99,179.99,-85,85], crs=crs_platecarree)
+    elif map_region == 'n_america': ax2.set_extent([-171.5,-52,-5,84],      crs=crs_platecarree)
+    elif map_region == 'europe':    ax2.set_extent([-13,46,26,72],          crs=crs_platecarree)
 
-        if ENABLE_COASTLINES:
-            # Use pre-loaded coastline feature instead of downloading each time
-            ax1.add_feature(coastlines_feature)
+    if map_type == "contourf":
+        map1 = ax2.contourf(x_transformed, y_transformed, var_cyclic,
+                            colors=colors_selected, levels=levels, extend="both")
+    elif map_type == "pcolormesh":
+        map1 = ax2.pcolormesh(lon_bounds_2d, lat_bounds_2d, var_cyclic,
+                              cmap=cmap, vmin=levels[0], vmax=levels[-1],
+                              transform=crs_platecarree)
+    elif map_type == "regions_ipcc_ar6":
+        norm = matplotlib.colors.Normalize(vmin=-2, vmax=2, clip=True)
+        for j in range(len(ar6_all)):
+            region_txt = ar6_abbreviations[j]
+            if region_txt in regions_all:
+                ind_region = np.where(region_txt == regions_all)[0][0]
+                value_for_region = var_cyclic[ind_region, 0]
+            else:
+                value_for_region = np.nan
+            if np.isnan(value_for_region):
+                facecolor = 'lightgray'
+            else:
+                facecolor = colors_from_cmap(norm(value_for_region))
+            region = ShapelyFeature([ar6_all[j]._polygon],
+                                    facecolor=facecolor,
+                                    crs=crs_platecarree)
+            ax2.add_feature(region)
 
-        if ENABLE_GRIDLINES:
-            gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
-            # Use pre-created locators instead of creating new ones each time
-            gl.ylocator = y_locator
-            gl.xlocator = x_locator
+    # If all NaN, show a message
+    if np.isnan(var_cyclic).all():
+        ax2.text(0.5, 0.5, 'Please select another year.',
+                 fontsize=12, ha='center', va='center',
+                 transform=ax2.transAxes)
 
-        if ENABLE_COLORBAR and 'colorbar' in locals():
-            if ref_period == 'none': colorbar.set_label(colorbar_txt,fontsize=6)
-            else: colorbar.set_label(colorbar_txt+', rel. '+ref_period,fontsize=6)
-            colorbar.ax.tick_params(labelsize=3)
-
-        if ENABLE_TEXT:
-            plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=crs_platecarree)
-
-        if save_instead_of_plot:
-            plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-
-            # CRITICAL: Explicitly remove all collections from axes to prevent contourf memory leak
-            # Remove collections in reverse order to avoid index issues
-            while len(ax1.collections) > 0:
-                ax1.collections[-1].remove()
-
-            # Clear the current axes.
-            plt.cla() 
-            # Clear the current figure.
-            plt.clf() 
-            # Closes all the figure windows.
-            plt.close('all')
-            del fig2, ax1, map1
-        else:
-            plt.show()
-
-    # Force garbage collection every iteration to immediately release memory
-    gc.collect()
-
-# Log completion of main processing loop
-print(f'SUCCESS: Main processing loop completed successfully! Processed all {len(time_var)} items.')
-print(f'SUCCESS: Moving to Step 2 (colorbar generation)...')
-
-#%% COLORBAR
-print('Step 2: Making a colorbar. N=1')
-i=0;time=time_var[i]
-plt.figure(figsize=(10,10))
-ax1 = plt.subplot2grid((1,1),(0,0),projection=ccrs.Mercator(central_longitude=0,min_latitude=-85,max_latitude=85))
-if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=ccrs.PlateCarree())
-elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=ccrs.PlateCarree())
-elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=ccrs.PlateCarree())
-if map_type == 'contourf':
-    var_cyclic,lon_cyclic = cutil.add_cyclic_point(var_spatial_mean_allmethods[i,:,:],coord=lon)
-    map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=ccrs.PlateCarree())
-    colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.08,pad=0.02)
-elif map_type == 'pcolormesh':
-    map1 = ax1.pcolormesh(lon_bounds_2d,lat_bounds_2d,var_spatial_mean_allmethods[i,:,:],cmap=cmap,vmin=levels[0],vmax=levels[-1],transform=ccrs.PlateCarree())
-    colorbar = plt.colorbar(map1,orientation='horizontal',ax=ax1,fraction=0.08,pad=0.02)
-elif map_type == 'regions_ipcc_ar6':
-    norm = matplotlib.colors.Normalize(vmin=-2,vmax=2,clip=True)
-    colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.08,pad=0.02)
-plt.gca().set_visible(False)
-if ref_period == 'none': colorbar.set_label(colorbar_txt,fontsize=16)
-else: colorbar.set_label(colorbar_txt+', rel. '+ref_period,fontsize=16)
-colorbar.ax.tick_params(labelsize=12)
-
-if save_instead_of_plot:
-    plt.savefig(output_dir_full+'colorbar_'+filename_txt+'.png',dpi=150,format='png',bbox_inches='tight')
-    plt.close()
-else:
-    plt.show()
+    plt.savefig(output_dir_full + "map_" + filename_txt + "_" +
+                str(int(np.ceil(time_var[i]))).zfill(5) + ".png",
+                dpi=150, format="png", bbox_inches="tight", pad_inches=0.0)
+    plt.close(fig2)
 
 
-#%% GRID CALCULATIONS
+# === MAIN LOOP USING MULTIPROCESSING ===
+print("Step 1: Making maps and info panels with forked workers")
+for i, time in enumerate(time_var):
+    if i % 50 == 0:
+        print(f"Processing {i+1}/{len(time_var)}")
 
-# Subset the grid
-lat_string,lon_string,j_for_ts,i_for_ts,lon_neg = functions_presto.select_latlons(lat,lon,map_region,dataset_txt)
+    # Pick the right data slice for this timestep
+    if map_type == "contourf":
+        var_cyclic = var_spatial_with_cyclic[i]
+    elif map_type == "pcolormesh":
+        var_cyclic = var_spatial_mean_allmethods[i, :, :]
+    elif map_type == "regions_ipcc_ar6":
+        var_cyclic = var_spatial_mean_allmethods[i, :, :]
+    else:
+        raise ValueError(f"Unknown map_type: {map_type}")
 
-"""
-# Save the latitudes and longitudes to a file
-with open('latlon_'+filename_txt+'.txt','w') as f:
-    f.write(lat_string+'\n')
-    f.write(lon_string)
-"""
+    # Spawn worker
+    p = mp.Process(
+        target=make_one_plot,
+        args=(i, time,
+              var_cyclic,
+              None if skip_global_ens else var_global_lowerbound,
+              None if skip_global_ens else var_global_upperbound,
+              var_global_mean_allmethods,
+              x_transformed, y_transformed,
+              lon_bounds_2d, lat_bounds_2d,
+              output_dir_full, filename_txt,
+              cmap, levels, tick_levels,
+              colors_selected,
+              crs_mercator, crs_platecarree,
+              ref_period, colorbar_txt,
+              info_unit_txt, time_var,
+              time_start, time_end, dataset_name, version_txt,
+              map_region, map_type,
+              skip_global_ens,
+              ar6_all, ar6_abbreviations, regions_all,
+              colors_from_cmap)
+    )
+    p.start()
+    p.join()  # wait for worker to finish
 
-
-#%% TIME SERIES FUNCTION
-
-# A function to make a time series
-def make_time_series(var_mean_to_plot,var_lowerbound_to_plot,var_upperbound_to_plot,location_title_txt,outputfile_txt,text_color):
-    #
-    # Make an interactive time series with bokeh
-    p1 = figure(width=1200,
-                height=ts_height,
-                title=title_txt_bokeh+' for '+dataset_name+', v.'+version_txt.replace('_','.')+location_title_txt+' (uncertainties: '+spatial_uncertainty_txt+')',
-                tools='pan,box_zoom,hover,save,reset',
-                active_drag='box_zoom',active_inspect='hover',
-                x_range=Range1d(bounds=(min(time_var),max(time_var))))
-    #
-    p1.title.text_color = text_color
-    p1.xaxis.axis_label = time_name_txt+' ('+time_unit_txt+')'
-    p1.yaxis.axis_label = title_txt_bokeh
-    p1.x_range.start = time_start
-    p1.x_range.end   = time_end
-    p1.y_range.start = ts_yrange[0]
-    p1.y_range.end   = ts_yrange[1]
-    #
-    for k,method_chosen in enumerate(method):
-        if skip_spatial_ens: pass
-        else: p1.varea(time_var,var_lowerbound_to_plot[k,:],var_upperbound_to_plot[k,:],color=method_color_list[k],alpha=0.1,legend_label=method_chosen)
-        p1.line(time_var,var_mean_to_plot[k,:],color=method_color_list[k],line_width=1,legend_label=method_chosen)
-    line0 = Span(location=0,dimension='width',line_color='gray',line_width=1)
-    p1.renderers.extend([line0])
-    p1.background_fill_color           = 'white'
-    p1.grid.grid_line_color            = '#e0e0e0'
-    p1.axis.axis_label_text_font_style = 'normal'
-    p1.axis.axis_label_text_font_size  = '16px'
-    p1.title.text_font_size            = '16px'
-    p1.title.align                     = 'center'
-    p1.legend.location     = 'bottom_right'
-    p1.legend.click_policy = 'hide'
-    #
-    hover = p1.select_one(HoverTool)
-    hover.tooltips = [
-            (time_name_txt,'@x{int} '+time_unit_txt),
-            (var_txt,'@y '+html_unit_txt),
-            ]
-    hover.mode='vline'
-    #
-    # Save as html
-    html = file_html(p1,CDN,outputfile_txt)
-    output_file = open(output_dir_full+outputfile_txt,'w')
-    output_file.write(html)
-    output_file.close()
 
 
 #%% MAKE TIME SERIES FOR LOCATIONS
