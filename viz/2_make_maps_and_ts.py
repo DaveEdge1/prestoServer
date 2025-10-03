@@ -519,7 +519,12 @@ for i,time in enumerate(time_var):
             while len(ax1.collections) > 0:
                 ax1.collections[-1].remove()
 
-            plt.close(fig2)
+            # Clear the current axes.
+            plt.cla() 
+            # Clear the current figure.
+            plt.clf() 
+            # Closes all the figure windows.
+            plt.close('all')
             del fig2, ax1
             if 'map1' in locals():
                 del map1
