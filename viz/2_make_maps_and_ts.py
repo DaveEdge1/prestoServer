@@ -26,6 +26,7 @@ from bokeh.embed import file_html
 from bokeh.models import HoverTool
 from bokeh.models import Range1d
 from bokeh.models import Span
+import multiprocessing as mp
 
 # Configure Python to minimize traceback retention
 sys.tracebacklimit = 0  # Disable traceback printing entirely to prevent retention
@@ -397,15 +398,6 @@ elif map_region == 'europe':    extra_txt_x = 16.5;    extra_txt_y = 31.25; grid
 y_locator = mticker.FixedLocator(np.arange(-90,91,grid_y))
 x_locator = mticker.FixedLocator(np.arange(-180,181,grid_x))
 
-i=0;time=time_var[i]
-
-# Pre-render the base time series figure ONCE to avoid recreating paths 1200 times
-# This figure template will be reused for each iteration
-import matplotlib.patches as mpatches
-from io import BytesIO
-
-import multiprocessing as mp
-
 def make_one_plot(i, time_value,
                   var_cyclic, var_global_lowerbound, var_global_upperbound,
                   var_global_mean_allmethods,
@@ -421,7 +413,9 @@ def make_one_plot(i, time_value,
                   map_region, map_type,
                   skip_global_ens,
                   ar6_all=None, ar6_abbreviations=None, regions_all=None,
-                  colors_from_cmap=None):
+                  colors_from_cmap=None,
+                  coastlines_feature=None, y_locator=None, x_locator=None,
+                  extra_txt_x=0, extra_txt_y=0, time_unit_txt=""):
 
     # === Time series panel ===
     fig = plt.figure(figsize=(4, 2))
@@ -449,10 +443,12 @@ def make_one_plot(i, time_value,
     fig2 = plt.figure(figsize=(10, 10))
     ax2 = fig2.add_subplot(111, projection=crs_mercator)
 
+    # Extent
     if   map_region == 'global':    ax2.set_extent([-179.99,179.99,-85,85], crs=crs_platecarree)
     elif map_region == 'n_america': ax2.set_extent([-171.5,-52,-5,84],      crs=crs_platecarree)
     elif map_region == 'europe':    ax2.set_extent([-13,46,26,72],          crs=crs_platecarree)
 
+    # Main plot
     if map_type == "contourf":
         map1 = ax2.contourf(x_transformed, y_transformed, var_cyclic,
                             colors=colors_selected, levels=levels, extend="both")
@@ -464,25 +460,54 @@ def make_one_plot(i, time_value,
         norm = matplotlib.colors.Normalize(vmin=-2, vmax=2, clip=True)
         for j in range(len(ar6_all)):
             region_txt = ar6_abbreviations[j]
-            if region_txt in regions_all:
+            if regions_all is not None and region_txt in regions_all:
                 ind_region = np.where(region_txt == regions_all)[0][0]
                 value_for_region = var_cyclic[ind_region, 0]
             else:
                 value_for_region = np.nan
-            if np.isnan(value_for_region):
-                facecolor = 'lightgray'
-            else:
-                facecolor = colors_from_cmap(norm(value_for_region))
+            facecolor = 'lightgray' if np.isnan(value_for_region) else colors_from_cmap(norm(value_for_region))
             region = ShapelyFeature([ar6_all[j]._polygon],
                                     facecolor=facecolor,
                                     crs=crs_platecarree)
             ax2.add_feature(region)
+        map1 = None
 
-    # If all NaN, show a message
+    # Coastlines
+    if coastlines_feature is not None:
+        ax2.add_feature(coastlines_feature)
+
+    # Gridlines
+    if x_locator is not None and y_locator is not None:
+        gl = ax2.gridlines(color='gray', linestyle=':', draw_labels=False)
+        gl.ylocator = y_locator
+        gl.xlocator = x_locator
+
+    # Colorbar
+    if map_type in ["contourf", "pcolormesh"] and map1 is not None:
+        colorbar = plt.colorbar(map1, ticks=tick_levels, orientation="horizontal",
+                                ax=ax2, fraction=0.01, pad=-0.07)
+    elif map_type == "regions_ipcc_ar6":
+        norm = matplotlib.colors.Normalize(vmin=-2, vmax=2, clip=True)
+        colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap),
+                                orientation="horizontal", ax=ax2, fraction=0.01, pad=-0.07)
+    else:
+        colorbar = None
+
+    if colorbar is not None:
+        label_txt = colorbar_txt if ref_period == "none" else colorbar_txt + ", rel. " + ref_period
+        colorbar.set_label(label_txt, fontsize=6)
+        colorbar.ax.tick_params(labelsize=3)
+
+    # Text annotation
+    ax2.text(extra_txt_x, extra_txt_y,
+             dataset_name + ", v." + version_txt.replace("_", ".") +
+             ", " + str(time_value) + " " + time_unit_txt,
+             fontsize=7, ha="center", transform=crs_platecarree)
+
+    # NaN message
     if np.isnan(var_cyclic).all():
-        ax2.text(0.5, 0.5, 'Please select another year.',
-                 fontsize=12, ha='center', va='center',
-                 transform=ax2.transAxes)
+        ax2.text(0.5, 0.5, "Please select another year.",
+                 fontsize=12, ha="center", va="center", transform=ax2.transAxes)
 
     plt.savefig(output_dir_full + "map_" + filename_txt + "_" +
                 str(int(np.ceil(time_var[i]))).zfill(5) + ".png",
@@ -496,7 +521,7 @@ for i, time in enumerate(time_var):
     if i % 50 == 0:
         print(f"Processing {i+1}/{len(time_var)}")
 
-    # Pick the right data slice for this timestep
+    # Pick data slice
     if map_type == "contourf":
         var_cyclic = var_spatial_with_cyclic[i]
     elif map_type == "pcolormesh":
@@ -525,13 +550,13 @@ for i, time in enumerate(time_var):
               time_start, time_end, dataset_name, version_txt,
               map_region, map_type,
               skip_global_ens,
-              ar6_all if map_type == 'regions_ipcc_ar6' else None,
-              ar6_abbreviations if map_type == 'regions_ipcc_ar6' else None,
-              regions_all if map_type == 'regions_ipcc_ar6' else None,
-              colors_from_cmap)
+              ar6_all, ar6_abbreviations, regions_all,
+              colors_from_cmap,
+              coastlines_feature, y_locator, x_locator,
+              extra_txt_x, extra_txt_y, time_unit_txt)
     )
     p.start()
-    p.join()  # wait for worker to finish
+    p.join()
 
 
 
