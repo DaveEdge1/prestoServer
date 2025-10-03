@@ -525,9 +525,7 @@ for i,time in enumerate(time_var):
             plt.clf() 
             # Closes all the figure windows.
             plt.close('all')
-            del fig2, ax1
-            if 'map1' in locals():
-                del map1
+            del fig2, ax1, map1
         else:
             plt.show()
 
