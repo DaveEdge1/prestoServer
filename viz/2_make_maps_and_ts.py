@@ -340,6 +340,7 @@ ar6_all = regionmask.defined_regions.ar6.all
 ar6_abbreviations = ar6_all.abbrevs
 
 # If the reconstruction uses the IPCC AR6 regions, get some data about regions
+regions_all = None
 if map_type == 'regions_ipcc_ar6': regions_all = lat
 
 
@@ -524,7 +525,9 @@ for i, time in enumerate(time_var):
               time_start, time_end, dataset_name, version_txt,
               map_region, map_type,
               skip_global_ens,
-              ar6_all, ar6_abbreviations, regions_all,
+              ar6_all if map_type == 'regions_ipcc_ar6' else None,
+              ar6_abbreviations if map_type == 'regions_ipcc_ar6' else None,
+              regions_all if map_type == 'regions_ipcc_ar6' else None,
               colors_from_cmap)
     )
     p.start()
