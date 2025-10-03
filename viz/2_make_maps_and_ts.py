@@ -351,6 +351,35 @@ print('Step 1: Making maps and info panels. N='+str(len(time_var))+' each')
 crs_platecarree = ccrs.PlateCarree()
 crs_mercator = ccrs.Mercator(central_longitude=0, min_latitude=-85, max_latitude=85)
 
+# Pre-load coastline geometries ONCE before loop to avoid downloading/parsing 1200 times
+# This is the key to fixing the memory leak
+import cartopy.feature as cfeature
+coastlines_feature = cfeature.NaturalEarthFeature('physical', 'coastline', '50m',
+                                                   edgecolor='black', facecolor='none')
+
+# Pre-compute cyclic point coordinates for all timesteps to avoid repeated computation
+# This prevents memory accumulation from coordinate transformations
+if map_type == 'contourf':
+    print('Pre-computing cyclic coordinates for all timesteps...')
+    # Add cyclic point to longitude for proper wrapping
+    var_spatial_with_cyclic = []
+    lon_cyclic = None
+    for idx in range(len(time_var)):
+        var_cyc, lon_cyc = cutil.add_cyclic_point(var_spatial_mean_allmethods[idx,:,:], coord=lon)
+        var_spatial_with_cyclic.append(var_cyc)
+        if lon_cyclic is None:
+            lon_cyclic = lon_cyc  # Same for all timesteps
+    print('Cyclic coordinate pre-computation complete')
+
+# Pre-determine grid spacing based on map region (same for all iterations)
+if   map_region == 'global':    extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
+elif map_region == 'n_america': extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
+elif map_region == 'europe':    extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
+
+# Pre-create FixedLocator objects once instead of creating 1200 times
+y_locator = mticker.FixedLocator(np.arange(-90,91,grid_y))
+x_locator = mticker.FixedLocator(np.arange(-180,181,grid_x))
+
 i=0;time=time_var[i]
 
 # Pre-render the base time series figure ONCE to avoid recreating paths 1200 times
@@ -403,7 +432,7 @@ for i,time in enumerate(time_var):
     ENABLE_EXTENT = True        # Set map extent
     ENABLE_CONTOUR = True       # Plot the actual data (contourf/pcolormesh)
     ENABLE_COLORBAR = True      # Add colorbar
-    ENABLE_COASTLINES = False    # Add coastlines (suspect #1 - downloads shapefiles)
+    ENABLE_COASTLINES = True    # Add coastlines - now using pre-loaded feature
     ENABLE_GRIDLINES = True     # Add gridlines
     ENABLE_TEXT = True          # Add text annotation
 
@@ -412,13 +441,15 @@ for i,time in enumerate(time_var):
         ax1 = fig2.add_subplot(111, projection=crs_mercator)
 
         if ENABLE_EXTENT:
-            if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
-            elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree); extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
-            elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree); extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
+            # Set extent using pre-determined values
+            if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree)
+            elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree)
+            elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree)
 
         if ENABLE_CONTOUR:
             if map_type == 'contourf':
-                var_cyclic,lon_cyclic = cutil.add_cyclic_point(var_spatial_mean_allmethods[i,:,:],coord=lon)
+                # Use pre-computed cyclic coordinates instead of computing each time
+                var_cyclic = var_spatial_with_cyclic[i]
                 map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=crs_platecarree)
                 if ENABLE_COLORBAR:
                     colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
@@ -445,12 +476,14 @@ for i,time in enumerate(time_var):
                 ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
 
         if ENABLE_COASTLINES:
-            ax1.coastlines(resolution='50m')
+            # Use pre-loaded coastline feature instead of downloading each time
+            ax1.add_feature(coastlines_feature)
 
         if ENABLE_GRIDLINES:
             gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
-            gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
-            gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
+            # Use pre-created locators instead of creating new ones each time
+            gl.ylocator = y_locator
+            gl.xlocator = x_locator
 
         if ENABLE_COLORBAR and 'colorbar' in locals():
             if ref_period == 'none': colorbar.set_label(colorbar_txt,fontsize=6)
