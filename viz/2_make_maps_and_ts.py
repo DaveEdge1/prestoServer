@@ -425,16 +425,16 @@ for i,time in enumerate(time_var):
     #
     #%%
     # Make the primary map to show
-    # STRATEGIC DIAGNOSTIC: Incrementally enable features to find leak source
-    # Test sequence: projection only -> +extent -> +contour -> +colorbar -> +coastlines -> +gridlines -> +text
+    # STRATEGIC DIAGNOSTIC: Minimal test - just projection, save, close
+    # Testing if cartopy projection itself leaks memory
 
     ENABLE_PROJECTION = True   # Create figure with cartopy projection
-    ENABLE_EXTENT = True        # Set map extent
-    ENABLE_CONTOUR = True       # Plot the actual data (contourf/pcolormesh)
-    ENABLE_COLORBAR = True      # Add colorbar
-    ENABLE_COASTLINES = True    # Add coastlines - now using pre-loaded feature
-    ENABLE_GRIDLINES = True     # Add gridlines
-    ENABLE_TEXT = True          # Add text annotation
+    ENABLE_EXTENT = False       # Set map extent
+    ENABLE_CONTOUR = False      # Plot the actual data (contourf/pcolormesh)
+    ENABLE_COLORBAR = False     # Add colorbar
+    ENABLE_COASTLINES = False   # Add coastlines
+    ENABLE_GRIDLINES = False    # Add gridlines
+    ENABLE_TEXT = False         # Add text annotation
 
     if ENABLE_PROJECTION:
         fig2 = plt.figure(figsize=(10,10))
