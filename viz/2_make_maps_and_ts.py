@@ -567,9 +567,9 @@ for i, time in enumerate(time_var):
 print(f"Prepared {len(all_args)} tasks, starting parallel processing...")
 
 # Process in parallel with a pool of 4 workers
-# maxtasksperchild=1 ensures each worker is terminated after 1 task to prevent memory leaks
+# maxtasksperchild=20 ensures each worker is terminated after 20 task to prevent memory leaks
 from multiprocessing import Pool
-with Pool(processes=4, maxtasksperchild=1) as pool:
+with Pool(processes=4, maxtasksperchild=20) as pool:
     # Use imap to get progress feedback
     for idx, result in enumerate(pool.imap(make_one_plot, all_args)):
         if idx % 50 == 0:
