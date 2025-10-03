@@ -496,15 +496,16 @@ for i,time in enumerate(time_var):
         if save_instead_of_plot:
             plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
 
-            # CRITICAL: Explicitly remove contour collections to prevent memory leak
-            # The contourf QuadContourSet retains Path objects that accumulate
-            if 'map1' in locals() and map1 is not None:
-                for collection in map1.collections:
-                    collection.remove()
-                del map1
+            # CRITICAL: Explicitly clear axes collections to prevent contourf memory leak
+            # Remove all collection objects (contours) from the axes before closing
+            for coll in ax1.collections:
+                coll.remove()
+            ax1.collections.clear()
 
             plt.close(fig2)
             del fig2, ax1
+            if 'map1' in locals():
+                del map1
         else:
             plt.show()
 
