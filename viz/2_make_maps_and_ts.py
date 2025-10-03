@@ -396,57 +396,74 @@ for i,time in enumerate(time_var):
     #
     #%%
     # Make the primary map to show
-    if True:  # Re-enabled with memory leak fix
+    # STRATEGIC DIAGNOSTIC: Incrementally enable features to find leak source
+    # Test sequence: projection only -> +extent -> +contour -> +colorbar -> +coastlines -> +gridlines -> +text
+
+    ENABLE_PROJECTION = True   # Create figure with cartopy projection
+    ENABLE_EXTENT = True        # Set map extent
+    ENABLE_CONTOUR = True       # Plot the actual data (contourf/pcolormesh)
+    ENABLE_COLORBAR = True      # Add colorbar
+    ENABLE_COASTLINES = False    # Add coastlines (suspect #1 - downloads shapefiles)
+    ENABLE_GRIDLINES = True     # Add gridlines
+    ENABLE_TEXT = True          # Add text annotation
+
+    if ENABLE_PROJECTION:
         fig2 = plt.figure(figsize=(10,10))
         ax1 = fig2.add_subplot(111, projection=crs_mercator)
-        if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
-        elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree); extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
-        elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree); extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
-        if map_type == 'contourf':
-            var_cyclic,lon_cyclic = cutil.add_cyclic_point(var_spatial_mean_allmethods[i,:,:],coord=lon)
-            map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=crs_platecarree)
-            colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
-        elif map_type == 'pcolormesh':
-            map1 = ax1.pcolormesh(lon_bounds_2d,lat_bounds_2d,var_spatial_mean_allmethods[i,:,:],cmap=cmap,vmin=levels[0],vmax=levels[-1],transform=crs_platecarree)
-            colorbar = plt.colorbar(map1,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
-        elif map_type == 'regions_ipcc_ar6':
-            norm = matplotlib.colors.Normalize(vmin=-2,vmax=2,clip=True)
-            for j in range(len(ar6_all)):
-                region_txt = ar6_abbreviations[j]
-                if region_txt in regions_all:
-                    ind_region = np.where(region_txt==regions_all)[0][0]
-                    value_for_region = var_spatial_mean_allmethods[i,ind_region,0]
-                else: value_for_region = np.nan
-                if np.isnan(value_for_region): facecolor = 'lightgray'
-                else: facecolor = colors_from_cmap(norm(value_for_region))
-                region = ShapelyFeature([ar6_all[j]._polygon],facecolor=facecolor,crs=crs_platecarree)
-                ax1.add_feature(region)
-            colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
-        if np.isnan(var_spatial_mean_allmethods[i,:,:]).all(): ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
-        ax1.coastlines(resolution='50m')
-        gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
-        gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
-        gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
-        if ref_period == 'none': colorbar.set_label(colorbar_txt,fontsize=6)
-        else: colorbar.set_label(colorbar_txt+', rel. '+ref_period,fontsize=6)
-        colorbar.ax.tick_params(labelsize=3)
-        plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=crs_platecarree)
-        #
+
+        if ENABLE_EXTENT:
+            if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
+            elif map_region == 'n_america': ax1.set_extent([-171.5,-52,-5,84],     crs=crs_platecarree); extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
+            elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree); extra_txt_x = 16.5;    extra_txt_y = 31.25; grid_x = 10; grid_y = 5
+
+        if ENABLE_CONTOUR:
+            if map_type == 'contourf':
+                var_cyclic,lon_cyclic = cutil.add_cyclic_point(var_spatial_mean_allmethods[i,:,:],coord=lon)
+                map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=crs_platecarree)
+                if ENABLE_COLORBAR:
+                    colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
+            elif map_type == 'pcolormesh':
+                map1 = ax1.pcolormesh(lon_bounds_2d,lat_bounds_2d,var_spatial_mean_allmethods[i,:,:],cmap=cmap,vmin=levels[0],vmax=levels[-1],transform=crs_platecarree)
+                if ENABLE_COLORBAR:
+                    colorbar = plt.colorbar(map1,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
+            elif map_type == 'regions_ipcc_ar6':
+                norm = matplotlib.colors.Normalize(vmin=-2,vmax=2,clip=True)
+                for j in range(len(ar6_all)):
+                    region_txt = ar6_abbreviations[j]
+                    if region_txt in regions_all:
+                        ind_region = np.where(region_txt==regions_all)[0][0]
+                        value_for_region = var_spatial_mean_allmethods[i,ind_region,0]
+                    else: value_for_region = np.nan
+                    if np.isnan(value_for_region): facecolor = 'lightgray'
+                    else: facecolor = colors_from_cmap(norm(value_for_region))
+                    region = ShapelyFeature([ar6_all[j]._polygon],facecolor=facecolor,crs=crs_platecarree)
+                    ax1.add_feature(region)
+                if ENABLE_COLORBAR:
+                    colorbar = plt.colorbar(matplotlib.cm.ScalarMappable(norm=norm,cmap=cmap),orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
+
+            if np.isnan(var_spatial_mean_allmethods[i,:,:]).all():
+                ax1.text(0.5,0.5,'Please select another year.',fontsize=12,ha='center',va='center',transform=ax1.transAxes)
+
+        if ENABLE_COASTLINES:
+            ax1.coastlines(resolution='50m')
+
+        if ENABLE_GRIDLINES:
+            gl = ax1.gridlines(color='gray',linestyle=':',draw_labels=False)
+            gl.ylocator = mticker.FixedLocator(np.arange(-90,91,grid_y))
+            gl.xlocator = mticker.FixedLocator(np.arange(-180,181,grid_x))
+
+        if ENABLE_COLORBAR and 'colorbar' in locals():
+            if ref_period == 'none': colorbar.set_label(colorbar_txt,fontsize=6)
+            else: colorbar.set_label(colorbar_txt+', rel. '+ref_period,fontsize=6)
+            colorbar.ax.tick_params(labelsize=3)
+
+        if ENABLE_TEXT:
+            plt.text(extra_txt_x,extra_txt_y,dataset_name+', v.'+version_txt.replace('_','.')+', '+str(time_var[i])+' '+time_unit_txt,fontsize=7,horizontalalignment='center',transform=crs_platecarree)
+
         if save_instead_of_plot:
             plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
-
-            # Clear cartopy caches that accumulate geometry data
-            # This is the key fix for the memory leak
-            import cartopy.io.shapereader as shapereader
-            if hasattr(shapereader, '_GEOMETRY_CACHE'):
-                shapereader._GEOMETRY_CACHE.clear()
-
             plt.close(fig2)
-            del fig2, ax1, gl
-            if 'colorbar' in locals():
-                del colorbar
-            if 'map1' in locals():
-                del map1
+            del fig2, ax1
         else:
             plt.show()
 
