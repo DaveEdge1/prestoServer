@@ -425,12 +425,11 @@ for i,time in enumerate(time_var):
     #
     #%%
     # Make the primary map to show
-    # STRATEGIC DIAGNOSTIC: Minimal test - just projection, save, close
-    # Testing if cartopy projection itself leaks memory
+    # Testing pcolormesh workaround for contourf memory leak
 
     ENABLE_PROJECTION = True   # Create figure with cartopy projection
-    ENABLE_EXTENT = True       # Set map extent
-    ENABLE_CONTOUR = True      # Plot the actual data (contourf/pcolormesh)
+    ENABLE_EXTENT = True        # Set map extent
+    ENABLE_CONTOUR = True       # Plot the actual data - now using pcolormesh instead of contourf
     ENABLE_COLORBAR = False     # Add colorbar
     ENABLE_COASTLINES = False   # Add coastlines
     ENABLE_GRIDLINES = False    # Add gridlines
@@ -447,10 +446,18 @@ for i,time in enumerate(time_var):
             elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree)
 
         if ENABLE_CONTOUR:
+            # WORKAROUND: Use pcolormesh instead of contourf to avoid memory leak
+            # contourf creates Path objects that accumulate even after figure close
             if map_type == 'contourf':
-                # Use pre-computed cyclic coordinates instead of computing each time
+                # Convert contourf to pcolormesh approach
+                # Use the cyclic data but render with pcolormesh instead
                 var_cyclic = var_spatial_with_cyclic[i]
-                map1 = ax1.contourf(lon_cyclic,lat,var_cyclic,colors=colors_selected,levels=levels,extend='both',transform=crs_platecarree)
+                # Create a colormap from the discrete colors
+                from matplotlib.colors import ListedColormap
+                cmap_from_colors = ListedColormap(colors_selected)
+                map1 = ax1.pcolormesh(lon_cyclic, lat, var_cyclic, cmap=cmap_from_colors,
+                                     vmin=levels[0], vmax=levels[-1],
+                                     transform=crs_platecarree, shading='auto')
                 if ENABLE_COLORBAR:
                     colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
             elif map_type == 'pcolormesh':
