@@ -430,7 +430,7 @@ for i,time in enumerate(time_var):
 
     ENABLE_PROJECTION = True   # Create figure with cartopy projection
     ENABLE_EXTENT = True       # Set map extent
-    ENABLE_CONTOUR = False      # Plot the actual data (contourf/pcolormesh)
+    ENABLE_CONTOUR = True      # Plot the actual data (contourf/pcolormesh)
     ENABLE_COLORBAR = False     # Add colorbar
     ENABLE_COASTLINES = False   # Add coastlines
     ENABLE_GRIDLINES = False    # Add gridlines
