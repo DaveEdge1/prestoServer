@@ -532,6 +532,8 @@ method_color_list = ['black','royalblue','salmon','olive','orange','darkseagreen
                      'black','royalblue','salmon','olive','orange','darkseagreen',
                      'black','royalblue','salmon','olive','orange','darkseagreen']
 
+lat_string, lon_string, j_for_ts, i_for_ts, lon_neg = functions_presto.select_latlons(lat, lon, map_region, dataset_txt)
+
 # Make a timeseries at every location
 if make_gridded_ts:
     j,i = 0,0
