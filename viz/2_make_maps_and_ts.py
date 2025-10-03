@@ -396,8 +396,7 @@ for i,time in enumerate(time_var):
     #
     #%%
     # Make the primary map to show
-    # DIAGNOSTIC: Skip map to test if time series is the leak
-    if False:  # Set to True to enable map figure
+    if True:  # Re-enabled with memory leak fix
         fig2 = plt.figure(figsize=(10,10))
         ax1 = fig2.add_subplot(111, projection=crs_mercator)
         if   map_region == 'global':    ax1.set_extent([-179.99,179.99,-85,85],crs=crs_platecarree); extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
@@ -435,8 +434,19 @@ for i,time in enumerate(time_var):
         #
         if save_instead_of_plot:
             plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
+
+            # Clear cartopy caches that accumulate geometry data
+            # This is the key fix for the memory leak
+            import cartopy.io.shapereader as shapereader
+            if hasattr(shapereader, '_GEOMETRY_CACHE'):
+                shapereader._GEOMETRY_CACHE.clear()
+
             plt.close(fig2)
-            del fig2, ax1
+            del fig2, ax1, gl
+            if 'colorbar' in locals():
+                del colorbar
+            if 'map1' in locals():
+                del map1
         else:
             plt.show()
 
