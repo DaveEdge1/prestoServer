@@ -588,6 +588,64 @@ method_color_list = ['black','royalblue','salmon','olive','orange','darkseagreen
 
 lat_string, lon_string, j_for_ts, i_for_ts, lon_neg = functions_presto.select_latlons(lat, lon, map_region, dataset_txt)
 
+#%% TIME SERIES FUNCTION
+
+# A function to make a time series
+def make_time_series(var_mean_to_plot,var_lowerbound_to_plot,var_upperbound_to_plot,location_title_txt,outputfile_txt,text_color):
+    #
+    # Make an interactive time series with bokeh
+    p1 = figure(width=1200,
+                height=ts_height,
+                title=title_txt_bokeh+' for '+dataset_name+', v.'+version_txt.replace('_','.')+location_title_txt+' (uncertainties: '+spatial_uncertainty_txt+')',
+                tools='pan,box_zoom,hover,save,reset',
+                active_drag='box_zoom',active_inspect='hover',
+                x_range=Range1d(bounds=(min(time_var),max(time_var))))
+    #
+    p1.title.text_color = text_color
+    p1.xaxis.axis_label = time_name_txt+' ('+time_unit_txt+')'
+    p1.yaxis.axis_label = title_txt_bokeh
+    p1.x_range.start = time_start
+    p1.x_range.end   = time_end
+    p1.y_range.start = ts_yrange[0]
+    p1.y_range.end   = ts_yrange[1]
+    #
+    for k,method_chosen in enumerate(method):
+        if skip_spatial_ens: pass
+        else: p1.varea(time_var,var_lowerbound_to_plot[k,:],var_upperbound_to_plot[k,:],color=method_color_list[k],alpha=0.1,legend_label=method_chosen)
+        p1.line(time_var,var_mean_to_plot[k,:],color=method_color_list[k],line_width=1,legend_label=method_chosen)
+    line0 = Span(location=0,dimension='width',line_color='gray',line_width=1)
+    p1.renderers.extend([line0])
+    p1.background_fill_color           = 'white'
+    p1.grid.grid_line_color            = '#e0e0e0'
+    p1.axis.axis_label_text_font_style = 'normal'
+    p1.axis.axis_label_text_font_size  = '16px'
+    p1.title.text_font_size            = '16px'
+    p1.title.align                     = 'center'
+    p1.legend.location     = 'bottom_right'
+    p1.legend.click_policy = 'hide'
+    #
+    hover = p1.select_one(HoverTool)
+    hover.tooltips = [
+            (time_name_txt,'@x{int} '+time_unit_txt),
+            (var_txt,'@y '+html_unit_txt),
+            ]
+    hover.mode='vline'
+    #
+    # Save as html
+    html = file_html(p1,CDN,outputfile_txt)
+    output_file = open(output_dir_full+outputfile_txt,'w')
+    output_file.write(html)
+    output_file.close()
+
+
+#%% MAKE TIME SERIES FOR LOCATIONS
+
+# Set color possibilities for time series
+method_color_list = ['black','royalblue','salmon','olive','orange','darkseagreen',
+                     'black','royalblue','salmon','olive','orange','darkseagreen',
+                     'black','royalblue','salmon','olive','orange','darkseagreen',
+                     'black','royalblue','salmon','olive','orange','darkseagreen',
+                     'black','royalblue','salmon','olive','orange','darkseagreen']
 # Make a timeseries at every location
 if make_gridded_ts:
     j,i = 0,0
