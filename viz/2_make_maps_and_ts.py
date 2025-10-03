@@ -371,6 +371,22 @@ if map_type == 'contourf':
             lon_cyclic = lon_cyc  # Same for all timesteps
     print('Cyclic coordinate pre-computation complete')
 
+# CRITICAL FIX: Pre-transform coordinates from PlateCarree to Mercator ONCE
+# Avoid transform parameter which causes memory leak through repeated coordinate transformation
+print('Pre-transforming coordinates to target projection to avoid memory leak...')
+import numpy as np
+# Create meshgrid of coordinates
+if map_type == 'contourf':
+    lon_2d, lat_2d = np.meshgrid(lon_cyclic, lat)
+else:
+    lon_2d, lat_2d = np.meshgrid(lon, lat)
+
+# Transform coordinates from PlateCarree to Mercator once
+transformed_coords = crs_mercator.transform_points(crs_platecarree, lon_2d, lat_2d)
+x_transformed = transformed_coords[:, :, 0]
+y_transformed = transformed_coords[:, :, 1]
+print('Coordinate transformation complete')
+
 # Pre-determine grid spacing based on map region (same for all iterations)
 if   map_region == 'global':    extra_txt_x = 0;       extra_txt_y = -82;   grid_x = 60; grid_y = 30
 elif map_region == 'n_america': extra_txt_x = -111.75; extra_txt_y = 7.5;   grid_x = 20; grid_y = 10
@@ -446,18 +462,13 @@ for i,time in enumerate(time_var):
             elif map_region == 'europe':    ax1.set_extent([-13,46,26,72],         crs=crs_platecarree)
 
         if ENABLE_CONTOUR:
-            # WORKAROUND: Use pcolormesh instead of contourf to avoid memory leak
-            # contourf creates Path objects that accumulate even after figure close
+            # CRITICAL FIX: Use pre-transformed coordinates WITHOUT transform parameter
+            # The transform=crs_platecarree was causing memory leak from repeated coordinate transformation
             if map_type == 'contourf':
-                # Convert contourf to pcolormesh approach
-                # Use the cyclic data but render with pcolormesh instead
                 var_cyclic = var_spatial_with_cyclic[i]
-                # Create a colormap from the discrete colors
-                from matplotlib.colors import ListedColormap
-                cmap_from_colors = ListedColormap(colors_selected)
-                map1 = ax1.pcolormesh(lon_cyclic, lat, var_cyclic, cmap=cmap_from_colors,
-                                     vmin=levels[0], vmax=levels[-1],
-                                     transform=crs_platecarree, shading='auto')
+                # Plot with pre-transformed coordinates - NO transform parameter!
+                map1 = ax1.contourf(x_transformed, y_transformed, var_cyclic,
+                                   colors=colors_selected, levels=levels, extend='both')
                 if ENABLE_COLORBAR:
                     colorbar = plt.colorbar(map1,ticks=tick_levels,orientation='horizontal',ax=ax1,fraction=0.01,pad=-0.07)
             elif map_type == 'pcolormesh':
