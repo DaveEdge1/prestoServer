@@ -496,11 +496,10 @@ for i,time in enumerate(time_var):
         if save_instead_of_plot:
             plt.savefig(output_dir_full+'map_'+filename_txt+'_'+str(int(np.ceil(time_var[i]))).zfill(5)+'.png',dpi=150,format='png',bbox_inches='tight',pad_inches=0.0)
 
-            # CRITICAL: Explicitly clear axes collections to prevent contourf memory leak
-            # Remove all collection objects (contours) from the axes before closing
-            for coll in ax1.collections:
-                coll.remove()
-            ax1.collections.clear()
+            # CRITICAL: Explicitly remove all collections from axes to prevent contourf memory leak
+            # Remove collections in reverse order to avoid index issues
+            while len(ax1.collections) > 0:
+                ax1.collections[-1].remove()
 
             plt.close(fig2)
             del fig2, ax1
