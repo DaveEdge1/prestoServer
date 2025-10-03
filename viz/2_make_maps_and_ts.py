@@ -398,24 +398,26 @@ elif map_region == 'europe':    extra_txt_x = 16.5;    extra_txt_y = 31.25; grid
 y_locator = mticker.FixedLocator(np.arange(-90,91,grid_y))
 x_locator = mticker.FixedLocator(np.arange(-180,181,grid_x))
 
-def make_one_plot(i, time_value,
-                  var_cyclic, lon_cyclic,
-                  var_global_lowerbound, var_global_upperbound,
-                  var_global_mean_allmethods,
-                  lon_bounds_2d, lat_bounds_2d,
-                  output_dir_full, filename_txt,
-                  cmap, levels, tick_levels,
-                  colors_selected,
-                  crs_mercator, crs_platecarree,
-                  ref_period, colorbar_txt,
-                  info_unit_txt, time_var,
-                  time_start, time_end, dataset_name, version_txt,
-                  map_region, map_type,
-                  skip_global_ens,
-                  ar6_all=None, ar6_abbreviations=None, regions_all=None,
-                  colors_from_cmap=None,
-                  coastlines_feature=None, y_locator=None, x_locator=None,
-                  extra_txt_x=0, extra_txt_y=0, time_unit_txt=""):
+def make_one_plot(args):
+    """Wrapper function for multiprocessing Pool that unpacks arguments"""
+    (i, time_value,
+     var_cyclic, lon_cyclic,
+     var_global_lowerbound, var_global_upperbound,
+     var_global_mean_allmethods,
+     lon_bounds_2d, lat_bounds_2d,
+     output_dir_full, filename_txt,
+     cmap, levels, tick_levels,
+     colors_selected,
+     crs_mercator, crs_platecarree,
+     ref_period, colorbar_txt,
+     info_unit_txt, time_var,
+     time_start, time_end, dataset_name, version_txt,
+     map_region, map_type,
+     skip_global_ens,
+     ar6_all, ar6_abbreviations, regions_all,
+     colors_from_cmap,
+     coastlines_feature, y_locator, x_locator,
+     extra_txt_x, extra_txt_y, time_unit_txt) = args
 
     # === Time series panel ===
     fig = plt.figure(figsize=(4, 2))
@@ -522,12 +524,12 @@ def make_one_plot(i, time_value,
     plt.close(fig2)
 
 
-# === MAIN LOOP USING MULTIPROCESSING ===
-print("Step 1: Making maps and info panels with forked workers")
-for i, time in enumerate(time_var):
-    if i % 50 == 0:
-        print(f"Processing {i+1}/{len(time_var)}")
+# === MAIN LOOP USING MULTIPROCESSING POOL ===
+print("Step 1: Making maps and info panels with parallel workers (4 processes)")
 
+# Prepare all arguments for parallel processing
+all_args = []
+for i, time in enumerate(time_var):
     if map_type == "contourf":
         var_cyclic, lon_cyclic = cutil.add_cyclic_point(
             var_spatial_mean_allmethods[i,:,:], coord=lon
@@ -541,31 +543,38 @@ for i, time in enumerate(time_var):
     else:
         raise ValueError(f"Unknown map_type: {map_type}")
 
-    p = mp.Process(
-        target=make_one_plot,
-        args=(i, time,
-              var_cyclic, lon_cyclic,
-              None if skip_global_ens else var_global_lowerbound,
-              None if skip_global_ens else var_global_upperbound,
-              var_global_mean_allmethods,
-              lon_bounds_2d, lat_bounds_2d,
-              output_dir_full, filename_txt,
-              cmap, levels, tick_levels,
-              colors_selected,
-              crs_mercator, crs_platecarree,
-              ref_period, colorbar_txt,
-              info_unit_txt, time_var,
-              time_start, time_end, dataset_name, version_txt,
-              map_region, map_type,
-              skip_global_ens,
-              ar6_all, ar6_abbreviations, regions_all,
-              colors_from_cmap,
-              coastlines_feature, y_locator, x_locator,
-              extra_txt_x, extra_txt_y, time_unit_txt)
-    )
-    p.start()
-    p.join()
-v
+    args_tuple = (i, time,
+                  var_cyclic, lon_cyclic,
+                  None if skip_global_ens else var_global_lowerbound,
+                  None if skip_global_ens else var_global_upperbound,
+                  var_global_mean_allmethods,
+                  lon_bounds_2d, lat_bounds_2d,
+                  output_dir_full, filename_txt,
+                  cmap, levels, tick_levels,
+                  colors_selected,
+                  crs_mercator, crs_platecarree,
+                  ref_period, colorbar_txt,
+                  info_unit_txt, time_var,
+                  time_start, time_end, dataset_name, version_txt,
+                  map_region, map_type,
+                  skip_global_ens,
+                  ar6_all, ar6_abbreviations, regions_all,
+                  colors_from_cmap,
+                  coastlines_feature, y_locator, x_locator,
+                  extra_txt_x, extra_txt_y, time_unit_txt)
+    all_args.append(args_tuple)
+
+print(f"Prepared {len(all_args)} tasks, starting parallel processing...")
+
+# Process in parallel with a pool of 4 workers
+from multiprocessing import Pool
+with Pool(processes=4) as pool:
+    # Use imap to get progress feedback
+    for idx, result in enumerate(pool.imap(make_one_plot, all_args)):
+        if idx % 50 == 0:
+            print(f"Completed {idx+1}/{len(all_args)}")
+
+print("All maps and info panels complete")
 
 #%% MAKE TIME SERIES FOR LOCATIONS
 
