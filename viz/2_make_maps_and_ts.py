@@ -399,9 +399,9 @@ y_locator = mticker.FixedLocator(np.arange(-90,91,grid_y))
 x_locator = mticker.FixedLocator(np.arange(-180,181,grid_x))
 
 def make_one_plot(i, time_value,
-                  var_cyclic, var_global_lowerbound, var_global_upperbound,
+                  var_cyclic, lon_cyclic,
+                  var_global_lowerbound, var_global_upperbound,
                   var_global_mean_allmethods,
-                  x_transformed, y_transformed,
                   lon_bounds_2d, lat_bounds_2d,
                   output_dir_full, filename_txt,
                   cmap, levels, tick_levels,
@@ -448,17 +448,15 @@ def make_one_plot(i, time_value,
     elif map_region == 'n_america': ax2.set_extent([-171.5,-52,-5,84],      crs=crs_platecarree)
     elif map_region == 'europe':    ax2.set_extent([-13,46,26,72],          crs=crs_platecarree)
 
-    # Main plot
+    # Main plot — use lon/lat with transform=PlateCarree
     if map_type == "contourf":
-        # IMPORTANT: use pre-transformed Mercator coordinates + transform=crs_mercator
         map1 = ax2.contourf(
-            x_transformed, y_transformed, var_cyclic,
+            lon_cyclic, lat, var_cyclic,
             colors=colors_selected, levels=levels, extend="both",
-            transform=crs_mercator
+            transform=crs_platecarree
         )
 
     elif map_type == "pcolormesh":
-        # Bounds are geographic lon/lat, so keep transform=PlateCarree
         map1 = ax2.pcolormesh(
             lon_bounds_2d, lat_bounds_2d, var_cyclic,
             cmap=cmap, vmin=levels[0], vmax=levels[-1],
@@ -522,6 +520,52 @@ def make_one_plot(i, time_value,
                 str(int(np.ceil(time_var[i]))).zfill(5) + ".png",
                 dpi=150, format="png", bbox_inches="tight", pad_inches=0.0)
     plt.close(fig2)
+
+
+# === MAIN LOOP USING MULTIPROCESSING ===
+print("Step 1: Making maps and info panels with forked workers")
+for i, time in enumerate(time_var):
+    if i % 50 == 0:
+        print(f"Processing {i+1}/{len(time_var)}")
+
+    if map_type == "contourf":
+        var_cyclic, lon_cyclic = cutil.add_cyclic_point(
+            var_spatial_mean_allmethods[i,:,:], coord=lon
+        )
+    elif map_type == "pcolormesh":
+        var_cyclic = var_spatial_mean_allmethods[i,:,:]
+        lon_cyclic = lon  # not used
+    elif map_type == "regions_ipcc_ar6":
+        var_cyclic = var_spatial_mean_allmethods[i,:,:]
+        lon_cyclic = lon  # not used
+    else:
+        raise ValueError(f"Unknown map_type: {map_type}")
+
+    p = mp.Process(
+        target=make_one_plot,
+        args=(i, time,
+              var_cyclic, lon_cyclic,
+              None if skip_global_ens else var_global_lowerbound,
+              None if skip_global_ens else var_global_upperbound,
+              var_global_mean_allmethods,
+              lon_bounds_2d, lat_bounds_2d,
+              output_dir_full, filename_txt,
+              cmap, levels, tick_levels,
+              colors_selected,
+              crs_mercator, crs_platecarree,
+              ref_period, colorbar_txt,
+              info_unit_txt, time_var,
+              time_start, time_end, dataset_name, version_txt,
+              map_region, map_type,
+              skip_global_ens,
+              ar6_all, ar6_abbreviations, regions_all,
+              colors_from_cmap,
+              coastlines_feature, y_locator, x_locator,
+              extra_txt_x, extra_txt_y, time_unit_txt)
+    )
+    p.start()
+    p.join()
+v
 
 #%% MAKE TIME SERIES FOR LOCATIONS
 
