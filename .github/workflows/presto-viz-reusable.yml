@@ -59,11 +59,11 @@ jobs:
       artifact_name: presto-viz-output-${{ steps.setup.outputs.reconstruction_id }}
 
     steps:
-      - name: Checkout prestoServer repository
+      - name: Checkout presto-viz repository
         uses: actions/checkout@v4
         with:
-          repository: DaveEdge1/prestoServer
-          path: presto
+          repository: DaveEdge1/presto-viz  # Update this to your public viz repository
+          path: presto-viz
 
       - name: Download input artifact
         if: ${{ inputs.artifact_name != '' }}
@@ -92,7 +92,7 @@ jobs:
           fi
 
           if [ -z "${{ inputs.web_data_dir }}" ]; then
-            WEB_DATA_DIR="${GITHUB_WORKSPACE}/presto/${{ inputs.web_data_dir }}"
+            WEB_DATA_DIR="${GITHUB_WORKSPACE}/presto-viz/web_assets"
           else
             WEB_DATA_DIR="${{ inputs.web_data_dir }}"
           fi
@@ -127,7 +127,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: '3.12'
-          environment-file: presto/viz/presto_env.yml
+          environment-file: presto-viz/presto_env.yml
           activate-environment: presto_env
 
       - name: Install additional dependencies
@@ -140,13 +140,13 @@ jobs:
         shell: bash -el {0}
         timeout-minutes: 15
         run: |
-          cd presto
+          cd presto-viz
           conda activate presto_env
 
           echo "=== Starting Script 1: Format Data ==="
           echo "$(date): Starting 1_format_data" | tee -a "$OUTPUT_DIR/1_format_data_full.log"
 
-          python -u viz/1_format_data_daholocene_graphem.py "$DATA_DIR" 2>&1 | tee -a "$OUTPUT_DIR/1_format_data_full.log"
+          python -u 1_format_data_daholocene_graphem.py "$DATA_DIR" 2>&1 | tee -a "$OUTPUT_DIR/1_format_data_full.log"
 
           EXIT_CODE=${PIPESTATUS[0]}
           echo "$(date): Script 1 exited with code: $EXIT_CODE" | tee -a "$OUTPUT_DIR/1_format_data_full.log"
@@ -162,7 +162,7 @@ jobs:
         shell: bash -el {0}
         timeout-minutes: 120
         run: |
-          cd presto
+          cd presto-viz
           conda activate presto_env
 
           echo "=== Starting Script 2: Make Maps and Time Series ==="
@@ -173,7 +173,7 @@ jobs:
           echo "Memory before start:" >> "$OUTPUT_DIR/resource_monitor.log"
           free -h >> "$OUTPUT_DIR/resource_monitor.log"
 
-          python -u viz/2_make_maps_and_ts.py "$DATA_DIR" "$OUTPUT_DIR" 2>&1 | tee -a "$OUTPUT_DIR/2_make_maps_full.log"
+          python -u 2_make_maps_and_ts.py "$DATA_DIR" "$OUTPUT_DIR" 2>&1 | tee -a "$OUTPUT_DIR/2_make_maps_full.log"
 
           EXIT_CODE=${PIPESTATUS[0]}
           echo "$(date): Script 2 exited with code: $EXIT_CODE" | tee -a "$OUTPUT_DIR/2_make_maps_full.log"
@@ -194,13 +194,13 @@ jobs:
         shell: bash -el {0}
         timeout-minutes: 10
         run: |
-          cd presto
+          cd presto-viz
           conda activate presto_env
 
           echo "=== Starting Script 3: Make HTML File ==="
           echo "$(date): Starting 3_make_html" | tee -a "$OUTPUT_DIR/3_make_html_full.log"
 
-          python -u viz/3_make_html_file.py "$DATA_DIR" "$OUTPUT_DIR" "$WEB_DATA_DIR" 2>&1 | tee -a "$OUTPUT_DIR/3_make_html_full.log"
+          python -u 3_make_html_file.py "$DATA_DIR" "$OUTPUT_DIR" "$WEB_DATA_DIR" 2>&1 | tee -a "$OUTPUT_DIR/3_make_html_full.log"
 
           EXIT_CODE=${PIPESTATUS[0]}
           echo "$(date): Script 3 exited with code: $EXIT_CODE" | tee -a "$OUTPUT_DIR/3_make_html_full.log"
