@@ -1,0 +1,38 @@
+# Example workflow to add to your LMR2 repository
+# This workflow calls the reusable Presto Visualization workflow after CFR Analysis completes
+
+name: Run CFR Analysis and Visualize
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]  # Adjust as needed
+
+jobs:
+  # Your existing CFR Analysis job
+  cfr-analysis:
+    name: Run CFR Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ... your existing CFR analysis steps ...
+
+      - name: Upload CFR outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfr-analysis-netcdf
+          path: |
+            output/*.nc
+            output/*.pkl
+          retention-days: 30
+
+  # Call the Presto Visualization workflow
+  visualize:
+    name: Generate Presto Visualization
+    needs: cfr-analysis
+    uses: DaveEdge1/prestoServer/.github/workflows/presto-viz-reusable.yml@main
+    with:
+      reconstruction_id: CFR_${{ github.run_number }}_${{ github.run_id }}
+      artifact_name: cfr-analysis-netcdf
