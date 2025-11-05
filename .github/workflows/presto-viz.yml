@@ -15,6 +15,20 @@ on:
         description: 'Output directory path (optional, defaults to /root/presto/userRecons/{reconstruction_id}/)'
         required: false
         type: string
+      source_repository:
+        description: 'Source repository for artifact download (e.g., DaveEdge1/LMR2). Leave empty to skip artifact download.'
+        required: false
+        type: string
+      workflow_run_id:
+        description: 'GitHub workflow run ID from source repository (find it in the Actions URL)'
+        required: false
+        type: string
+      artifact_name:
+        description: 'Name of artifact to download from source repository'
+        required: false
+        type: string
+  repository_dispatch:
+    types: [run-presto-viz]
 
 jobs:
   process-visualization:
@@ -25,6 +39,40 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Prepare artifact download parameters
+        id: artifact_params
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo "source_repo=${{ github.event.client_payload.source_repository }}" >> $GITHUB_OUTPUT
+            echo "run_id=${{ github.event.client_payload.workflow_run_id }}" >> $GITHUB_OUTPUT
+            echo "artifact_name=${{ github.event.client_payload.artifact_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "source_repo=${{ inputs.source_repository }}" >> $GITHUB_OUTPUT
+            echo "run_id=${{ inputs.workflow_run_id }}" >> $GITHUB_OUTPUT
+            echo "artifact_name=${{ inputs.artifact_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download artifact from source repository
+        if: ${{ steps.artifact_params.outputs.source_repo != '' && steps.artifact_params.outputs.run_id != '' && steps.artifact_params.outputs.artifact_name != '' }}
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_conclusion: success
+          run_id: ${{ steps.artifact_params.outputs.run_id }}
+          name: ${{ steps.artifact_params.outputs.artifact_name }}
+          path: ./downloaded_artifacts
+          repo: ${{ steps.artifact_params.outputs.source_repo }}
+
+      - name: Move downloaded artifacts to data directory
+        if: ${{ steps.artifact_params.outputs.source_repo != '' }}
+        run: |
+          if [ -d "./downloaded_artifacts" ]; then
+            echo "Moving downloaded artifacts to data directory..."
+            mkdir -p "${{ env.DATA_DIR }}"
+            cp -r ./downloaded_artifacts/* "${{ env.DATA_DIR }}/"
+            ls -lh "${{ env.DATA_DIR }}"
+          fi
 
       - name: Set up Conda environment
         uses: conda-incubator/setup-miniconda@v3
@@ -43,34 +91,59 @@ jobs:
       - name: Set up directories
         shell: bash -el {0}
         run: |
-          # Set directory paths
-          if [ -z "${{ inputs.data_dir }}" ]; then
-            DATA_DIR="/root/presto/userRecons/${{ inputs.reconstruction_id }}/"
+          # Handle inputs from both workflow_dispatch and repository_dispatch
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            RECONSTRUCTION_ID="${{ github.event.client_payload.reconstruction_id }}"
+            DATA_DIR_INPUT="${{ github.event.client_payload.data_dir }}"
+            OUTPUT_DIR_INPUT="${{ github.event.client_payload.output_dir }}"
+            SOURCE_REPO="${{ github.event.client_payload.source_repository }}"
+            RUN_ID="${{ github.event.client_payload.workflow_run_id }}"
+            ARTIFACT="${{ github.event.client_payload.artifact_name }}"
           else
-            DATA_DIR="${{ inputs.data_dir }}"
+            RECONSTRUCTION_ID="${{ inputs.reconstruction_id }}"
+            DATA_DIR_INPUT="${{ inputs.data_dir }}"
+            OUTPUT_DIR_INPUT="${{ inputs.output_dir }}"
+            SOURCE_REPO="${{ inputs.source_repository }}"
+            RUN_ID="${{ inputs.workflow_run_id }}"
+            ARTIFACT="${{ inputs.artifact_name }}"
           fi
 
-          if [ -z "${{ inputs.output_dir }}" ]; then
-            OUTPUT_DIR="/root/presto/userRecons/${{ inputs.reconstruction_id }}/"
+          # Set directory paths
+          if [ -z "$DATA_DIR_INPUT" ]; then
+            DATA_DIR="/root/presto/userRecons/${RECONSTRUCTION_ID}/"
           else
-            OUTPUT_DIR="${{ inputs.output_dir }}"
+            DATA_DIR="$DATA_DIR_INPUT"
+          fi
+
+          if [ -z "$OUTPUT_DIR_INPUT" ]; then
+            OUTPUT_DIR="/root/presto/userRecons/${RECONSTRUCTION_ID}/"
+          else
+            OUTPUT_DIR="$OUTPUT_DIR_INPUT"
           fi
 
           WEB_DATA_DIR="/root/presto/viz/web_assets/"
 
           # Export for use in subsequent steps
+          echo "RECONSTRUCTION_ID=$RECONSTRUCTION_ID" >> $GITHUB_ENV
           echo "DATA_DIR=$DATA_DIR" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$OUTPUT_DIR" >> $GITHUB_ENV
           echo "WEB_DATA_DIR=$WEB_DATA_DIR" >> $GITHUB_ENV
+          echo "SOURCE_REPO=$SOURCE_REPO" >> $GITHUB_ENV
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
 
           # Create directories if they don't exist
           mkdir -p "$DATA_DIR"
           mkdir -p "$OUTPUT_DIR"
 
           echo "=== Processing reconstruction ==="
+          echo "Reconstruction ID: $RECONSTRUCTION_ID"
           echo "Data directory: $DATA_DIR"
           echo "Output directory: $OUTPUT_DIR"
           echo "Web data directory: $WEB_DATA_DIR"
+          echo "Source repository: $SOURCE_REPO"
+          echo "Workflow run ID: $RUN_ID"
+          echo "Artifact name: $ARTIFACT"
 
       - name: Script 1 - Format data
         shell: bash -el {0}
@@ -159,7 +232,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: presto-viz-logs-${{ inputs.reconstruction_id }}
+          name: presto-viz-logs-${{ env.RECONSTRUCTION_ID }}
           path: |
             ${{ env.OUTPUT_DIR }}/*.log
             ${{ env.OUTPUT_DIR }}/*.html
@@ -171,6 +244,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: presto-viz-output-${{ inputs.reconstruction_id }}
+          name: presto-viz-output-${{ env.RECONSTRUCTION_ID }}
           path: ${{ env.OUTPUT_DIR }}
           retention-days: 30

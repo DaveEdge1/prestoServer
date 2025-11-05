@@ -1,0 +1,50 @@
+# Example workflow to be added to the LMR2 repository
+# This shows how to trigger the Presto Visualization workflow after CFR Analysis completes
+
+name: Trigger Presto Visualization (Example for LMR2)
+
+on:
+  workflow_run:
+    workflows: ["Run CFR Analysis"]  # Replace with actual workflow name
+    types:
+      - completed
+
+jobs:
+  trigger-presto-viz:
+    name: Trigger Presto Visualization
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Get workflow run info
+        id: workflow_info
+        run: |
+          echo "run_id=${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
+          echo "run_number=${{ github.event.workflow_run.run_number }}" >> $GITHUB_OUTPUT
+
+          # Generate a reconstruction ID based on timestamp and run number
+          TIMESTAMP=$(date +%s%3N)
+          RECONSTRUCTION_ID="${TIMESTAMP}_CFR_Run${{ github.event.workflow_run.run_number }}"
+          echo "reconstruction_id=$RECONSTRUCTION_ID" >> $GITHUB_OUTPUT
+
+      - name: Trigger Presto Visualization workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PRESTO_WORKFLOW_TOKEN }}  # Create a PAT with workflow permissions
+          repository: DaveEdge1/prestoServer  # Your prestoServer repository
+          event-type: run-presto-viz
+          client-payload: |
+            {
+              "reconstruction_id": "${{ steps.workflow_info.outputs.reconstruction_id }}",
+              "source_repository": "${{ github.repository }}",
+              "workflow_run_id": "${{ steps.workflow_info.outputs.run_id }}",
+              "artifact_name": "cfr-analysis-output",
+              "data_dir": "",
+              "output_dir": ""
+            }
+
+      - name: Workflow triggered
+        run: |
+          echo "✅ Presto Visualization workflow triggered successfully!"
+          echo "Reconstruction ID: ${{ steps.workflow_info.outputs.reconstruction_id }}"
+          echo "Source run ID: ${{ steps.workflow_info.outputs.run_id }}"
