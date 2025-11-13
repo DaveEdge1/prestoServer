@@ -204,9 +204,25 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 	
 };
 
-pickleEm = function(path1){
-	console.log("launching lipd pickler")
-	var dockerComm = "docker run --rm -v " + path1 +":/output -v " + path1 + "/lipd.pkl:/lipd.pkl davidedge/lipd_webapps:lipdPickler"
+pickleEm = function(path1, format){
+	// Default to legacy format if not specified
+	format = format || 'legacy';
+
+	console.log("launching lipd pickler with format: " + format)
+
+	// Determine which Python script to run based on format
+	var scriptName = 'makePickle.py';  // default legacy
+	var outputFile = 'lipd.pkl';
+
+	if (format === 'cfr') {
+		scriptName = 'makeCfrPickle.py';
+		outputFile = 'lipd_cfr.pkl';
+	}
+
+	// Build Docker command with script override
+	var dockerComm = "docker run --rm -v " + path1 + ":/output -v " + path1 + "/" + outputFile + ":/" + outputFile + " davidedge/lipd_webapps:lipdPickler " + scriptName;
+
+	console.log("Docker command: " + dockerComm);
 	var dockerspawn = child_process.exec(dockerComm);
 	dockerspawn.stdout.on('data', function (data) {
 		console.log(data.toString());
@@ -369,7 +385,9 @@ async function downloadCompilation(uniqueID, URL, language) {
 
 }
 
-var downloadEm = async function(uniqueID, language){
+var downloadEm = async function(uniqueID, language, format){
+	// Default to legacy format if not specified
+	format = format || 'legacy';
 	const userDir1 = path.join(__dirname, '../userRecons', uniqueID)
 	const path1111 = path.join(userDir1, 'archivedComp.json')
 	const exists1111 = await checkFileExistsSync(path1111)
@@ -417,8 +435,8 @@ var downloadEm = async function(uniqueID, language){
 					console.log("rspawn1 language: " + language)
    					//if (reso == 0 && language == "Python"){
 					var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
-					console.log("attempting pickle")
-					pickleEm(pathToPkl).then(reso => {
+					console.log("attempting pickle with format: " + format)
+					pickleEm(pathToPkl, format).then(reso => {
 						removeEm(pathToPkl).then(reso => {
 							console.log("downloadLipds.js successful, new lipd set created")
 							process.exit(0);
@@ -435,5 +453,4 @@ var downloadEm = async function(uniqueID, language){
 
 };
 
-downloadEm(process.argv[2], process.argv[3])
-
+downloadEm(process.argv[2], process.argv[3], process.argv[4])
