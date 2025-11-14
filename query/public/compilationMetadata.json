@@ -50,5 +50,9 @@
   "LakeStatus21k": {
     "compilationName": "LakeStatus21k",
     "versions": "1_0_0"
+  },
+  "Pages2k": {
+    "compilationName": "Pages2k",
+    "versions": ["2_0_0", "2_2_0"]
   }
 }
