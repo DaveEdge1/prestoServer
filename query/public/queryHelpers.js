@@ -427,40 +427,60 @@ getAllMonths = function(startSpan,endSpan){
   return(allMonths)
 }
         function params(useCoords=false){
-            var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)	    
+            var x1 = rmBlanks(document.getElementById("archiveTypeIn").value)
             var x2 = rmBlanks(document.getElementById("variableName").value)
-            qstring = '?'
-            qstring = qstring + qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name,false)
-            qstring = qstring + '&' + qString(document.getElementById("variableName").value,document.getElementById("variableName").name,false)
-            qstring = qstring + '&' + qString(document.getElementById("proxy").value,document.getElementById("proxy").name,false)
-            qstring = qstring + '&' + qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name,false)
-            qstring = qstring + '&' + qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name,false)
-            qstring = qstring + '&' + qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name,true)
+
+            // Build array of non-empty query parts
+            var queryParts = [];
+
+            var part;
+            part = qString(document.getElementById("archiveTypeIn").value,document.getElementById("archiveTypeIn").name,false);
+            if (part) queryParts.push(part);
+
+            part = qString(document.getElementById("variableName").value,document.getElementById("variableName").name,false);
+            if (part) queryParts.push(part);
+
+            part = qString(document.getElementById("proxy").value,document.getElementById("proxy").name,false);
+            if (part) queryParts.push(part);
+
+            part = qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name,false);
+            if (part) queryParts.push(part);
+
+            part = qString(document.getElementById("continentIn").value,document.getElementById("continentIn").name,false);
+            if (part) queryParts.push(part);
+
+            part = qString(document.getElementById("compilationIn").value,document.getElementById("compilationIn").name,true);
+            if (part) queryParts.push(part);
+
             if (!JSON.parse(filters1['seasonality'])){
-                qstring = qstring + '&' + qString(document.getElementById("seasonality1").value,document.getElementById("seasonality1").name,false)
+                part = qString(document.getElementById("seasonality1").value,document.getElementById("seasonality1").name,false);
+                if (part) queryParts.push(part);
             }
+
             if (useCoords=true){
                 if (JSON.parse(filters1['coords'])){
-                    qstring = qstring + '& geo_latitude < ' + document.getElementById("lat_max").value
-                    qstring = qstring + '& geo_latitude > ' + document.getElementById("lat_min").value
-                    qstring = qstring + '& geo_longitude < ' + document.getElementById("lon_max").value
-                    qstring = qstring + '& geo_longitude > ' + document.getElementById("lon_min").value
+                    queryParts.push('geo_latitude < ' + document.getElementById("lat_max").value);
+                    queryParts.push('geo_latitude > ' + document.getElementById("lat_min").value);
+                    queryParts.push('geo_longitude < ' + document.getElementById("lon_max").value);
+                    queryParts.push('geo_longitude > ' + document.getElementById("lon_min").value);
                 }
             }
             if (JSON.parse(filters1['ages'])){
-                
-                qstring = qstring + '& minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value
-                qstring = qstring + '& maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value
+                queryParts.push('minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value);
+                queryParts.push('maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value);
             }
             if (JSON.parse(filters1['resolution'])){
-                qstring = qstring + '& medianResolution < ' + document.getElementById("resolutionInput").value
+                queryParts.push('medianResolution < ' + document.getElementById("resolutionInput").value);
             }
             if (JSON.parse(filters1['terrestrial'])){
-                qstring = qstring + '& isTerrestrial=' + +document.getElementById("Terrestrial").checked
+                queryParts.push('isTerrestrial=' + +document.getElementById("Terrestrial").checked);
             }
             if (JSON.parse(filters1['seasonality'])){
-                qstring = qstring + '& ' + document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value))
+                queryParts.push(document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value)));
             }
+
+            // Join with & and prepend with ?
+            var qstring = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
             console.log("qstring from params(): " + qstring)
             return qstring;
         };
