@@ -534,38 +534,32 @@ getAllMonths = function(startSpan,endSpan){
             
         getTSIDs = function(){
 
+                var xhr2 = new XMLHttpRequest();
+                //xhr.timeout = 2000;
                 return new Promise((resolve, reject) => {
                     if (document.getElementById("archivedCompilation").checked) {
                         resolve();
                     } else {
-                        // Use the cached prevResp data instead of making a new server request
-                        if (prevResp && Array.isArray(prevResp) && prevResp.length > 0) {
-                            console.log("Using cached query results with " + prevResp.length + " records");
-                            // prevResp is already an array of time series records
-                            resolve(JSON.stringify(prevResp));
-                        } else {
-                            console.log("No cached results found, making server request");
-                            // Fallback to server request if prevResp is empty
-                            var xhr2 = new XMLHttpRequest();
                             xhr2.onreadystatechange = (e) => {
-                                if (xhr2.readyState !== 4) {
-                                    return;
-                                }
-                                if (xhr2.status === 200){
-                                    //console.log("TSIDs: ");
-                                    //console.log(xhr.responseText);
-                                    resolve(xhr2.responseText);
-                                } else {
-                                    var resp1 = "XHR didn't work: " + xhr2.status;
-                                    console.log(resp1);
-                                    resolve();
-                                }
-                            };
-                            xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
-                            xhr2.send();
-                        }
+                            if (xhr2.readyState !== 4) {
+                                return;
+                            }
+                            if (xhr2.status === 200){
+                                console.log("TSIDs response received:");
+                                console.log(xhr2.responseText);
+                                resolve(xhr2.responseText);
+                            } else {
+                                var resp1 = "XHR didn't work: " + xhr2.status;
+                                console.log(resp1);
+                                resolve();
+                            }
+                        };
+                        var tsURL = "http://143.198.98.66:88/TS" + params(useCoords=true);
+                        console.log("getTSIDs requesting URL: " + tsURL);
+                        xhr2.open("get", tsURL, /*async*/ true);
+                        xhr2.send();
                     }
-                });
+                    });
         }
         
         retTimeSeries = function(TSIDs){
