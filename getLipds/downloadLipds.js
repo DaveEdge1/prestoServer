@@ -8,8 +8,8 @@ const archiver = require("archiver")
 const shelljs = require("shelljs")
 
 var child_process = require('child_process');
-var file_path = "/root/presto/getLipds/getLipd.R";
-var file_path2 = "/root/presto/getLipds/getLipd.R";
+var file_path = "/root/presto/getLipds/getLipdSmart.R";
+var file_path2 = "/root/presto/getLipds/getLipdSmart.R";
 var r_comm = '/usr/bin/Rscript';
 
 async function routeExistingLipds(uniqueID){
