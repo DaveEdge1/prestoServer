@@ -1,3 +1,5 @@
 userRecons/*
 debug.log
 userRecons/
+query/csv_cache/
+query/verification_output/
