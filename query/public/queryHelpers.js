@@ -750,17 +750,17 @@ getAllMonths = function(startSpan,endSpan){
                         var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) +
                                      ',"datasetIds": ' + JSON.stringify(uniqueDatasetIds) +
                                      ',"recon":"' + document.getElementById('recon').value +
-                                     '", "uniqueID":"' + document.getElementById('uniqueID').value +
-                                     '", "language":"'  + document.getElementById('language').value + '"}'
+                                     '", "uniqueID":"' + document.getElementById('uniqueID').value + '"}'
                         console.log("Sending POST with " + IDs.length + " TSIDs and " + uniqueDatasetIds.length + " datasetIds")
+                        console.log("All output formats will be generated (R, Python CFR, Python legacy, lipd_files.zip)")
                         console.log("json body length: " + tsJSON.length + " characters")
                         //postTSids(tsJSON);
                         var TSIDsArray = JSON.parse(tsJSON).TSIDs
                         var numTSids = TSIDsArray.length
                     } else {
                         const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
-                        var tsJSON = '{"compilation": "' + document.getElementById('archivedCompilationIn').value + '", "version": "' + document.getElementById('archivedCompilationVersionIn').value + '", "recon": "' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
-                        console.log("sending post for archived compilation: ", tsJSON)
+                        var tsJSON = '{"compilation": "' + document.getElementById('archivedCompilationIn').value + '", "version": "' + document.getElementById('archivedCompilationVersionIn').value + '", "recon": "' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '"}'
+                        console.log("Sending POST for archived compilation (both R and Python formats will be downloaded): ", tsJSON)
                     }
                     compileLipds(tsJSON)
                         .then(response => {

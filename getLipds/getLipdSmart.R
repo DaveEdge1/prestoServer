@@ -3,14 +3,13 @@ print("starting getLipdSmart.R")
 library(lipdR)
 library(jsonlite)
 print(paste0("args: ", args))
-if (length(args) != 3){
-	stop("TSIDs, uniqueID, and language required")
+if (length(args) != 2){
+	stop("TSIDs and uniqueID required")
 }
 
 # Parse arguments
 TSIDs_query <- unlist(strsplit(args[1], split = ","))
 userDir <- args[2]
-language <- args[3]
 
 if (length(TSIDs_query) < 1){
 	stop("Requires at least 1 TSId")
