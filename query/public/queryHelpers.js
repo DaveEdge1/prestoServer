@@ -728,30 +728,24 @@ getAllMonths = function(startSpan,endSpan){
                     if (lipdSource == 'TSIDs'){
                         var resoJSON = JSON.parse(reso);
                         var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-                        console.log("=== TSID Collection Summary ===");
-                        console.log("Total datasets in database query: " + prevResp.length);
-                        console.log("Total time series (TSIDs) to POST: " + IDs.length);
-                        console.log("Average TSIDs per dataset: " + (IDs.length / prevResp.length).toFixed(2));
 
-                        // Debug: Check structure of prevResp
-                        console.log("DEBUG: First dataset from prevResp:", prevResp[0]);
-                        console.log("DEBUG: Keys in first dataset:", Object.keys(prevResp[0]));
-
-                        // Extract unique datasetIds from the query result
-                        var datasetIds = prevResp.map(function(d) { return d['datasetId']; })
-                        console.log("DEBUG: First 5 datasetIds:", datasetIds.slice(0, 5));
+                        // Extract unique datasetIds from the TSID query result (resoJSON, not prevResp!)
+                        var datasetIds = resoJSON.map(function(d) { return d['datasetId']; })
                         var uniqueDatasetIds = [...new Set(datasetIds)];
-                        console.log("Unique dataset IDs to POST: " + uniqueDatasetIds.length);
-                        console.log("DEBUG: First 5 unique datasetIds:", uniqueDatasetIds.slice(0, 5));
+
+                        console.log("=== TSID Collection Summary ===");
+                        console.log("Total time series (TSIDs) from /TS endpoint: " + IDs.length);
+                        console.log("Unique datasets from those TSIDs: " + uniqueDatasetIds.length);
+                        console.log("Average TSIDs per dataset: " + (IDs.length / uniqueDatasetIds.length).toFixed(2));
+                        console.log("First 5 unique datasetIds:", uniqueDatasetIds.slice(0, 5));
 
                         var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) +
                                      ',"datasetIds": ' + JSON.stringify(uniqueDatasetIds) +
                                      ',"recon":"' + document.getElementById('recon').value +
                                      '", "uniqueID":"' + document.getElementById('uniqueID').value +
                                      '", "language":"'  + document.getElementById('language').value + '"}'
-                        console.log("DEBUG: Length of tsJSON: " + tsJSON.length + " characters");
-                        console.log("json body sent to 'getLipds' (first 500 chars): " + tsJSON.substring(0, 500))
-                        console.log("sending post TSids")
+                        console.log("Sending POST with " + IDs.length + " TSIDs and " + uniqueDatasetIds.length + " datasetIds")
+                        console.log("json body length: " + tsJSON.length + " characters")
                         //postTSids(tsJSON);
                         var TSIDsArray = JSON.parse(tsJSON).TSIDs
                         var numTSids = TSIDsArray.length
