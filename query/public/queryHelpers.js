@@ -727,10 +727,18 @@ getAllMonths = function(startSpan,endSpan){
                 getTSIDs().then(reso => {
                     if (lipdSource == 'TSIDs'){
                         var resoJSON = JSON.parse(reso);
+
+                        // DEBUG: Check what /TS endpoint returned
+                        console.log("DEBUG: First TSID record from /TS endpoint:", resoJSON[0]);
+                        console.log("DEBUG: Keys in TSID record:", Object.keys(resoJSON[0]));
+
                         var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
 
                         // Extract unique datasetIds from the TSID query result (resoJSON, not prevResp!)
                         var datasetIds = resoJSON.map(function(d) { return d['datasetId']; })
+                        console.log("DEBUG: First 10 datasetIds from resoJSON:", datasetIds.slice(0, 10));
+                        console.log("DEBUG: datasetIds with undefined:", datasetIds.filter(d => d === undefined).length);
+
                         var uniqueDatasetIds = [...new Set(datasetIds)];
 
                         console.log("=== TSID Collection Summary ===");
