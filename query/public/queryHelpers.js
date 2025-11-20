@@ -457,7 +457,7 @@ getAllMonths = function(startSpan,endSpan){
                 if (part) queryParts.push(part);
             }
 
-            if (useCoords=true){
+            if (useCoords===true){
                 if (JSON.parse(filters1['coords'])){
                     queryParts.push('geo_latitude < ' + document.getElementById("lat_max").value);
                     queryParts.push('geo_latitude > ' + document.getElementById("lat_min").value);
@@ -495,11 +495,13 @@ getAllMonths = function(startSpan,endSpan){
                     const promise1 = new Promise((resolve, reject) => {
                         console.log("query: " + param1)
                         prevResp = updateRes(JSON.parse(xhr0.response));
-                            
+                        console.log("Database returned " + prevResp.length + " datasets");
+
                         resolve();
                     });
                     promise1.then(() => {
                       updatePoints(prevResp)
+                      console.log("After updatePoints, inRectCount = " + inRectCount);
                       xhr0 = null;
                       // Expected output: "Success!"
                     });
