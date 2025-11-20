@@ -1,0 +1,9 @@
+name: lipdverse-db
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - mysql-connector-python>=8.0.33
