@@ -3,3 +3,11 @@ debug.log
 userRecons/
 query/csv_cache/
 query/verification_output/
+
+# getLipds generated/temporary files
+getLipds/*.log
+getLipds/*.out
+getLipds/lipdverseQuery.csv
+getLipds/lipdverseQuery.zip
+getLipds/lipdverseQuery.md5
+getLipds/lipdverse_and_md5_update.txt
