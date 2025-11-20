@@ -571,6 +571,8 @@ getAllMonths = function(startSpan,endSpan){
                             }
                             if (xhr2.status === 200){
                                 console.log("TSIDs response received:");
+                                var tsidArray = JSON.parse(xhr2.responseText);
+                                console.log("Number of TSIDs returned: " + tsidArray.length);
                                 console.log(xhr2.responseText);
                                 resolve(xhr2.responseText);
                             } else {
@@ -726,7 +728,10 @@ getAllMonths = function(startSpan,endSpan){
                     if (lipdSource == 'TSIDs'){
                         var resoJSON = JSON.parse(reso);
                         var IDs = resoJSON.map(function(d) { return d['paleoData_TSid']; })
-                        console.log("Total time series: " + IDs.length);
+                        console.log("=== TSID Collection Summary ===");
+                        console.log("Total datasets in database query: " + prevResp.length);
+                        console.log("Total time series (TSIDs) to POST: " + IDs.length);
+                        console.log("Average TSIDs per dataset: " + (IDs.length / prevResp.length).toFixed(2));
                         var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
                         console.log("json body sent to 'getLipds': " + tsJSON)
                         console.log("sending post TSids")
@@ -832,6 +837,6 @@ function updatePoints (coords){
 	    }
 		}
 	    }).addTo(layerGroup);
-    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inRectCount
+    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + coords.length + " (" + inRectCount + " unique locations)"
     document.getElementById("my-css-spinner").style.display = "none";
 }
