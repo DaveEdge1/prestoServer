@@ -328,8 +328,11 @@ function changeBoxCoord(){
     return {"South":South,"West":West,"North":North,"East":East}
 }
 function loadLatLon (a1){
+    console.log("loadLatLon received " + a1.length + " datasets");
     var x1 = a1.filter((arr, index, self) =>
     index === self.findIndex((t) => (t.geo_latitude === arr.geo_latitude && t.geo_longitude === arr.geo_longitude)))
+    console.log("After deduplication by coordinates: " + x1.length + " unique locations");
+    console.log("Removed " + (a1.length - x1.length) + " datasets with duplicate coordinates");
     var geojson = {
     "name":"NewFeatureType",
     "type":"FeatureCollection",
