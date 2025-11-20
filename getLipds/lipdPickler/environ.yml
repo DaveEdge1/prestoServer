@@ -1,0 +1,11 @@
+name: python3_lipdPy
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy<2.0
+  - pip:
+      - lipd==0.2.8.9
+      - cloudpickle==2.2.1
+      - pandas

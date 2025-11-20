@@ -8,8 +8,8 @@ const archiver = require("archiver")
 const shelljs = require("shelljs")
 
 var child_process = require('child_process');
-var file_path = "/root/presto/getLipds/getLipd.R";
-var file_path2 = "/root/presto/getLipds/getLipd.R";
+var file_path = "/root/presto/getLipds/getLipdSmart.R";
+var file_path2 = "/root/presto/getLipds/getLipdSmart.R";
 var r_comm = '/usr/bin/Rscript';
 
 async function routeExistingLipds(uniqueID){
@@ -112,9 +112,9 @@ var updateTSIDmd5 = async function (){
 }
 
 var checkmd5 = async function (uniqueID){
-	var path99 = path.join(__dirname, '../userRecons', uniqueID)
+	var path99 = path.join('/root/presto/userRecons', uniqueID)
 	var path9 = path.join(__dirname, '/checkTSIDmd5.R')
-	var path9999 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
+	var path9999 = path.join('/root/presto/userRecons', uniqueID, 'TSIDs.json')
 	const exists1 = await checkFileExistsSync(path9999)
 	if (!exists1){
 		console.log("no TSIDs.json file in directory: " + uniqueID)
@@ -154,7 +154,7 @@ async function newStatus(uniqueID, language){
 	}
 	await checkmd5(uniqueID)
 	console.log("md5 checked")
-	var path999 = path.join(__dirname, '../userRecons', uniqueID, '/pointer.txt')
+	var path999 = path.join('/root/presto/userRecons', uniqueID, '/pointer.txt')
 	const exists1 = await checkFileExistsSync(path999)
 	if (exists1){
 		console.log("matching TSIDs file exists")
@@ -166,7 +166,7 @@ async function newStatus(uniqueID, language){
 }
 
 var rspawn1 = function (TSIDs, uniqueID, language){
-	var path1 = path.join(__dirname, '../userRecons', uniqueID)
+	var path1 = path.join('/root/presto/userRecons', uniqueID)
 
 	var path3 = path.join(path1, "lipd.pkl")
 	fs.writeFile(path3, " ", (err) => {
@@ -204,23 +204,11 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 	
 };
 
-pickleEm = function(path1, format){
-	// Default to legacy format if not specified
-	format = format || 'legacy';
+pickleEm = function(path1){
+	console.log("launching lipd pickler (creates both cfr and legacy formats)")
 
-	console.log("launching lipd pickler with format: " + format)
-
-	// Determine which Python script to run based on format
-	var scriptName = 'makePickle.py';  // default legacy
-	var outputFile = 'lipd.pkl';
-
-	if (format === 'cfr') {
-		scriptName = 'makeCfrPickle.py';
-		outputFile = 'lipd_cfr.pkl';
-	}
-
-	// Build Docker command with script override
-	var dockerComm = "docker run --rm -v " + path1 + ":/output -v " + path1 + "/" + outputFile + ":/" + outputFile + " davidedge/lipd_webapps:lipdPickler " + scriptName;
+	// Always use makeCfrPickle.py which creates both lipd.pkl (cfr) and lipd_legacy.pkl
+	var dockerComm = "docker run --rm -v " + path1 + ":/output davidedge/lipd_webapps:lipdPickler";
 
 	console.log("Docker command: " + dockerComm);
 	var dockerspawn = child_process.exec(dockerComm);
@@ -385,14 +373,12 @@ async function downloadCompilation(uniqueID, URL, language) {
 
 }
 
-var downloadEm = async function(uniqueID, language, format){
-	// Default to legacy format if not specified
-	format = format || 'legacy';
-	const userDir1 = path.join(__dirname, '../userRecons', uniqueID)
+var downloadEm = async function(uniqueID, language){
+	const userDir1 = path.join('/root/presto/userRecons', uniqueID)
 	const path1111 = path.join(userDir1, 'archivedComp.json')
 	const exists1111 = await checkFileExistsSync(path1111)
 
-	if (process.argv.length == 4){
+	if (process.argv.length >= 4){
 
 		if (exists1111){
 			console.log('found request for archived compilation: ' + path1111)
@@ -427,20 +413,33 @@ var downloadEm = async function(uniqueID, language, format){
 		}
 		if (runStatus == 1){
 			console.log("no matching TSIDs set, building new collection")
-			var path1 = path.join(__dirname, '../userRecons', uniqueID, 'TSIDs.json')
+			var path1 = path.join('/root/presto/userRecons', uniqueID, 'TSIDs.json')
 
 			var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
 			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
 					console.log("rspawn1 reso: " + reso)
 					console.log("rspawn1 language: " + language)
    					//if (reso == 0 && language == "Python"){
-					var pathToPkl = path.join(__dirname, '../userRecons', uniqueID)
-					console.log("attempting pickle with format: " + format)
-					pickleEm(pathToPkl, format).then(reso => {
-						removeEm(pathToPkl).then(reso => {
-							console.log("downloadLipds.js successful, new lipd set created")
-							process.exit(0);
-						});
+					var pathToPkl = path.join('/root/presto/userRecons', uniqueID)
+					console.log("attempting pickle creation")
+					pickleEm(pathToPkl).then(reso => {
+						console.log("pickleEm exit code: " + reso)
+						if (reso == 0) {
+							// Only remove .lpd files if pickle creation succeeded
+							removeEm(pathToPkl).then(reso => {
+								console.log("downloadLipds.js successful, new lipd set created")
+								process.exit(0);
+							});
+						} else {
+							console.log("ERROR: pickleEm failed with code " + reso)
+							console.log("Preserving .lpd files for debugging")
+							console.log("lipd_files.zip should still be available")
+							process.exit(1);
+						}
+					}).catch(err => {
+						console.log("ERROR: pickleEm failed with error: " + err)
+						console.log("Preserving .lpd files for debugging")
+						process.exit(1);
 					})
 			});
 
@@ -453,4 +452,5 @@ var downloadEm = async function(uniqueID, language, format){
 
 };
 
-downloadEm(process.argv[2], process.argv[3], process.argv[4])
+downloadEm(process.argv[2], process.argv[3])
+

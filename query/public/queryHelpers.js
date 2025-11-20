@@ -732,7 +732,17 @@ getAllMonths = function(startSpan,endSpan){
                         console.log("Total datasets in database query: " + prevResp.length);
                         console.log("Total time series (TSIDs) to POST: " + IDs.length);
                         console.log("Average TSIDs per dataset: " + (IDs.length / prevResp.length).toFixed(2));
-                        var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) + ',"recon":"' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '", "language":"'  + document.getElementById('language').value + '"}'
+
+                        // Extract unique datasetIds from the query result
+                        var datasetIds = prevResp.map(function(d) { return d['datasetId']; })
+                        var uniqueDatasetIds = [...new Set(datasetIds)];
+                        console.log("Unique dataset IDs to POST: " + uniqueDatasetIds.length);
+
+                        var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) +
+                                     ',"datasetIds": ' + JSON.stringify(uniqueDatasetIds) +
+                                     ',"recon":"' + document.getElementById('recon').value +
+                                     '", "uniqueID":"' + document.getElementById('uniqueID').value +
+                                     '", "language":"'  + document.getElementById('language').value + '"}'
                         console.log("json body sent to 'getLipds': " + tsJSON)
                         console.log("sending post TSids")
                         //postTSids(tsJSON);
