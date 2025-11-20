@@ -57,6 +57,19 @@ app.post('/lipds', function(req, res) {
 						      console.log("File written successfully at: " + path0);
 						    }
 				});
+
+				// Also save datasetIds if provided
+				if ("datasetIds" in req.body){
+					var path1 = path.join(dir1, 'datasetIds.json')
+					var datasetJSON = `{"datasetIds":` + JSON.stringify(req.body.datasetIds) + `}`
+					fs.writeFile(path1, datasetJSON, (err) => {
+						  if (err)
+							    console.log(err);
+						  else {
+							      console.log("File written successfully at: " + path1);
+							    }
+					});
+				}
 			} else {
 				var path0 = path.join(dir1, 'TSIDs_err.txt')
 				fs.writeFile(path0, "Rserver error! TSIDs not written.", (err) => {
