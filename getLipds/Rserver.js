@@ -43,6 +43,19 @@ async function createDirectory(dirPath) {
 app.post('/lipds', function(req, res) {
 	var dir1 = '/root/presto/userRecons/' + req.body.uniqueID + '_' + req.body.recon
 
+	// DEBUG: Log what we received
+	console.log("=== POST /lipds received ===");
+	console.log("Request body keys:", Object.keys(req.body));
+	if ("TSIDs" in req.body) {
+		console.log("TSIDs count:", req.body.TSIDs.length);
+	}
+	if ("datasetIds" in req.body) {
+		console.log("datasetIds count:", req.body.datasetIds.length);
+		console.log("First 5 datasetIds:", req.body.datasetIds.slice(0, 5));
+	} else {
+		console.log("WARNING: No datasetIds in request body!");
+	}
+
 	if ("TSIDs" in req.body){
 		createDirectory(dir1).then(status => {
 		    console.log('Final status:', status);
