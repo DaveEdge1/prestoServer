@@ -147,9 +147,9 @@ var checkmd5 = async function (uniqueID){
 	});
 }
 
-async function newStatus(uniqueID, language){
+async function newStatus(uniqueID){
 	console.log("starting status check")
-	if (typeof uniqueID == 'undefined' || typeof language == 'undefined'){
+	if (typeof uniqueID == 'undefined'){
 		return(3)
 	}
 	await checkmd5(uniqueID)
@@ -165,7 +165,7 @@ async function newStatus(uniqueID, language){
 
 }
 
-var rspawn1 = function (TSIDs, uniqueID, language){
+var rspawn1 = function (TSIDs, uniqueID){
 	var path1 = path.join('/root/presto/userRecons', uniqueID)
 
 	var path3 = path.join(path1, "lipd.pkl")
@@ -176,7 +176,7 @@ var rspawn1 = function (TSIDs, uniqueID, language){
 				console.log("Blank lipd.pkl written successfully\n");
 		       }
 	});
-	var args = '--vanilla ' + file_path + ' ' + TSIDs + ' ' + path1 + ' ' + language;
+	var args = '--vanilla ' + file_path + ' ' + TSIDs + ' ' + path1;
 	return new Promise((resolve, reject) => {
 			var rspawn = child_process.spawn(r_comm,[args]);
 
@@ -327,130 +327,132 @@ function grabCompilationInfo(path){
 	    }
 }
 
-function addExt(allButExt, language) {
-	if (language == 'R'){
-		return allButExt + '.RData';
-	} else if (language == 'Python'){
-		return allButExt + '.pkl';
-	}
-}
-
-
-
-async function downloadCompilation(uniqueID, URL, language) {
-
+// Download both R and Python formats for archived compilations
+async function downloadCompilation(uniqueID) {
 	const userDir = "/root/presto/userRecons/" + uniqueID
 	const path2archiveJSON = userDir + "/archivedComp.json"
-	var archivedComp = '';
-	var archivedVers = '';
 	const compilationDetails = grabCompilationInfo(path2archiveJSON);
-	const allButExt = 'https://lipdverse.org/' + compilationDetails.compilation + '/' + compilationDetails.version + '/' + compilationDetails.compilation + compilationDetails.version
-	const dataURL = addExt(allButExt, language)
-	const destPath = addExt(userDir+'/lipd', language)
-	
-		return new Promise((resolve, reject) => {
-			console.log('downloading compilation...');
-			var bashCommand = 'curl ' + dataURL + ' -o ' + destPath
-			console.log('bash command: ' + bashCommand);
-			shelljs.exec('curl ' + dataURL + ' -o ' + destPath, {async: true}, function(code, stdout, stderr) {
-			  if (code !== 0) {
-			    console.log('curl failed with code:', code);
-			    console.log('stderr:', stderr);
-			    // Handle error if needed
-			    return;
-			  }
-			  console.log('curl succeeded:', stdout);
-			
-			  fs.appendFile('/root/presto/userRecons/' + uniqueID + '/request-status.txt', "downloaded archived compilation\n", function(err) {
-			    if (err) {
-			      return console.log('Failed to append to status file:', err);
-			    }
-			    console.log('archived compilation download completed!');
-			    resolve();
-			  });
+	const baseURL = 'https://lipdverse.org/' + compilationDetails.compilation + '/' + compilationDetails.version + '/' + compilationDetails.compilation + compilationDetails.version
+
+	// Download both .RData and .pkl files
+	const downloads = [
+		{ url: baseURL + '.RData', dest: userDir + '/lipd.RData', name: 'R format' },
+		{ url: baseURL + '.pkl', dest: userDir + '/lipd.pkl', name: 'Python format' }
+	];
+
+	console.log('Downloading archived compilation in both R and Python formats...');
+
+	for (const dl of downloads) {
+		await new Promise((resolve, reject) => {
+			const bashCommand = 'curl ' + dl.url + ' -o ' + dl.dest;
+			console.log('Downloading ' + dl.name + ': ' + bashCommand);
+			shelljs.exec(bashCommand, {async: true}, function(code, stdout, stderr) {
+				if (code !== 0) {
+					console.log('WARNING: Download failed for ' + dl.name + ' with code:', code);
+					console.log('stderr:', stderr);
+				} else {
+					console.log(dl.name + ' download succeeded');
+				}
+				resolve(); // Continue even if one format fails
 			});
 		});
+	}
 
+	fs.appendFile(userDir + '/request-status.txt', "downloaded archived compilation (both formats)\n", function(err) {
+		if (err) {
+			console.log('Failed to append to status file:', err);
+		}
+	});
+	console.log('Archived compilation downloads completed!');
 }
 
-var downloadEm = async function(uniqueID, language){
+var downloadEm = async function(uniqueID){
 	const userDir1 = path.join('/root/presto/userRecons', uniqueID)
 	const path1111 = path.join(userDir1, 'archivedComp.json')
 	const exists1111 = await checkFileExistsSync(path1111)
 
-	if (process.argv.length >= 4){
+	// Handle archived compilation requests
+	if (exists1111){
+		console.log('Found request for archived compilation: ' + path1111)
+		await downloadCompilation(uniqueID);
 
-		if (exists1111){
-			console.log('found request for archived compilation: ' + path1111)
-			await downloadCompilation(uniqueID, URL, language);
-			const path2222 = addExt(userDir1+'/lipd', language)
-			const exists2222 = await checkFileExistsSync(path2222)
-			if (language == 'R'){
-				if (exists2222){
-					console.log("writing lipd tts file")
-					await writeTTS("/root/presto/userRecons/" + uniqueID);
-					console.log("downloadLipds.js successful, downloaded archived compilation")
-					process.exit(0);
-				} else {
-					console.log("no file at expected path: " + path2222)
-					process.exit(1);
-				}
+		// Check if at least one format downloaded successfully
+		const pathRData = path.join(userDir1, 'lipd.RData')
+		const pathPkl = path.join(userDir1, 'lipd.pkl')
+		const existsRData = await checkFileExistsSync(pathRData)
+		const existsPkl = await checkFileExistsSync(pathPkl)
+
+		if (existsRData || existsPkl){
+			if (existsRData) {
+				console.log("Writing lipd_tts file from R data...")
+				await writeTTS(userDir1);
 			}
-			
-		}
-
-		
-		var runStatus = await newStatus(uniqueID, language)
-		updateTSIDmd5()
-
-		if (runStatus == 2){
-			if (await routeExistingLipds(uniqueID)){
-				console.log("downloadLipds.js successful, found existing TSID set")
-				process.exit(0);
-			} else {
-				runStatus = 1;
-			}
-		}
-		if (runStatus == 1){
-			console.log("no matching TSIDs set, building new collection")
-			var path1 = path.join('/root/presto/userRecons', uniqueID, 'TSIDs.json')
-
-			var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
-			rspawn1(fullJSON.TSIDs, uniqueID, language).then(reso => {
-					console.log("rspawn1 reso: " + reso)
-					console.log("rspawn1 language: " + language)
-   					//if (reso == 0 && language == "Python"){
-					var pathToPkl = path.join('/root/presto/userRecons', uniqueID)
-					console.log("attempting pickle creation")
-					pickleEm(pathToPkl).then(reso => {
-						console.log("pickleEm exit code: " + reso)
-						if (reso == 0) {
-							// Only remove .lpd files if pickle creation succeeded
-							removeEm(pathToPkl).then(reso => {
-								console.log("downloadLipds.js successful, new lipd set created")
-								process.exit(0);
-							});
-						} else {
-							console.log("ERROR: pickleEm failed with code " + reso)
-							console.log("Preserving .lpd files for debugging")
-							console.log("lipd_files.zip should still be available")
-							process.exit(1);
-						}
-					}).catch(err => {
-						console.log("ERROR: pickleEm failed with error: " + err)
-						console.log("Preserving .lpd files for debugging")
-						process.exit(1);
-					})
-			});
-
+			console.log("downloadLipds.js successful, downloaded archived compilation (both formats)")
+			process.exit(0);
 		} else {
-			console.log("Error: num args to downloadLipds.js: " + process.argv.length)
-			console.log("runStatus: " + runStatus)
+			console.log("ERROR: No files downloaded successfully")
 			process.exit(1);
 		}
 	}
 
+	// Handle TSID-based requests
+	var runStatus = await newStatus(uniqueID)
+	updateTSIDmd5()
+
+	if (runStatus == 2){
+		if (await routeExistingLipds(uniqueID)){
+			console.log("downloadLipds.js successful, found existing TSID set")
+			process.exit(0);
+		} else {
+			runStatus = 1;
+		}
+	}
+
+	if (runStatus == 1){
+		console.log("No matching TSIDs set, building new collection")
+		var path1 = path.join('/root/presto/userRecons', uniqueID, 'TSIDs.json')
+
+		var fullJSON = JSON.parse(TSIDs(path1, uniqueID))
+		rspawn1(fullJSON.TSIDs, uniqueID).then(reso => {
+			console.log("R script exit code: " + reso)
+			if (reso !== 0) {
+				console.log("ERROR: R script failed")
+				process.exit(1);
+			}
+
+			// Always create both pickle formats
+			var pathToPkl = path.join('/root/presto/userRecons', uniqueID)
+			console.log("Creating pickle files (both CFR and legacy formats)...")
+			pickleEm(pathToPkl).then(reso => {
+				console.log("pickleEm exit code: " + reso)
+				if (reso == 0) {
+					// Only remove .lpd files if pickle creation succeeded
+					removeEm(pathToPkl).then(reso => {
+						console.log("downloadLipds.js successful! Generated all output formats:")
+						console.log("  - R files: lipd.rds, lipd_tts.rds")
+						console.log("  - Python files: lipd.pkl (CFR), lipd_legacy.pkl")
+						console.log("  - Archive: lipd_files.zip")
+						console.log("  - Metadata: datasetIds.json")
+						process.exit(0);
+					});
+				} else {
+					console.log("ERROR: pickleEm failed with code " + reso)
+					console.log("Preserving .lpd files for debugging")
+					console.log("lipd_files.zip should still be available")
+					process.exit(1);
+				}
+			}).catch(err => {
+				console.log("ERROR: pickleEm failed with error: " + err)
+				console.log("Preserving .lpd files for debugging")
+				process.exit(1);
+			})
+		});
+	} else {
+		console.log("Error: Unexpected runStatus: " + runStatus)
+		process.exit(1);
+	}
 };
 
-downloadEm(process.argv[2], process.argv[3])
+// Only require uniqueID now (no language parameter)
+downloadEm(process.argv[2])
 

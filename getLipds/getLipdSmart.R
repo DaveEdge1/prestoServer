@@ -3,14 +3,13 @@ print("starting getLipdSmart.R")
 library(lipdR)
 library(jsonlite)
 print(paste0("args: ", args))
-if (length(args) != 3){
-	stop("TSIDs, uniqueID, and language required")
+if (length(args) != 2){
+	stop("TSIDs and uniqueID required")
 }
 
 # Parse arguments
 TSIDs_query <- unlist(strsplit(args[1], split = ","))
 userDir <- args[2]
-language <- args[3]
 
 if (length(TSIDs_query) < 1){
 	stop("Requires at least 1 TSId")
@@ -32,15 +31,22 @@ if (file.exists(datasetIdsPath)){
 	print(paste0("Query targets ", length(datasetIds_query), " datasets"))
 
 	# Get ALL TSIDs for these datasets from the query table (TSIDs-a)
-	TSIDs_from_datasets <- qt$paleoData_TSid[qt$datasetId %in% datasetIds_query]
+	# BUT exclude age/year columns since those aren't in the TSID query
+	TSIDs_from_datasets <- qt$paleoData_TSid[
+		qt$datasetId %in% datasetIds_query &
+		!(qt$paleoData_variableName %in% c("age", "year"))
+	]
 	TSIDs_from_datasets <- unique(TSIDs_from_datasets)
-	print(paste0("These datasets contain ", length(TSIDs_from_datasets), " total TSIDs"))
+	print(paste0("These datasets contain ", length(TSIDs_from_datasets), " paleoData TSIDs (excluding age/year)"))
 
 	# Compare: Are all dataset TSIDs included in the query? (TSIDs-a vs TSIDs-b)
 	excluded_TSIDs <- setdiff(TSIDs_from_datasets, TSIDs_query)
 	num_excluded <- length(excluded_TSIDs)
 
 	print(paste0("Number of TSIDs excluded by query: ", num_excluded))
+	if (num_excluded > 0) {
+		print(paste0("Excluded TSIDs (first 10): ", paste(head(excluded_TSIDs, 10), collapse=", ")))
+	}
 
 	if (num_excluded == 0){
 		print("=== SIMPLE PATH: No TSIDs excluded, downloading complete datasets ===")
