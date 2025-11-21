@@ -30,64 +30,59 @@ if (file.exists(datasetIdsPath)){
 	datasetIds_query <- datasetIdsJSON$datasetIds
 	print(paste0("Query targets ", length(datasetIds_query), " datasets"))
 
-	# Get ALL TSIDs for these datasets from the query table (TSIDs-a)
-	# BUT exclude age/year columns since those aren't in the TSID query
-	TSIDs_from_datasets <- qt$paleoData_TSid[
-		qt$datasetId %in% datasetIds_query &
-		!(qt$paleoData_variableName %in% c("age", "year"))
-	]
-	TSIDs_from_datasets <- unique(TSIDs_from_datasets)
-	print(paste0("These datasets contain ", length(TSIDs_from_datasets), " paleoData TSIDs (excluding age/year)"))
+	# FOR NOW: Always use SIMPLE PATH (download complete datasets)
+	# TODO: Implement proper SIMPLE vs COMPLEX path detection
+	# The COMPLEX path code is preserved below for future use
 
-	# Compare: Are all dataset TSIDs included in the query? (TSIDs-a vs TSIDs-b)
-	excluded_TSIDs <- setdiff(TSIDs_from_datasets, TSIDs_query)
-	num_excluded <- length(excluded_TSIDs)
+	print("=== SIMPLE PATH: Downloading complete datasets ===")
 
-	print(paste0("Number of TSIDs excluded by query: ", num_excluded))
-	if (num_excluded > 0) {
-		print(paste0("Excluded TSIDs (first 10): ", paste(head(excluded_TSIDs, 10), collapse=", ")))
-	}
+	# Download complete LiPD files by datasetId
+	print("Downloading LiPD files...")
+	D <- lipdR::readLipd(datasetIds_query)
 
-	if (num_excluded == 0){
-		print("=== SIMPLE PATH: No TSIDs excluded, downloading complete datasets ===")
+	# Create time series tibble
+	tts <- as.lipdTsTibble(D)
 
-		# Download complete LiPD files by datasetId
-		print("Downloading LiPD files...")
-		D <- lipdR::readLipd(datasetIds_query)
+	print(paste0("Downloaded ", length(datasetIds_query), " datasets"))
+	print(paste0("Time series table has ", nrow(tts), " rows"))
+	print(paste0("Unique TSIDs: ", length(unique(tts$paleoData_TSid))))
 
-		# Create time series tibble
-		tts <- as.lipdTsTibble(D)
+	# COMMENTED OUT: TSID comparison logic (for future SIMPLE vs COMPLEX detection)
+	# # Get ALL TSIDs for these datasets from the query table (TSIDs-a)
+	# # BUT exclude age/year columns since those aren't in the TSID query
+	# TSIDs_from_datasets <- qt$paleoData_TSid[
+	# 	qt$datasetId %in% datasetIds_query &
+	# 	!(qt$paleoData_variableName %in% c("age", "year"))
+	# ]
+	# TSIDs_from_datasets <- unique(TSIDs_from_datasets)
+	# print(paste0("These datasets contain ", length(TSIDs_from_datasets), " paleoData TSIDs (excluding age/year)"))
+	#
+	# # Compare: Are all dataset TSIDs included in the query? (TSIDs-a vs TSIDs-b)
+	# excluded_TSIDs <- setdiff(TSIDs_from_datasets, TSIDs_query)
+	# num_excluded <- length(excluded_TSIDs)
+	#
+	# print(paste0("Number of TSIDs excluded by query: ", num_excluded))
+	# if (num_excluded > 0) {
+	# 	print(paste0("Excluded TSIDs (first 10): ", paste(head(excluded_TSIDs, 10), collapse=", ")))
+	# }
 
-		# Filter to only include the queried TSIDs (for safety, though should be all)
-		tts <- tts[tts$paleoData_TSid %in% TSIDs_query,]
-
-		print(paste0("Downloaded ", length(datasetIds_query), " datasets"))
-		print(paste0("Time series table has ", nrow(tts), " rows"))
-
-	} else {
-		print("=== COMPLEX PATH: Some TSIDs excluded, filtering required ===")
-		print(paste0("Excluded TSIDs (first 10): ", paste(head(excluded_TSIDs, 10), collapse=", ")))
-
-		# Download complete LiPD files by datasetId
-		print("Downloading LiPD files...")
-		D <- lipdR::readLipd(datasetIds_query)
-
-		# Create time series tibble
-		tts <- as.lipdTsTibble(D)
-
-		# Filter to ONLY the TSIDs from the query
-		print(paste0("Filtering from ", nrow(tts), " to ", length(TSIDs_query), " time series"))
-		tts <- tts[tts$paleoData_TSid %in% TSIDs_query,]
-		print(paste0("After filtering: ", nrow(tts), " rows"))
-
-		# Need to rebuild the multiLipd object with only the queried TSIDs
-		# This is more complex - we need to remove specific time series from datasets
-		if (length(datasetIds_query) == 1){
-		  D <- lipdR::as.lipd(tts)
-		} else {
-		  D <- lipdR::as.multiLipd(tts)
-		}
-	}
+	# COMMENTED OUT: COMPLEX PATH (for future use when filtering is needed)
+	# if (num_excluded > 0){
+	# 	print("=== COMPLEX PATH: Some TSIDs excluded, filtering required ===")
+	# 	print(paste0("Excluded TSIDs (first 10): ", paste(head(excluded_TSIDs, 10), collapse=", ")))
+	#
+	# 	# Filter to ONLY the TSIDs from the query
+	# 	print(paste0("Filtering from ", nrow(tts), " to ", length(TSIDs_query), " time series"))
+	# 	tts <- tts[tts$paleoData_TSid %in% TSIDs_query,]
+	# 	print(paste0("After filtering: ", nrow(tts), " rows"))
+	#
+	# 	# Need to rebuild the multiLipd object with only the queried TSIDs
+	# 	if (length(datasetIds_query) == 1){
+	# 	  D <- lipdR::as.lipd(tts)
+	# 	} else {
+	# 	  D <- lipdR::as.multiLipd(tts)
+	# 	}
+	# }
 
 } else {
 	print("WARNING: datasetIds.json not found - falling back to old TSID-only pathway")
