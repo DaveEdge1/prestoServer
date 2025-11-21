@@ -30,16 +30,23 @@ if (file.exists(datasetIdsPath)){
 	datasetIds_query <- datasetIdsJSON$datasetIds
 	print(paste0("Query targets ", length(datasetIds_query), " datasets"))
 
-	# Get ALL TSIDs for these datasets from the query table (TSIDs-a)
-	# BUT exclude age/year columns since those aren't in the TSID query
+	# Determine which compilations are being queried by examining TSIDs_query
+	compilations_in_query <- unique(qt$paleoData_mostRecentCompilations[qt$paleoData_TSid %in% TSIDs_query])
+	# Remove empty/NA compilations
+	compilations_in_query <- compilations_in_query[!is.na(compilations_in_query) & compilations_in_query != ""]
+	print(paste0("Query is for compilations: ", paste(compilations_in_query, collapse=", ")))
+
+	# Get TSIDs for these datasets that are in the SAME compilations
+	# This gives us an apples-to-apples comparison
 	TSIDs_from_datasets <- qt$paleoData_TSid[
 		qt$datasetId %in% datasetIds_query &
-		!(qt$paleoData_variableName %in% c("age", "year"))
+		!(qt$paleoData_variableName %in% c("age", "year")) &
+		qt$paleoData_mostRecentCompilations %in% compilations_in_query
 	]
 	TSIDs_from_datasets <- unique(TSIDs_from_datasets)
-	print(paste0("These datasets contain ", length(TSIDs_from_datasets), " paleoData TSIDs (excluding age/year)"))
+	print(paste0("These datasets contain ", length(TSIDs_from_datasets), " paleoData TSIDs in the queried compilations"))
 
-	# Compare: Are all dataset TSIDs included in the query? (TSIDs-a vs TSIDs-b)
+	# Compare: Are all dataset TSIDs (in queried compilations) included in the query?
 	excluded_TSIDs <- setdiff(TSIDs_from_datasets, TSIDs_query)
 	num_excluded <- length(excluded_TSIDs)
 
