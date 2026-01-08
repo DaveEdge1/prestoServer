@@ -18,8 +18,8 @@
       <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
          integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
          crossorigin=""></script>
-      <script src="https://unpkg.com/proj4@2.9.0/dist/proj4.js"></script>
-      <script src="https://unpkg.com/proj4leaflet@1.0.2/dist/proj4leaflet.js"></script>
+      <script src="https://unpkg.com/proj4@2.9.0"></script>
+      <script src="https://unpkg.com/proj4leaflet@1.0.2"></script>
       <link rel="stylesheet" href="/slider.css">
       <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.6/base64.min.js"></script>
       <script src="/Leaflet.draw.js"></script>
@@ -544,6 +544,11 @@
       var prevResp = {};
       var inRectCount = 0;
 
+      // Check if proj4leaflet is loaded
+      console.log('Leaflet version:', L.version);
+      console.log('proj4 loaded:', typeof proj4 !== 'undefined');
+      console.log('L.Proj available:', typeof L.Proj !== 'undefined');
+
       function dec4(x) {
         return Number.parseFloat(x).toFixed(4);
       }
@@ -860,7 +865,7 @@
       }
 
       // Only call changeBoxCoord for standard projection on initial load
-      if (currentProjection === 'standard') {
+      if (currentProjection === 'standard' && rect !== null) {
          changeBoxCoord();
       }
 
