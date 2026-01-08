@@ -628,7 +628,7 @@
                attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
                tileSize: 256
             },
-            bounds: [[-90, -180], [-30, 180]]
+            bounds: [[-90, -180], [-40, 180]]
          },
          arctic: {
             crs: new L.Proj.CRS('EPSG:3413',
@@ -657,7 +657,7 @@
                maxZoom: 8,
                minZoom: 1
             },
-            bounds: [[30, -180], [90, 180]]
+            bounds: [[40, -180], [90, 180]]
          }
       };
 
@@ -693,13 +693,15 @@
          // Add layer group for points
          layerGroup = L.layerGroup().addTo(map);
 
-         // Add rectangle for bounding box (only draggable in standard projection)
+         // Add rectangle for bounding box (only visible and draggable in standard projection)
          var isDraggable = (projectionType === 'standard');
+         var isVisible = (projectionType === 'standard');
+
          rect = L.rectangle(config.bounds, {
             color: "#ff7800",
-            opacity: 0.1,
+            opacity: isVisible ? 0.1 : 0,
             fill: "#ff7800",
-            fillOpacity: 0.1,
+            fillOpacity: isVisible ? 0.1 : 0,
             draggable: isDraggable
          });
          map.addLayer(rect);
@@ -713,10 +715,15 @@
 
          console.log('Set bounding box to:', bounds[0][0], bounds[0][1], 'to', bounds[1][0], bounds[1][1]);
 
-         // Update bounding box note
-         if (isDraggable) {
+         // Update coordinate filter checkbox and visibility
+         if (projectionType === 'standard') {
+            // Standard projection: use whatever the user has set (default unchecked)
             document.getElementById('boundingBoxNote').style.display = 'block';
          } else {
+            // Polar projections: enable coordinate filtering by default
+            document.getElementById('coordsOn').checked = true;
+            document.getElementById('coordsDiv').style.visibility = 'visible';
+            filters1['coords'] = 'true';
             document.getElementById('boundingBoxNote').style.display = 'none';
          }
 
