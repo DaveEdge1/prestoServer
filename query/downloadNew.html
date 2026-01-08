@@ -18,8 +18,8 @@
       <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
          integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
          crossorigin=""></script>
-      <script src="https://unpkg.com/proj4"></script>
-      <script src="https://unpkg.com/proj4leaflet@1.0.2"></script>
+      <script src="https://unpkg.com/proj4@2.9.0/dist/proj4.js"></script>
+      <script src="https://unpkg.com/proj4leaflet@1.0.2/dist/proj4leaflet.js"></script>
       <link rel="stylesheet" href="/slider.css">
       <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.6/base64.min.js"></script>
       <script src="/Leaflet.draw.js"></script>
@@ -585,8 +585,8 @@
                }
             ),
             center: [-90, 0],
-            zoom: 1,
-            minZoom: 1,
+            zoom: 2,
+            minZoom: 0,
             maxZoom: 9,
             tileLayer: 'https://data.aad.gov.au/mbtileserver/services/tiles-newmap-12layers/tiles/{z}/{x}/{y}.png',
             tileOptions: {
@@ -614,8 +614,8 @@
                }
             ),
             center: [90, 0],
-            zoom: 1,
-            minZoom: 1,
+            zoom: 2,
+            minZoom: 0,
             maxZoom: 8,
             tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             tileOptions: {
@@ -811,10 +811,24 @@
          // Update bounding box from form inputs (works for all projections)
          updateBoundingBox();
 
-         // Reload data if we had previous data
-         if (prevResp && Object.keys(prevResp).length > 0) {
-            updatePoints(prevResp);
+         // For polar projections, disable rect editing to prevent coordinate issues
+         if (projectionType !== 'standard') {
+            rect.editing.disable();
          }
+
+         console.log('Map CRS:', map.options.crs);
+         console.log('Map initialized with center:', config.center, 'zoom:', config.zoom);
+         console.log('Projection type:', projectionType);
+
+         // Force a slight delay to ensure map is fully initialized before adding points
+         setTimeout(function() {
+            // Reload data if we had previous data
+            if (prevResp && Object.keys(prevResp).length > 0) {
+               console.log('Reloading', Object.keys(prevResp).length, 'previous data points');
+               console.log('Current map CRS when adding points:', map.options.crs);
+               updatePoints(prevResp);
+            }
+         }, 100);
       }
 
       // Initialize with standard projection
