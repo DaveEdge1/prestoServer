@@ -553,6 +553,34 @@
         return Number.parseFloat(x).toFixed(4);
       }
 
+      // Store original updatePoints function
+      var originalUpdatePoints = null;
+
+      // Wrapper to add coordinate transformation debugging
+      function wrappedUpdatePoints(coords) {
+        console.log('updatePoints called with', coords.length, 'points');
+        console.log('Current projection:', currentProjection);
+        console.log('Current map CRS:', map ? map.options.crs.code : 'no map');
+
+        // For polar projections, verify coordinate transformation
+        if (currentProjection !== 'standard' && coords.length > 0) {
+          var sampleCoord = coords[0];
+          console.log('Sample coordinate (lat/lon):', sampleCoord.geo_latitude, sampleCoord.geo_longitude);
+
+          // Test coordinate transformation
+          if (map && map.options.crs.code) {
+            var testLatLng = L.latLng(sampleCoord.geo_latitude, sampleCoord.geo_longitude);
+            var testPoint = map.latLngToLayerPoint(testLatLng);
+            console.log('Test transformation - LatLng:', testLatLng, '-> LayerPoint:', testPoint);
+          }
+        }
+
+        // Call original function
+        if (originalUpdatePoints) {
+          originalUpdatePoints(coords);
+        }
+      }
+
       // Define projection configurations
       var projectionConfigs = {
          standard: {
@@ -862,6 +890,13 @@
    <script>
       updateRes = function(a1){
        return(a1)
+      }
+
+      // Store and wrap the original updatePoints function
+      if (typeof updatePoints !== 'undefined') {
+        originalUpdatePoints = updatePoints;
+        updatePoints = wrappedUpdatePoints;
+        console.log('updatePoints function wrapped for debugging');
       }
 
       // Only call changeBoxCoord for standard projection on initial load
