@@ -541,6 +541,8 @@
       var rect = null;
       var legend = null;
       var regExp = /\(([^)]+)\)/;
+      var prevResp = {};
+      var inRectCount = 0;
 
       function dec4(x) {
         return Number.parseFloat(x).toFixed(4);
@@ -625,10 +627,17 @@
 
       // Initialize map with standard projection
       function initMap(projectionType) {
+         console.log('initMap called with projection: ' + projectionType);
          var config = projectionConfigs[projectionType];
+
+         if (!config) {
+            console.error('No configuration found for projection: ' + projectionType);
+            return;
+         }
 
          // Remove existing map if any
          if (map) {
+            console.log('Removing existing map');
             map.remove();
          }
 
@@ -812,11 +821,19 @@
       initMap('standard');
 
       // Add event listeners for projection selector
-      document.querySelectorAll('input[name="projection"]').forEach(function(radio) {
+      var radios = document.querySelectorAll('input[name="projection"]');
+      console.log('Found ' + radios.length + ' projection radio buttons');
+      radios.forEach(function(radio) {
          radio.addEventListener('change', function() {
+            console.log('Projection changed to: ' + this.value);
             if (this.checked) {
                currentProjection = this.value;
-               initMap(currentProjection);
+               try {
+                  initMap(currentProjection);
+                  console.log('Map reinitialized with projection: ' + currentProjection);
+               } catch(e) {
+                  console.error('Error initializing map with projection ' + currentProjection + ':', e);
+               }
             }
          });
       });
@@ -824,8 +841,6 @@
    </script>
 
    <script>
-      let inRectCount = 0;
-      let prevResp = {};
       updateRes = function(a1){
        return(a1)
       }
