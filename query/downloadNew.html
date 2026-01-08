@@ -533,13 +533,18 @@
       	return(filters1)
       }
 
-      // Projection configurations
+      // Global variables
       var currentProjection = 'standard';
       var map = null;
       var tiles = null;
       var layerGroup = null;
       var rect = null;
       var legend = null;
+      var regExp = /\(([^)]+)\)/;
+
+      function dec4(x) {
+        return Number.parseFloat(x).toFixed(4);
+      }
 
       // Define projection configurations
       var projectionConfigs = {
@@ -789,11 +794,12 @@
          // Set up event listeners for draggable rectangle (only for standard projection)
          if (isDraggable) {
             rect.on('edit', function() {
+               changeBoxCoord();
                updatePoints(prevResp);
             });
          }
 
-         changeBoxCoord();
+         // Update bounding box from form inputs (works for all projections)
          updateBoundingBox();
 
          // Reload data if we had previous data
@@ -815,11 +821,6 @@
          });
       });
 
-      var regExp = /\(([^)]+)\)/;
-      function dec4(x) {
-        return Number.parseFloat(x).toFixed(4);
-      }
-
    </script>
 
    <script>
@@ -829,7 +830,10 @@
        return(a1)
       }
 
-      changeBoxCoord();
+      // Only call changeBoxCoord for standard projection on initial load
+      if (currentProjection === 'standard') {
+         changeBoxCoord();
+      }
 
       var recon1 = document.getElementById('recon').value
       if (recon1 == 'false'){
