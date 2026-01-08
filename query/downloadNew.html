@@ -593,7 +593,8 @@
             tileOptions: {
                maxZoom: 18,
                minZoom: 1
-            }
+            },
+            bounds: [[-90, -180], [90, 180]]
          },
          antarctic: {
             crs: new L.Proj.CRS('EPSG:3031',
@@ -626,7 +627,8 @@
                zoomOffset: 1,
                attribution: '&copy; <a href="https://data.aad.gov.au/map-attribution">Attribution</a>',
                tileSize: 256
-            }
+            },
+            bounds: [[-90, -180], [-30, 180]]
          },
          arctic: {
             crs: new L.Proj.CRS('EPSG:3413',
@@ -654,7 +656,8 @@
             tileOptions: {
                maxZoom: 8,
                minZoom: 1
-            }
+            },
+            bounds: [[30, -180], [90, 180]]
          }
       };
 
@@ -692,7 +695,7 @@
 
          // Add rectangle for bounding box (only draggable in standard projection)
          var isDraggable = (projectionType === 'standard');
-         rect = L.rectangle([[-90, -180], [90, 180]], {
+         rect = L.rectangle(config.bounds, {
             color: "#ff7800",
             opacity: 0.1,
             fill: "#ff7800",
@@ -700,6 +703,15 @@
             draggable: isDraggable
          });
          map.addLayer(rect);
+
+         // Update form inputs to match projection bounds
+         var bounds = config.bounds;
+         document.getElementById("lat_min").value = bounds[0][0];
+         document.getElementById("lon_min").value = bounds[0][1];
+         document.getElementById("lat_max").value = bounds[1][0];
+         document.getElementById("lon_max").value = bounds[1][1];
+
+         console.log('Set bounding box to:', bounds[0][0], bounds[0][1], 'to', bounds[1][0], bounds[1][1]);
 
          // Update bounding box note
          if (isDraggable) {
@@ -842,7 +854,11 @@
          }
 
          // Update bounding box from form inputs (works for all projections)
+         // Note: This reads the values we just set in the form and applies them to the rect
          updateBoundingBox();
+
+         // Log rectangle bounds after update
+         console.log('Rectangle bounds after updateBoundingBox:', rect.getBounds());
 
          // For polar projections, disable rect editing to prevent coordinate issues
          if (projectionType !== 'standard') {
