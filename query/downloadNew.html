@@ -560,7 +560,7 @@
       // Store original updatePoints function
       var originalUpdatePoints = null;
 
-      // Wrapper to add coordinate transformation debugging
+      // Wrapper to add coordinate transformation debugging and fix dataset count
       function wrappedUpdatePoints(coords) {
         console.log('updatePoints called with', coords.length, 'points');
         console.log('Current projection:', currentProjection);
@@ -579,9 +579,32 @@
           }
         }
 
-        // Call original function
+        // Call original function (shows all points with opacity filtering)
         if (originalUpdatePoints) {
           originalUpdatePoints(coords);
+        }
+
+        // After updatePoints runs, fix the dataset count if coordinate filtering is enabled
+        // The original function counts all datasets, but we want to count only those in bounds
+        if (document.getElementById('coordsOn') && document.getElementById('coordsOn').checked) {
+          // Get current rectangle bounds
+          var latMin = +document.getElementById('lat_min').value;
+          var latMax = +document.getElementById('lat_max').value;
+          var lonMin = +document.getElementById('lon_min').value;
+          var lonMax = +document.getElementById('lon_max').value;
+
+          // Count datasets within bounds
+          var inBoundsCount = coords.filter(function(point) {
+            var lat = +point.geo_latitude;
+            var lon = +point.geo_longitude;
+            return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax;
+          }).length;
+
+          // Update the display to show correct count
+          // inRectCount is already set by updatePoints for unique locations
+          document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + inBoundsCount + " (" + inRectCount + " unique locations)";
+
+          console.log('Coordinate filtering: showing', coords.length, 'total datasets, but', inBoundsCount, 'are within bounds');
         }
       }
 
