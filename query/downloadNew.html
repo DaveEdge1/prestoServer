@@ -68,6 +68,10 @@
          .projection-selector input[type="radio"] {
          margin-right: 5px;
          }
+         /* Hide editing handles for rectangles when projection is not standard */
+         .polar-projection .leaflet-editing-icon {
+         display: none !important;
+         }
       </style>
    </head>
    <body>
@@ -697,6 +701,14 @@
             document.getElementById('map').innerHTML = '';
          }
 
+         // Add or remove polar-projection class for CSS styling
+         var mapContainer = document.getElementById('map');
+         if (projectionType !== 'standard') {
+            mapContainer.classList.add('polar-projection');
+         } else {
+            mapContainer.classList.remove('polar-projection');
+         }
+
          // Create new map
          map = L.map('map', {
             crs: config.crs,
@@ -722,9 +734,16 @@
             opacity: isVisible ? 0.1 : 0,
             fill: "#ff7800",
             fillOpacity: isVisible ? 0.1 : 0,
-            draggable: isDraggable
+            draggable: isDraggable,
+            // Prevent editing handlers for polar projections
+            editing: isDraggable ? undefined : false
          });
          map.addLayer(rect);
+
+         // For polar projections, ensure editing is completely disabled
+         if (!isDraggable && rect.editing) {
+            rect.editing.disable();
+         }
 
          // Update form inputs to match projection bounds
          var bounds = config.bounds;
