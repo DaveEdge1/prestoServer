@@ -880,16 +880,19 @@
             });
          }
 
-         // Update bounding box from form inputs (works for all projections)
-         // Note: This reads the values we just set in the form and applies them to the rect
-         updateBoundingBox();
-
-         // Log rectangle bounds after update
-         console.log('Rectangle bounds after updateBoundingBox:', rect.getBounds());
-
-         // For polar projections, disable rect editing to prevent coordinate issues
-         if (projectionType !== 'standard') {
-            rect.editing.disable();
+         // Update bounding box from form inputs
+         // For standard projection: call updateBoundingBox which enables editing
+         // For polar projections: skip this to avoid enabling editing handles
+         if (projectionType === 'standard') {
+            updateBoundingBox();
+            console.log('Rectangle bounds after updateBoundingBox:', rect.getBounds());
+         } else {
+            // Polar projections: bounds already set from config, just disable editing
+            if (rect.editing) {
+               rect.editing.disable();
+            }
+            console.log('Skipped updateBoundingBox for polar projection, editing disabled');
+            console.log('Rectangle bounds:', rect.getBounds());
          }
 
          console.log('Map CRS:', map.options.crs);
