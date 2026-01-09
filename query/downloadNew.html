@@ -579,9 +579,28 @@
           }
         }
 
-        // Call original function
+        // Filter coordinates based on bounding box if coordinate filtering is enabled
+        var filteredCoords = coords;
+        if (document.getElementById('coordsOn') && document.getElementById('coordsOn').checked) {
+          // Get current rectangle bounds
+          var latMin = +document.getElementById('lat_min').value;
+          var latMax = +document.getElementById('lat_max').value;
+          var lonMin = +document.getElementById('lon_min').value;
+          var lonMax = +document.getElementById('lon_max').value;
+
+          // Filter coords to only include points within bounds
+          filteredCoords = coords.filter(function(point) {
+            var lat = +point.geo_latitude;
+            var lon = +point.geo_longitude;
+            return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax;
+          });
+
+          console.log('Coordinate filtering enabled: filtered from', coords.length, 'to', filteredCoords.length, 'datasets');
+        }
+
+        // Call original function with filtered coords
         if (originalUpdatePoints) {
-          originalUpdatePoints(coords);
+          originalUpdatePoints(filteredCoords);
         }
       }
 
