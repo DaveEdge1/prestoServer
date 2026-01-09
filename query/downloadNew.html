@@ -675,7 +675,26 @@
          // Remove existing map if any
          if (map) {
             console.log('Removing existing map');
+            // Remove legend control first if it exists
+            if (legend) {
+               map.removeControl(legend);
+               legend = null;
+            }
+            // Clear layer references
+            if (tiles) {
+               tiles = null;
+            }
+            if (layerGroup) {
+               layerGroup = null;
+            }
+            if (rect) {
+               rect = null;
+            }
+            // Remove map and clear container
             map.remove();
+            map = null;
+            // Clear the map container to ensure all DOM elements are removed
+            document.getElementById('map').innerHTML = '';
          }
 
          // Create new map
