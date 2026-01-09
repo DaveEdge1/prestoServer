@@ -49,28 +49,44 @@
          max-width: 90%;
          max-height: 100%;
          }
-         .projection-selector {
-         position: absolute;
-         top: 10px;
-         right: 10px;
-         z-index: 1000;
-         background: white;
-         padding: 10px;
-         border-radius: 5px;
-         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-         }
-         .projection-selector label {
-         display: block;
-         margin: 5px 0;
-         font-size: 14px;
-         cursor: pointer;
-         }
-         .projection-selector input[type="radio"] {
-         margin-right: 5px;
-         }
          /* Hide editing handles for rectangles when projection is not standard */
          .polar-projection .leaflet-editing-icon {
          display: none !important;
+         }
+         /* Projection control styling */
+         .leaflet-control-projection {
+         background: white;
+         padding: 6px 10px;
+         border-radius: 4px;
+         box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+         cursor: pointer;
+         }
+         .leaflet-control-projection.collapsed .projection-options {
+         display: none;
+         }
+         .leaflet-control-projection .projection-title {
+         font-weight: bold;
+         margin-bottom: 5px;
+         font-size: 14px;
+         }
+         .leaflet-control-projection.collapsed .projection-title::after {
+         content: ' ▼';
+         }
+         .leaflet-control-projection:not(.collapsed) .projection-title::after {
+         content: ' ▲';
+         }
+         .leaflet-control-projection .projection-options {
+         margin-top: 5px;
+         }
+         .leaflet-control-projection label {
+         display: block;
+         margin: 4px 0;
+         font-size: 13px;
+         cursor: pointer;
+         }
+         .leaflet-control-projection input[type="radio"] {
+         margin-right: 5px;
+         cursor: pointer;
          }
       </style>
    </head>
@@ -127,22 +143,6 @@
          <br>
          <br>
          <div class="css-spinner" id="my-css-spinner"></div>
-         <!-- Projection Selector -->
-         <div class="projection-selector">
-            <strong>Map Projection:</strong>
-            <label>
-               <input type="radio" name="projection" value="standard" checked>
-               Standard (Web Mercator)
-            </label>
-            <label>
-               <input type="radio" name="projection" value="arctic">
-               Arctic Polar Stereographic
-            </label>
-            <label>
-               <input type="radio" name="projection" value="antarctic">
-               Antarctic Polar Stereographic
-            </label>
-         </div>
          <div class="leaflet-container" id="map" style="height: 90vh; width: 90vw;"></div>
          <br>
          <br>
@@ -748,6 +748,59 @@
          // Add layer group for points
          layerGroup = L.layerGroup().addTo(map);
 
+         // Add projection selector control
+         var ProjectionControl = L.Control.extend({
+            options: {
+               position: 'topleft'
+            },
+            onAdd: function(map) {
+               var container = L.DomUtil.create('div', 'leaflet-control-projection collapsed');
+
+               container.innerHTML =
+                  '<div class="projection-title">Map Projection</div>' +
+                  '<div class="projection-options">' +
+                  '<label><input type="radio" name="projection" value="standard" ' + (currentProjection === 'standard' ? 'checked' : '') + '> Standard (Web Mercator)</label>' +
+                  '<label><input type="radio" name="projection" value="arctic" ' + (currentProjection === 'arctic' ? 'checked' : '') + '> Arctic Polar</label>' +
+                  '<label><input type="radio" name="projection" value="antarctic" ' + (currentProjection === 'antarctic' ? 'checked' : '') + '> Antarctic Polar</label>' +
+                  '</div>';
+
+               // Toggle collapsed state when clicking the title
+               var title = container.querySelector('.projection-title');
+               L.DomEvent.on(title, 'click', function() {
+                  if (container.classList.contains('collapsed')) {
+                     container.classList.remove('collapsed');
+                  } else {
+                     container.classList.add('collapsed');
+                  }
+               });
+
+               // Handle projection changes
+               var radios = container.querySelectorAll('input[type="radio"]');
+               radios.forEach(function(radio) {
+                  L.DomEvent.on(radio, 'change', function() {
+                     console.log('Projection changed to: ' + this.value);
+                     if (this.checked) {
+                        currentProjection = this.value;
+                        try {
+                           initMap(currentProjection);
+                           console.log('Map reinitialized with projection: ' + currentProjection);
+                        } catch(e) {
+                           console.error('Error initializing map with projection ' + currentProjection + ':', e);
+                        }
+                     }
+                  });
+               });
+
+               // Prevent map interactions when clicking on control
+               L.DomEvent.disableClickPropagation(container);
+               L.DomEvent.disableScrollPropagation(container);
+
+               return container;
+            }
+         });
+
+         map.addControl(new ProjectionControl());
+
          // Add rectangle for bounding box (only visible and draggable in standard projection)
          var isDraggable = (projectionType === 'standard');
          var isVisible = (projectionType === 'standard');
@@ -968,24 +1021,6 @@
 
       // Initialize with standard projection
       initMap('standard');
-
-      // Add event listeners for projection selector
-      var radios = document.querySelectorAll('input[name="projection"]');
-      console.log('Found ' + radios.length + ' projection radio buttons');
-      radios.forEach(function(radio) {
-         radio.addEventListener('change', function() {
-            console.log('Projection changed to: ' + this.value);
-            if (this.checked) {
-               currentProjection = this.value;
-               try {
-                  initMap(currentProjection);
-                  console.log('Map reinitialized with projection: ' + currentProjection);
-               } catch(e) {
-                  console.error('Error initializing map with projection ' + currentProjection + ':', e);
-               }
-            }
-         });
-      });
 
    </script>
 
