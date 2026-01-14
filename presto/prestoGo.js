@@ -191,14 +191,14 @@ var translate = function (uniqueID, recon){
 }
 
 let transporter = nodemailer.createTransport({
-    host: 'smtp.zoho.com',
-	    port: 465,
-	    name: 'zoho.com',
-	    auth: {
-		    user: "no-reply@paleopresto.com",
-		    pass: "5-KBS%*YsTneRs4"
-	    },
-	from: 'no-reply@paleopresto.com'
+    host: process.env.SMTP_HOST || 'smtp.zoho.com',
+    port: parseInt(process.env.SMTP_PORT) || 465,
+    name: 'zoho.com',
+    auth: {
+        user: process.env.SMTP_USER || 'no-reply@paleopresto.com',
+        pass: process.env.SMTP_PASSWORD  // Required - set via environment variable
+    },
+    from: process.env.SMTP_FROM || 'no-reply@paleopresto.com'
 });
 
 updateParams = function (uniqueID, recon){

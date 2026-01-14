@@ -1,0 +1,29 @@
+FROM node:18-bullseye
+
+# Install R for downloadLipds.js which runs R scripts
+RUN apt-get update && apt-get install -y \
+    r-base \
+    r-base-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install R packages required by the getLipds scripts
+RUN R -e "install.packages(c('lipdR', 'jsonlite', 'magrittr'), repos='https://cran.r-project.org')"
+
+# Set working directory to match host path structure (same-path mounting)
+WORKDIR /root/presto
+
+# Copy and install Node.js dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+CMD ["node", "presto/prestoServer.js"]
