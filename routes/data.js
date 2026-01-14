@@ -1,0 +1,110 @@
+/**
+ * Data routes (was queryDB.js)
+ * MySQL database queries for LiPDverse data
+ */
+
+const express = require('express');
+const router = express.Router();
+const mysql = require('mysql2');
+const config = require('../config');
+
+// Build WHERE clause from query parameters
+function buildQstring(qs) {
+  let countA = 0;
+  console.log(qs);
+  console.log('key length: ' + Object.keys(qs).length);
+
+  if (Object.keys(qs).length === 0) {
+    console.log('mySQL string is empty');
+    return '';
+  }
+
+  let outString = '';
+  for (const [key, value] of Object.entries(qs)) {
+    const words = value.split(',');
+    console.log('words: ' + words);
+    const totalWordLen = words.reduce((a, obj) => a + Object.keys(obj).length, 0);
+    console.log(totalWordLen);
+
+    if (countA > 0) {
+      console.log('index > 0');
+      outString = outString + ' AND (';
+    } else {
+      outString = '(';
+    }
+
+    if (totalWordLen == 0) {
+      outString = outString + key;
+    } else {
+      for (let i = 0; i < words.length; i++) {
+        outString = outString + key + ' LIKE' + ' "%' + words[i] + '%"';
+        if (i < words.length - 1) {
+          outString = outString + ' OR ';
+        }
+      }
+    }
+
+    outString = outString + ')';
+    console.log('outString: ' + outString);
+    countA = countA + 1;
+  }
+
+  outString = ' WHERE ' + outString;
+  console.log('mySQL string: ' + outString);
+  return outString;
+}
+
+// Create connection pool
+function getPool() {
+  return mysql.createPool({
+    connectionLimit: config.mysql.connectionLimit,
+    host: config.mysql.host,
+    user: config.mysql.user,
+    password: config.mysql.password,
+    database: config.mysql.database
+  });
+}
+
+// GET / - Query dataset summary
+router.get('/', (req, res) => {
+  const con = getPool();
+  con.getConnection((err) => {
+    if (err) {
+      console.error('MySQL connection error:', err);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+    console.log('Connected!');
+    const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId FROM dataSetQuery' + buildQstring(req.query) + ';';
+    con.query(query, (err, result) => {
+      if (err) {
+        console.error('Query error:', err);
+        return res.status(500).json({ error: 'Query failed' });
+      }
+      console.log('Total records returned: ' + result.length);
+      res.status(200).json(result);
+    });
+  });
+});
+
+// GET /TS - Query time series
+router.get('/TS', (req, res) => {
+  const con = getPool();
+  con.getConnection((err) => {
+    if (err) {
+      console.error('MySQL connection error:', err);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+    console.log('Connected!');
+    const query = 'SELECT paleoData_TSid, datasetId FROM query' + buildQstring(req.query) + ';';
+    con.query(query, (err, result) => {
+      if (err) {
+        console.error('Query error:', err);
+        return res.status(500).json({ error: 'Query failed' });
+      }
+      console.log('Total records returned: ' + result.length);
+      res.status(200).json(result);
+    });
+  });
+});
+
+module.exports = router;
