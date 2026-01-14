@@ -1,0 +1,17 @@
+Old URL,New URL,Files,Notes
+http://143.198.98.66:88/,/data/,"query/*.html, query/public/queryHelpers.js",MySQL dataset queries
+http://143.198.98.66:88/TS,/data/TS,"query/*.html, query/public/queryHelpers.js",MySQL time series queries
+http://143.198.98.66:89/sparql,/sparql,"query/*.html, query/public/queryHelpers.js",GraphDB SPARQL queries
+http://143.198.98.66:90/lipds,/lipds,"query/*.html, query/public/queryHelpers.js",Save LiPD selections
+http://143.198.98.66:92/,/posttsids/,"query/*.html, query/public/queryHelpers.js",PostTSIDs endpoint (needs route added?)
+http://143.198.98.66:85/,/editor/,"query/*.html, prestoForm/formServer.js",Parameter editor
+http://143.198.98.66:85/querypath,/editor/querypath,"query/*.html, query/public/queryHelpers.js",Query path editor
+http://143.198.98.66:86/,/query/,"prestoForm/index2.html, query/public/archiveLegend.js",Query UI and static assets
+http://143.198.98.66:86/glacierIce.png,/query/glacierIce.png,query/public/archiveLegend.js,Icon asset
+http://143.198.98.66:86//groundIce.png,/query/groundIce.png,query/public/archiveLegend.js,Icon asset (note double slash)
+http://143.198.98.66:86/glacierIceOpac.png,/query/glacierIceOpac.png,query/public/archiveLegend.js,Icon asset
+http://143.198.98.66:86//groundIceOpac.png,/query/groundIceOpac.png,query/public/archiveLegend.js,Icon asset (note double slash)
+http://143.198.98.66:81/,/reconstruct/,presto/prestoGo.js,Reconstruction trigger
+http://143.198.98.66:83/customRecons/,/downloads/browse/,presto/prestoGo.js,Browse results directory
+http://143.198.98.66:83/downloads/,/downloads/zip/,presto/prestoGo.js,Download zip files
+http://143.198.98.66:91/,/viz/,presto/prestoGo.js,Visualization pages

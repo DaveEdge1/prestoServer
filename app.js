@@ -74,6 +74,9 @@ app.use('/lipds', require('./routes/lipds'));
 // Visualization (was viz:3011)
 app.use('/viz', require('./routes/viz'));
 
+// Post TSIDs (was postTSidsServer:3012)
+app.use('/posttsids', require('./routes/posttsids'));
+
 // ===========================================
 // HEALTH CHECK
 // ===========================================
