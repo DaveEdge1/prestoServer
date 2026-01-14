@@ -16,11 +16,12 @@ RUN R -e "install.packages(c('lipdR', 'jsonlite', 'magrittr'), repos='https://cr
 # Set working directory to match host path structure (same-path mounting)
 WORKDIR /root/presto
 
-# Copy and install Node.js dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
+# Copy package.json files for each service and install dependencies
+# presto/ has the main orchestrator dependencies
+COPY presto/package*.json ./presto/
+RUN cd presto && npm install --omit=dev
 
-# Copy application code
+# Copy all application code
 COPY . .
 
 ENV NODE_ENV=production
