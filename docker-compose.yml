@@ -23,11 +23,13 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
     volumes:
       # Docker socket for sibling containers (prestoGo.js spawns containers)
+      # On Windows: //var/run/docker.sock or use named pipe
       - /var/run/docker.sock:/var/run/docker.sock
-      # Mount paths IDENTICALLY to host - no code changes needed!
-      - /root/presto:/root/presto
-      - /root/holocene_da:/root/holocene_da
-      - /root/temp12k-regional-composites:/root/temp12k-regional-composites
+      # PRODUCTION ONLY (Linux server at /root/presto):
+      # These mounts enable same-path strategy. Comment out for local dev.
+      # - /root/presto:/root/presto
+      # - /root/holocene_da:/root/holocene_da
+      # - /root/temp12k-regional-composites:/root/temp12k-regional-composites
     # No port exposure needed - nginx proxies via port 81
     networks:
       - presto-network
