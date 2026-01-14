@@ -198,7 +198,7 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 				//document.getElementById('tableForm2').action = "/manualORdefault"}
 	            		const urlParams = new URLSearchParams(window.location.search);
 				//document.getElementById('tableForm2').action = "/manualORdefault"
-	            		document.getElementById('tableForm2').action = "/manualORdefault?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&email=' + document.getElementById('useremail').value + '&parampath=' + document.getElementById('GUI').value
+	            		document.getElementById('tableForm2').action = "/forms/manualORdefault?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&email=' + document.getElementById('useremail').value + '&parampath=' + document.getElementById('GUI').value
 				} else {
 					alert("invalid email")
 				}
