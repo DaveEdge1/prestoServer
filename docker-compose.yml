@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ===========================================
   # ORCHESTRATOR (prestoServer + prestoGo.js)
@@ -30,8 +28,7 @@ services:
       - /root/presto:/root/presto
       - /root/holocene_da:/root/holocene_da
       - /root/temp12k-regional-composites:/root/temp12k-regional-composites
-    ports:
-      - "3000:3000"
+    # No port exposure needed - nginx proxies via port 81
     networks:
       - presto-network
     restart: unless-stopped
