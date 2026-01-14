@@ -93,172 +93,60 @@ After reviewing the core files, the architecture is more nuanced than initially 
 
 ## Containerization Strategy
 
-### Recommended Approach: Hybrid Containerization
+### Recommended Approach: Same-Path Container Mounting (SIMPLIFIED)
 
-Given the complexity discovered in the code review, we recommend a **hybrid approach** rather than full containerization of all components. This recognizes that:
+After closer review of `prestoGo.js`, there's a much simpler containerization approach:
 
-1. The job orchestration system (prestoServer + prestoGo.js) has deep integration with the host Docker daemon
-2. Reconstruction containers need direct access to host paths
-3. Simple web servers can be containerized easily; orchestration components require careful handling
+**Key Insight**: If we mount host paths to the same locations inside the container, the existing code works unchanged. The `docker run` commands in prestoGo.js pass host paths to sibling containers - these paths don't need translation if they're identical inside and outside the orchestrator container.
 
-### Phase 1: Foundation (Preparation) - CRITICAL
+**What Actually Needs to Change:**
+1. **SMTP credentials** (lines 193-202) - MUST move to environment variables (security issue)
+2. Mount the Docker socket for sibling container access
+3. Ensure R runtime is available for downloadLipds.js
 
-#### 1.1 Security Remediation (IMMEDIATE)
-**Before any containerization, fix the security issue in prestoGo.js:**
+**What Does NOT Need to Change:**
+- All the hardcoded `/root/presto/...` paths can stay as-is
+- Docker volume mount commands in lines 432-437
+- Path references throughout prestoGo.js and downloadLipds.js
+
+### Phase 1: Minimal Required Changes
+
+#### 1.1 Security Fix (REQUIRED - Do This First)
+
+Fix the hardcoded SMTP credentials in `presto/prestoGo.js` lines 193-202:
+
 ```javascript
-// CURRENT (INSECURE) - line 193-202:
+// BEFORE (INSECURE):
 let transporter = nodemailer.createTransport({
     host: 'smtp.zoho.com',
     port: 465,
+    name: 'zoho.com',
     auth: {
         user: "no-reply@paleopresto.com",
-        pass: "5-KBS%*YsTneRs4"  // EXPOSED PASSWORD!
+        pass: "5-KBS%*YsTneRs4"  // EXPOSED!
     },
+    from: 'no-reply@paleopresto.com'
 });
 
-// REQUIRED FIX:
+// AFTER (SECURE):
 let transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.zoho.com',
-    port: process.env.SMTP_PORT || 465,
+    port: parseInt(process.env.SMTP_PORT) || 465,
+    name: 'zoho.com',
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD
+        user: process.env.SMTP_USER || "no-reply@paleopresto.com",
+        pass: process.env.SMTP_PASSWORD  // Required - no default!
     },
+    from: process.env.SMTP_FROM || 'no-reply@paleopresto.com'
 });
 ```
 
-#### 1.2 Environment Configuration
-- Create `.env` file with all configuration variables
-- Define environment variables for:
-  - Database connections (MySQL host, port, credentials)
-  - External service URLs (GraphDB)
-  - **Email configuration (SMTP settings) - REMOVE FROM CODE**
-  - Base paths and directories
-  - Port mappings
+#### 1.2 Simple Dockerfile for Orchestrator
 
-#### 1.3 Path Abstraction Strategy
-
-The codebase has extensive hardcoded paths. Here's a mapping of what needs to change:
-
-| Current Path | Environment Variable | Container Path |
-|-------------|---------------------|----------------|
-| `/root/presto/userRecons/` | `USER_RECONS_PATH` | `/data/userRecons` |
-| `/root/presto/presto/` | `PRESTO_APP_PATH` | `/app/presto` |
-| `/root/presto/prestoForm/` | `FORM_PATH` | `/app/prestoForm` |
-| `/root/presto/getLipds/` | `GETLIPDS_PATH` | `/app/getLipds` |
-| `/root/presto/viz/` | `VIZ_PATH` | `/app/viz` |
-| `/root/holocene_da/` | `HOLOCENE_DA_PATH` | Keep as host path |
-| `/root/temp12k-regional-composites/` | `TEMP12K_PATH` | Keep as host path |
-
-**Key Files Requiring Path Updates:**
-- `presto/prestoServer.js` - Lines 10, 27-28
-- `presto/prestoGo.js` - Lines 18, 29, 91, 100-103, 117-123, 185, 207-210, 371-392, 412-534 (extensive)
-- `getLipds/downloadLipds.js` - Lines 11-12, 16, 115-117, 169, 332, 370-413
-
-#### 1.4 Code Refactoring Priority
-
-**HIGH PRIORITY (prestoGo.js specific):**
-1. Extract all paths to environment variables
-2. Move email credentials to environment
-3. Create a config module that centralizes settings
-4. The Docker launch commands in lines 432-437 need special attention:
-```javascript
-// Current:
-var launchText = 'docker run --rm --name ' + uniqueID +
-  ' -v /root/presto/userRecons/'+uniqueID+'/lipd.pkl:/proxies/temp12k/Temp12k1_0_2.pkl ' +
-  ' -v ' + dirname + ':' + reconParams(recon).resultsDir +
-  ' -v ' + configLoc + ':' + reconParams(recon).paramsCon +
-  ' -v /root/holocene_da/da_load_proxies.py:/da_load_proxies.py ...'
-
-// These paths must resolve correctly from BOTH:
-// 1. Inside the presto-server container (if containerized)
-// 2. On the host Docker daemon (where the sibling container runs)
-```
-
-**MEDIUM PRIORITY (downloadLipds.js specific):**
-1. The R script paths (line 11-12) need environment variables
-2. Docker commands for lipdPickler (line 211) need path translation
-
-### Phase 2: Individual Service Containerization
-
-#### 2.1 Service Tiers
-
-Based on code analysis, services fall into three categories:
-
-**Tier 1: Simple Containerization (Low Risk)**
-These services are standard Express servers with minimal external dependencies:
-- `downloadServer` - Static file serving
-- `formServer` - Form handling with file uploads
-- `editorServer` - JSON editor UI
-- `queryServer` - MySQL queries + GraphDB HTTP calls
-- `queryDB` - MySQL queries
-- `sparqlServer` - GraphDB HTTP calls
-- `viz` - Static file serving
-
-**Tier 2: Complex Containerization (Medium Risk)**
-These require R runtime and/or Docker socket access:
-- `Rserver` - Runs R scripts, needs R installed in container
-
-**Tier 3: Orchestration Layer (High Risk - Consider Alternatives)**
-These spawn child processes and sibling Docker containers:
-- `prestoServer` + `prestoGo.js` - The core job orchestrator
-- `downloadLipds.js` - Data retrieval with Docker + R
-
-#### 2.2 Tier 1 Services - Standard Dockerfiles
-
-**Base Dockerfile Pattern (Tier 1):**
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-ENV NODE_ENV=production
-EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
-CMD ["node", "server.js"]
-```
-
-**Tier 1 Services to Containerize:**
-
-1. **download-server** (downloadServer)
-   - Needs read access to user reconstruction directories
-   - Static file serving capabilities
-   - Simple containerization
-
-2. **form-server** (formServer)
-   - Needs access to reconstruction configuration templates
-   - File upload handling (multer)
-   - Writes configs to userRecons directory
-
-3. **editor-server** (editorServer)
-   - Static assets for JSON editor UI
-   - Access to configuration files
-
-4. **query-server** (queryServer)
-   - MySQL client connectivity
-   - External GraphDB access
-
-5. **query-db** (queryDB)
-   - MySQL connection pool configuration
-   - CORS configuration
-
-6. **sparql-server** (sparqlServer)
-   - External GraphDB connectivity
-   - CORS configuration
-
-7. **viz-server** (viz)
-   - Read access to visualization outputs in user directories
-   - Static file serving
-
-#### 2.3 Tier 2 Services - R Runtime Required
-
-**Dockerfile for Rserver (requires R):**
 ```dockerfile
 FROM node:18-bullseye
 
-# Install R and required packages
+# Install R (required by downloadLipds.js)
 RUN apt-get update && apt-get install -y \
     r-base \
     r-base-dev \
@@ -267,164 +155,101 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install R packages (this may take a while)
-RUN R -e "install.packages(c('lipdR', 'jsonlite'), repos='https://cran.r-project.org')"
+# Install R packages
+RUN R -e "install.packages(c('lipdR', 'jsonlite', 'magrittr'), repos='https://cran.r-project.org')"
 
-WORKDIR /app
+# Install Node.js dependencies
+WORKDIR /root/presto
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
 
 ENV NODE_ENV=production
-EXPOSE 3010
-CMD ["node", "Rserver.js"]
-```
-
-#### 2.4 Tier 3 Services - Orchestration (SPECIAL HANDLING)
-
-**The prestoServer + prestoGo.js Challenge:**
-
-This is the most complex component because:
-1. `prestoServer.js` spawns `prestoGo.js` as a child process (line 28)
-2. `prestoGo.js` runs `downloadLipds.js` synchronously (line 443)
-3. `prestoGo.js` launches Docker containers with host path mounts (lines 432-437)
-4. `downloadLipds.js` also launches Docker containers (line 211)
-
-**Three Options for Tier 3:**
-
-**Option A: Keep on Host (Recommended Initially)**
-- Run prestoServer, prestoGo.js, and downloadLipds.js directly on host
-- Containerize only Tier 1 and Tier 2 services
-- Lowest risk, fastest path to partial containerization
-
-**Option B: Container with Host Path Passthrough**
-```dockerfile
-FROM node:18-bullseye
-
-# Install R (needed for downloadLipds.js)
-RUN apt-get update && apt-get install -y \
-    r-base r-base-dev docker.io \
-    libcurl4-openssl-dev libssl-dev libxml2-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN R -e "install.packages(c('lipdR', 'jsonlite'), repos='https://cran.r-project.org')"
-
-WORKDIR /app
-COPY . .
-RUN npm ci --only=production
-
-ENV NODE_ENV=production
-# CRITICAL: These paths must match host paths for sibling container mounts
-ENV HOST_USER_RECONS_PATH=/root/presto/userRecons
-ENV HOST_HOLOCENE_DA_PATH=/root/holocene_da
-ENV HOST_TEMP12K_PATH=/root/temp12k-regional-composites
-
 EXPOSE 3000
-CMD ["node", "prestoServer.js"]
+CMD ["node", "presto/prestoServer.js"]
 ```
 
-**Key Requirement for Option B:**
-The Docker volume mounts in prestoGo.js must use HOST paths, not container paths:
-```javascript
-// prestoGo.js must be modified to use:
-const hostUserReconsPath = process.env.HOST_USER_RECONS_PATH;
-// NOT the container's internal path
+#### 1.3 Docker Compose - Same-Path Mounting
+
+```yaml
+version: '3.8'
+
+services:
+  presto-orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # SMTP Configuration (REQUIRED)
+      - SMTP_HOST=smtp.zoho.com
+      - SMTP_PORT=465
+      - SMTP_USER=no-reply@paleopresto.com
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=no-reply@paleopresto.com
+    volumes:
+      # Docker socket for sibling containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount paths IDENTICALLY to host - no code changes needed!
+      - /root/presto/userRecons:/root/presto/userRecons
+      - /root/presto/prestoForm:/root/presto/prestoForm
+      - /root/presto/presto:/root/presto/presto
+      - /root/presto/getLipds:/root/presto/getLipds
+      - /root/presto/viz:/root/presto/viz
+      - /root/holocene_da:/root/holocene_da
+      - /root/temp12k-regional-composites:/root/temp12k-regional-composites
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
 ```
 
-**Option C: Worker Queue Architecture (Future Enhancement)**
-- Replace child process spawning with a job queue (Redis/RabbitMQ)
-- Separate job scheduler from job executor
-- Most scalable but requires significant refactoring
+**Why This Works:**
+- `prestoGo.js` line 432: `docker run ... -v /root/presto/userRecons/...`
+  - This path exists identically in the container AND on the host
+  - The Docker socket runs the sibling container on the HOST
+  - The sibling container sees `/root/presto/userRecons/` which is a real host path
+- No path translation needed!
 
-### Phase 3: Docker Compose Configuration
+### Phase 2: Full Stack with Same-Path Approach
 
-#### 3.1 Hybrid Architecture Overview
+### Phase 2: Full Docker Compose Stack
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                           HOST SYSTEM                                │
-│                                                                      │
-│  ┌────────────────────────────────────────────────────────────────┐ │
-│  │                    Docker Compose Stack                         │ │
-│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │ │
-│  │  │download │ │  form   │ │ editor  │ │  query  │ │ sparql  │  │ │
-│  │  │ server  │ │ server  │ │ server  │ │ server  │ │ server  │  │ │
-│  │  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘  │ │
-│  │       │           │           │           │           │        │ │
-│  │  ┌────┴───────────┴───────────┴───────────┴───────────┴────┐  │ │
-│  │  │                    presto-network                        │  │ │
-│  │  └────────────────────────────┬────────────────────────────┘  │ │
-│  │                               │                                │ │
-│  │  ┌─────────┐ ┌─────────┐     │     ┌─────────┐               │ │
-│  │  │  viz    │ │ rserver │     │     │  mysql  │               │ │
-│  │  │ server  │ │         │     │     │   db    │               │ │
-│  │  └─────────┘ └─────────┘     │     └─────────┘               │ │
-│  └──────────────────────────────┼────────────────────────────────┘ │
-│                                 │                                   │
-│  ┌──────────────────────────────┼────────────────────────────────┐ │
-│  │         HOST SERVICES (forever-managed)                        │ │
-│  │                              │                                  │ │
-│  │  ┌─────────────────┐        │                                  │ │
-│  │  │  prestoServer   │◄───────┘ (port 3000)                      │ │
-│  │  │  (port 3000)    │                                           │ │
-│  │  └────────┬────────┘                                           │ │
-│  │           │ spawns                                              │ │
-│  │           ▼                                                     │ │
-│  │  ┌─────────────────┐                                           │ │
-│  │  │   prestoGo.js   │──────► Launches sibling containers        │ │
-│  │  │  (background)   │        (holocene_da, temp12k, etc.)       │ │
-│  │  └────────┬────────┘                                           │ │
-│  │           │ calls                                               │ │
-│  │           ▼                                                     │ │
-│  │  ┌─────────────────┐                                           │ │
-│  │  │downloadLipds.js │──────► Launches lipdPickler container     │ │
-│  │  │  (synchronous)  │        + runs R scripts                   │ │
-│  │  └─────────────────┘                                           │ │
-│  └────────────────────────────────────────────────────────────────┘ │
-│                                                                      │
-│  SHARED: /root/presto/userRecons (bind mount to containers)         │
-└──────────────────────────────────────────────────────────────────────┘
-```
-
-#### 3.2 Docker Compose - Tier 1 & 2 Services Only (Recommended Initial Deployment)
+Using the same-path mounting approach, here's a complete docker-compose.yml:
 
 ```yaml
 version: '3.8'
 
 services:
   # ===========================================
-  # NGINX REVERSE PROXY
+  # ORCHESTRATOR (prestoServer + prestoGo.js)
+  # Uses same-path mounting - no code changes!
   # ===========================================
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "83:83"    # downloadServer
-      - "84:84"    # formServer
-      - "85:85"    # editorServer
-      - "86:86"    # queryServer
-      - "87:87"    # queryDB
-      - "89:89"    # sparqlServer
-      - "90:90"    # rserver
-      - "91:91"    # viz
+  presto-orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SMTP_HOST=smtp.zoho.com
+      - SMTP_PORT=465
+      - SMTP_USER=no-reply@paleopresto.com
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-    depends_on:
-      - download-server
-      - form-server
-      - editor-server
-      - query-server
-      - query-db
-      - sparql-server
-      - rserver
-      - viz-server
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Same paths inside container as on host
+      - /root/presto:/root/presto
+      - /root/holocene_da:/root/holocene_da
+      - /root/temp12k-regional-composites:/root/temp12k-regional-composites
+    ports:
+      - "3000:3000"
     networks:
       - presto-network
     restart: unless-stopped
 
   # ===========================================
-  # TIER 1: SIMPLE WEB SERVERS
+  # SIMPLE WEB SERVICES (can use different paths)
   # ===========================================
 
   download-server:
@@ -433,17 +258,13 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3001
-      - USER_RECONS_PATH=/data/userRecons
     volumes:
-      - user-data:/data/userRecons:ro
+      - /root/presto/userRecons:/root/presto/userRecons:ro
+    ports:
+      - "3001:3001"
     networks:
       - presto-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   form-server:
     build:
@@ -451,11 +272,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3002
-      - USER_RECONS_PATH=/data/userRecons
-      - FORM_TEMPLATES_PATH=/app/templates
     volumes:
-      - user-data:/data/userRecons
-      - ./prestoForm:/app/templates:ro
+      - /root/presto/userRecons:/root/presto/userRecons
+      - /root/presto/prestoForm:/root/presto/prestoForm:ro
+    ports:
+      - "3002:3002"
     networks:
       - presto-network
     restart: unless-stopped
@@ -467,7 +288,9 @@ services:
     environment:
       - PORT=3004
     volumes:
-      - user-data:/data/userRecons
+      - /root/presto/userRecons:/root/presto/userRecons
+    ports:
+      - "3004:3004"
     networks:
       - presto-network
     restart: unless-stopped
@@ -479,11 +302,9 @@ services:
     environment:
       - PORT=3006
       - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
       - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - GRAPHDB_URL=https://linkedearth.graphdb.mint.isi.edu
     networks:
       - presto-network
     restart: unless-stopped
@@ -498,10 +319,11 @@ services:
     environment:
       - PORT=3007
       - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
       - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "3007:3007"
     networks:
       - presto-network
     restart: unless-stopped
@@ -516,6 +338,23 @@ services:
     environment:
       - PORT=3009
       - GRAPHDB_URL=https://linkedearth.graphdb.mint.isi.edu
+    ports:
+      - "3009:3009"
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  rserver:
+    build:
+      context: ./getLipds
+      dockerfile: Dockerfile.rserver
+    environment:
+      - PORT=3010
+    volumes:
+      - /root/presto/userRecons:/root/presto/userRecons
+      - /root/presto/getLipds:/root/presto/getLipds:ro
+    ports:
+      - "3010:3010"
     networks:
       - presto-network
     restart: unless-stopped
@@ -526,26 +365,10 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3011
-      - USER_RECONS_PATH=/data/userRecons
     volumes:
-      - user-data:/data/userRecons:ro
-    networks:
-      - presto-network
-    restart: unless-stopped
-
-  # ===========================================
-  # TIER 2: R-ENABLED SERVICE
-  # ===========================================
-
-  rserver:
-    build:
-      context: ./getLipds
-      dockerfile: Dockerfile.rserver
-    environment:
-      - PORT=3010
-      - USER_RECONS_PATH=/data/userRecons
-    volumes:
-      - user-data:/data/userRecons
+      - /root/presto/userRecons:/root/presto/userRecons:ro
+    ports:
+      - "3011:3011"
     networks:
       - presto-network
     restart: unless-stopped
@@ -553,7 +376,6 @@ services:
   # ===========================================
   # DATABASE
   # ===========================================
-
   mysql:
     image: mysql:8.0
     environment:
@@ -563,7 +385,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./query/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - presto-network
     restart: unless-stopped
@@ -574,241 +395,195 @@ services:
       retries: 5
       start_period: 30s
 
-# ===========================================
-# VOLUMES
-# ===========================================
+  # ===========================================
+  # NGINX REVERSE PROXY
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "81:81"
+      - "83:83"
+      - "84:84"
+      - "85:85"
+      - "90:90"
+      - "91:91"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - presto-orchestrator
+      - download-server
+      - form-server
+    networks:
+      - presto-network
+    restart: unless-stopped
+
 volumes:
-  # CRITICAL: This must be a bind mount to host path
-  # so that host-based prestoServer can share data
-  user-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /root/presto/userRecons
-      o: bind
-
   mysql-data:
-    driver: local
 
-# ===========================================
-# NETWORKS
-# ===========================================
 networks:
   presto-network:
     driver: bridge
 ```
 
-#### 3.3 Alternative: Full Containerization (Option B from Phase 2)
+### Phase 3: Dockerfiles for Each Service
 
-If you want to containerize prestoServer as well, use this additional service definition:
+#### 3.1 Orchestrator Dockerfile (Dockerfile.orchestrator)
 
-```yaml
-  # ===========================================
-  # TIER 3: ORCHESTRATION (OPTIONAL)
-  # Only include if you want full containerization
-  # ===========================================
+```dockerfile
+FROM node:18-bullseye
 
-  presto-server:
-    build:
-      context: ./presto
-      dockerfile: Dockerfile.orchestrator
-    environment:
-      - PORT=3000
-      # Container-internal paths (for Node.js code)
-      - USER_RECONS_PATH=/data/userRecons
-      - PRESTO_APP_PATH=/app
-      - GETLIPDS_PATH=/app/getLipds
-      - VIZ_SCRIPT_PATH=/app/viz/run_script.sh
-      # HOST paths (for Docker volume mounts in spawned containers)
-      - HOST_USER_RECONS_PATH=/root/presto/userRecons
-      - HOST_HOLOCENE_DA_PATH=/root/holocene_da
-      - HOST_TEMP12K_PATH=/root/temp12k-regional-composites
-      - HOST_PRESTO_FORM_PATH=/root/presto/prestoForm
-      # Email (NEVER hardcode these!)
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-    volumes:
-      # Docker socket for launching sibling containers
-      - /var/run/docker.sock:/var/run/docker.sock
-      # User data (must match HOST_USER_RECONS_PATH on host side)
-      - /root/presto/userRecons:/data/userRecons
-      # Algorithm code (read-only, for visualization scripts)
-      - /root/holocene_da:/holocene_da:ro
-      - /root/temp12k-regional-composites:/temp12k:ro
-      # Form templates
-      - ./prestoForm:/app/prestoForm:ro
-      # getLipds scripts
-      - ./getLipds:/app/getLipds:ro
-    networks:
-      - presto-network
-    restart: unless-stopped
-    # Note: This container needs significant resources for R
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-        reservations:
-          memory: 1G
+# Install R for downloadLipds.js
+RUN apt-get update && apt-get install -y \
+    r-base \
+    r-base-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install R packages
+RUN R -e "install.packages(c('lipdR', 'jsonlite', 'magrittr'), repos='https://cran.r-project.org')"
+
+# Set working directory to match host path structure
+WORKDIR /root/presto
+
+# Copy and install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+CMD ["node", "presto/prestoServer.js"]
 ```
 
-#### 3.4 Nginx Configuration Updates
+#### 3.2 Simple Service Dockerfile (example: downloads/Dockerfile)
 
-For the hybrid approach, nginx must route to both:
-- Container services (via Docker network names)
-- Host services (via localhost)
-
-```nginx
-# Example nginx.conf for hybrid setup
-upstream presto-server {
-    # prestoServer still runs on host (Tier 3)
-    server host.docker.internal:3000;
-}
-
-upstream download-server {
-    # Containerized service
-    server download-server:3001;
-}
-
-# ... similar for other services
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+ENV NODE_ENV=production
+EXPOSE 3001
+CMD ["node", "downloadServer.js"]
 ```
 
-**Note**: Use `host.docker.internal` to reach host services from within the nginx container on Docker Desktop. On Linux, you may need to use `--add-host=host.docker.internal:host-gateway` or the host's actual IP.
+#### 3.3 R-enabled Service (getLipds/Dockerfile.rserver)
 
-### Phase 3.5: Special Considerations for prestoGo.js and downloadLipds.js
+```dockerfile
+FROM node:18-bullseye
 
-These files are the core of the reconstruction pipeline and require special attention.
+RUN apt-get update && apt-get install -y \
+    r-base r-base-dev \
+    libcurl4-openssl-dev libssl-dev libxml2-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-#### prestoGo.js Deep Dive
+RUN R -e "install.packages(c('lipdR', 'jsonlite'), repos='https://cran.r-project.org')"
 
-**Current Flow:**
-```
-prestoServer.js (HTTP request)
-    └── spawns prestoGo.js (child process)
-            ├── reads/translates config files
-            ├── calls downloadLipds.js (synchronous exec)
-            │       ├── runs R scripts (child_process.spawn)
-            │       └── runs lipdPickler Docker container
-            ├── launches reconstruction Docker container
-            │       (holocene_da or temp12k)
-            ├── polls for container completion
-            ├── runs visualization script (bash)
-            └── sends email with results
-```
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
 
-**Key Code Locations Requiring Changes:**
-
-| Line(s) | Current Code | Required Change |
-|---------|-------------|-----------------|
-| 18 | `fs.readFileSync('/root/presto/presto/reconLib.json')` | Use `process.env.PRESTO_APP_PATH + '/reconLib.json'` |
-| 29 | `'/root/presto/prestoForm/' + recon + '/lookup.json'` | Use `process.env.FORM_PATH` |
-| 91-96 | `'/root/presto/userRecons/' + uniqueID` | Use `process.env.USER_RECONS_PATH` |
-| 100-103 | More hardcoded paths to prestoForm | Use environment variables |
-| 117-123 | Same pattern | Use environment variables |
-| 185-190 | `'/root/presto/userRecons/' + uniqueID` | Use environment variable |
-| 193-202 | **HARDCODED SMTP CREDENTIALS** | **CRITICAL: Move to environment** |
-| 371-392 | `/root/presto/userRecons/` for viz status | Use environment variable |
-| 428 | `var dirname = '/root/presto/userRecons/' + uniqueID` | Use environment variable |
-| 432-437 | Docker run command with hardcoded paths | **See special handling below** |
-| 443 | `'node /root/presto/getLipds/downloadLipds.js'` | Use environment variable |
-| 510-513 | `/root/presto/viz/run_script.sh` | Use environment variable |
-
-**Docker Launch Command Special Handling (lines 432-437):**
-
-The Docker volume mounts in the `docker run` command are critical. When containerized:
-- The paths used for `-v` flags must be HOST paths (not container paths)
-- The reconstruction containers (holocene_da, temp12k) run as siblings, not children
-
-```javascript
-// BEFORE (hardcoded):
-var launchText = 'docker run --rm --name ' + uniqueID +
-  ' -v /root/presto/userRecons/'+uniqueID+'/lipd.pkl:/proxies/temp12k/Temp12k1_0_2.pkl' +
-  ' -v ' + dirname + ':' + reconParams(recon).resultsDir +
-  ' -v /root/holocene_da/da_load_proxies.py:/da_load_proxies.py'
-
-// AFTER (environment-aware):
-const hostUserRecons = process.env.HOST_USER_RECONS_PATH || '/root/presto/userRecons';
-const hostHoloceneDa = process.env.HOST_HOLOCENE_DA_PATH || '/root/holocene_da';
-
-var launchText = 'docker run --rm --name ' + uniqueID +
-  ' -v ' + hostUserRecons + '/' + uniqueID + '/lipd.pkl:/proxies/temp12k/Temp12k1_0_2.pkl' +
-  ' -v ' + hostUserRecons + '/' + uniqueID + ':' + reconParams(recon).resultsDir +
-  ' -v ' + hostHoloceneDa + '/da_load_proxies.py:/da_load_proxies.py'
+ENV NODE_ENV=production
+EXPOSE 3010
+CMD ["node", "Rserver.js"]
 ```
 
-#### downloadLipds.js Deep Dive
+### Phase 4: Architecture Overview
 
-**Current Flow:**
+With the same-path mounting approach, everything runs in containers:
+
 ```
-downloadLipds.js (called by prestoGo.js)
-    ├── Checks for existing LiPD data (md5 matching)
-    ├── For archived compilations:
-    │   └── Downloads from lipdverse.org via curl
-    ├── For TSID-based requests:
-    │   ├── Runs R script (getLipdSmart.R) to fetch data
-    │   ├── Runs Docker container (lipdPickler) to create pickle files
-    │   └── Cleans up .lpd files
-    └── Exits with status code
-```
-
-**Key Code Locations:**
-
-| Line(s) | Current Code | Required Change |
-|---------|-------------|-----------------|
-| 11-12 | `var file_path = "/root/presto/getLipds/getLipdSmart.R"` | Use `process.env.GETLIPDS_PATH` |
-| 16 | `'/root/presto/userRecons/'` | Use `process.env.USER_RECONS_PATH` |
-| 86-87 | `'/root/presto/getLipds/updateTSIDmd5.R'` | Use `process.env.GETLIPDS_PATH` |
-| 115-117 | `'/root/presto/userRecons/'` paths | Use environment variable |
-| 169 | `'/root/presto/userRecons/'` | Use environment variable |
-| 211 | Docker command for lipdPickler | Use `HOST_USER_RECONS_PATH` |
-| 332 | `'/root/presto/userRecons/'` | Use environment variable |
-
-**Docker Command for lipdPickler (line 211):**
-```javascript
-// BEFORE:
-var dockerComm = "docker run --rm -v " + path1 + ":/output davidedge/lipd_webapps:lipdPickler";
-
-// AFTER (when containerized):
-const hostPath = process.env.HOST_USER_RECONS_PATH
-  ? path1.replace(process.env.USER_RECONS_PATH, process.env.HOST_USER_RECONS_PATH)
-  : path1;
-var dockerComm = "docker run --rm -v " + hostPath + ":/output davidedge/lipd_webapps:lipdPickler";
-```
-
-#### Recommended Refactoring: Create a Config Module
-
-To simplify the path management, create a shared config module:
-
-```javascript
-// config/paths.js
-const path = require('path');
-
-module.exports = {
-  // Internal paths (used by Node.js code)
-  userRecons: process.env.USER_RECONS_PATH || '/root/presto/userRecons',
-  prestoApp: process.env.PRESTO_APP_PATH || '/root/presto/presto',
-  formPath: process.env.FORM_PATH || '/root/presto/prestoForm',
-  getLipdsPath: process.env.GETLIPDS_PATH || '/root/presto/getLipds',
-  vizPath: process.env.VIZ_PATH || '/root/presto/viz',
-
-  // Host paths (used for Docker volume mounts when running in container)
-  hostUserRecons: process.env.HOST_USER_RECONS_PATH || '/root/presto/userRecons',
-  hostHoloceneDa: process.env.HOST_HOLOCENE_DA_PATH || '/root/holocene_da',
-  hostTemp12k: process.env.HOST_TEMP12K_PATH || '/root/temp12k-regional-composites',
-  hostFormPath: process.env.HOST_PRESTO_FORM_PATH || '/root/presto/prestoForm',
-
-  // Helper function for Docker volume mounts
-  toHostPath: function(internalPath) {
-    if (process.env.HOST_USER_RECONS_PATH && internalPath.startsWith(this.userRecons)) {
-      return internalPath.replace(this.userRecons, this.hostUserRecons);
-    }
-    return internalPath;
-  }
-};
+┌─────────────────────────────────────────────────────────────────────┐
+│                           HOST SYSTEM                                │
+│                                                                      │
+│  Host Paths (mounted identically into containers):                   │
+│  • /root/presto/userRecons                                          │
+│  • /root/presto/prestoForm                                          │
+│  • /root/holocene_da                                                │
+│  • /root/temp12k-regional-composites                                │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐ │
+│  │                    Docker Compose Stack                         │ │
+│  │                                                                  │ │
+│  │  ┌─────────────────────────────────────────────────────────┐   │ │
+│  │  │  presto-orchestrator (prestoServer + prestoGo.js)       │   │ │
+│  │  │  • Mounts: /root/presto → /root/presto (SAME PATH!)     │   │ │
+│  │  │  • Docker socket: /var/run/docker.sock                   │   │ │
+│  │  │  • Spawns sibling containers via socket                  │   │ │
+│  │  └─────────────────────────────────────────────────────────┘   │ │
+│  │                              │                                  │ │
+│  │                              │ launches (via Docker socket)     │ │
+│  │                              ▼                                  │ │
+│  │  ┌─────────────────────────────────────────────────────────┐   │ │
+│  │  │  Sibling Containers (holocene_da, temp12k, lipdPickler) │   │ │
+│  │  │  • Run on HOST Docker daemon                             │   │ │
+│  │  │  • See /root/presto/userRecons as HOST path              │   │ │
+│  │  │  • No path translation needed!                           │   │ │
+│  │  └─────────────────────────────────────────────────────────┘   │ │
+│  │                                                                  │ │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐  │ │
+│  │  │download │ │  form   │ │ editor  │ │  query  │ │ sparql  │  │ │
+│  │  │ server  │ │ server  │ │ server  │ │ servers │ │ server  │  │ │
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘  │ │
+│  │                                                                  │ │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐              │ │
+│  │  │  viz    │ │ rserver │ │  mysql  │ │  nginx  │              │ │
+│  │  │ server  │ │         │ │   db    │ │  proxy  │              │ │
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘              │ │
+│  └────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-### Phase 4: Migration Strategy
+**Why Same-Path Works:**
+1. prestoGo.js runs `docker run -v /root/presto/userRecons/...`
+2. This command goes through the Docker socket to the HOST daemon
+3. The HOST daemon mounts the HOST path `/root/presto/userRecons/...`
+4. Since the orchestrator container has the same path mounted, both see the same files
+
+### Phase 5: Migration Steps
+
+#### 5.1 Minimal Migration (Just Fix Security + Containerize)
+
+**Step 1: Fix SMTP credentials** (one code change)
+```bash
+# Edit presto/prestoGo.js lines 193-202
+# Change from hardcoded to environment variables
+```
+
+**Step 2: Create .env file**
+```bash
+# .env
+SMTP_PASSWORD=<your_actual_password>
+MYSQL_ROOT_PASSWORD=<mysql_root_pass>
+MYSQL_USER=presto_user
+MYSQL_PASSWORD=<mysql_pass>
+```
+
+**Step 3: Build and run**
+```bash
+docker-compose build
+docker-compose up -d
+```
+
+That's it! No path changes needed.
+
+#### 5.2 Optional Future Improvements
+
+If you later want to decouple from the `/root/presto` path structure, you could:
+1. Add environment variables for paths
+2. Modify code to use them
+3. Change container mount points
+
+But this is **not required** for containerization to work.
+
+### Phase 6: Migration Strategy
 
 #### 4.1 Pre-Migration Checklist
 
@@ -1077,122 +852,77 @@ Set up alerts for:
 
 ## Appendix
 
-### A. Environment Variables Reference
+### A. Environment Variables (Minimal - Same-Path Approach)
+
+With same-path mounting, you only need these environment variables:
 
 ```bash
 # ===========================================
-# DATABASE
-# ===========================================
-MYSQL_HOST=mysql
-MYSQL_PORT=3306
-MYSQL_DATABASE=lipdverse
-MYSQL_USER=presto_user
-MYSQL_PASSWORD=<secure_password>
-MYSQL_ROOT_PASSWORD=<secure_root_password>
-
-# ===========================================
-# EXTERNAL SERVICES
-# ===========================================
-GRAPHDB_URL=https://linkedearth.graphdb.mint.isi.edu
-
-# ===========================================
-# EMAIL CONFIGURATION (CRITICAL - remove from code!)
-# Current hardcoded values in prestoGo.js line 193-202:
-#   host: smtp.zoho.com
-#   user: no-reply@paleopresto.com
-#   pass: 5-KBS%*YsTneRs4 (EXPOSED!)
+# REQUIRED - SMTP (must move from hardcoded!)
 # ===========================================
 SMTP_HOST=smtp.zoho.com
 SMTP_PORT=465
 SMTP_USER=no-reply@paleopresto.com
-SMTP_PASSWORD=<secure_password>
+SMTP_PASSWORD=<your_actual_password>  # REQUIRED
+SMTP_FROM=no-reply@paleopresto.com
 
 # ===========================================
-# INTERNAL PATHS (used by Node.js code inside containers)
+# REQUIRED - DATABASE
 # ===========================================
-USER_RECONS_PATH=/data/userRecons
-PRESTO_APP_PATH=/app/presto
-FORM_PATH=/app/prestoForm
-GETLIPDS_PATH=/app/getLipds
-VIZ_PATH=/app/viz
+MYSQL_ROOT_PASSWORD=<secure_root_password>
+MYSQL_DATABASE=lipdverse
+MYSQL_USER=presto_user
+MYSQL_PASSWORD=<secure_password>
+
+# ===========================================
+# OPTIONAL
+# ===========================================
+GRAPHDB_URL=https://linkedearth.graphdb.mint.isi.edu
 BASE_URL=http://143.198.98.66
-
-# ===========================================
-# HOST PATHS (for Docker volume mounts in sibling containers)
-# These must match actual host filesystem paths
-# ===========================================
-HOST_USER_RECONS_PATH=/root/presto/userRecons
-HOST_HOLOCENE_DA_PATH=/root/holocene_da
-HOST_TEMP12K_PATH=/root/temp12k-regional-composites
-HOST_PRESTO_FORM_PATH=/root/presto/prestoForm
-
-# ===========================================
-# SERVER PORTS
-# ===========================================
-PRESTO_SERVER_PORT=3000
-DOWNLOAD_SERVER_PORT=3001
-FORM_SERVER_PORT=3002
-EDITOR_SERVER_PORT=3004
-QUERY_SERVER_PORT=3006
-QUERY_DB_PORT=3007
-SPARQL_SERVER_PORT=3009
-RSERVER_PORT=3010
-VIZ_SERVER_PORT=3011
-
-# ===========================================
-# DOCKER
-# ===========================================
-DOCKER_HOST=unix:///var/run/docker.sock
 ```
 
-### B. Critical Files Requiring Path Updates (Detailed)
+### B. Required Code Change (ONLY ONE FILE!)
 
-#### B.1 presto/prestoServer.js (4 changes)
-| Line | Current | Change To |
-|------|---------|-----------|
-| 10 | `/root/presto/presto/reconLib.json` | `process.env.PRESTO_APP_PATH + '/reconLib.json'` |
-| 27 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 28 | `node /root/presto/presto/prestoGo.js` | `node ${process.env.PRESTO_APP_PATH}/prestoGo.js` |
+**File:** `presto/prestoGo.js` lines 193-202
 
-#### B.2 presto/prestoGo.js (30+ changes - HIGHEST PRIORITY)
-| Line | Current | Change To |
-|------|---------|-----------|
-| 18 | `/root/presto/presto/reconLib.json` | `process.env.PRESTO_APP_PATH + '/reconLib.json'` |
-| 29 | `/root/presto/prestoForm/` | `process.env.FORM_PATH + '/'` |
-| 91 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 100 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 102 | `/root/presto/prestoForm/` | `process.env.FORM_PATH + '/'` |
-| 117 | `/root/presto/prestoForm/` | `process.env.FORM_PATH + '/'` |
-| 121 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 123 | `/root/presto/prestoForm/` | `process.env.FORM_PATH + '/'` |
-| 185 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 193-202 | **HARDCODED SMTP** | **Use environment variables** |
-| 313, 321 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 371, 385 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 390, 412 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 428 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 432-437 | Docker -v paths | Use `HOST_*` env vars |
-| 443 | `/root/presto/getLipds/downloadLipds.js` | `process.env.GETLIPDS_PATH + '/downloadLipds.js'` |
-| 446, 466, 478, 483 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 492, 496, 504, 510-513, 530 | Various paths | Use environment variables |
+```javascript
+// BEFORE (INSECURE - current state):
+let transporter = nodemailer.createTransport({
+    host: 'smtp.zoho.com',
+    port: 465,
+    name: 'zoho.com',
+    auth: {
+        user: "no-reply@paleopresto.com",
+        pass: "5-KBS%*YsTneRs4"
+    },
+    from: 'no-reply@paleopresto.com'
+});
 
-#### B.3 getLipds/downloadLipds.js (15+ changes)
-| Line | Current | Change To |
-|------|---------|-----------|
-| 11-12 | `/root/presto/getLipds/getLipdSmart.R` | `process.env.GETLIPDS_PATH + '/getLipdSmart.R'` |
-| 16 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 57 | `__dirname` reference | Keep or use GETLIPDS_PATH |
-| 86 | `/root/presto/getLipds/updateTSIDmd5.R` | `process.env.GETLIPDS_PATH + '...'` |
-| 115-117, 157, 169 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
-| 211 | Docker -v path | Use `HOST_USER_RECONS_PATH` |
-| 332, 370, 380-413 | `/root/presto/userRecons/` | `process.env.USER_RECONS_PATH + '/'` |
+// AFTER (SECURE):
+let transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.zoho.com',
+    port: parseInt(process.env.SMTP_PORT) || 465,
+    name: 'zoho.com',
+    auth: {
+        user: process.env.SMTP_USER || "no-reply@paleopresto.com",
+        pass: process.env.SMTP_PASSWORD  // REQUIRED - no default!
+    },
+    from: process.env.SMTP_FROM || 'no-reply@paleopresto.com'
+});
+```
 
-#### B.4 Other Files
-- `downloads/downloadServer.js` - User recons path
-- `getLipds/Rserver.js` - User recons path
-- `viz/viz.js` - User recons path
-- `query/queryDB.js` - MySQL connection (already uses some env vars)
-- All nginx configuration files - Service URLs
+### C. Optional Path Changes (NOT needed for containerization)
+
+The following files have hardcoded `/root/presto/...` paths. With same-path mounting, these **do NOT need changes**:
+
+| File | # of Hardcoded Paths | Required for Containerization? |
+|------|---------------------|-------------------------------|
+| `presto/prestoGo.js` | 30+ | NO (same-path mounting) |
+| `presto/prestoServer.js` | 3 | NO |
+| `getLipds/downloadLipds.js` | 15+ | NO |
+| Other servers | 1-3 each | NO |
+
+Only change these if you want to deploy to a different path structure later
 
 ### C. Docker Commands Reference
 
