@@ -526,7 +526,7 @@ getAllMonths = function(startSpan,endSpan){
                 xhr0.ontimeout = function (){
                     console.error("request timedout: ", xhr0);
                 }
-                xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
+                xhr0.open("get", "/data/" + param1, /*async*/ true);
                 // xhr.responseType = "text";
                 xhr0.send();
             }
@@ -551,7 +551,7 @@ getAllMonths = function(startSpan,endSpan){
                         resolve();
                     }
                 };
-                xhr7.open("post", "http://143.198.98.66:92/", /*async*/ true);
+                xhr7.open("post", "/posttsids/", /*async*/ true);
                 xhr7.setRequestHeader("Content-type", "application/json");
                 xhr7.send(Body);
                 });
@@ -581,7 +581,7 @@ getAllMonths = function(startSpan,endSpan){
                                 resolve();
                             }
                         };
-                        var tsURL = "http://143.198.98.66:88/TS" + params(useCoords=true);
+                        var tsURL = "/data/TS" + params(useCoords=true);
                         console.log("getTSIDs requesting URL: " + tsURL);
                         xhr2.open("get", tsURL, /*async*/ true);
                         xhr2.send();
@@ -607,7 +607,7 @@ getAllMonths = function(startSpan,endSpan){
                         resolve(xhr3.status);
                     }
                 };
-                xhr3.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
+                xhr3.open("post", "/sparql", /*async*/ true);
                 xhr3.setRequestHeader("Content-type", "application/json");
                 xhr3.send(TSIDs);
                 });
@@ -713,7 +713,7 @@ getAllMonths = function(startSpan,endSpan){
                     reject(new Error("XHR request timed out"));
                 };
         
-                xhr1.open("POST", "http://143.198.98.66:90/lipds", true);
+                xhr1.open("POST", "/lipds", true);
                 xhr1.setRequestHeader("Content-type", "application/json");
         
                 xhr1.timeout = 5000; // Set a timeout (optional)
@@ -771,7 +771,7 @@ getAllMonths = function(startSpan,endSpan){
                             var queryParams = params(useCoords=true)
                             queryParams = '&' + queryParams.substring(1);
                             queryParams = queryParams.replace(/\s/g, '');
-                            resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
+                            resolve("/editor/querypath"+window.location.search+queryParams)
                         }
                         })
                         .catch(error => {

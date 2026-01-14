@@ -1,6 +1,9 @@
 //Docker = require('dockerode');
 const fs = require('fs');
 var shelljs = require("shelljs");
+
+// Base URL for email links (set via environment variable)
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 //const util = require('util');
 var exec = require("child_process").exec;
 var execSync = require("child_process").execSync;
@@ -244,10 +247,10 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	   if (configLoc == true || recon == 'temp12k') {
 		   return ''
 	   } else {
-		   return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '" download>Click here to VISUALIZE your results</a><br>'
+		   return '<a href="' + BASE_URL + '/viz/'+ uniqueID + '" download>Click here to VISUALIZE your results</a><br>'
 	   }
    };
-   var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
+   var indexURL = BASE_URL + "/downloads/browse/"+ uniqueID + "/"
    var configFileTxt = function (configFileLoc) {
 	   if (configFileLoc == true){
 		   return "";
@@ -301,7 +304,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
   sendEmail = function (user, domain, uniqueID, configLoc, recon) {
     console.log('attempting to send email')
     console.log('recon within sendEmail(): ' + recon);
-    var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
+    var destURL = BASE_URL + '/downloads/zip/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
       to: user + '@' + domain,

@@ -6,28 +6,28 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
  "Peat":"triangle-down","Sclerosponge":"triangle-down","Shoreline":"diamond","Wood":"triangle","TerrestrialSediment":"circle", "Documents": "star-5"}
 
 var glacierIce = L.icon({
-    iconUrl: 'http://143.198.98.66:86/glacierIce.png',
+    iconUrl: '/query/glacierIce.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var groundIce = L.icon({
-    iconUrl: 'http://143.198.98.66:86//groundIce.png',
+    iconUrl: '/query/groundIce.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var glacierIceOpac = L.icon({
-    iconUrl: 'http://143.198.98.66:86/glacierIceOpac.png',
+    iconUrl: '/query/glacierIceOpac.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var groundIceOpac = L.icon({
-    iconUrl: 'http://143.198.98.66:86//groundIceOpac.png',
+    iconUrl: '/query/groundIceOpac.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location

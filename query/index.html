@@ -757,28 +757,28 @@ var numPoints = +(numdata * 2)
 let inRectCount = 0;
 
 var glacierIce = L.icon({
-    iconUrl: 'http://143.198.98.66:86/glacierIce.png',
+    iconUrl: '/query/glacierIce.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var groundIce = L.icon({
-    iconUrl: 'http://143.198.98.66:86//groundIce.png',
+    iconUrl: '/query/groundIce.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var glacierIceOpac = L.icon({
-    iconUrl: 'http://143.198.98.66:86/glacierIceOpac.png',
+    iconUrl: '/query/glacierIceOpac.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
     popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor
 });
 var groundIceOpac = L.icon({
-    iconUrl: 'http://143.198.98.66:86//groundIceOpac.png',
+    iconUrl: '/query/groundIceOpac.png',
 
     iconSize:     [10, 10], // size of the icon
     iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location
@@ -1360,7 +1360,7 @@ getAllMonths = function(startSpan,endSpan){
         xhr0.ontimeout = function (){
             console.error("request timedout: ", xhr0);
         }
-        xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
+        xhr0.open("get", "/data/" + param1, /*async*/ true);
         // xhr.responseType = "text";
         xhr0.send();
     }
@@ -1383,7 +1383,7 @@ compileLipds = function(Body){
 				resolve();
 			}
 		};
-		xhr1.open("post", "http://143.198.98.66:90/lipds", /*async*/ true);
+		xhr1.open("post", "/lipds", /*async*/ true);
 		xhr1.setRequestHeader("Content-type", "application/json");
 		xhr1.send(Body);
 		});
@@ -1407,7 +1407,7 @@ postTSids = function(Body){
 				resolve();
 			}
 		};
-		xhr7.open("post", "http://143.198.98.66:92/", /*async*/ true);
+		xhr7.open("post", "/posttsids/", /*async*/ true);
 		xhr7.setRequestHeader("Content-type", "application/json");
 		xhr7.send(Body);
 		});
@@ -1431,7 +1431,7 @@ getTSIDs = function(){
 				resolve();
 			}
 		};
-		xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);
+		xhr2.open("get", "/data/TS" + params(useCoords=true), /*async*/ true);
 		xhr2.send();
 		});
 }
@@ -1454,7 +1454,7 @@ retTimeSeries = function(TSIDs){
 				resolve(xhr3.status);
 			}
 		};
-		xhr3.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
+		xhr3.open("post", "/sparql", /*async*/ true);
 		xhr3.setRequestHeader("Content-type", "application/json");
 		xhr3.send(TSIDs);
 		});
@@ -1529,7 +1529,7 @@ function getLipds(loc1){
 				var queryParams = params(useCoords=true)
 				queryParams = '&' + queryParams.substring(1);
 				queryParams = queryParams.replace(/\s/g, '');
-				resolve("http://143.198.98.66:85/"+window.location.search+queryParams)
+				resolve("/editor/"+window.location.search+queryParams)
 			} else {
 				resolve("https://paleopresto.com/")
 			}
