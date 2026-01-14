@@ -583,6 +583,188 @@ If you later want to decouple from the `/root/presto` path structure, you could:
 
 But this is **not required** for containerization to work.
 
+## Architecture Improvement Recommendations
+
+After detailed analysis, the current 9-server architecture significantly complicates containerization and maintenance. This section outlines recommended improvements.
+
+### Current State: Why 9 Servers is Problematic
+
+| Issue | Impact |
+|-------|--------|
+| 9 Node.js processes | 9x memory overhead, 9 containers to manage |
+| 9 different ports | Complex nginx configuration, hard-coded port mappings in client code |
+| No shared utilities | Duplicated patterns across servers |
+| Hard-coded URLs in client JS | `http://143.198.98.66:88`, `:89`, `:90`... tightly coupled to deployment |
+| Multiple credential exposures | SMTP in prestoGo.js, MySQL in queryDB.js |
+
+### Recommended: Single Consolidated Server
+
+All 9 servers can be consolidated into **one Express application**:
+
+```
+app.js (port 3000)
+├── /api/reconstruct     ← prestoServer (1 route)
+├── /api/downloads/*     ← downloadServer (3 routes)
+├── /api/forms/*         ← formServer (5 routes)
+├── /api/editor/*        ← editorServer (3 routes)
+├── /api/query/*         ← queryServer (3 routes)
+├── /api/data/*          ← queryDB (2 routes)
+├── /api/sparql          ← sparqlServer (1 route)
+├── /api/lipds           ← Rserver (1 route)
+├── /viz/:reconID/*      ← viz (static files)
+└── /static/*            ← Static assets
+```
+
+**Benefits:**
+- **1 container** instead of 9
+- **1 port** instead of 9 (simpler nginx, or no nginx needed)
+- **Shared middleware** (auth, logging, error handling)
+- **Shared database connections** (connection pooling)
+- **Simpler client code** (all API calls to same origin)
+
+### Consolidation Effort Estimate
+
+| Phase | Servers | Effort | Risk |
+|-------|---------|--------|------|
+| 1 | queryServer, viz, downloadServer | 1 day | Low |
+| 2 | sparqlServer, prestoServer, Rserver | 1 day | Low |
+| 3 | queryDB (needs DB cred refactor) | 1 day | Medium |
+| 4 | formServer, editorServer | 2-3 days | Medium |
+| **Total** | **All 9** | **5-6 days** | **Low-Medium** |
+
+### Proposed Consolidated Structure
+
+```javascript
+// app.js - Single entry point
+const express = require('express');
+const app = express();
+
+// Shared middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Environment-based configuration
+const config = {
+  port: process.env.PORT || 3000,
+  mysql: {
+    host: process.env.MYSQL_HOST || 'localhost',
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE || 'lipdverse'
+  },
+  smtp: {
+    host: process.env.SMTP_HOST || 'smtp.zoho.com',
+    port: process.env.SMTP_PORT || 465,
+    user: process.env.SMTP_USER,
+    password: process.env.SMTP_PASSWORD
+  },
+  paths: {
+    userRecons: process.env.USER_RECONS_PATH || '/root/presto/userRecons',
+    prestoForm: process.env.FORM_PATH || '/root/presto/prestoForm'
+  }
+};
+
+// Route modules
+app.use('/api/reconstruct', require('./routes/reconstruct'));
+app.use('/api/downloads', require('./routes/downloads'));
+app.use('/api/forms', require('./routes/forms'));
+app.use('/api/editor', require('./routes/editor'));
+app.use('/api/query', require('./routes/query'));
+app.use('/api/data', require('./routes/data'));
+app.use('/api/sparql', require('./routes/sparql'));
+app.use('/api/lipds', require('./routes/lipds'));
+app.use('/viz', require('./routes/viz'));
+
+app.listen(config.port);
+```
+
+### Additional Security Fixes Needed
+
+Beyond the SMTP credentials already documented, also fix:
+
+**query/queryDB.js lines 5-10:**
+```javascript
+// BEFORE (INSECURE):
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "dave",
+  password: "peb0pk0q",  // EXPOSED!
+  database: "lipdverse"
+});
+
+// AFTER (SECURE):
+var con = mysql.createConnection({
+  host: process.env.MYSQL_HOST || "localhost",
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE || "lipdverse"
+});
+```
+
+### Decision: Consolidate Before or After Containerization?
+
+**Option A: Containerize First, Then Consolidate**
+- Pros: Faster to get into containers, can iterate
+- Cons: More complex docker-compose (9 services), more work to change later
+
+**Option B: Consolidate First, Then Containerize** (RECOMMENDED)
+- Pros: Simpler containerization (1 service), cleaner architecture
+- Cons: Delays containerization by ~1 week
+
+**Recommendation:** Option B. The consolidation effort is small (~5-6 days), and the resulting single-container architecture is dramatically simpler to deploy and maintain.
+
+### Simplified Docker Setup After Consolidation
+
+```yaml
+# docker-compose.yml (after consolidation)
+version: '3.8'
+
+services:
+  presto:
+    build: .
+    environment:
+      - PORT=3000
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - SMTP_HOST=smtp.zoho.com
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/presto:/root/presto
+      - /root/holocene_da:/root/holocene_da
+      - /root/temp12k-regional-composites:/root/temp12k-regional-composites
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=lipdverse
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - presto
+
+volumes:
+  mysql-data:
+```
+
+**Result: 3 containers instead of 11** (was: 9 Node.js + MySQL + nginx)
+
 ### Phase 6: Migration Strategy
 
 #### 4.1 Pre-Migration Checklist
