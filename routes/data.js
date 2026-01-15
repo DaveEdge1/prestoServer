@@ -8,6 +8,13 @@ const router = express.Router();
 const mysql = require('mysql2');
 const config = require('../config');
 
+// Cache for full dataset query (24 hour TTL)
+let datasetCache = {
+  data: null,
+  timestamp: null,
+  ttl: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+};
+
 // Build WHERE clause from query parameters
 function buildQstring(qs) {
   let countA = 0;
@@ -67,6 +74,20 @@ function getPool() {
 
 // GET / - Query dataset summary
 router.get('/', (req, res) => {
+  const hasQueryParams = Object.keys(req.query).length > 0;
+  const now = Date.now();
+
+  // Use cache for full dataset query (no filters)
+  if (!hasQueryParams && datasetCache.data && datasetCache.timestamp) {
+    const cacheAge = now - datasetCache.timestamp;
+    if (cacheAge < datasetCache.ttl) {
+      console.log(`Serving from cache (age: ${Math.round(cacheAge / 1000 / 60)} minutes)`);
+      return res.status(200).json(datasetCache.data);
+    } else {
+      console.log('Cache expired, refreshing...');
+    }
+  }
+
   const con = getPool();
   con.getConnection((err) => {
     if (err) {
@@ -81,6 +102,14 @@ router.get('/', (req, res) => {
         return res.status(500).json({ error: 'Query failed' });
       }
       console.log('Total records returned: ' + result.length);
+
+      // Cache the full dataset query (no filters)
+      if (!hasQueryParams) {
+        datasetCache.data = result;
+        datasetCache.timestamp = now;
+        console.log('Dataset cached for 24 hours');
+      }
+
       res.status(200).json(result);
     });
   });
