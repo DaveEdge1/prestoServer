@@ -135,7 +135,6 @@ For more information about each of the options, mouse over the question mark ico
 }
 </script>
 <script>
-function popQueryVariable(){
 document.getElementById("recon").value = getQueryVariable("recon");
 document.getElementById("user").value = getQueryVariable("user");
 document.getElementById("domain").value = getQueryVariable("domain");
@@ -143,7 +142,6 @@ document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
 }
 </script>
 <script>
-popQueryVariable()
 </script>
 <input id="recon" name="recon" type="hidden" value="">
 <input id="user" name="user" type="hidden" value="">
@@ -244,7 +242,7 @@ function buildURL(){
 if (confirm("Submit Custom Reconstruction request?")){
 var urlParams = new URLSearchParams(window.location.search);
 document.getElementById("paramsForm").method = "POST"
-document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")
+document.getElementById("paramsForm").action = "/editor/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")
 return true;
 } else {
 document.getElementById("paramsForm").action = ""

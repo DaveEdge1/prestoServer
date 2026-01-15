@@ -126,17 +126,6 @@
        return(false);
 }
 </script>
-<script>
-function popQueryVariable(){
-document.getElementById("recon").value = getQueryVariable("recon");
-document.getElementById("user").value = getQueryVariable("user");
-document.getElementById("domain").value = getQueryVariable("domain");
-document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
-}
-</script>
-<script>
-popQueryVariable()
-</script>
 <form id="paramsForm" method="POST" onsubmit="buildURL()">
 <input id="recon" name="recon" type="hidden" value="download">
 <input id="language" name="language" type="hidden" value="">
@@ -179,13 +168,15 @@ popQueryVariable()
     if (confirm("Submit Custom Reconstruction request?")){
       var urlParams = new URLSearchParams(window.location.search);
       document.getElementById("paramsForm").method = "POST"
-      document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + document.querySelector('input[name="fileformat"]:checked').value;
+      document.getElementById("paramsForm").action = "/editor/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + document.querySelector('input[name="fileformat"]:checked').value;
       return true;
     } else {
       document.getElementById("paramsForm").action = ""
       return false;
     };
   }
+  // Call popQueryVariable after form elements are defined
+  popQueryVariable();
 </script>
 </body>
         <footer>
