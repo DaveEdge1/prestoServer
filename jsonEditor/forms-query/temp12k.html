@@ -29,7 +29,7 @@
     <!-- Theme stylesheet-->
     <link rel="stylesheet" href="/editor/css/style.default.css" id="theme-stylesheet">
     <!-- Custom stylesheet - for your changes-->
-    <link rel="stylesheet" href"/editor/slider.css">
+    <link rel="stylesheet" href="/editor/slider.css">
     <link rel="stylesheet" href="/editor/css/custom.css">
     <!-- Favicon and apple touch icons-->
     <link rel="shortcut icon" href="/editor/img/favicon.png" type="image/x-icon">
@@ -134,19 +134,15 @@ For more information about each of the options, mouse over the question mark ico
        return(false);
 }
 </script>
+<input id="user" name="user" type="hidden" value="">
+<input id="domain" name="domain" type="hidden" value="">
+<input id="uniqueID" name="uniqueID" type="hidden" value="">
 <script>
 document.getElementById("recon").value = getQueryVariable("recon");
 document.getElementById("user").value = getQueryVariable("user");
 document.getElementById("domain").value = getQueryVariable("domain");
 document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
-}
 </script>
-<script>
-</script>
-<input id="recon" name="recon" type="hidden" value="">
-<input id="user" name="user" type="hidden" value="">
-<input id="domain" name="domain" type="hidden" value="">
-<input id="uniqueID" name="uniqueID" type="hidden" value="">
 <button type="button" class="collapsible">Time</button>
 <div class="content">
 <br>
@@ -251,9 +247,9 @@ return false;
 }
 </script>
 <script>
-function val() {document.getElementById("abstract2").src = "/slider.css";}
+function val() {document.getElementById("abstract2").src = "/editor/slider.css";}
 </script>
-<script src"/editor/slidertemp12k.js"></script>
+<script src="/editor/slidertemp12k.js"></script>
 </div>
 <br>
 </body>
