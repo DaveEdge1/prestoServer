@@ -1,3 +1,22 @@
+// Top 15 most common interpretation variables (shared across query pages)
+var top15InterpVars = [
+   "temperature",
+   "precipitation",
+   "effectivePrecipitation",
+   "temperature|precipitationIsotope",
+   "growingDegreeDays",
+   "temperature|temperature|seawaterIsotope",
+   "precipitation|precipitationIsotope",
+   "precipitationIsotope",
+   "seaIce",
+   "salinity|seawaterIsotope",
+   "streamflow",
+   "upwelling",
+   "effectivePrecipitation|effectivePrecipitation",
+   "temperature|seawaterIsotope",
+   "salinity"
+];
+
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
 var countrylist = [{"value":"Afghanistan","label":"Afghanistan"},{"value":"Aland","label":"Aland"},{"value":"Albania","label":"Albania"},{"value":"Algeria","label":"Algeria"},{"value":"Antarctica","label":"Antarctica"},{"value":"Argentina","label":"Argentina"},{"value":"Armenia","label":"Armenia"},{"value":"Australia","label":"Australia"},{"value":"Austria","label":"Austria"},{"value":"Belarus","label":"Belarus"},{"value":"Belgium","label":"Belgium"},{"value":"Belize","label":"Belize"},{"value":"Bermuda","label":"Bermuda"},{"value":"Bhutan","label":"Bhutan"},{"value":"Bolivia","label":"Bolivia"},{"value":"Botswana","label":"Botswana"},{"value":"Brazil","label":"Brazil"},{"value":"Bulgaria","label":"Bulgaria"},{"value":"Burundi","label":"Burundi"},{"value":"Canada","label":"Canada"},{"value":"Cayman Islands","label":"Cayman Islands"},{"value":"Chad","label":"Chad"},{"value":"Chile","label":"Chile"},{"value":"China","label":"China"},{"value":"Colombia","label":"Colombia"},{"value":"Cook Islands","label":"Cook Islands"},{"value":"Costa Rica","label":"Costa Rica"},{"value":"Cuba","label":"Cuba"},{"value":"Czech Republic","label":"Czech Republic"},{"value":"Democratic Republic of the Congo","label":"Democratic Republic of the Congo"},{"value":"Denmark","label":"Denmark"},{"value":"Djibouti","label":"Djibouti"},{"value":"Dominican Republic","label":"Dominican Republic"},{"value":"Ecuador","label":"Ecuador"},{"value":"Egypt","label":"Egypt"},{"value":"Estonia","label":"Estonia"},{"value":"Ethiopia","label":"Ethiopia"},{"value":"Faroe Islands","label":"Faroe Islands"},{"value":"Finland","label":"Finland"},{"value":"France","label":"France"},{"value":"French Polynesia","label":"French Polynesia"},{"value":"Georgia","label":"Georgia"},{"value":"Germany","label":"Germany"},{"value":"Ghana","label":"Ghana"},{"value":"Greece","label":"Greece"},{"value":"Greenland","label":"Greenland"},{"value":"Guam","label":"Guam"},{"value":"Guatemala","label":"Guatemala"},{"value":"Haiti","label":"Haiti"},{"value":"Hungary","label":"Hungary"},{"value":"Iceland","label":"Iceland"},{"value":"India","label":"India"},{"value":"Indonesia","label":"Indonesia"},{"value":"Iran","label":"Iran"},{"value":"Ireland","label":"Ireland"},{"value":"Israel","label":"Israel"},{"value":"Italy","label":"Italy"},{"value":"Jamaica","label":"Jamaica"},{"value":"Japan","label":"Japan"},{"value":"Jordan","label":"Jordan"},{"value":"Kazakhstan","label":"Kazakhstan"},{"value":"Kenya","label":"Kenya"},{"value":"Kyrgyzstan","label":"Kyrgyzstan"},{"value":"Laos","label":"Laos"},{"value":"Lebanon","label":"Lebanon"},{"value":"Libya","label":"Libya"},{"value":"Lithuania","label":"Lithuania"},{"value":"Luxembourg","label":"Luxembourg"},{"value":"Macedonia","label":"Macedonia"},{"value":"Madagascar","label":"Madagascar"},{"value":"Malawi","label":"Malawi"},{"value":"Malaysia","label":"Malaysia"},{"value":"Mali","label":"Mali"},{"value":"Malta","label":"Malta"},{"value":"Mauritania","label":"Mauritania"},{"value":"Mexico","label":"Mexico"},{"value":"Mongolia","label":"Mongolia"},{"value":"Morocco","label":"Morocco"},{"value":"Namibia","label":"Namibia"},{"value":"Nauru","label":"Nauru"},{"value":"Nepal","label":"Nepal"},{"value":"Netherlands","label":"Netherlands"},{"value":"New Zealand","label":"New Zealand"},{"value":"Nicaragua","label":"Nicaragua"},{"value":"Niger","label":"Niger"},{"value":"Nigeria","label":"Nigeria"},{"value":"Norway","label":"Norway"},{"value":"Oman","label":"Oman"},{"value":"Pakistan","label":"Pakistan"},{"value":"Papua New Guinea","label":"Papua New Guinea"},{"value":"Peru","label":"Peru"},{"value":"Poland","label":"Poland"},{"value":"Portugal","label":"Portugal"},{"value":"Romania","label":"Romania"},{"value":"Russia","label":"Russia"},{"value":"Saudi Arabia","label":"Saudi Arabia"},{"value":"Senegal","label":"Senegal"},{"value":"Seychelles","label":"Seychelles"},{"value":"Slovakia","label":"Slovakia"},{"value":"Slovenia","label":"Slovenia"},{"value":"South Africa","label":"South Africa"},{"value":"South Korea","label":"South Korea"},{"value":"South Sudan","label":"South Sudan"},{"value":"Spain","label":"Spain"},{"value":"Sudan","label":"Sudan"},{"value":"Sweden","label":"Sweden"},{"value":"Switzerland","label":"Switzerland"},{"value":"Syria","label":"Syria"},{"value":"Taiwan","label":"Taiwan"},{"value":"Tajikistan","label":"Tajikistan"},{"value":"Thailand","label":"Thailand"},{"value":"The Bahamas","label":"The Bahamas"},{"value":"Togo","label":"Togo"},{"value":"Tunisia","label":"Tunisia"},{"value":"Turkey","label":"Turkey"},{"value":"Uganda","label":"Uganda"},{"value":"Ukraine","label":"Ukraine"},{"value":"United Kingdom","label":"United Kingdom"},{"value":"United Republic of Tanzania","label":"United Republic of Tanzania"},{"value":"United States of America","label":"United States of America"},{"value":"Uzbekistan","label":"Uzbekistan"},{"value":"Vanuatu","label":"Vanuatu"},{"value":"Venezuela","label":"Venezuela"},{"value":"Vietnam","label":"Vietnam"},{"value":"West Bank","label":"West Bank"},{"value":"Western Sahara","label":"Western Sahara"},{"value":"Yemen","label":"Yemen"},{"value":"Zambia","label":"Zambia"}]
@@ -241,24 +260,46 @@ async function transformToLabelValueArray() {
     rect.editing.enable();
     return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
 }
-function chooseColor(archiveType){
-    archiveType = archiveType.toString();
-    var color1 = colorPal[archiveType]
-    if (typeof color1 !== 'undefined'){
-	return color1
+function chooseColor(archiveType, interpVar){
+    // Check if we're in interpVar legend mode
+    if (typeof legendMode !== 'undefined' && legendMode === 'interpVar') {
+        // Map interpVar to top 15 or "*Other*"
+        if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
+            var color1 = interpVarColorPal[interpVar];
+            return color1 || "#808080";
+        } else {
+            return interpVarColorPal["*Other*"] || "#808080";
+        }
     } else {
-	//console.log(archiveType)
-	return "black"
+        // Default: archiveType mode
+        archiveType = archiveType.toString();
+        var color1 = colorPal[archiveType]
+        if (typeof color1 !== 'undefined'){
+            return color1
+        } else {
+            return "black"
+        }
     }
 }
-function chooseShape(archiveType){
-    archiveType = archiveType.toString();
-    var shape1 = shapePal[archiveType]
-    if (typeof shape1 !== 'undefined'){
-	return shape1
+function chooseShape(archiveType, interpVar){
+    // Check if we're in interpVar legend mode
+    if (typeof legendMode !== 'undefined' && legendMode === 'interpVar') {
+        // Map interpVar to top 15 or "*Other*"
+        if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
+            var shape1 = interpVarShapePal[interpVar];
+            return shape1 || "diamond";
+        } else {
+            return interpVarShapePal["*Other*"] || "diamond";
+        }
     } else {
-	//console.log(archiveType)
-	return "diamond"
+        // Default: archiveType mode
+        archiveType = archiveType.toString();
+        var shape1 = shapePal[archiveType]
+        if (typeof shape1 !== 'undefined'){
+            return shape1
+        } else {
+            return "diamond"
+        }
     }
 }
 function chooseOpacity(coords, rect1){
@@ -816,27 +857,29 @@ function updatePoints (coords){
 	    },
 */
 		pointToLayer : function(feature, latlng) {
-	    var col1 = chooseColor(feature.properties.archiveType)
+	    var col1 = chooseColor(feature.properties.archiveType, feature.properties.interp_Vars)
 	    var aType = feature.properties.archiveType
-	    var shape1 = chooseShape(feature.properties.archiveType)
+	    var shape1 = chooseShape(feature.properties.archiveType, feature.properties.interp_Vars)
 	    var Opac1 = +chooseOpacity(latlng, rectCoord)
 	    var radius1 = 4
 	    if (aType == "Documents"){
 		radius1 = 6
 	    }
-	    if (aType == "GroundIce" && Opac1 == 0.8){
+	    // Only use special ice icons for archiveType mode
+	    var usingArchiveMode = (typeof legendMode === 'undefined' || legendMode === 'archiveType');
+	    if (aType == "GroundIce" && Opac1 == 0.8 && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: groundIce
 		});
-	    } else if (aType == "GlacierIce" && Opac1 == 0.8){
+	    } else if (aType == "GlacierIce" && Opac1 == 0.8 && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: glacierIce
 		});
-	    } else if (aType == "GroundIce" && Opac1 == 0.1){
+	    } else if (aType == "GroundIce" && Opac1 == 0.1 && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: groundIceOpac
 		});
-	    } else if (aType == "GlacierIce" && Opac1 == 0.1){
+	    } else if (aType == "GlacierIce" && Opac1 == 0.1 && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: glacierIceOpac
 		});

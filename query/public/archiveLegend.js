@@ -5,6 +5,45 @@ var shapePal = {"Borehole":"square","MolluskShell":"triangle","GlacierIce":"snow
  "FluvialSediment":"circle","LakeSediment":"circle","MarineSediment":"circle","Speleothem":"square","Midden":"diamond",
  "Peat":"triangle-down","Sclerosponge":"triangle-down","Shoreline":"diamond","Wood":"triangle","TerrestrialSediment":"circle", "Documents": "star-5"}
 
+// Interpretation variable color and shape palettes (top 15 + Other)
+var interpVarColorPal = {
+   "temperature": "#FFD600",
+   "precipitation": "#FF8B00",
+   "effectivePrecipitation": "#4169E0",
+   "temperature|precipitationIsotope": "#8f8fa1",
+   "growingDegreeDays": "#8A4513",
+   "temperature|temperature|seawaterIsotope": "#824E2B",
+   "precipitation|precipitationIsotope": "#7b03fc",
+   "precipitationIsotope": "#8A9A5B",
+   "seaIce": "#D2042D",
+   "salinity|seawaterIsotope": "#40826D",
+   "streamflow": "#FF1492",
+   "upwelling": "#d2b48c",
+   "effectivePrecipitation|effectivePrecipitation": "#32CC32",
+   "temperature|seawaterIsotope": "#1E90FF",
+   "salinity": "#9370DB",
+   "*Other*": "#808080"
+};
+
+var interpVarShapePal = {
+   "temperature": "square",
+   "precipitation": "triangle-down",
+   "effectivePrecipitation": "circle",
+   "temperature|precipitationIsotope": "circle",
+   "growingDegreeDays": "circle",
+   "temperature|temperature|seawaterIsotope": "diamond",
+   "precipitation|precipitationIsotope": "triangle",
+   "precipitationIsotope": "triangle-down",
+   "seaIce": "triangle-down",
+   "salinity|seawaterIsotope": "diamond",
+   "streamflow": "square",
+   "upwelling": "circle",
+   "effectivePrecipitation|effectivePrecipitation": "triangle",
+   "temperature|seawaterIsotope": "star-5",
+   "salinity": "diamond",
+   "*Other*": "diamond"
+};
+
 var glacierIce = L.icon({
     iconUrl: '/query/glacierIce.png',
 

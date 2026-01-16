@@ -548,6 +548,26 @@
       var regExp = /\(([^)]+)\)/;
       var prevResp = {};
       var inRectCount = 0;
+      var legendMode = 'archiveType'; // 'archiveType' or 'interpVar'
+
+      // Top 15 most common interpretation variables (cached from database query)
+      var top15InterpVars = [
+         "temperature",
+         "precipitation",
+         "effectivePrecipitation",
+         "temperature|precipitationIsotope",
+         "growingDegreeDays",
+         "temperature|temperature|seawaterIsotope",
+         "precipitation|precipitationIsotope",
+         "precipitationIsotope",
+         "seaIce",
+         "salinity|seawaterIsotope",
+         "streamflow",
+         "upwelling",
+         "effectivePrecipitation|effectivePrecipitation",
+         "temperature|seawaterIsotope",
+         "salinity"
+      ];
 
       // All possible legend entries (full list)
       var allLegendEntries = {
@@ -683,31 +703,189 @@
          }
       };
 
-      // Function to update legend based on visible archive types
+      // Interpretation variable legend entries (top 15 + Other)
+      var allInterpVarEntries = {
+         "temperature": {
+            label: "temperature",
+            type: "polygon",
+            sides: "4",
+            color: "#FFD600",
+            fillColor: "#FFD600",
+            weight: 2
+         },
+         "precipitation": {
+            label: "precipitation",
+            type: "polygonR",
+            sides: 3,
+            color: "#FF8B00",
+            fillColor: "#FF8B00",
+            weight: 2
+         },
+         "effectivePrecipitation": {
+            label: "effectivePrecipitation",
+            type: "circle",
+            radius: 6,
+            color: "#4169E0",
+            fillColor: "#4169E0",
+            weight: 2
+         },
+         "temperature|precipitationIsotope": {
+            label: "temp|precipIsotope",
+            type: "circle",
+            radius: 6,
+            color: "#8f8fa1",
+            fillColor: "#8f8fa1",
+            weight: 2
+         },
+         "growingDegreeDays": {
+            label: "growingDegreeDays",
+            type: "circle",
+            radius: 6,
+            color: "#8A4513",
+            fillColor: "#8A4513",
+            weight: 2
+         },
+         "temperature|temperature|seawaterIsotope": {
+            label: "temp|temp|seawaterIso",
+            type: "polygonR",
+            sides: 4,
+            color: "#824E2B",
+            fillColor: "#824E2B",
+            weight: 2
+         },
+         "precipitation|precipitationIsotope": {
+            label: "precip|precipIsotope",
+            type: "polygon",
+            sides: 3,
+            color: "#7b03fc",
+            fillColor: "#7b03fc",
+            weight: 2
+         },
+         "precipitationIsotope": {
+            label: "precipitationIsotope",
+            type: "polygonR",
+            sides: 3,
+            color: "#8A9A5B",
+            fillColor: "#8A9A5B",
+            weight: 2
+         },
+         "seaIce": {
+            label: "seaIce",
+            type: "polygonR",
+            sides: 3,
+            color: "#D2042D",
+            fillColor: "#D2042D",
+            weight: 2
+         },
+         "salinity|seawaterIsotope": {
+            label: "salinity|seawaterIso",
+            type: "polygonR",
+            sides: 4,
+            color: "#40826D",
+            fillColor: "#40826D",
+            weight: 2
+         },
+         "streamflow": {
+            label: "streamflow",
+            type: "polygon",
+            sides: 4,
+            color: "#FF1492",
+            fillColor: "#FF1492",
+            weight: 2
+         },
+         "upwelling": {
+            label: "upwelling",
+            type: "circle",
+            radius: 6,
+            color: "#d2b48c",
+            fillColor: "#d2b48c",
+            weight: 2
+         },
+         "effectivePrecipitation|effectivePrecipitation": {
+            label: "effectPrecip|effectPrecip",
+            type: "polygon",
+            sides: 3,
+            color: "#32CC32",
+            fillColor: "#32CC32",
+            weight: 2
+         },
+         "temperature|seawaterIsotope": {
+            label: "temp|seawaterIsotope",
+            type: "star",
+            sides: "5",
+            color: "#1E90FF",
+            fillColor: "#1E90FF",
+            weight: 2
+         },
+         "salinity": {
+            label: "salinity",
+            type: "polygonR",
+            sides: "4",
+            color: "#9370DB",
+            fillColor: "#9370DB",
+            weight: 2
+         },
+         "*Other*": {
+            label: "*Other*",
+            type: "polygonR",
+            sides: "4",
+            color: "#808080",
+            fillColor: "#808080",
+            weight: 2
+         }
+      };
+
+      // Function to update legend based on visible archive types or interp vars
       function updateLegend() {
          if (!prevResp || !prevResp.length) return;
 
-         // Collect unique visible archive types from current data
          var visibleTypes = new Set();
          var rectCoord = changeBoxCoord ? changeBoxCoord() : {"South":-90,"West":-180,"North":90,"East":180};
+         var legendEntries = [];
+         var legendTitle = "";
+         var legendEntrySource = null;
 
-         prevResp.forEach(function(item) {
-            // Check if this point would be visible (same logic as chooseOpacity)
-            var lat = item.geo_latitude;
-            var lon = item.geo_longitude;
-            var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
-                           lon >= rectCoord.West && lon <= rectCoord.East;
+         if (legendMode === 'archiveType') {
+            // Collect unique visible archive types
+            prevResp.forEach(function(item) {
+               var lat = item.geo_latitude;
+               var lon = item.geo_longitude;
+               var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
+                              lon >= rectCoord.West && lon <= rectCoord.East;
 
-            if (isVisible && item.archiveType) {
-               visibleTypes.add(item.archiveType);
-            }
-         });
+               if (isVisible && item.archiveType) {
+                  visibleTypes.add(item.archiveType);
+               }
+            });
+
+            legendEntrySource = allLegendEntries;
+            legendTitle = "Archive Type";
+         } else {
+            // Collect unique visible interpretation variables
+            prevResp.forEach(function(item) {
+               var lat = item.geo_latitude;
+               var lon = item.geo_longitude;
+               var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
+                              lon >= rectCoord.West && lon <= rectCoord.East;
+
+               if (isVisible && item.interp_Vars) {
+                  var interpVar = item.interp_Vars;
+                  // Map to top 15 or "Other"
+                  if (top15InterpVars.indexOf(interpVar) === -1) {
+                     interpVar = "*Other*";
+                  }
+                  visibleTypes.add(interpVar);
+               }
+            });
+
+            legendEntrySource = allInterpVarEntries;
+            legendTitle = "Interpretation Variable";
+         }
 
          // Build legend entries for visible types only
-         var legendEntries = [];
-         visibleTypes.forEach(function(archiveType) {
-            if (allLegendEntries[archiveType]) {
-               legendEntries.push(allLegendEntries[archiveType]);
+         visibleTypes.forEach(function(type) {
+            if (legendEntrySource[type]) {
+               legendEntries.push(legendEntrySource[type]);
             }
          });
 
@@ -719,9 +897,59 @@
 
          // Add updated legend with only visible types
          if (legendEntries.length > 0 && map) {
+            // Create custom legend control with radio buttons
+            var LegendControl = L.Control.extend({
+               options: {
+                  position: 'topright'
+               },
+               onAdd: function(map) {
+                  var container = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control');
+                  container.style.background = 'white';
+                  container.style.padding = '10px';
+                  container.style.borderRadius = '4px';
+                  container.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
+
+                  // Radio buttons
+                  var radioHtml = '<div style="margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 8px;">' +
+                     '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
+                     '<input type="radio" name="legendType" value="archiveType" ' +
+                     (legendMode === 'archiveType' ? 'checked' : '') + '> Archive Type</label>' +
+                     '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
+                     '<input type="radio" name="legendType" value="interpVar" ' +
+                     (legendMode === 'interpVar' ? 'checked' : '') + '> Interp. Variable</label>' +
+                     '</div>';
+
+                  container.innerHTML = radioHtml;
+
+                  // Add change event listeners
+                  var radios = container.querySelectorAll('input[name="legendType"]');
+                  radios.forEach(function(radio) {
+                     L.DomEvent.on(radio, 'change', function(e) {
+                        legendMode = e.target.value;
+                        updateLegend();
+                        // Redraw markers with new coloring
+                        if (originalUpdatePoints && prevResp) {
+                           originalUpdatePoints(prevResp);
+                        }
+                     });
+                     // Prevent map interactions when clicking on radio buttons
+                     L.DomEvent.disableClickPropagation(radio);
+                  });
+
+                  // Prevent map panning when dragging legend
+                  L.DomEvent.disableClickPropagation(container);
+
+                  return container;
+               }
+            });
+
+            var radioControl = new LegendControl();
+            map.addControl(radioControl);
+
+            // Now add the actual legend below the radio buttons
             legend = L.control.Legend({
                position: "topright",
-               title: "Archive Type",
+               title: legendTitle,
                collapsed: false,
                symbolWidth: 12,
                symbolHeight: 12,

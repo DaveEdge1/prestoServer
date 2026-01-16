@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(docker-compose logs:*)",
+      "Bash(wmic:*)",
+      "Bash(docker system:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(docker-compose exec presto-orchestrator node -e \"const mysql = require\\(''mysql2''\\); const con = mysql.createConnection\\({host: ''mysql'', user: ''dave'', password: ''peb0pk0q'', database: ''lipdverse''}\\); con.connect\\(err => { if\\(err\\) console.error\\(''Error:'', err.message\\); else console.log\\(''Connected!''\\); con.end\\(\\); }\\);\")",
+      "Bash(docker-compose exec mysql mysql:*)",
+      "Bash(docker-compose exec:*)",
+      "Bash(docker volume rm:*)",
+      "Bash(mysql:*)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(done)",
+      "Bash(docker-compose restart:*)",
+      "Bash(docker exec:*)"
+    ]
+  }
+}
