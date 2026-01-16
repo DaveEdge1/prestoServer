@@ -544,6 +544,7 @@
       var layerGroup = null;
       var rect = null;
       var legend = null;
+      var legendRadioControl = null; // Track radio button control separately
       var boundaryLayerControl = null;
       var regExp = /\(([^)]+)\)/;
       var prevResp = {};
@@ -835,9 +836,70 @@
          }
       };
 
+      // Function to create radio button control (only once)
+      function createLegendRadioControl() {
+         if (legendRadioControl) return; // Already created
+
+         var LegendControl = L.Control.extend({
+            options: {
+               position: 'topright'
+            },
+            onAdd: function(map) {
+               var container = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control');
+               container.style.background = 'white';
+               container.style.padding = '10px';
+               container.style.borderRadius = '4px';
+               container.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
+
+               // Radio buttons
+               var radioHtml = '<div style="margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 8px;">' +
+                  '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
+                  '<input type="radio" name="legendType" value="archiveType" ' +
+                  (legendMode === 'archiveType' ? 'checked' : '') + '> Archive Type</label>' +
+                  '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
+                  '<input type="radio" name="legendType" value="interpVar" ' +
+                  (legendMode === 'interpVar' ? 'checked' : '') + '> Interp. Variable</label>' +
+                  '</div>';
+
+               container.innerHTML = radioHtml;
+
+               // Add change event listeners
+               var radios = container.querySelectorAll('input[name="legendType"]');
+               radios.forEach(function(radio) {
+                  L.DomEvent.on(radio, 'change', function(e) {
+                     legendMode = e.target.value;
+                     updateLegend();
+                     // Redraw markers with new coloring
+                     if (originalUpdatePoints && prevResp) {
+                        originalUpdatePoints(prevResp);
+                     }
+                  });
+                  // Prevent map interactions when clicking on radio buttons
+                  L.DomEvent.disableClickPropagation(radio);
+               });
+
+               // Prevent map panning when dragging legend
+               L.DomEvent.disableClickPropagation(container);
+
+               return container;
+            }
+         });
+
+         legendRadioControl = new LegendControl();
+         if (map) {
+            map.addControl(legendRadioControl);
+         }
+      }
+
       // Function to update legend based on visible archive types or interp vars
       function updateLegend() {
          if (!prevResp || !prevResp.length) return;
+
+         // Debug: log first item to see property names
+         if (prevResp.length > 0) {
+            console.log('Sample data item:', prevResp[0]);
+            console.log('interp_Vars value:', prevResp[0].interp_Vars);
+         }
 
          var visibleTypes = new Set();
          var rectCoord = changeBoxCoord ? changeBoxCoord() : {"South":-90,"West":-180,"North":90,"East":180};
@@ -878,6 +940,7 @@
                }
             });
 
+            console.log('Visible interp vars:', Array.from(visibleTypes));
             legendEntrySource = allInterpVarEntries;
             legendTitle = "Interpretation Variable";
          }
@@ -889,6 +952,11 @@
             }
          });
 
+         console.log('Legend entries count:', legendEntries.length);
+
+         // Create radio control if it doesn't exist
+         createLegendRadioControl();
+
          // Remove existing legend
          if (legend && map) {
             map.removeControl(legend);
@@ -897,56 +965,6 @@
 
          // Add updated legend with only visible types
          if (legendEntries.length > 0 && map) {
-            // Create custom legend control with radio buttons
-            var LegendControl = L.Control.extend({
-               options: {
-                  position: 'topright'
-               },
-               onAdd: function(map) {
-                  var container = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control');
-                  container.style.background = 'white';
-                  container.style.padding = '10px';
-                  container.style.borderRadius = '4px';
-                  container.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
-
-                  // Radio buttons
-                  var radioHtml = '<div style="margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 8px;">' +
-                     '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
-                     '<input type="radio" name="legendType" value="archiveType" ' +
-                     (legendMode === 'archiveType' ? 'checked' : '') + '> Archive Type</label>' +
-                     '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
-                     '<input type="radio" name="legendType" value="interpVar" ' +
-                     (legendMode === 'interpVar' ? 'checked' : '') + '> Interp. Variable</label>' +
-                     '</div>';
-
-                  container.innerHTML = radioHtml;
-
-                  // Add change event listeners
-                  var radios = container.querySelectorAll('input[name="legendType"]');
-                  radios.forEach(function(radio) {
-                     L.DomEvent.on(radio, 'change', function(e) {
-                        legendMode = e.target.value;
-                        updateLegend();
-                        // Redraw markers with new coloring
-                        if (originalUpdatePoints && prevResp) {
-                           originalUpdatePoints(prevResp);
-                        }
-                     });
-                     // Prevent map interactions when clicking on radio buttons
-                     L.DomEvent.disableClickPropagation(radio);
-                  });
-
-                  // Prevent map panning when dragging legend
-                  L.DomEvent.disableClickPropagation(container);
-
-                  return container;
-               }
-            });
-
-            var radioControl = new LegendControl();
-            map.addControl(radioControl);
-
-            // Now add the actual legend below the radio buttons
             legend = L.control.Legend({
                position: "topright",
                title: legendTitle,
