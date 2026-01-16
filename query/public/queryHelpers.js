@@ -263,6 +263,7 @@ async function transformToLabelValueArray() {
 function chooseColor(archiveType, interpVar){
     // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
     if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+        console.log('chooseColor in interpVar mode, interpVar:', interpVar, 'in top15:', top15InterpVars.indexOf(interpVar) !== -1);
         // Map interpVar to top 15 or "*Other*"
         if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
             var color1 = interpVarColorPal[interpVar];
