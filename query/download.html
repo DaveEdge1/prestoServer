@@ -1065,19 +1065,23 @@
             crs: new L.Proj.CRS('ESRI:54009',
                '+proj=moll +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
                {
-                  resolutions: [65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128],
-                  origin: [-18e6, 9e6]
+                  resolutions: [65536, 32768, 16384, 8192, 4096, 2048],
+                  origin: [-18e6, 9e6],
+                  bounds: [[-18e6, -9e6], [18e6, 9e6]]
                }
             ),
             center: [0, 0],
             zoom: 1,
-            minZoom: 0,
-            maxZoom: 6,
-            tileLayer: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}',
-            tileOptions: {
-               attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service',
-               maxZoom: 8,
-               noWrap: true
+            minZoom: 1,
+            maxZoom: 4,
+            // Use WMS layer instead of tiles for proper reprojection
+            useWMS: true,
+            wmsLayer: 'https://ows.terrestris.de/osm/service?',
+            wmsOptions: {
+               layers: 'OSM-WMS',
+               format: 'image/png',
+               transparent: false,
+               attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             },
             bounds: [[-90, -180], [90, 180]]
          },
@@ -1200,8 +1204,14 @@
             attributionControl: false
          });
 
-         // Add tile layer
-         tiles = L.tileLayer(config.tileLayer, config.tileOptions).addTo(map);
+         // Add tile or WMS layer
+         if (config.useWMS) {
+            // Use WMS for projections that need on-the-fly reprojection
+            tiles = L.tileLayer.wms(config.wmsLayer, config.wmsOptions).addTo(map);
+         } else {
+            // Use standard tile layer
+            tiles = L.tileLayer(config.tileLayer, config.tileOptions).addTo(map);
+         }
 
          // Add layer group for points
          layerGroup = L.layerGroup().addTo(map);
