@@ -263,6 +263,8 @@ async function transformToLabelValueArray() {
 function chooseColor(archiveType, interpVar){
     // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
     if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+        // Convert interpVar from array to string (same as archiveType handling)
+        interpVar = interpVar ? interpVar.toString() : '';
         console.log('chooseColor in interpVar mode, interpVar:', interpVar, 'in top15:', top15InterpVars.indexOf(interpVar) !== -1);
         // Map interpVar to top 15 or "*Other*"
         if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
@@ -285,6 +287,8 @@ function chooseColor(archiveType, interpVar){
 function chooseShape(archiveType, interpVar){
     // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
     if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+        // Convert interpVar from array to string (same as archiveType handling)
+        interpVar = interpVar ? interpVar.toString() : '';
         // Map interpVar to top 15 or "*Other*"
         if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
             var shape1 = interpVarShapePal[interpVar];
