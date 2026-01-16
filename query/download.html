@@ -549,7 +549,10 @@
       var regExp = /\(([^)]+)\)/;
       var prevResp = {};
       var inRectCount = 0;
-      var legendMode = 'archiveType'; // 'archiveType' or 'interpVar'
+
+      // Make legendMode accessible to queryHelpers.js by putting it on window object
+      window.legendMode = 'archiveType'; // 'archiveType' or 'interpVar'
+      var legendMode = window.legendMode; // Local reference for convenience
 
       // Top 15 most common interpretation variables (cached from database query)
       var top15InterpVars = [
@@ -867,7 +870,9 @@
                var radios = container.querySelectorAll('input[name="legendType"]');
                radios.forEach(function(radio) {
                   L.DomEvent.on(radio, 'change', function(e) {
-                     legendMode = e.target.value;
+                     window.legendMode = e.target.value;
+                     legendMode = e.target.value; // Keep local var in sync
+                     console.log('Legend mode changed to:', window.legendMode);
                      updateLegend();
                      // Redraw markers with new coloring
                      if (originalUpdatePoints && prevResp) {

@@ -261,8 +261,8 @@ async function transformToLabelValueArray() {
     return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
 }
 function chooseColor(archiveType, interpVar){
-    // Check if we're in interpVar legend mode
-    if (typeof legendMode !== 'undefined' && legendMode === 'interpVar') {
+    // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
+    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
         // Map interpVar to top 15 or "*Other*"
         if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
             var color1 = interpVarColorPal[interpVar];
@@ -282,8 +282,8 @@ function chooseColor(archiveType, interpVar){
     }
 }
 function chooseShape(archiveType, interpVar){
-    // Check if we're in interpVar legend mode
-    if (typeof legendMode !== 'undefined' && legendMode === 'interpVar') {
+    // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
+    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
         // Map interpVar to top 15 or "*Other*"
         if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
             var shape1 = interpVarShapePal[interpVar];
@@ -866,7 +866,7 @@ function updatePoints (coords){
 		radius1 = 6
 	    }
 	    // Only use special ice icons for archiveType mode
-	    var usingArchiveMode = (typeof legendMode === 'undefined' || legendMode === 'archiveType');
+	    var usingArchiveMode = (typeof window.legendMode === 'undefined' || window.legendMode === 'archiveType');
 	    if (aType == "GroundIce" && Opac1 == 0.8 && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: groundIce
