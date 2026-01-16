@@ -549,6 +549,189 @@
       var prevResp = {};
       var inRectCount = 0;
 
+      // All possible legend entries (full list)
+      var allLegendEntries = {
+         "Borehole": {
+            label: "Borehole",
+            type: "polygon",
+            sides: "4",
+            color: "#FFD600",
+            fillColor: "#FFD600",
+            weight: 2
+         },
+         "Coral": {
+            label: "Coral",
+            type: "polygonR",
+            sides: 3,
+            color: "#FF8B00",
+            fillColor: "#FF8B00",
+            weight: 2
+         },
+         "FluvialSediment": {
+            label: "FluvialSediment",
+            type: "circle",
+            radius: 6,
+            color: "#4169E0",
+            fillColor: "#4169E0",
+            weight: 2
+         },
+         "GlacierIce": {
+            label: "GlacierIce",
+            type: "image",
+            url: "/query/glacierIce.png"
+         },
+         "GroundIce": {
+            label: "GroundIce",
+            type: "image",
+            url: "/query/groundIce.png"
+         },
+         "LakeSediment": {
+            label: "LakeSediment",
+            type: "circle",
+            radius: 6,
+            color: "#8f8fa1",
+            fillColor: "#8f8fa1",
+            weight: 2
+         },
+         "MarineSediment": {
+            label: "MarineSediment",
+            type: "circle",
+            radius: 6,
+            color: "#8A4513",
+            fillColor: "#8A4513",
+            weight: 2
+         },
+         "Midden": {
+            label: "Midden",
+            type: "polygonR",
+            sides: 4,
+            color: "#824E2B",
+            fillColor: "#824E2B",
+            weight: 2
+         },
+         "MolluskShell": {
+            label: "MolluskShell",
+            type: "polygon",
+            sides: 3,
+            color: "#7b03fc",
+            fillColor: "#7b03fc",
+            weight: 2
+         },
+         "Peat": {
+            label: "Peat",
+            type: "polygonR",
+            sides: 3,
+            color: "#8A9A5B",
+            fillColor: "#8A9A5B",
+            weight: 2
+         },
+         "Sclerosponge": {
+            label: "Sclerosponge",
+            type: "polygonR",
+            sides: 3,
+            color: "#D2042D",
+            fillColor: "#D2042D",
+            weight: 2
+         },
+         "Shoreline": {
+            label: "Shoreline",
+            type: "polygonR",
+            sides: 4,
+            color: "#40826D",
+            fillColor: "#40826D",
+            weight: 2
+         },
+         "Speleothem": {
+            label: "Speleothem",
+            type: "polygon",
+            sides: 4,
+            color: "#FF1492",
+            fillColor: "#FF1492",
+            weight: 2
+         },
+         "TerrestrialSediment": {
+            label: "TerrestrialSediment",
+            type: "circle",
+            radius: 6,
+            color: "#d2b48c",
+            fillColor: "#d2b48c",
+            weight: 2
+         },
+         "Wood": {
+            label: "Wood",
+            type: "polygon",
+            sides: 3,
+            color: "#32CC32",
+            fillColor: "#32CC32",
+            weight: 2
+         },
+         "Documents": {
+            label: "Documents",
+            type: "star",
+            sides: "5",
+            color: "black",
+            fillColor: "black",
+            weight: 2
+         },
+         "*Other*": {
+            label: "*Other*",
+            type: "polygonR",
+            sides: "4",
+            color: "black",
+            fillColor: "black",
+            weight: 2
+         }
+      };
+
+      // Function to update legend based on visible archive types
+      function updateLegend() {
+         if (!prevResp || !prevResp.length) return;
+
+         // Collect unique visible archive types from current data
+         var visibleTypes = new Set();
+         var rectCoord = changeBoxCoord ? changeBoxCoord() : {"South":-90,"West":-180,"North":90,"East":180};
+
+         prevResp.forEach(function(item) {
+            // Check if this point would be visible (same logic as chooseOpacity)
+            var lat = item.geo_latitude;
+            var lon = item.geo_longitude;
+            var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
+                           lon >= rectCoord.West && lon <= rectCoord.East;
+
+            if (isVisible && item.archiveType) {
+               visibleTypes.add(item.archiveType);
+            }
+         });
+
+         // Build legend entries for visible types only
+         var legendEntries = [];
+         visibleTypes.forEach(function(archiveType) {
+            if (allLegendEntries[archiveType]) {
+               legendEntries.push(allLegendEntries[archiveType]);
+            }
+         });
+
+         // Remove existing legend
+         if (legend && map) {
+            map.removeControl(legend);
+            legend = null;
+         }
+
+         // Add updated legend with only visible types
+         if (legendEntries.length > 0 && map) {
+            legend = L.control.Legend({
+               position: "topright",
+               title: "Archive Type",
+               collapsed: false,
+               symbolWidth: 12,
+               symbolHeight: 12,
+               opacity: 1,
+               column: 1,
+               legends: legendEntries
+            }).addTo(map);
+         }
+      }
+
       // Check if proj4leaflet is loaded
       console.log('Leaflet version:', L.version);
       console.log('proj4 loaded:', typeof proj4 !== 'undefined');
@@ -607,6 +790,9 @@
 
           console.log('Coordinate filtering: showing', coords.length, 'total datasets, but', inBoundsCount, 'are within bounds');
         }
+
+        // Update legend to show only visible archive types
+        updateLegend();
       }
 
       // Define projection configurations
@@ -843,130 +1029,8 @@
             document.getElementById('boundingBoxNote').style.display = 'none';
          }
 
-         // Add legend
-         legend = L.control.Legend({
-            position: "topright",
-            title: "Archive Type",
-            collapsed: false,
-            symbolWidth: 12,
-            symbolHeight: 12,
-            opacity: 1,
-            column: 1,
-            legends: [{
-               label: "Borehole",
-               type: "polygon",
-               sides: "4",
-               color: "#FFD600",
-               fillColor: "#FFD600",
-               weight: 2
-            }, {
-               label: "Coral",
-               type: "polygonR",
-               sides: 3,
-               color: "#FF8B00",
-               fillColor: "#FF8B00",
-               weight: 2
-            }, {
-               label: "FluvialSediment",
-               type: "circle",
-               radius: 6,
-               color: "#4169E0",
-               fillColor: "#4169E0",
-               weight: 2
-            }, {
-               label: "GlacierIce",
-               type: "image",
-               url: "/query/glacierIce.png"
-            }, {
-               label: "GroundIce",
-               type: "image",
-               url: "/query/groundIce.png"
-            }, {
-               label: "LakeSediment",
-               type: "circle",
-               radius: 6,
-               color: "#8f8fa1",
-               fillColor: "#8f8fa1",
-               weight: 2
-            }, {
-               label: "MarineSediment",
-               type: "circle",
-               radius: 6,
-               color: "#8A4513",
-               fillColor: "#8A4513",
-               weight: 2
-            }, {
-               label: "Midden",
-               type: "polygonR",
-               sides: 4,
-               color: "#824E2B",
-               fillColor: "#824E2B",
-               weight: 2
-            }, {
-               label: "MolluskShell",
-               type: "polygon",
-               sides: 3,
-               color: "#7b03fc",
-               fillColor: "#7b03fc",
-               weight: 2
-            }, {
-               label: "Peat",
-               type: "polygonR",
-               sides: 3,
-               color: "#8A9A5B",
-               fillColor: "#8A9A5B",
-               weight: 2
-            }, {
-               label: "Sclerosponge",
-               type: "polygonR",
-               sides: 3,
-               color: "#D2042D",
-               fillColor: "#D2042D",
-               weight: 2
-            }, {
-               label: "Shoreline",
-               type: "polygonR",
-               sides: 4,
-               color: "#40826D",
-               fillColor: "#40826D",
-               weight: 2
-            }, {
-               label: "Speleothem",
-               type: "polygon",
-               sides: 4,
-               color: "#FF1492",
-               fillColor: "#FF1492",
-               weight: 2
-            }, {
-               label: "TerrestrialSediment",
-               type: "circle",
-               radius: 6,
-               color: "#d2b48c",
-               fillColor: "#d2b48c",
-               weight: 2
-            }, {
-               label: "Wood",
-               type: "polygon",
-               sides: 3,
-               color: "#32CC32",
-               fillColor: "#32CC32",
-               weight: 2
-            }, {
-               label: "Documents",
-               type: "star",
-               sides: "5",
-               color: "black",
-               fillColor: "black",
-               weight: 2
-            }, {
-               label: "*Other*",
-               type: "polygonR",
-               sides: "4",
-               color: "black",
-               fillColor: "black",
-               weight: 2
-            }]
-         }).addTo(map);
+         // Legend will be dynamically created by updateLegend() after data is loaded
+         // This shows only the archive types present in the filtered data
 
          // Set up event listeners for draggable rectangle (only for standard projection)
          if (isDraggable) {
