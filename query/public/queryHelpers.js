@@ -406,7 +406,8 @@ var numPoints = +(numdata * 2)
     proxy1 = Object.values(x1)[ii].paleoData_proxy
     minAge = Object.values(x1)[ii].minAge
     maxAge = Object.values(x1)[ii].maxAge
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
+    interpVars = Object.values(x1)[ii].interp_Vars
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": [], "interp_Vars": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
     geojson.features[i].properties.dataSetName.push(dName);
@@ -414,6 +415,7 @@ var numPoints = +(numdata * 2)
     geojson.features[i].properties.paleoData_proxy.push(proxy1);
     geojson.features[i].properties.minAge.push(minAge);
     geojson.features[i].properties.maxAge.push(maxAge);
+    geojson.features[i].properties.interp_Vars.push(interpVars);
   }
 
   return(geojson)
