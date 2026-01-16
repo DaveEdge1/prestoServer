@@ -10,7 +10,7 @@ var interpVarColorPal = {
    "temperature": "#FFD600",
    "precipitation": "#FF8B00",
    "effectivePrecipitation": "#4169E0",
-   "temperature|precipitationIsotope": "#8f8fa1",
+   "temperature|precipitationIsotope": "#FF0000",
    "growingDegreeDays": "#8A4513",
    "temperature|temperature|seawaterIsotope": "#824E2B",
    "precipitation|precipitationIsotope": "#7b03fc",
