@@ -95,7 +95,7 @@ router.get('/', (req, res) => {
       return res.status(500).json({ error: 'Database connection failed' });
     }
     console.log('Connected!');
-    const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId FROM dataSetQuery' + buildQstring(req.query) + ';';
+    const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId, interp_Vars FROM dataSetQuery' + buildQstring(req.query) + ';';
     con.query(query, (err, result) => {
       if (err) {
         console.error('Query error:', err);
