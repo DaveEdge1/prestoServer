@@ -538,6 +538,9 @@
       }
 
       // Global variables
+      window.legendMode = 'archiveType'; // 'archiveType' or 'interpVar'
+      var legendMode = window.legendMode;
+      var legendRadioControl = null; // Track radio control to avoid duplication
       var currentProjection = 'standard';
       var map = null;
       var tiles = null;
@@ -548,6 +551,25 @@
       var regExp = /\(([^)]+)\)/;
       var prevResp = {};
       var inRectCount = 0;
+
+      // Top 15 most common interpretation variables
+      var top15InterpVars = [
+         "temperature",
+         "precipitation",
+         "effectivePrecipitation",
+         "temperature|precipitationIsotope",
+         "growingDegreeDays",
+         "temperature|temperature|seawaterIsotope",
+         "precipitation|precipitationIsotope",
+         "precipitationIsotope",
+         "seaIce",
+         "salinity|seawaterIsotope",
+         "streamflow",
+         "upwelling",
+         "effectivePrecipitation|effectivePrecipitation",
+         "temperature|seawaterIsotope",
+         "salinity"
+      ];
 
       // All possible legend entries (full list)
       var allLegendEntries = {
@@ -683,11 +705,202 @@
          }
       };
 
-      // Function to update legend based on visible archive types
+      // All possible interpretation variable legend entries (top 15 + Other)
+      var allInterpVarEntries = {
+         "temperature": {
+            label: "temperature",
+            type: "polygon",
+            sides: "4",
+            color: "#FFD600",
+            fillColor: "#FFD600",
+            weight: 2
+         },
+         "precipitation": {
+            label: "precipitation",
+            type: "polygonR",
+            sides: 3,
+            color: "#FF8B00",
+            fillColor: "#FF8B00",
+            weight: 2
+         },
+         "effectivePrecipitation": {
+            label: "effectivePrecipitation",
+            type: "circle",
+            radius: 6,
+            color: "#4169E0",
+            fillColor: "#4169E0",
+            weight: 2
+         },
+         "temperature|precipitationIsotope": {
+            label: "temperature|precipitationIsotope",
+            type: "circle",
+            radius: 6,
+            color: "#8f8fa1",
+            fillColor: "#8f8fa1",
+            weight: 2
+         },
+         "growingDegreeDays": {
+            label: "growingDegreeDays",
+            type: "circle",
+            radius: 6,
+            color: "#8A4513",
+            fillColor: "#8A4513",
+            weight: 2
+         },
+         "temperature|temperature|seawaterIsotope": {
+            label: "temperature|temperature|seawaterIsotope",
+            type: "polygonR",
+            sides: 4,
+            color: "#824E2B",
+            fillColor: "#824E2B",
+            weight: 2
+         },
+         "precipitation|precipitationIsotope": {
+            label: "precipitation|precipitationIsotope",
+            type: "polygon",
+            sides: 3,
+            color: "#7b03fc",
+            fillColor: "#7b03fc",
+            weight: 2
+         },
+         "precipitationIsotope": {
+            label: "precipitationIsotope",
+            type: "polygonR",
+            sides: 3,
+            color: "#8A9A5B",
+            fillColor: "#8A9A5B",
+            weight: 2
+         },
+         "seaIce": {
+            label: "seaIce",
+            type: "polygonR",
+            sides: 3,
+            color: "#D2042D",
+            fillColor: "#D2042D",
+            weight: 2
+         },
+         "salinity|seawaterIsotope": {
+            label: "salinity|seawaterIsotope",
+            type: "polygonR",
+            sides: 4,
+            color: "#40826D",
+            fillColor: "#40826D",
+            weight: 2
+         },
+         "streamflow": {
+            label: "streamflow",
+            type: "polygon",
+            sides: 4,
+            color: "#FF1492",
+            fillColor: "#FF1492",
+            weight: 2
+         },
+         "upwelling": {
+            label: "upwelling",
+            type: "circle",
+            radius: 6,
+            color: "#d2b48c",
+            fillColor: "#d2b48c",
+            weight: 2
+         },
+         "effectivePrecipitation|effectivePrecipitation": {
+            label: "effectivePrecipitation|effectivePrecipitation",
+            type: "polygon",
+            sides: 3,
+            color: "#32CC32",
+            fillColor: "#32CC32",
+            weight: 2
+         },
+         "temperature|seawaterIsotope": {
+            label: "temperature|seawaterIsotope",
+            type: "star",
+            sides: "5",
+            color: "#1E90FF",
+            fillColor: "#1E90FF",
+            weight: 2
+         },
+         "salinity": {
+            label: "salinity",
+            type: "polygonR",
+            sides: 4,
+            color: "#9370DB",
+            fillColor: "#9370DB",
+            weight: 2
+         },
+         "*Other*": {
+            label: "*Other*",
+            type: "polygonR",
+            sides: "4",
+            color: "#808080",
+            fillColor: "#808080",
+            weight: 2
+         }
+      };
+
+      // Create legend radio control (only once)
+      function createLegendRadioControl() {
+         if (legendRadioControl) return; // Already created
+
+         var LegendRadioControl = L.Control.extend({
+            options: {
+               position: 'topright'
+            },
+            onAdd: function(map) {
+               var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+               container.style.background = 'white';
+               container.style.padding = '8px';
+               container.style.borderRadius = '4px';
+
+               container.innerHTML =
+                  '<div style="font-weight: bold; margin-bottom: 5px;">Legend Mode:</div>' +
+                  '<label style="display: block; cursor: pointer; margin: 3px 0;">' +
+                  '<input type="radio" name="legendMode" value="archiveType" checked style="margin-right: 5px;"> Archive Type</label>' +
+                  '<label style="display: block; cursor: pointer; margin: 3px 0;">' +
+                  '<input type="radio" name="legendMode" value="interpVar" style="margin-right: 5px;"> Interp. Variable</label>';
+
+               // Handle radio changes
+               var radios = container.querySelectorAll('input[type="radio"]');
+               radios.forEach(function(radio) {
+                  L.DomEvent.on(radio, 'change', function(e) {
+                     window.legendMode = e.target.value;
+                     legendMode = e.target.value;
+                     console.log('Legend mode changed to:', window.legendMode);
+                     updateLegend();
+                     if (originalUpdatePoints && prevResp) {
+                        originalUpdatePoints(prevResp);
+                     }
+                  });
+               });
+
+               // Prevent map interactions when clicking on control
+               L.DomEvent.disableClickPropagation(container);
+               L.DomEvent.disableScrollPropagation(container);
+
+               return container;
+            }
+         });
+
+         legendRadioControl = new LegendRadioControl();
+         if (map) {
+            legendRadioControl.addTo(map);
+         }
+      }
+
+      // Function to update legend based on visible archive types or interpretation variables
       function updateLegend() {
          if (!prevResp || !prevResp.length) return;
 
-         // Collect unique visible archive types from current data
+         // Create radio control if it doesn't exist
+         createLegendRadioControl();
+
+         console.log('updateLegend called, legendMode:', window.legendMode);
+
+         // Determine which legend entries to use based on mode
+         var legendSource = (window.legendMode === 'interpVar') ? allInterpVarEntries : allLegendEntries;
+         var dataField = (window.legendMode === 'interpVar') ? 'interp_Vars' : 'archiveType';
+         var legendTitle = (window.legendMode === 'interpVar') ? 'Interp. Variable' : 'Archive Type';
+
+         // Collect unique visible types from current data
          var visibleTypes = new Set();
          var rectCoord = changeBoxCoord ? changeBoxCoord() : {"South":-90,"West":-180,"North":90,"East":180};
 
@@ -698,18 +911,35 @@
             var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
                            lon >= rectCoord.West && lon <= rectCoord.East;
 
-            if (isVisible && item.archiveType) {
-               visibleTypes.add(item.archiveType);
+            if (isVisible) {
+               var value = item[dataField];
+               console.log(dataField + ' value:', value);
+               if (value) {
+                  // For interpVar mode, check if it's in top 15, otherwise use "*Other*"
+                  if (window.legendMode === 'interpVar') {
+                     if (top15InterpVars.indexOf(value) !== -1) {
+                        visibleTypes.add(value);
+                     } else {
+                        visibleTypes.add('*Other*');
+                     }
+                  } else {
+                     visibleTypes.add(value);
+                  }
+               }
             }
          });
 
+         console.log('Visible types:', Array.from(visibleTypes));
+
          // Build legend entries for visible types only
          var legendEntries = [];
-         visibleTypes.forEach(function(archiveType) {
-            if (allLegendEntries[archiveType]) {
-               legendEntries.push(allLegendEntries[archiveType]);
+         visibleTypes.forEach(function(type) {
+            if (legendSource[type]) {
+               legendEntries.push(legendSource[type]);
             }
          });
+
+         console.log('Legend entries:', legendEntries.length);
 
          // Remove existing legend
          if (legend && map) {
@@ -721,7 +951,7 @@
          if (legendEntries.length > 0 && map) {
             legend = L.control.Legend({
                position: "topright",
-               title: "Archive Type",
+               title: legendTitle,
                collapsed: false,
                symbolWidth: 12,
                symbolHeight: 12,
