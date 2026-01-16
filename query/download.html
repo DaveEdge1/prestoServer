@@ -538,7 +538,7 @@
       }
 
       // Global variables
-      var currentProjection = 'standard';
+      var currentProjection = 'mollweide';
       var map = null;
       var tiles = null;
       var layerGroup = null;
@@ -1061,6 +1061,26 @@
             },
             bounds: [[-90, -180], [90, 180]]
          },
+         mollweide: {
+            crs: new L.Proj.CRS('ESRI:54009',
+               '+proj=moll +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+               {
+                  resolutions: [65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128],
+                  origin: [-18e6, 9e6]
+               }
+            ),
+            center: [0, 0],
+            zoom: 1,
+            minZoom: 0,
+            maxZoom: 6,
+            tileLayer: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}',
+            tileOptions: {
+               attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service',
+               maxZoom: 8,
+               noWrap: true
+            },
+            bounds: [[-90, -180], [90, 180]]
+         },
          antarctic: {
             crs: new L.Proj.CRS('EPSG:3031',
                '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +type=crs',
@@ -1162,9 +1182,9 @@
             document.getElementById('map').innerHTML = '';
          }
 
-         // Add or remove polar-projection class for CSS styling
+         // Add or remove polar-projection class for CSS styling (only for actual polar projections)
          var mapContainer = document.getElementById('map');
-         if (projectionType !== 'standard') {
+         if (projectionType === 'arctic' || projectionType === 'antarctic') {
             mapContainer.classList.add('polar-projection');
          } else {
             mapContainer.classList.remove('polar-projection');
@@ -1197,6 +1217,7 @@
                container.innerHTML =
                   '<div class="projection-title">Map Projection</div>' +
                   '<div class="projection-options">' +
+                  '<label><input type="radio" name="projection" value="mollweide" ' + (currentProjection === 'mollweide' ? 'checked' : '') + '> Mollweide (Equal Area)</label>' +
                   '<label><input type="radio" name="projection" value="standard" ' + (currentProjection === 'standard' ? 'checked' : '') + '> Standard (Web Mercator)</label>' +
                   '<label><input type="radio" name="projection" value="arctic" ' + (currentProjection === 'arctic' ? 'checked' : '') + '> Arctic Polar</label>' +
                   '<label><input type="radio" name="projection" value="antarctic" ' + (currentProjection === 'antarctic' ? 'checked' : '') + '> Antarctic Polar</label>' +
@@ -1272,6 +1293,9 @@
          if (projectionType === 'standard') {
             // Standard projection: use whatever the user has set (default unchecked)
             document.getElementById('boundingBoxNote').style.display = 'block';
+         } else if (projectionType === 'mollweide') {
+            // Mollweide projection: show whole world, don't force coordinate filtering
+            document.getElementById('boundingBoxNote').style.display = 'none';
          } else {
             // Polar projections: enable coordinate filtering by default
             document.getElementById('coordsOn').checked = true;
@@ -1395,8 +1419,8 @@
         });
       })();
 
-      // Initialize with standard projection
-      initMap('standard');
+      // Initialize with Mollweide projection
+      initMap('mollweide');
 
       // Southern Ocean boundary coordinates
       // Based on Orsi et al., 1995 - Circumpolar Fronts
