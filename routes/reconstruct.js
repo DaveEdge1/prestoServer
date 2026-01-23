@@ -31,7 +31,7 @@ async function startPresto(launchText, dirname) {
 const prestoStartHtml = (uniqueID, user, domain, recon, language) => {
   const dirname = path.join(config.paths.userRecons, uniqueID) + '/';
   const prestoGoPath = path.join(config.paths.prestoBase, 'presto', 'prestoGo.js');
-  const execComm = `node ${prestoGoPath} ${uniqueID} ${user} ${domain} ${recon} ${language}`;
+  const execComm = `node ${prestoGoPath} ${uniqueID} ${user} ${domain} ${recon} ${language || ''}`;
   startPresto(execComm, dirname);
 
   const params = reconParams(recon);
@@ -47,16 +47,17 @@ const prestoStartHtml = (uniqueID, user, domain, recon, language) => {
   );
 };
 
-// GET /:recon/:user/:domain/:uniqueID/:language
-router.get('/:recon/:user/:domain/:uniqueID/:language', (req, res) => {
+// GET /:recon/:user/:domain/:uniqueID/:language? - language is optional
+router.get('/:recon/:user/:domain/:uniqueID/:language?', (req, res) => {
   console.log('uniqueID: ' + req.params.uniqueID);
   console.log('reconID: ' + req.params.uniqueID);
+  console.log('language: ' + req.params.language);
   res.send(prestoStartHtml(
     req.params.uniqueID,
     req.params.user,
     req.params.domain,
     req.params.recon,
-    req.params.language
+    req.params.language || ''
   ));
 });
 

@@ -232,37 +232,24 @@ async function transformToLabelValueArray() {
       };
     });
   }
-  function updateBoundingBox(){
-    rect.editing.disable();
-    var latMin = +document.getElementById("lat_min").value
-    var latMax = +document.getElementById("lat_max").value
-    if (latMin > latMax){
-	if (latMin < 90){
-	    latMax = latMin + .001
-	    document.getElementById("lat_max").value = latMax
-	} else {
-	    latMin = latMax - .001
-	    document.getElementById("lat_min").value = latMin
-	}
-    }
-    var lonMin = +document.getElementById("lon_min").value
-    var lonMax = +document.getElementById("lon_max").value
-    if (lonMin > lonMax){
-	if (lonMin < 180){
-	    lonMax = lonMin + .001
-	    document.getElementById("lon_max").value = lonMax
-	} else {
-	    lonMin = lonMax - .001
-	    document.getElementById("lon_min").value = lonMin
-	}
-    }
-    rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
-    rect.editing.enable();
-    return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
-}
-function chooseColor(archiveType, interpVar){
-    // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
-    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+function chooseColor(archiveType, interpVar, proxy){
+    // Check if we're in proxy legend mode (use window.legendMode for cross-script access)
+    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'proxy') {
+        var proxyValue = proxy;
+        if (Array.isArray(proxy)) {
+            proxyValue = proxy[0];
+        }
+        if (Array.isArray(proxyValue)) {
+            proxyValue = proxyValue[0];
+        }
+        proxyValue = proxyValue ? proxyValue.toString().trim() : '';
+
+        if (proxyValue && typeof proxyColorPal[proxyValue] !== 'undefined') {
+            return proxyColorPal[proxyValue];
+        } else {
+            return proxyColorPal["*Other*"] || "#808080";
+        }
+    } else if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
         // Convert interpVar from array to string (same as archiveType handling)
         interpVar = interpVar ? interpVar.toString() : '';
         console.log('chooseColor in interpVar mode, interpVar:', interpVar, 'in top15:', top15InterpVars.indexOf(interpVar) !== -1);
@@ -284,9 +271,24 @@ function chooseColor(archiveType, interpVar){
         }
     }
 }
-function chooseShape(archiveType, interpVar){
-    // Check if we're in interpVar legend mode (use window.legendMode for cross-script access)
-    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+function chooseShape(archiveType, interpVar, proxy){
+    // Check if we're in proxy legend mode (use window.legendMode for cross-script access)
+    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'proxy') {
+        var proxyValue = proxy;
+        if (Array.isArray(proxy)) {
+            proxyValue = proxy[0];
+        }
+        if (Array.isArray(proxyValue)) {
+            proxyValue = proxyValue[0];
+        }
+        proxyValue = proxyValue ? proxyValue.toString().trim() : '';
+
+        if (proxyValue && typeof proxyShapePal[proxyValue] !== 'undefined') {
+            return proxyShapePal[proxyValue];
+        } else {
+            return proxyShapePal["*Other*"] || "diamond";
+        }
+    } else if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
         // Convert interpVar from array to string (same as archiveType handling)
         interpVar = interpVar ? interpVar.toString() : '';
         // Map interpVar to top 15 or "*Other*"
@@ -306,72 +308,6 @@ function chooseShape(archiveType, interpVar){
             return "diamond"
         }
     }
-}
-function chooseOpacity(coords, rect1){
-    //rectSW = regExp.exec(rect._bounds._southWest)[1]
-    //rect1 = changeBoxCoord()
-    var point = regExp.exec(coords)[1]
-    var pointLat = dec4(point.split(',')[0])
-    var pointLon = dec4(point.split(',')[1])
-
-    if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
-	inRectCount = inRectCount + 1
-	return 0.8
-    } else {
-	return 0.1
-    }
-}
-function changeBoxCoord(){
-    var SW = regExp.exec(rect._bounds._southWest)[1]
-    var South = dec4(SW.split(',')[0])
-    var West = dec4(SW.split(',')[1])
-    //var South = dec4(0)
-    //var West = dec4(-90)
-    var NE = regExp.exec(rect._bounds._northEast)[1]
-    var North = dec4(NE.split(',')[0])
-    var East = dec4(NE.split(',')[1])
-    //var North = dec4(45)
-    //var East = dec4(0)
-    //var newCoords = South + ', ' + West + ', ' + North + ', ' + East
-    var rectWidth = +(East-West)
-    rect.editing.disable();
-    if (North > 90){
-	    rect.setBounds([[South, West], [90, East]]);
-
-    }
-    if (South < -90){
-
-	    rect.setBounds([[-90, West], [North, East]]);
-	
-    }
-    if (West < -360){
-
-	    rect.setBounds([[South, -360], [North, East]]);
-
-    }
-    if (East > 360){
-
-	    rect.setBounds([[South, West], [North, 360]]);
-	
-    }
-    if (rectWidth > 360){
-	if (West < -360){
-	    var newWest = +(+East - 360)
-	    rect.setBounds([[South, newWest], [North, East]]);
-	} else {
-	    var newEast = +(+West + 360)
-	    rect.setBounds([[South, West], [North, newEast]]);
-	}
-	
-    }
-    
-	
-    document.getElementById("lat_min").value = South
-    document.getElementById("lat_max").value = North
-    document.getElementById("lon_min").value = West
-    document.getElementById("lon_max").value = East
-    rect.editing.enable();
-    return {"South":South,"West":West,"North":North,"East":East}
 }
 function loadLatLon (a1){
     console.log("loadLatLon received " + a1.length + " datasets");
@@ -813,11 +749,16 @@ getAllMonths = function(startSpan,endSpan){
                     compileLipds(tsJSON)
                         .then(response => {
                             console.log("Success:", response);
-                        if (loc1 == "donwload"){
+                        if (loc1 == "download"){
                             resolve("https://www.google.com")
                         } else {
                             var queryParams = params(useCoords=true)
-                            queryParams = '&' + queryParams.substring(1);
+                            // Check if window.location.search already has query params
+                            if (window.location.search) {
+                                // Append with &
+                                queryParams = '&' + queryParams.substring(1);
+                            }
+                            // If no existing query params, queryParams already starts with ?
                             queryParams = queryParams.replace(/\s/g, '');
                             resolve("/editor/querypath"+window.location.search+queryParams)
                         }
@@ -833,20 +774,34 @@ getAllMonths = function(startSpan,endSpan){
 function updatePoints (coords){
     inRectCount = 0;
     layerGroup.clearLayers();
+
+    // Always read coordinate values from the form
+    var latMin = +document.getElementById("lat_min").value;
+    var latMax = +document.getElementById("lat_max").value;
+    var lonMin = +document.getElementById("lon_min").value;
+    var lonMax = +document.getElementById("lon_max").value;
+
+    console.log('updatePoints: Form values - latMin=' + latMin + ', latMax=' + latMax + ', lonMin=' + lonMin + ', lonMax=' + lonMax);
+    console.log('updatePoints: coordsOn checked =', document.getElementById("coordsOn").checked);
+
     if (!document.getElementById("coordsOn").checked) {
+	// Reset to global bounds when unchecked
 	document.getElementById("lat_min").value = -90
 	document.getElementById("lat_max").value = 90
 	document.getElementById("lon_min").value = -180
 	document.getElementById("lon_max").value = 180
-	//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
-	updateBoundingBox();
 	rectCoord = {"South":-90,"West":-180,"North":90,"East":180};
-	rect.editing.disable();
-	
     } else {
-	rect.editing.enable();
-	rectCoord = changeBoxCoord();
+	// Use the form values when checked
+	// Note: Use isNaN check instead of || because 0 is a valid coordinate
+	rectCoord = {
+	    "South": isNaN(latMin) ? -90 : latMin,
+	    "West": isNaN(lonMin) ? -180 : lonMin,
+	    "North": isNaN(latMax) ? 90 : latMax,
+	    "East": isNaN(lonMax) ? 180 : lonMax
+	};
     }
+    console.log('updatePoints: rectCoord =', rectCoord);
  L.geoJSON([loadLatLon(coords)], {
 
 		style : function(feature) {
@@ -858,50 +813,52 @@ function updatePoints (coords){
 		   maxWidth : 600
 	    });
 	},
-/*
-	    filter: function(feature, layer) {
-		 return feature.properties.archiveType == 'Wood';
-	    },
-*/
+
+	filter: function(feature, layer) {
+	    // Check if point is within coordinate bounds
+	    var lat = feature.geometry.coordinates[1];
+	    var lon = feature.geometry.coordinates[0];
+	    var isInBounds = lat >= rectCoord.South && lat <= rectCoord.North &&
+	                     lon >= rectCoord.West && lon <= rectCoord.East;
+	    if (isInBounds) {
+		inRectCount = inRectCount + 1;
+	    }
+	    // Debug: log first few filtered points
+	    if (inRectCount <= 3) {
+		console.log('Filter check: lat=' + lat + ', lon=' + lon + ', isInBounds=' + isInBounds, ', bounds=', rectCoord);
+	    }
+	    return isInBounds;
+	},
+
 		pointToLayer : function(feature, latlng) {
-	    var col1 = chooseColor(feature.properties.archiveType, feature.properties.interp_Vars)
+	    var col1 = chooseColor(feature.properties.archiveType, feature.properties.interp_Vars, feature.properties.paleoData_proxy)
 	    var aType = feature.properties.archiveType
-	    var shape1 = chooseShape(feature.properties.archiveType, feature.properties.interp_Vars)
-	    var Opac1 = +chooseOpacity(latlng, rectCoord)
+	    var shape1 = chooseShape(feature.properties.archiveType, feature.properties.interp_Vars, feature.properties.paleoData_proxy)
 	    var radius1 = 4
 	    if (aType == "Documents"){
 		radius1 = 6
 	    }
 	    // Only use special ice icons for archiveType mode
 	    var usingArchiveMode = (typeof window.legendMode === 'undefined' || window.legendMode === 'archiveType');
-	    if (aType == "GroundIce" && Opac1 == 0.8 && usingArchiveMode){
+	    if (aType == "GroundIce" && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: groundIce
 		});
-	    } else if (aType == "GlacierIce" && Opac1 == 0.8 && usingArchiveMode){
+	    } else if (aType == "GlacierIce" && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: glacierIce
 		});
-	    } else if (aType == "GroundIce" && Opac1 == 0.1 && usingArchiveMode){
-		return L.marker(latlng, {
-		    icon: groundIceOpac
-		});
-	    } else if (aType == "GlacierIce" && Opac1 == 0.1 && usingArchiveMode){
-		return L.marker(latlng, {
-		    icon: glacierIceOpac
-		});
 	    } else {
 			    return L.shapeMarker(latlng, {
-		    //icon: chooseIcon(feature.properties.archiveType)
-		    
+
 				radius : radius1,
 				fillColor : col1,
 				color : col1,
 				weight : 1,
-		    fillOpacity : Opac1,
+		    fillOpacity : 0.8,
 		    shape : shape1,
 		    opacity : 0.1
-		    
+
 			    });
 	    }
 		}

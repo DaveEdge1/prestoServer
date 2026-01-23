@@ -21,6 +21,12 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
+      # File Paths for Reconstruction
+      - USER_RECONS_PATH=${USER_RECONS_PATH:-/root/presto/userRecons}
+      - PRESTO_FORM_PATH=${PRESTO_FORM_PATH:-/root/presto/prestoForm}
+      - PRESTO_BASE_PATH=${PRESTO_BASE_PATH:-/root/presto}
+      - HOLOCENE_DA_PATH=${HOLOCENE_DA_PATH:-/root/holocene_da}
+      - TEMP12K_PATH=${TEMP12K_PATH:-/root/temp12k-regional-composites}
     volumes:
       # Docker socket for sibling containers (prestoGo.js spawns containers)
       # On Windows: //var/run/docker.sock or use named pipe

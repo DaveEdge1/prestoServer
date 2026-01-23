@@ -21,7 +21,17 @@
       "Bash(grep:*)",
       "Bash(done)",
       "Bash(docker-compose restart:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(docker compose:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(docker image prune:*)",
+      "Bash(docker builder prune:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker cp:*)",
+      "Bash(pkill -f \"docker-compose build\")",
+      "Bash(docker ps:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

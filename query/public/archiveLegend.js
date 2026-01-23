@@ -44,6 +44,35 @@ var interpVarShapePal = {
    "*Other*": "diamond"
 };
 
+// Proxy color and shape palettes (top 10 + Other)
+var proxyColorPal = {
+   "d18O": "#FFD600",           // Yellow
+   "Mg/Ca": "#FF8B00",          // Orange
+   "pollen": "#4169E0",         // Blue
+   "chironomid": "#8A4513",     // Brown
+   "alkenone": "#FF0000",       // Red
+   "ring width": "#32CC32",     // Green
+   "diatom": "#8A9A5B",         // Olive
+   "TEX86": "#D2042D",          // Crimson
+   "charcoal": "#40826D",       // Teal
+   "BSi": "#1E90FF",            // Dodger Blue
+   "*Other*": "#808080"         // Gray
+};
+
+var proxyShapePal = {
+   "d18O": "square",
+   "Mg/Ca": "triangle-down",
+   "pollen": "circle",
+   "chironomid": "circle",
+   "alkenone": "diamond",
+   "ring width": "triangle",
+   "diatom": "triangle-down",
+   "TEX86": "diamond",
+   "charcoal": "square",
+   "BSi": "star-5",
+   "*Other*": "diamond"
+};
+
 var glacierIce = L.icon({
     iconUrl: '/query/glacierIce.png',
 
