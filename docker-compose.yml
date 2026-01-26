@@ -21,6 +21,18 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
+      # GitHub OAuth & Actions Configuration (OPTIONAL)
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL:-http://143.198.98.66/oauth/github/callback}
+      - GITHUB_DEFAULT_VISIBILITY=${GITHUB_DEFAULT_VISIBILITY:-public}
+      # Security Configuration
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      # External Services
+      - GRAPHDB_URL=${GRAPHDB_URL:-https://linkedearth.graphdb.mint.isi.edu}
+      - BASE_URL=${BASE_URL:-http://143.198.98.66}
       # File Paths for Reconstruction
       - USER_RECONS_PATH=${USER_RECONS_PATH:-/root/presto/userRecons}
       - PRESTO_FORM_PATH=${PRESTO_FORM_PATH:-/root/presto/prestoForm}
