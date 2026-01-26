@@ -32,6 +32,19 @@ const config = {
   // External Services
   graphDbUrl: process.env.GRAPHDB_URL || 'https://linkedearth.graphdb.mint.isi.edu',
 
+  // GitHub OAuth & Actions Configuration
+  github: {
+    clientId: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    webhookSecret: process.env.GITHUB_WEBHOOK_SECRET,
+    defaultVisibility: process.env.GITHUB_DEFAULT_VISIBILITY || 'public',
+    callbackUrl: process.env.GITHUB_CALLBACK_URL || 'http://localhost:3000/oauth/github/callback'
+  },
+
+  // Security
+  encryptionKey: process.env.ENCRYPTION_KEY,
+  sessionSecret: process.env.SESSION_SECRET || 'presto-session-secret-change-in-production',
+
   // File Paths (for production Linux server)
   paths: {
     userRecons: process.env.USER_RECONS_PATH || '/root/presto/userRecons',

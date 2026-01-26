@@ -19,6 +19,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const session = require('express-session');
 const config = require('./config');
 
 const app = express();
@@ -29,7 +30,8 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: config.corsOrigins
+  origin: config.corsOrigins,
+  credentials: true
 }));
 
 // Body parsing
@@ -38,6 +40,18 @@ app.use(bodyParser.json({
   limit: '50mb'
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Session configuration
+app.use(session({
+  secret: config.sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: config.nodeEnv === 'production',
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  }
+}));
 
 // Trust proxy (for req.ip behind nginx)
 app.set('trust proxy', true);
@@ -49,6 +63,14 @@ app.set('view engine', 'ejs');
 // ===========================================
 // ROUTES
 // ===========================================
+
+// GitHub OAuth & Integration (new)
+app.use('/oauth', require('./routes/oauth'));
+app.use('/webhooks', require('./routes/webhooks'));
+app.use('/status', require('./routes/status'));
+
+// Serve static files from public directory
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Reconstruction trigger (was prestoServer:3000)
 app.use('/reconstruct', require('./routes/reconstruct'));

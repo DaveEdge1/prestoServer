@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PReSto Reconstruction Status</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <style>
+    body {
+      padding-top: 20px;
+      font-family: 'Roboto', sans-serif;
+    }
+    .status-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+    .status-pending { background-color: #f0ad4e; color: white; }
+    .status-queued { background-color: #5bc0de; color: white; }
+    .status-in_progress { background-color: #0275d8; color: white; }
+    .status-completed { background-color: #5cb85c; color: white; }
+    .status-failed { background-color: #d9534f; color: white; }
+    .status-cancelled { background-color: #6c757d; color: white; }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0275d8;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .info-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+    .events-timeline {
+      margin-top: 20px;
+    }
+    .event-item {
+      padding: 10px;
+      border-left: 3px solid #0275d8;
+      margin-bottom: 10px;
+      background-color: #f8f9fa;
+    }
+    .error-message {
+      padding: 15px;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 4px;
+      color: #721c24;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container status-container">
+    <h1>PReSto Reconstruction Status</h1>
+
+    <div id="loading" style="text-align: center; padding: 40px;">
+      <div class="spinner"></div>
+      <p>Loading reconstruction status...</p>
+    </div>
+
+    <div id="error" class="error-message" style="display: none;">
+      <strong>Error:</strong> <span id="error-message"></span>
+    </div>
+
+    <div id="status-content" style="display: none;">
+      <div class="info-section">
+        <h3>
+          <span id="status-badge" class="status-badge"></span>
+        </h3>
+        <p><strong>Reconstruction ID:</strong> <code id="unique-id"></code></p>
+        <p><strong>Type:</strong> <span id="recon-type"></span></p>
+        <p><strong>Execution Mode:</strong> <span id="execution-mode"></span></p>
+      </div>
+
+      <div id="github-info" class="info-section" style="display: none;">
+        <h4>GitHub Repository</h4>
+        <p>
+          <strong>Repository:</strong>
+          <a id="repo-link" href="#" target="_blank"></a>
+        </p>
+        <p>
+          <strong>Workflow Run:</strong>
+          <a id="workflow-link" href="#" target="_blank">View logs on GitHub</a>
+        </p>
+      </div>
+
+      <div id="timestamps" class="info-section">
+        <h4>Timeline</h4>
+        <p><strong>Created:</strong> <span id="created-time"></span></p>
+        <p id="started-row" style="display: none;"><strong>Started:</strong> <span id="started-time"></span></p>
+        <p id="completed-row" style="display: none;"><strong>Completed:</strong> <span id="completed-time"></span></p>
+        <p id="duration-row" style="display: none;"><strong>Duration:</strong> <span id="duration"></span></p>
+      </div>
+
+      <div id="events-section" class="info-section events-timeline" style="display: none;">
+        <h4>Recent Events</h4>
+        <div id="events-list"></div>
+      </div>
+
+      <div id="auto-refresh" style="margin-top: 20px; text-align: center;">
+        <p class="text-muted">
+          <small>Auto-refreshing every 10 seconds... <span id="countdown">10</span>s</small>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const uniqueID = window.location.pathname.split('/').pop();
+    let refreshInterval;
+    let countdownInterval;
+    let countdown = 10;
+
+    function formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    }
+
+    function formatDuration(seconds) {
+      if (!seconds) return 'N/A';
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${secs}s`;
+      }
+      if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+      }
+      return `${secs}s`;
+    }
+
+    function updateStatus(data) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('status-content').style.display = 'block';
+
+      // Status badge
+      const statusBadge = document.getElementById('status-badge');
+      statusBadge.textContent = data.status;
+      statusBadge.className = 'status-badge status-' + data.status;
+
+      // Basic info
+      document.getElementById('unique-id').textContent = data.uniqueId;
+      document.getElementById('recon-type').textContent = data.reconType;
+      document.getElementById('execution-mode').textContent = data.executionMode;
+
+      // GitHub info
+      if (data.repository && data.repository.url) {
+        document.getElementById('github-info').style.display = 'block';
+        const repoLink = document.getElementById('repo-link');
+        repoLink.href = data.repository.url;
+        repoLink.textContent = data.repository.name;
+
+        if (data.workflowRunId) {
+          const workflowLink = document.getElementById('workflow-link');
+          workflowLink.href = `${data.repository.url}/actions/runs/${data.workflowRunId}`;
+        }
+      }
+
+      // Timestamps
+      document.getElementById('created-time').textContent = formatDate(data.timestamps.created);
+
+      if (data.timestamps.started) {
+        document.getElementById('started-row').style.display = 'block';
+        document.getElementById('started-time').textContent = formatDate(data.timestamps.started);
+      }
+
+      if (data.timestamps.completed) {
+        document.getElementById('completed-row').style.display = 'block';
+        document.getElementById('completed-time').textContent = formatDate(data.timestamps.completed);
+      }
+
+      if (data.duration) {
+        document.getElementById('duration-row').style.display = 'block';
+        document.getElementById('duration').textContent = formatDuration(data.duration);
+      }
+
+      // Events
+      if (data.events && data.events.length > 0) {
+        document.getElementById('events-section').style.display = 'block';
+        const eventsList = document.getElementById('events-list');
+        eventsList.innerHTML = data.events.map(event => `
+          <div class="event-item">
+            <strong>${event.type}</strong><br>
+            <small class="text-muted">${formatDate(event.timestamp)}</small>
+          </div>
+        `).join('');
+      }
+
+      // Hide auto-refresh if completed
+      if (data.status === 'completed' || data.status === 'failed' || data.status === 'cancelled') {
+        document.getElementById('auto-refresh').style.display = 'none';
+        clearInterval(refreshInterval);
+        clearInterval(countdownInterval);
+      }
+    }
+
+    function showError(message) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error-message').textContent = message;
+    }
+
+    async function fetchStatus() {
+      try {
+        const response = await fetch(`/status/api/${uniqueID}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch status');
+        }
+        const data = await response.json();
+        updateStatus(data);
+        countdown = 10;
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function startCountdown() {
+      countdownInterval = setInterval(() => {
+        countdown--;
+        const countdownEl = document.getElementById('countdown');
+        if (countdownEl) {
+          countdownEl.textContent = countdown;
+        }
+        if (countdown <= 0) {
+          countdown = 10;
+        }
+      }, 1000);
+    }
+
+    // Initial fetch
+    fetchStatus();
+
+    // Auto-refresh every 10 seconds
+    refreshInterval = setInterval(fetchStatus, 10000);
+    startCountdown();
+  </script>
+</body>
+</html>

@@ -618,11 +618,69 @@ popQueryVariable()
 <br>
 <br>
 <br>
+
+<!-- GitHub Authentication Section -->
+<div id="github-auth-section" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
+  <div id="github-login" style="display:none;">
+    <h4 style="color: #333; margin-bottom: 10px;">Store Results Permanently in GitHub</h4>
+    <p style="color: #666; margin-bottom: 15px;">
+      Login with GitHub to run your reconstruction via GitHub Actions and store results permanently in your own repository.
+    </p>
+    <a href="/oauth/github?returnTo=/forms/holocene_da.html" class="btn btn-default" style="background-color: #24292e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
+      <svg height="20" width="20" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 8px; fill: white;">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      Login with GitHub
+    </a>
+  </div>
+  <div id="github-authenticated" style="display:none;">
+    <h4 style="color: #333; margin-bottom: 10px;">GitHub Actions Execution</h4>
+    <p style="color: #666; margin-bottom: 10px;">
+      <strong>Logged in as:</strong> <span id="github-username" style="color: #0366d6;"></span>
+      <button onclick="logoutGitHub()" class="btn btn-sm btn-link" style="margin-left: 10px; padding: 2px 8px;">Logout</button>
+    </p>
+    <label style="cursor: pointer; color: #333;">
+      <input type="checkbox" id="use-github-actions" name="useGitHubActions" value="true" checked style="margin-right: 8px;"/>
+      <strong>Run reconstruction in GitHub Actions</strong> (beta - stores results permanently in your GitHub account)
+    </label>
+    <p style="color: #666; font-size: 12px; margin-top: 5px; margin-left: 24px;">
+      Your reconstruction will be stored in a new GitHub repository with full transparency and version control.
+    </p>
+  </div>
+</div>
+
 <div class="button-submit">
 <button style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
 </div>
 </form>
 <script>
+// Check GitHub authentication status
+fetch('/oauth/github/status')
+  .then(r => r.json())
+  .then(data => {
+    if (data.authenticated) {
+      document.getElementById('github-authenticated').style.display = 'block';
+      document.getElementById('github-username').textContent = data.username;
+    } else {
+      document.getElementById('github-login').style.display = 'block';
+    }
+  })
+  .catch(err => {
+    console.error('Failed to check GitHub auth status:', err);
+    document.getElementById('github-login').style.display = 'block';
+  });
+
+function logoutGitHub() {
+  if (confirm('Logout from GitHub?')) {
+    fetch('/oauth/github/logout', { method: 'POST' })
+      .then(() => location.reload())
+      .catch(err => {
+        console.error('Logout failed:', err);
+        alert('Logout failed. Please try again.');
+      });
+  }
+}
+
 function buildURL(){
   if (confirm("Submit Custom Reconstruction request?")){
     var urlParams = new URLSearchParams(window.location.search);

@@ -146,18 +146,122 @@ router.get('/querypath', (req, res) => {
 });
 
 // POST /sendReconRequest - Submit reconstruction request
-router.post('/sendReconRequest', (req, res) => {
+router.post('/sendReconRequest', async (req, res) => {
   console.log(req.query.uniqueID);
-  res.redirect(
-    writeConfigs(
-      req.query.recon,
-      req.query.user,
-      req.query.domain,
-      req.body,
-      req.query.uniqueID,
-      req.query.language
-    )
-  );
+
+  const { recon, user, domain, uniqueID, language } = req.query;
+  const useGitHubActions = req.body.useGitHubActions === 'true';
+
+  // Check if user wants GitHub Actions and is authenticated
+  if (useGitHubActions && req.session.userId) {
+    try {
+      const githubService = require('../services/github');
+      const mysql = require('mysql2/promise');
+      const db = await mysql.createPool(config.mysql);
+
+      // Save configuration to prestoForm directory
+      const reconID = uniqueID + '_' + recon;
+      const configLoc = path.join(config.paths.prestoForm, recon, 'configs.yml');
+      const configPath = editConfigs(configLoc, req.body, recon, reconID);
+
+      // Prepare configuration data for GitHub repository
+      const configData = {
+        ...req.body,
+        recon: recon,
+        user: user,
+        domain: domain,
+        uniqueID: uniqueID,
+        language: language || 'en'
+      };
+
+      // Get user's GitHub token
+      const [tokens] = await db.query(
+        'SELECT encrypted_token FROM github_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+        [req.session.userId]
+      );
+
+      if (tokens.length === 0) {
+        throw new Error('GitHub token not found. Please login again.');
+      }
+
+      const token = githubService.decryptToken(tokens[0].encrypted_token);
+
+      // Create GitHub repository
+      console.log(`Creating GitHub repository for ${recon} reconstruction ${uniqueID}...`);
+      const repo = await githubService.createRepository(
+        token,
+        recon,
+        uniqueID,
+        configData
+      );
+
+      console.log(`Repository created: ${repo.url}`);
+
+      // Dispatch workflow
+      console.log(`Dispatching workflow for ${repo.name}...`);
+      const workflowRun = await githubService.dispatchWorkflow(
+        token,
+        repo.owner,
+        repo.name,
+        {
+          unique_id: uniqueID,
+          recon_type: recon
+        }
+      );
+
+      console.log(`Workflow dispatched: ${workflowRun.html_url}`);
+
+      // Save job to database
+      await db.query(
+        `INSERT INTO reconstruction_jobs
+         (unique_id, user_id, email, recon_type, execution_mode, github_repo_name, github_repo_url, workflow_run_id, workflow_status, config_json)
+         VALUES (?, ?, ?, ?, 'github_actions', ?, ?, ?, 'queued', ?)`,
+        [
+          uniqueID,
+          req.session.userId,
+          user + '@' + domain,
+          recon,
+          repo.name,
+          repo.url,
+          workflowRun.id,
+          JSON.stringify(configData)
+        ]
+      );
+
+      console.log(`Job saved to database for ${uniqueID}`);
+
+      // Redirect to status page
+      res.redirect(`/status/${uniqueID}?repo=${encodeURIComponent(repo.url)}`);
+
+    } catch (error) {
+      console.error('GitHub Actions error:', error);
+
+      // Fallback to traditional workflow
+      console.warn('Falling back to traditional workflow...');
+      res.redirect(
+        writeConfigs(
+          req.query.recon,
+          req.query.user,
+          req.query.domain,
+          req.body,
+          req.query.uniqueID,
+          req.query.language
+        )
+      );
+    }
+  } else {
+    // Traditional workflow (existing code)
+    res.redirect(
+      writeConfigs(
+        req.query.recon,
+        req.query.user,
+        req.query.domain,
+        req.body,
+        req.query.uniqueID,
+        req.query.language
+      )
+    );
+  }
 });
 
 module.exports = router;

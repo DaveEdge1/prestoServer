@@ -1,0 +1,105 @@
+name: Holocene DA Reconstruction
+
+on:
+  workflow_dispatch:
+    inputs:
+      unique_id:
+        description: 'Unique reconstruction ID'
+        required: true
+        type: string
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up environment
+        run: |
+          echo "RECON_TYPE=holocene_da" >> $GITHUB_ENV
+          echo "UNIQUE_ID=${{ github.event.inputs.unique_id }}" >> $GITHUB_ENV
+          echo "RESULTS_DIR=${{ github.workspace }}/results" >> $GITHUB_ENV
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create results directory
+        run: |
+          mkdir -p results/data
+          mkdir -p results/viz
+          mkdir -p results/logs
+
+      - name: Gather LiPD proxy data
+        run: |
+          chmod +x scripts/gather_lipd_data.sh
+          ./scripts/gather_lipd_data.sh
+        env:
+          CONFIG_FILE: config/user_config.yml
+
+      - name: Run Holocene DA reconstruction
+        run: |
+          chmod +x scripts/run_reconstruction.sh
+          ./scripts/run_reconstruction.sh
+        env:
+          DOCKER_IMAGE: davidedge/lipd_webapps:holocene_da
+          CONFIG_FILE: config/user_config.yml
+
+      - name: Generate visualizations
+        if: success()
+        run: |
+          chmod +x scripts/generate_visualizations.sh
+          ./scripts/generate_visualizations.sh
+        env:
+          DOCKER_IMAGE: davidedge/lipd_webapps:holocene_da_viz
+
+      - name: Upload reconstruction results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconstruction-results-${{ github.event.inputs.unique_id }}
+          path: results/
+          retention-days: 90
+
+      - name: Commit results to repository
+        if: success()
+        run: |
+          git config user.name "PReSto Bot"
+          git config user.email "no-reply@paleopresto.com"
+          git add results/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add reconstruction results for ${{ github.event.inputs.unique_id }}"
+            git push
+          fi
+
+      - name: Deploy visualizations to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./results/viz
+          destination_dir: .
+          commit_message: "Deploy visualizations for ${{ github.event.inputs.unique_id }}"
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Reconstruction Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reconstruction ID:** ${{ github.event.inputs.unique_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Type:** Holocene DA" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -d "results" ]; then
+            echo "### Results Files" >> $GITHUB_STEP_SUMMARY
+            find results -type f | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+          fi
