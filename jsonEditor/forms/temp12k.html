@@ -238,34 +238,79 @@ popQueryVariable()
 <br>
 <br>
 
-<!-- GitHub Authentication Section -->
-<div id="github-auth-section" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
-  <div id="github-login" style="display:none;">
-    <h4 style="color: #333; margin-bottom: 10px;">Store Results Permanently in GitHub</h4>
-    <p style="color: #666; margin-bottom: 15px;">
-      Login with GitHub to run your reconstruction via GitHub Actions and store results permanently in your own repository.
-    </p>
-    <a href="/oauth/github?returnTo=/forms/temp12k.html" class="btn btn-default" style="background-color: #24292e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
-      <svg height="20" width="20" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 8px; fill: white;">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-      </svg>
-      Login with GitHub
-    </a>
+<!-- GitHub Actions Execution Options -->
+<div id="github-options-section" style="margin: 20px 0;">
+  <h3 style="color: #333; margin-bottom: 15px;">Execution Options</h3>
+
+  <!-- Option 1: Quick Run (Anonymous via GitHub App) -->
+  <div style="margin-bottom: 15px; padding: 15px; background-color: #f0f7ff; border-radius: 8px; border: 2px solid #0969da;">
+    <div style="display: flex; align-items: start;">
+      <input type="radio" name="executionMode" value="anonymous" id="mode-anonymous" checked style="margin-top: 3px; margin-right: 10px;">
+      <div style="flex: 1;">
+        <label for="mode-anonymous" style="cursor: pointer; font-weight: bold; color: #0969da; font-size: 16px; display: block; margin-bottom: 5px;">
+          Quick Run (No Login Required)
+        </label>
+        <p style="color: #666; font-size: 14px; margin: 5px 0;">
+          Results will be stored in our public archive for 90 days. Perfect for testing and demos.
+        </p>
+        <p style="color: #888; font-size: 12px; margin: 5px 0;">
+          Repository: <code style="background: #e7f3ff; padding: 2px 6px; border-radius: 3px;">presto-reconstructions/temp12k-...</code>
+        </p>
+      </div>
+    </div>
   </div>
-  <div id="github-authenticated" style="display:none;">
-    <h4 style="color: #333; margin-bottom: 10px;">GitHub Actions Execution</h4>
-    <p style="color: #666; margin-bottom: 10px;">
-      <strong>Logged in as:</strong> <span id="github-username" style="color: #0366d6;"></span>
-      <button onclick="logoutGitHub()" class="btn btn-sm btn-link" style="margin-left: 10px; padding: 2px 8px;">Logout</button>
-    </p>
-    <label style="cursor: pointer; color: #333;">
-      <input type="checkbox" id="use-github-actions" name="useGitHubActions" value="true" checked style="margin-right: 8px;"/>
-      <strong>Run reconstruction in GitHub Actions</strong> (beta - stores results permanently in your GitHub account)
-    </label>
-    <p style="color: #666; font-size: 12px; margin-top: 5px; margin-left: 24px;">
-      Your reconstruction will be stored in a new GitHub repository with full transparency and version control.
-    </p>
+
+  <!-- Option 2: Personal Run (OAuth) -->
+  <div style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #d1d5db;">
+    <div style="display: flex; align-items: start;">
+      <input type="radio" name="executionMode" value="personal" id="mode-personal" style="margin-top: 3px; margin-right: 10px;">
+      <div style="flex: 1;">
+        <label for="mode-personal" style="cursor: pointer; font-weight: bold; color: #333; font-size: 16px; display: block; margin-bottom: 5px;">
+          Run in Your GitHub Account
+        </label>
+        <div id="personal-mode-content">
+          <div id="github-login" style="display:none;">
+            <p style="color: #666; font-size: 14px; margin: 5px 0 10px 0;">
+              Login to store results permanently in your own GitHub repository. You maintain full control and ownership.
+            </p>
+            <a href="/oauth/github?returnTo=/forms/temp12k.html" class="btn btn-default" style="background-color: #24292e; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 14px;">
+              <svg height="16" width="16" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 6px; fill: white;">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+              </svg>
+              Login with GitHub
+            </a>
+          </div>
+          <div id="github-authenticated" style="display:none;">
+            <p style="color: #666; font-size: 14px; margin: 5px 0;">
+              <strong>Logged in as:</strong> <span id="github-username" style="color: #0969da;"></span>
+              <button onclick="logoutGitHub()" class="btn btn-sm btn-link" style="margin-left: 10px; padding: 0; font-size: 12px; color: #666;">Logout</button>
+            </p>
+            <p style="color: #888; font-size: 12px; margin: 5px 0;">
+              Repository: <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;"><span id="github-username-code"></span>/presto-temp12k-...</code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Option 3: Traditional Workflow (Local) -->
+  <div style="margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #d1d5db;">
+    <div style="display: flex; align-items: start;">
+      <input type="radio" name="executionMode" value="traditional" id="mode-traditional" style="margin-top: 3px; margin-right: 10px;">
+      <div style="flex: 1;">
+        <label for="mode-traditional" style="cursor: pointer; font-weight: bold; color: #333; font-size: 16px; display: block; margin-bottom: 5px;">
+          Traditional Workflow (Email Results)
+        </label>
+        <p style="color: #666; font-size: 14px; margin: 5px 0;">
+          Run reconstruction on our server and receive results via email. Results are not stored permanently.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden input for form submission -->
+  <input type="hidden" id="use-github-actions" name="useGitHubActions" value="true">
 </div>
 
 <div class="button-submit">
@@ -274,13 +319,22 @@ popQueryVariable()
 </form>
 <script>
 // Check GitHub authentication status
+let isUserAuthenticated = false;
+
 fetch('/oauth/github/status')
   .then(r => r.json())
   .then(data => {
+    isUserAuthenticated = data.authenticated;
     if (data.authenticated) {
+      // User is logged in - show authenticated state
       document.getElementById('github-authenticated').style.display = 'block';
       document.getElementById('github-username').textContent = data.username;
+      document.getElementById('github-username-code').textContent = data.username;
+      // Auto-select personal mode if logged in
+      document.getElementById('mode-personal').checked = true;
+      updateExecutionMode();
     } else {
+      // User is not logged in - show login button
       document.getElementById('github-login').style.display = 'block';
     }
   })
@@ -288,6 +342,40 @@ fetch('/oauth/github/status')
     console.error('Failed to check GitHub auth status:', err);
     document.getElementById('github-login').style.display = 'block';
   });
+
+// Handle execution mode changes
+document.querySelectorAll('input[name="executionMode"]').forEach(radio => {
+  radio.addEventListener('change', updateExecutionMode);
+});
+
+function updateExecutionMode() {
+  const selectedMode = document.querySelector('input[name="executionMode"]:checked').value;
+  const useGitHubActionsInput = document.getElementById('use-github-actions');
+
+  switch (selectedMode) {
+    case 'anonymous':
+      // Anonymous mode - use GitHub Actions without login
+      useGitHubActionsInput.value = 'true';
+      break;
+    case 'personal':
+      // Personal mode - use GitHub Actions with OAuth
+      if (!isUserAuthenticated) {
+        alert('Please login with GitHub to use personal mode');
+        document.getElementById('mode-anonymous').checked = true;
+        updateExecutionMode();
+        return;
+      }
+      useGitHubActionsInput.value = 'true';
+      break;
+    case 'traditional':
+      // Traditional workflow - no GitHub Actions
+      useGitHubActionsInput.value = 'false';
+      break;
+  }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', updateExecutionMode);
 
 function logoutGitHub() {
   if (confirm('Logout from GitHub?')) {

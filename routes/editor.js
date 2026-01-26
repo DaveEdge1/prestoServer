@@ -151,11 +151,11 @@ router.post('/sendReconRequest', async (req, res) => {
 
   const { recon, user, domain, uniqueID, language } = req.query;
   const useGitHubActions = req.body.useGitHubActions === 'true';
+  const isAuthenticated = !!(req.session && req.session.userId);
 
-  // Check if user wants GitHub Actions and is authenticated
-  if (useGitHubActions && req.session.userId) {
+  // GitHub Actions workflow (OAuth or App)
+  if (useGitHubActions) {
     try {
-      const githubService = require('../services/github');
       const mysql = require('mysql2/promise');
       const db = await mysql.createPool(config.mysql);
 
@@ -174,61 +174,110 @@ router.post('/sendReconRequest', async (req, res) => {
         language: language || 'en'
       };
 
-      // Get user's GitHub token
-      const [tokens] = await db.query(
-        'SELECT encrypted_token FROM github_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
-        [req.session.userId]
-      );
+      let repo, authType, isAnonymous, userId, githubOrg;
 
-      if (tokens.length === 0) {
-        throw new Error('GitHub token not found. Please login again.');
+      // OPTION 1: OAuth - Personal Repository (User is authenticated)
+      if (isAuthenticated) {
+        console.log(`Creating personal GitHub repository for ${recon} reconstruction ${uniqueID}...`);
+
+        const githubService = require('../services/github');
+
+        // Get user's GitHub token
+        const [tokens] = await db.query(
+          'SELECT encrypted_token FROM github_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+          [req.session.userId]
+        );
+
+        if (tokens.length === 0) {
+          throw new Error('GitHub token not found. Please login again.');
+        }
+
+        const token = githubService.decryptToken(tokens[0].encrypted_token);
+
+        // Create repository in user's account
+        const repoData = await githubService.createRepository(
+          token,
+          recon,
+          uniqueID,
+          configData
+        );
+
+        // Dispatch workflow
+        console.log(`Dispatching workflow for ${repoData.name}...`);
+        const workflowRun = await githubService.dispatchWorkflow(
+          token,
+          repoData.owner,
+          repoData.name,
+          {
+            unique_id: uniqueID,
+            recon_type: recon
+          }
+        );
+
+        repo = {
+          name: repoData.name,
+          url: repoData.url,
+          workflowRunId: workflowRun.id
+        };
+        authType = 'oauth';
+        isAnonymous = false;
+        userId = req.session.userId;
+        githubOrg = null;
+
+        console.log(`Personal repository created: ${repo.url}`);
+      }
+      // OPTION 2: GitHub App - Anonymous/Centralized Repository
+      else {
+        console.log(`Creating anonymous GitHub repository for ${recon} reconstruction ${uniqueID}...`);
+
+        const githubAppService = require('../services/githubApp');
+
+        // Check if GitHub App is available
+        if (!githubAppService.isAvailable()) {
+          throw new Error('Anonymous reconstructions are not available. Please login with GitHub or use traditional workflow.');
+        }
+
+        // Create and run reconstruction using GitHub App
+        const result = await githubAppService.createAndRunReconstruction({
+          uniqueId: uniqueID,
+          reconType: recon,
+          formData: configData
+        });
+
+        repo = {
+          name: result.repoName,
+          url: result.repoUrl,
+          workflowRunId: null // GitHub App doesn't return workflow run ID immediately
+        };
+        authType = 'github_app';
+        isAnonymous = true;
+        userId = null;
+        githubOrg = result.organization;
+
+        console.log(`Anonymous repository created: ${repo.url}`);
       }
 
-      const token = githubService.decryptToken(tokens[0].encrypted_token);
-
-      // Create GitHub repository
-      console.log(`Creating GitHub repository for ${recon} reconstruction ${uniqueID}...`);
-      const repo = await githubService.createRepository(
-        token,
-        recon,
-        uniqueID,
-        configData
-      );
-
-      console.log(`Repository created: ${repo.url}`);
-
-      // Dispatch workflow
-      console.log(`Dispatching workflow for ${repo.name}...`);
-      const workflowRun = await githubService.dispatchWorkflow(
-        token,
-        repo.owner,
-        repo.name,
-        {
-          unique_id: uniqueID,
-          recon_type: recon
-        }
-      );
-
-      console.log(`Workflow dispatched: ${workflowRun.html_url}`);
-
-      // Save job to database
+      // Save job to database with auth type tracking
       await db.query(
         `INSERT INTO reconstruction_jobs
-         (unique_id, user_id, email, recon_type, execution_mode, github_repo_name, github_repo_url, workflow_run_id, workflow_status, config_json)
-         VALUES (?, ?, ?, ?, 'github_actions', ?, ?, ?, 'queued', ?)`,
+         (unique_id, user_id, email, recon_type, execution_mode, github_repo_name, github_repo_url, workflow_run_id, workflow_status, config_json, auth_type, is_anonymous, github_org)
+         VALUES (?, ?, ?, ?, 'github_actions', ?, ?, ?, 'queued', ?, ?, ?, ?)`,
         [
           uniqueID,
-          req.session.userId,
+          userId,
           user + '@' + domain,
           recon,
           repo.name,
           repo.url,
-          workflowRun.id,
-          JSON.stringify(configData)
+          repo.workflowRunId,
+          JSON.stringify(configData),
+          authType,
+          isAnonymous,
+          githubOrg
         ]
       );
 
-      console.log(`Job saved to database for ${uniqueID}`);
+      console.log(`Job saved to database for ${uniqueID} (auth_type: ${authType})`);
 
       // Redirect to status page
       res.redirect(`/status/${uniqueID}?repo=${encodeURIComponent(repo.url)}`);
