@@ -31,5 +31,13 @@
     "github": "https://lipdverse.org/",
     "conTag": "",
     "translate": "false"
+  },
+  "LMR": {
+    "title": "Last Millennium Reanalysis (LMR) reconstruction",
+    "paramsCon": "/lmr_configs.yml",
+    "resultsDir": "/recons",
+    "github": "https://github.com/fzhu2e/cfr",
+    "conTag": "davidedge/lmr2:latest",
+    "translate": "false"
   }
 }

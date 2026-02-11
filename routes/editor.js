@@ -202,16 +202,55 @@ router.post('/sendReconRequest', async (req, res) => {
           configData
         );
 
+        // LMR-specific: Generate and upload LiPD pickle
+        let lipdDataUrl = null;
+        if (recon === 'LMR') {
+          console.log('Generating LiPD data for LMR reconstruction...');
+
+          const lipdService = require('../services/lipdDataService');
+
+          // Extract query parameters from formData
+          const queryParams = {
+            compilation: req.body.data_selection_compilation || 'PAGES2kv2',
+            coords: [
+              parseFloat(req.body.geo_proxy_coords?.[0] || -90),
+              parseFloat(req.body.geo_proxy_coords?.[1] || 90),
+              parseFloat(req.body.geo_proxy_coords?.[2] || -180),
+              parseFloat(req.body.geo_proxy_coords?.[3] || 180)
+            ],
+            archiveTypes: req.body.data_selection_archive_types || null,
+            variableName: req.body.paleoData_variableName || null
+          };
+
+          // Generate and upload pickle to repository
+          lipdDataUrl = await lipdService.generateAndUploadLipdPickle(
+            queryParams,
+            uniqueID,
+            token,
+            repoData.owner,
+            repoData.name
+          );
+
+          console.log(`LiPD data uploaded: ${lipdDataUrl}`);
+        }
+
         // Dispatch workflow
         console.log(`Dispatching workflow for ${repoData.name}...`);
+        const workflowInputs = {
+          unique_id: uniqueID,
+          recon_type: recon
+        };
+
+        // Add lipd_data_url for LMR
+        if (recon === 'LMR' && lipdDataUrl) {
+          workflowInputs.lipd_data_url = lipdDataUrl;
+        }
+
         const workflowRun = await githubService.dispatchWorkflow(
           token,
           repoData.owner,
           repoData.name,
-          {
-            unique_id: uniqueID,
-            recon_type: recon
-          }
+          workflowInputs
         );
 
         repo = {

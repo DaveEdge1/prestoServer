@@ -654,7 +654,7 @@ popQueryVariable()
             <p style="color: #666; font-size: 14px; margin: 5px 0 10px 0;">
               Login to store results permanently in your own GitHub repository. You maintain full control and ownership.
             </p>
-            <a href="/oauth/github?returnTo=/forms/holocene_da.html" class="btn btn-default" style="background-color: #24292e; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 14px;">
+            <a href="#" id="github-login-link" class="btn btn-default" style="background-color: #24292e; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; font-size: 14px;">
               <svg height="16" width="16" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 6px; fill: white;">
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
               </svg>
@@ -701,6 +701,16 @@ popQueryVariable()
 <script>
 // Check GitHub authentication status
 let isUserAuthenticated = false;
+
+// Set up OAuth login link with current URL as returnTo
+document.addEventListener('DOMContentLoaded', function() {
+  const loginLink = document.getElementById('github-login-link');
+  if (loginLink) {
+    // Capture the current full URL (including query params) to return after OAuth
+    const currentUrl = window.location.pathname + window.location.search;
+    loginLink.href = '/oauth/github?returnTo=' + encodeURIComponent(currentUrl);
+  }
+});
 
 fetch('/oauth/github/status')
   .then(r => r.json())
@@ -770,15 +780,40 @@ function logoutGitHub() {
 }
 
 function buildURL(){
-  if (confirm("Submit Custom Reconstruction request?")){
-    var urlParams = new URLSearchParams(window.location.search);
-    document.getElementById("paramsForm").method = "POST"
-    document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")
-    return true;
-  } else {
-    document.getElementById("paramsForm").action = ""
+  const selectedMode = document.querySelector('input[name="executionMode"]:checked').value;
+
+  // Check if personal mode is selected but user is not authenticated
+  if (selectedMode === 'personal' && !isUserAuthenticated) {
+    alert('Please login with GitHub first to use personal mode.\n\nClick the "Login with GitHub" button in the "Run in Your GitHub Account" section above.');
+    // Select the personal mode option to show the login button
+    document.getElementById('mode-personal').checked = true;
     return false;
-  };
+  }
+
+  // Confirm submission based on mode
+  let confirmMessage = '';
+  switch (selectedMode) {
+    case 'anonymous':
+      confirmMessage = 'Submit reconstruction?\n\nResults will be stored in public archive (presto-reconstructions) for 90 days.';
+      break;
+    case 'personal':
+      confirmMessage = 'Submit reconstruction?\n\nA new repository will be created in your GitHub account.';
+      break;
+    case 'traditional':
+      confirmMessage = 'Submit reconstruction?\n\nResults will be emailed to you when complete.';
+      break;
+  }
+
+  if (!confirm(confirmMessage)) {
+    return false;
+  }
+
+  // Set form action and submit
+  var urlParams = new URLSearchParams(window.location.search);
+  document.getElementById("paramsForm").method = "POST";
+  document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language");
+
+  return true;
 }
 </script>
 <script>

@@ -160,27 +160,29 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
     message: `Add ${recon} reconstruction workflow`
   });
 
-  // 2. Shell scripts
-  const scripts = ['gather_lipd_data.sh', 'run_reconstruction.sh'];
-  if (recon === 'holocene_da') {
-    scripts.push('generate_visualizations.sh');
-  }
+  // 2. Shell scripts (not needed for download or LMR - they use different workflows)
+  if (recon !== 'download' && recon !== 'LMR') {
+    const scripts = ['gather_lipd_data.sh', 'run_reconstruction.sh'];
+    if (recon === 'holocene_da') {
+      scripts.push('generate_visualizations.sh');
+    }
 
-  for (const script of scripts) {
-    const scriptPath = `scripts/${script}`;
-    const scriptContent = fs.readFileSync(
-      path.join(templateDir, 'scripts', script),
-      'utf8'
-    );
-    filesToCreate.push({
-      path: scriptPath,
-      content: scriptContent,
-      message: `Add ${script} script`
-    });
+    for (const script of scripts) {
+      const scriptPath = `scripts/${script}`;
+      const scriptContent = fs.readFileSync(
+        path.join(templateDir, 'scripts', script),
+        'utf8'
+      );
+      filesToCreate.push({
+        path: scriptPath,
+        content: scriptContent,
+        message: `Add ${script} script`
+      });
+    }
   }
 
   // 3. User configuration
-  const configPath = 'config/user_config.yml';
+  const configPath = recon === 'LMR' ? 'config/lmr_configs.yml' : 'config/user_config.yml';
   const configYaml = yaml.dump(configData);
   filesToCreate.push({
     path: configPath,
