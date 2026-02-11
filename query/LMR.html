@@ -176,18 +176,18 @@
                <br><br><br>
                <label id="archivedCompilation_label" for="archivedCompilation">Use an archived compilation</label>
                <br>
-               <input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
+               <input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();' checked>
                <br><br><br>
             </div>
-            <form style="max-width: 90%; display:none; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
-               <div id="archivedCompilationGroup"  style="display:none;" class="form-group">
+            <form style="max-width: 90%; display:block; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
+               <div id="archivedCompilationGroup"  style="display:block;" class="form-group">
                   <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilation_label" for="archivedCompilation">Archived Compilation</label>
                   <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
                      <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
                   </div>
-                  <input style="width:80%;" name="archivedCompilationIn" id="archivedCompilationIn" value="">
+                  <input style="width:80%;" name="archivedCompilationIn" id="archivedCompilationIn" value="Pages2kTemperature">
                   <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilationVersionIn_label" for="archivedCompilationVersionIn">Compilation Version</label>
-                  <input style="width:80%;" name="archivedCompilationVersionIn" id="archivedCompilationVersionIn" value="">
+                  <input style="width:80%;" name="archivedCompilationVersionIn" id="archivedCompilationVersionIn" value="2_2_0">
                </div>
                <div id="buttonDiv" class="button-submit">
                   <button style="height:35px; width:220px; font-size:14px display:none;" id="archivedCompButton" type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)" class="btn btn-primary">Use Archived Compilation</button>
@@ -196,9 +196,9 @@
          </form>
       </div>
       <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
-         <button id="compilationButton" type="button" class="collapsible">Compilation Filter
+         <button id="compilationButton" type="button" class="collapsible" style="display:none;">Compilation Filter
          </button>
-         <div class="content">
+         <div class="content" style="display:none;">
             <br>
             <p></p>
             <br>
@@ -208,7 +208,7 @@
                   <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
                </div>
                <br>
-               <input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn" value="PAGES2kv2">
+               <input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn" value="">
             </div>
             <br>
             <hr class="solid">
