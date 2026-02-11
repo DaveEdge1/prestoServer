@@ -34,6 +34,12 @@ function parseBool(val) {
 // Edit config file with form data
 function editConfigs(configLoc, formEdits, recon, uniqueID) {
   const configDir = path.join(config.paths.userRecons, uniqueID);
+
+  // Create user directory if it doesn't exist
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+
   const configFile = fs.readFileSync(configLoc, 'utf8');
   const configFileNew = YAML.parse(configFile);
 
