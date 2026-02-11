@@ -1,0 +1,88 @@
+name: LMR CFR Reconstruction
+
+on:
+  workflow_dispatch:
+    inputs:
+      unique_id:
+        description: 'Unique reconstruction ID'
+        required: true
+        type: string
+      lipd_data_url:
+        description: 'URL to LiPD pickle file'
+        required: true
+        type: string
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download LiPD data
+        run: |
+          echo "Downloading LiPD data from: ${{ inputs.lipd_data_url }}"
+          curl -L "${{ inputs.lipd_data_url }}" -o lipd_data.pkl
+          ls -lh lipd_data.pkl
+
+      - name: Pull Docker image
+        run: docker pull davidedge/lmr2:latest
+
+      - name: Create results directory
+        run: mkdir -p ./recons
+
+      - name: Convert LiPD format
+        run: |
+          echo "Converting LiPD pickle to CFR DataFrame format..."
+          docker run --rm \
+            -v $(pwd)/lipd_data.pkl:/lipd_data.pkl \
+            -v $(pwd):/workspace \
+            davidedge/lmr2:latest \
+            python convert_lipd_to_cfr_dataframe.py
+
+      - name: Verify CFR data created
+        run: |
+          if [ -f lipd_cfr.pkl ]; then
+            echo "CFR data file created successfully"
+            ls -lh lipd_cfr.pkl
+          else
+            echo "ERROR: CFR data file not created"
+            exit 1
+          fi
+
+      - name: Run CFR reconstruction
+        run: |
+          echo "Running LMR CFR reconstruction..."
+          docker run --rm \
+            -v $(pwd)/config/lmr_configs.yml:/lmr_configs.yml \
+            -v $(pwd)/lipd_cfr.pkl:/lipd_cfr.pkl \
+            -v $(pwd)/recons:/recons \
+            davidedge/lmr2:latest \
+            python cfr_main_code.py
+
+      - name: Verify reconstruction results
+        run: |
+          if [ -d ./recons ] && [ "$(ls -A ./recons)" ]; then
+            echo "Reconstruction completed successfully"
+            ls -lh ./recons/
+          else
+            echo "ERROR: No reconstruction results generated"
+            exit 1
+          fi
+
+      - name: Upload reconstruction results
+        uses: actions/upload-artifact@v4
+        with:
+          name: lmr-reconstruction-${{ inputs.unique_id }}
+          path: ./recons/
+          retention-days: 90
+
+      - name: Commit results to repository
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add recons/
+          git commit -m "Add LMR reconstruction results for ${{ inputs.unique_id }}"
+          git push
