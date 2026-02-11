@@ -458,7 +458,7 @@ function buildHtml(configs, recon) {
        + 'document.getElementById("abstract2").src = "/slider.css";'
        + '}\n'
        + '</script>\n'
-       + '<script src="/slider' + recon + '.js"></script>\n'
+       + '<script src="/editor/slider' + recon + '.js"></script>\n'
        + '</div>\n'
        + '<br>\n'
        + '</body>\n'
