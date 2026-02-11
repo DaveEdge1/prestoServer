@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <title>Autocomplete Lipdverse Query</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="robots" content="noindex">
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+         integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+         crossorigin="" />
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+      <link rel="stylesheet" href="/query/style.default.css" id="theme-stylesheet">
+      <link rel="stylesheet" href="/query/leaflet.legend.css">
+      <link rel="stylesheet" href="/query/spinner.css">
+      <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+      <script src="//code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+         integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+         crossorigin=""></script>
+      <script src="https://unpkg.com/proj4@2.9.0"></script>
+      <script src="https://unpkg.com/proj4leaflet@1.0.2"></script>
+      <script src="/query/mollweide-crs.js"></script>
+      <link rel="stylesheet" href="/query/slider.css">
+      <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.6/base64.min.js"></script>
+      <script src="/query/Leaflet.draw.js"></script>
+      <script src="/query/Leaflet.Draw.Event.js"></script>
+      <script src="/query/TouchEvents.js"></script>
+      <script src="/query/Edit.SimpleShape.js"></script>
+      <script src="/query/Edit.Rectangle.js"></script>
+      <script src="/query/leaflet-svg-shape-markers.min.js"></script>
+      <script src="/query/leaflet.legend.js"></script>
+      <script src="/query/compilationMetadata.js"></script>
+      <script src="/query/queryHelpers.js"></script>
+      <script src="/query/archiveLegend.js"></script>
+      <script language="javascript" type="text/javascript" src="/query/data_forge.js"></script>
+      <style>
+         html, body {
+         height: 100%;
+         margin: 0;
+         padding: 0;
+         }
+         .leaflet-container {
+         display: block;
+         position: relative;
+         margin-left: auto;
+         margin-right: auto;
+         height: auto;
+         width: auto;
+         max-width: 90%;
+         max-height: 100%;
+         }
+         /* Hide editing handles for rectangles when projection is not standard */
+         .polar-projection .leaflet-editing-icon {
+         display: none !important;
+         }
+         /* Projection control styling */
+         .leaflet-control-projection {
+         background: white;
+         padding: 6px 10px;
+         border-radius: 4px;
+         box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+         cursor: pointer;
+         }
+         .leaflet-control-projection.collapsed .projection-options {
+         display: none;
+         }
+         .leaflet-control-projection .projection-title {
+         font-weight: bold;
+         margin-bottom: 5px;
+         font-size: 14px;
+         }
+         .leaflet-control-projection.collapsed .projection-title::after {
+         content: ' ▼';
+         }
+         .leaflet-control-projection:not(.collapsed) .projection-title::after {
+         content: ' ▲';
+         }
+         .leaflet-control-projection .projection-options {
+         margin-top: 5px;
+         }
+         .leaflet-control-projection label {
+         display: block;
+         margin: 4px 0;
+         font-size: 13px;
+         cursor: pointer;
+         }
+         .leaflet-control-projection input[type="radio"] {
+         margin-right: 5px;
+         cursor: pointer;
+         }
+      </style>
+   </head>
+   <body>
+      <div class="wide" id="all">
+         <div class="top-bar py-0" id="topBar" style="background: #555"></div>
+         <!-- Navbar Sticky-->
+         <header class="nav-holder make-sticky">
+            <div class="navbar navbar-light bg-white navbar-expand-lg py-0" id="navbar">
+               <div class="container py-3 py-lg-0 px-lg-0">
+                  <!-- Navbar brand--><a class="navbar-brand" href="https://paleopresto.com/"><img class="d-none d-md-inline-block" src="/query/img/logo.png" alt="Universal logo"><img class="d-inline-block d-md-none" src="/query/img/logo-small.png" alt="Universal logo"><span class="sr-only">Universal - go to homepage</span></a> <!-- TODO: Update the logo. -->
+                  <!-- Navbar toggler-->
+                  <button class="navbar-toggler text-primary border-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navigationCollapse" aria-controls="navigationCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="sr-only">Toggle navigation</span><i class="fas fa-align-justify"></i></button>
+                  <!-- Collapsed Navigation    -->
+                  <div class="collapse navbar-collapse" id="navigationCollapse">
+                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <a class="nav-link" href="https://paleopresto.com/">Home</a>
+                        <!-- megamenu [features]-->
+                        <li class="nav-item dropdown">
+                           <a class="nav-link dropdown-toggle" id="featuresMegamenu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reconstructions</a>
+                           <ul class="dropdown-menu megamenu p-4" aria-labelledby="featuresMegamenu">
+                              <li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/holocene.html">Holocene</a></li>
+                              <li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/common_era.html">Common Era</a></li>
+                           </ul>
+                        </li>
+                        <!-- megamenu [portfolio]-->
+                        <a class="nav-link" href="https://paleopresto.com/analysis.html">Analysis</a>
+                        <a class="nav-link" href="https://paleopresto.com/custom.html">Custom</a>
+                        <a class="nav-link" href="https://paleopresto.com/about.html">About Us</a>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </header>
+         <!-- HEADING BREADCRUMB-->
+         <section class="bg-pentagon py-4">
+            <div class="container py-3">
+               <div class="row d-flex align-items-center gy-4">
+                  <div class="col-md-7">
+                     <h1 class="h2 mb-0 text-uppercase">Custom Reconstructions</h1>
+                  </div>
+                  <div class="col-md-5">
+                     <!-- Breadcrumb-->
+                     <ol class="text-sm justify-content-start justify-content-lg-end mb-0 breadcrumb undefined">
+                        <li class="breadcrumb-item"><a class="text-uppercase" href="https://paleopresto.com/">Home</a></li>
+                        <li class="breadcrumb-item text-uppercase active">Custom Reconstructions</li>
+                     </ol>
+                  </div>
+               </div>
+            </div>
+         </section>
+         <br><br>
+         <h1 style="text-align: center; font-size:40px"><img src="/query/img/lipdverse_logo_text.png" alt="LiPDverse Logo" width="200" height="45"> Query</h1>
+         <br>
+         <br>
+         <div class="css-spinner" id="my-css-spinner"></div>
+         <div class="leaflet-container" id="map" style="height: 90vh; width: 90vw;"></div>
+         <br>
+         <br>
+         <div id="InstructionBox" style="width: 1200px; margin: auto; border-width:3px; border-style:groove; border-color:#899877; border-radius: 10px;">
+            <p style="text-align: center; font-size:14px; margin-left: 10px; margin-right: 10px; margin-top: 10px; margin-bottom: 10px;" id="Instructions">The map above offers a preview of the data returned by the LiPDverse Query. Each point represents a dataset with one or more paleoclimate proxy time series. Provide queries below and click <b>Update Map</b> to view available data. When you are satisfied with your query, click <b>Submit</b> at the bottom of the page to continue.</p>
+         </div>
+         <br>
+         <div>
+            <p style="text-align: center; font-size:16px;" id="datasetCount"></p>
+         </div>
+         <br>
+         <input id="recon" name="recon" type="hidden" value="">
+         <input id="user" name="user" type="hidden" value="">
+         <input id="domain" name="domain" type="hidden" value="">
+         <input id="uniqueID" name="uniqueID" type="hidden" value="">
+         <input id="language" name="language" type="hidden" value="">
+         <script>
+            popQueryVariable()
+         </script>
+         <br>
+         <div id="mapUpdateButton" class="button-submit">
+            <button style="height:30px; width:150px; font-size:13px" id="get-repos" onclick="sendQuery()" class="btn btn-primary">Update Map</button>
+         </div>
+         <br>
+         <br>
+         <span id="response"></span>
+         <br>
+         <div style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;">
+            <div style="width: 100%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="archivedCompilation_label" for="archivedCompilation">Use an archived compilation</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="archivedCompilation" onclick='hideForm();'>
+               <br><br><br>
+            </div>
+            <form style="max-width: 90%; display:none; margin-left: auto; margin-right: auto;" id="compilationForm" onsubmit="">
+               <div id="archivedCompilationGroup"  style="display:none;" class="form-group">
+                  <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilation_label" for="archivedCompilation">Archived Compilation</label>
+                  <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                     <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
+                  </div>
+                  <input style="width:80%;" name="archivedCompilationIn" id="archivedCompilationIn" value="">
+                  <label style="font-size:20px; padding-right:10px; color:black" id="archivedCompilationVersionIn_label" for="archivedCompilationVersionIn">Compilation Version</label>
+                  <input style="width:80%;" name="archivedCompilationVersionIn" id="archivedCompilationVersionIn" value="">
+               </div>
+               <div id="buttonDiv" class="button-submit">
+                  <button style="height:35px; width:220px; font-size:14px display:none;" id="archivedCompButton" type="button" onclick="getLipds(document.getElementById('recon').value, 'archivedComp').then(reso1 => location.href = reso1)" class="btn btn-primary">Use Archived Compilation</button>
+               </div>
+         </div>
+         </form>
+      </div>
+      <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
+         <button id="compilationButton" type="button" class="collapsible">Compilation Filter
+         </button>
+         <div class="content">
+            <br>
+            <p></p>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="compilation_label" for="compilation">Compilation</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose compilation(s) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn" value="PAGES2kv2">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+         </div>
+         <button type="button" class="collapsible">Location Filters
+         </button>
+         <div class="content">
+            <br>
+            <p></p>
+            <br>
+            <div style="width: 10%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="coordsOn_label" for="coordsOn">Filter by coordinates</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="coordsOn" value="TRUE" onclick='updateFilters();'>
+               <br><br><br>
+            </div>
+            <br>
+            <div id="coordsDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="">
+               <label style="font-size:20px; padding-right:10px; color:black" id="geo_proxy_coords_label">Coordinate bounds for assimilating proxies </label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Provide bounds to assimilate only proxies in a given region</span>
+               </div>
+               <p style="color: red;" id="boundingBoxNote">Note: The bounding box can be adjusted using the draggable handles on the map</p>
+               <p style="color: red;">Note: The bounding box width is limited to 360 degrees</p>
+               <br>
+               <label style="font-size:16px; margin-right:8px;">Latitude</label>
+               <input class="coord-input" type="number" name="geo_proxy_coords" id="lat_min" value="-90" min="-90" max="90" step="1" onchange="updateBoundingBox();">
+               <label style="margin-right:8px;">min</label>
+               <input class="coord-input" type="number" name="geo_proxy_coords" id="lat_max" value="90" min="-90" max="90" step="0.001" onchange="updateBoundingBox();">
+               <label style="margin-right:30px;">max</label>
+               <label style="font-size:16px; margin-right:8px;">Longitude</label>
+               <input class="coord-input" type="number" name="geo_proxy_coords" id="lon_min" value="-180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
+               <label style="margin-right:8px;">min</label>
+               <input class="coord-input" type="number" name="geo_proxy_coords" id="lon_max" value="180" min="-180" max="180" step="0.001" onchange="updateBoundingBox();">
+               <label>max</label>
+            </div>
+            <br><br><br><br><br><br><br><br><br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="continentIn_label" for="continent">Continent (based on <a href="https://jakubnowosad.com/spData/reference/world.html"  target="_blank">these polygons</a>)</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose continent(s) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="continent" id="continentIn" value="">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="country_label" for="country">Country (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose country(ies) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="country" id="countryIn" value="">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <div style="width: 10%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="isTerrestrialOn_label" for="isTerrestrialOn">Filter by Land/Sea</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();' >
+               <br><br><br>
+            </div>
+            <div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
+               <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+               <span class="tooltip-text">Select only terrestrial/marine data</span>
+            </div>
+            <div class="radio_container">
+               <div class="radio_control">
+                  <input type="radio" id="Terrestrial" name="isTerrestrial" value="1" checked>
+                  <label for="Terrestrial">Terrestrial</label><br>
+                  <input type="radio" id="Marine" name="isTerrestrial" value="0" >
+                  <label for="Marine">Marine</label><br>
+               </div>
+            </div>
+         </div>
+         <br><br><br><br><br><br><br>
+         <hr class="solid">
+         <hr class="solid">
+         <br>
+         </div>
+         <button type="button" class="collapsible">Material and Interpretation Filters
+         </button>
+         <div class="content">
+            <br>
+            <p></p>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="seasonality_label" for="seasonality1">Seasonality</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose seasonality(ies) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="interpretation1_seasonality" id="seasonality1" value="">
+            </div>
+            <br>
+            <br>
+            <div style="width: 10%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();' >
+               <br><br><br>
+            </div>
+            <div id="monthSliderDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="months_range_label" for="months_range">Range of months</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Span limited to 12 months. The outter months defined here will be included, but seasonality spans that extend outside the defined range will not. eg. Jun-Aug includes Jun,Jun-Jul,Jun-Aug,Jul,Jul-Aug,Aug</span>
+               </div>
+               <div class="range_container">
+                  <div class="sliders_control">
+                     <input id="months_range_fromSlider" type="range" value="1" min="1" max="24" step="1"/>
+                     <input id="months_range_toSlider" type="range" value="12" min="1" max="24" step="1"/>
+                  </div>
+                  <br>
+                  <div class="form_control">
+                     <div class="form_control_container">
+                        <div class="form_control_container__time">Min</div>
+                        <input class="form_control_container__time__input" name="months_range_text" type="text" value="Jan" id="months_range_fromInput_text" readonly="readonly"/>
+                     </div>
+                     <div class="form_control_container">
+                        <div class="form_control_container__time">Max</div>
+                        <input class="form_control_container__time__input" name="months_range_text" type="text" value="Dec" id="months_range_toInput_text" readonly="readonly"/>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="archiveType_label" for="archiveType">Archive Type</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose archive type(s) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="archiveType" id="archiveTypeIn" value="">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="variableName_label" for="variableName">Variable Name</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose variable name(s) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="paleoData_variableName" id="variableName" value="">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="proxy_label" for="proxy">Proxy</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose proxy(ies) (Begin typing for suggestions)</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="paleoData_proxy" id="proxy" value="">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+         </div>
+         <button type="button" class="collapsible">Temporal Filters
+         </button>
+         <div class="content">
+            <br>
+            <p></p>
+            <br>
+            <div style="width: 10%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();'>
+               <br><br><br>
+            </div>
+            <div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>
+               </div>
+               <div class="range_container">
+                  <div class="sliders_control">
+                     <input id="time_range_to_reconstruct_fromSlider" type="range" value="0" min="0" max="2000" step="100"/>
+                     <input id="time_range_to_reconstruct_toSlider" type="range" value="2000" min="0" max="2000" step="100"/>
+                  </div>
+                  <br>
+                  <div class="form_control">
+                     <div class="form_control_container">
+                        <div class="form_control_container__time">Min</div>
+                        <input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="0" min="0" max="2000" step="1"/>
+                     </div>
+                     <div class="form_control_container">
+                        <div class="form_control_container__time">Max</div>
+                        <input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="2000" min="0" max="2000" step="1"/>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <br><br><br><br><br><br><br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div style="width: 10%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="resolutionOn_label" for="resolutionOn">Filter by resolution</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="resolutionOn" value="TRUE" onclick='updateFilters();'>
+               <br><br><br>
+            </div>
+            <div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>
+               <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
+               <span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>
+            </div>
+            <div class="range_container">
+               <div class="sliders_control">
+                  <input id="resolutionSlider" type="range" value="200" min="1" max="1000" step="1"/>
+                  <br>
+                  <input type="number" id="resolutionInput" name="resolution" value="200" min="1" max="1000" step="1"/>
+               </div>
+            </div>
+         </div>
+         <br><br><br><br><br><br><br>
+         <hr class="solid">
+         <hr class="solid">
+         <br>
+         </div>
+      </form>
+      <br><br>
+
+      <br><br>
+      <div class="button-submit">
+         <button id="proceedButton" class="btn btn-primary" style="font-size: 18px;height:45px; width:400px; " type="button" onclick="getLipds()">Use selected Proxies</button>
+      </div>
+      <div>
+         <p id="timeSeries"></p>
+      </div>
+      <br><br><br><br>
+      <script src="/query/slider.js"></script>
+   </body>
+   <footer>
+      <!-- COPYRIGHTS                -->
+      <div class="bg-dark py-5">
+         <div class="container">
+            <div class="row align-items-cenrer gy-3 text-center">
+               <div class="col-md-6 text-md-start">
+                  <p class="mb-0 text-sm text-gray-500">&copy; 2023. The Presto Team </p>
+               </div>
+               <div class="col-md-6 text text-md-end">
+                  <p class="mb-0 text-sm text-gray-500">Template designed by  <a href="https://bootstrapious.com" target="_blank">Bootstrapious</a></p>
+                  <!-- Please do not remove the backlink to us unless you purchase the Attribution-free License at https://bootstrapious.com/attribution-free-license. Thank you.-->
+               </div>
+            </div>
+         </div>
+      </div>
+   </footer>
+   <script>
+      document.getElementById("my-css-spinner").style.display = "block";
+
+      let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
+      function updateFilters(){
+      	if (document.getElementById("ageSliderOn").checked){
+      		document.getElementById("timeSliderDiv").style.visibility = "visible";
+      		filters1['ages'] = 'true'
+      	}
+      	if (!document.getElementById("ageSliderOn").checked) {
+      		document.getElementById("timeSliderDiv").style.visibility = "hidden";
+      		filters1['ages'] = 'false'
+      	}
+      	if (document.getElementById("coordsOn").checked){
+      		document.getElementById("coordsDiv").style.visibility = "visible";
+      		filters1['coords'] = 'true'
+      	}
+      	if (!document.getElementById("coordsOn").checked) {
+      		document.getElementById("coordsDiv").style.visibility = "hidden";
+      		filters1['coords'] = 'false'
+      	}
+      	if (document.getElementById("resolutionOn").checked){
+      		document.getElementById("resolutionDiv").style.visibility = "visible";
+      		filters1['resolution'] = 'true'
+      	}
+      	if (!document.getElementById("resolutionOn").checked) {
+      		document.getElementById("resolutionDiv").style.visibility = "hidden";
+      		filters1['resolution'] = 'false'
+      	}
+      	if (document.getElementById("isTerrestrialOn").checked){
+      		document.getElementById("isTerrestrialDiv").style.visibility = "visible";
+      		filters1['terrestrial'] = 'true'
+      	}
+      	if (!document.getElementById("isTerrestrialOn").checked) {
+      		document.getElementById("isTerrestrialDiv").style.visibility = "hidden";
+      		filters1['terrestrial'] = 'false'
+      	}
+      	if (document.getElementById("seasonMonthsOn").checked){
+      		document.getElementById("monthSliderDiv").style.visibility = "visible";
+      		filters1['seasonality'] = 'true'
+      	}
+      	if (!document.getElementById("seasonMonthsOn").checked) {
+      		document.getElementById("monthSliderDiv").style.visibility = "hidden";
+      		filters1['seasonality'] = 'false'
+      	}
+      	sendQuery();
+      	return(filters1)
+      }
+
+      // Global variables for backward compatibility (maintained by MapManager)
+      var prevResp = {};
+      var inRectCount = 0;
+      var rect = null; // Rectangle for coordinate filtering
+
+      </script>
+      <script src="/query/boundary_coords.js"></script>
+      <script src="/query/mapManager.js"></script>
+
+   <script>
+      updateRes = function(a1){
+       return(a1)
+      }
+
+      // Initialize MapManager with full configuration (now supports Mollweide + proxy legend!)
+      MapManager.init({
+        defaultProjection: 'mollweide',
+        enabledProjections: ['standard', 'mollweide', 'arctic', 'antarctic'],
+        enabledLegendModes: ['archiveType', 'interpVar', 'proxy'],
+        enableDynamicLegend: true,
+        enableSouthernOceanBoundaries: true
+      });
+
+      // Create map with Mollweide projection as default
+      MapManager.createMap('map', 'mollweide');
+
+      // Wrap updatePoints function for legend integration
+      if (typeof updatePoints !== 'undefined') {
+        updatePoints = MapManager.wrapUpdatePoints(updatePoints);
+        console.log('updatePoints function wrapped by MapManager');
+      }
+
+      var recon1 = document.getElementById('recon').value
+      if (recon1 == 'false'){
+      //console.log("recon undefined, using downloads pathway")
+      document.getElementById('proceedButton').innerHTML = "Download selected Proxies"
+      document.getElementById('proceedButton').onclick = function () { getLipds('download', 'TSIDs').then(reso1 => location.href = reso1)};
+      } else {
+      //console.log(recon1)
+      document.getElementById('proceedButton').innerHTML = "Use selected Proxies"
+      document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct', 'TSIDs').then(reso1 => location.href = reso1)};
+      }
+
+      sendQuery()
+
+
+   </script>
+</html>

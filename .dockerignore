@@ -1,0 +1,36 @@
+# Git repository
+.git
+.gitignore
+
+# Node modules (already handled by package.json)
+node_modules
+
+# Local development files
+.env
+.env.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+nul
+
+# Documentation
+*.md
+!README.md
+
+# Claude files
+.claude
