@@ -8,8 +8,12 @@ on:
         required: true
         type: string
       lipd_data_url:
-        description: 'URL to LiPD pickle file'
-        required: true
+        description: 'URL to pre-generated LiPD pickle (traditional pathway)'
+        required: false
+        type: string
+      lipd_query_json:
+        description: 'LiPD data query parameters for workflow generation (GitHub Actions pathway)'
+        required: false
         type: string
 
 jobs:
@@ -21,11 +25,128 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download LiPD data
+      # Detect which pathway to use
+      - name: Detect data acquisition pathway
+        id: pathway
         run: |
-          echo "Downloading LiPD data from: ${{ inputs.lipd_data_url }}"
+          if [ -n "${{ inputs.lipd_data_url }}" ]; then
+            echo "pathway=traditional" >> $GITHUB_OUTPUT
+            echo "Using traditional pathway: download from URL"
+          elif [ -n "${{ inputs.lipd_query_json }}" ]; then
+            echo "pathway=github_actions" >> $GITHUB_OUTPUT
+            echo "Using GitHub Actions pathway: generate in workflow"
+            echo '${{ inputs.lipd_query_json }}' > query_params.json
+            MODE=$(jq -r '.mode' query_params.json)
+            echo "mode=$MODE" >> $GITHUB_OUTPUT
+          else
+            echo "ERROR: Neither lipd_data_url nor lipd_query_json provided"
+            exit 1
+          fi
+
+      # TRADITIONAL PATHWAY: Download from URL
+      - name: Download LiPD data from URL
+        if: steps.pathway.outputs.pathway == 'traditional'
+        run: |
+          echo "Downloading pre-generated LiPD data from: ${{ inputs.lipd_data_url }}"
           curl -L "${{ inputs.lipd_data_url }}" -o lipd_data.pkl
           ls -lh lipd_data.pkl
+
+      # GITHUB ACTIONS PATHWAY - PATH A: Archived Compilation (direct download)
+      - name: Download archived compilation
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'archived'
+        run: |
+          COMPILATION=$(jq -r '.compilation' query_params.json)
+          VERSION=$(jq -r '.version' query_params.json)
+          PICKLE_URL="https://lipdverse.org/${COMPILATION}/${VERSION}/${COMPILATION}${VERSION}.pkl"
+
+          echo "Downloading archived compilation from: $PICKLE_URL"
+          curl -L -f "$PICKLE_URL" -o lipd_data.pkl || {
+            echo "ERROR: Failed to download archived compilation"
+            echo "URL: $PICKLE_URL"
+            exit 1
+          }
+
+          ls -lh lipd_data.pkl
+
+      # GITHUB ACTIONS PATHWAY - PATH B: Filtered Query (R script + Docker)
+      - name: Setup R environment
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3.0'
+
+      - name: Install R dependencies
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        run: |
+          Rscript -e 'install.packages(c("jsonlite", "magrittr", "remotes", "tidyverse"), repos="https://cloud.r-project.org")'
+          Rscript -e 'remotes::install_github("nickmckay/lipdR")'
+
+      - name: Download lipdverse query table
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        run: |
+          curl -L "https://lipdverse.org/lipdverse/lipdverseQuery.csv" -o lipdverseQuery.csv
+          ls -lh lipdverseQuery.csv
+
+      - name: Download lipdverse time series data
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        run: |
+          curl -L "https://lipdverse.org/lipdverse/lipdverse_tts.RData" -o lipdverse_tts.RData
+          ls -lh lipdverse_tts.RData
+
+      - name: Download R script for LiPD generation
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        run: |
+          curl -L "https://raw.githubusercontent.com/LinkedEarth/prestoServer/master/getLipds/generateLMRPickle.R" -o generateLMRPickle.R
+          chmod +x generateLMRPickle.R
+
+      - name: Generate LiPD data from query
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        run: |
+          # Update paths in query_params.json to point to current directory
+          jq '. + {csv_path: "./lipdverseQuery.csv", tts_path: "./lipdverse_tts.RData"}' query_params.json > query_params_updated.json
+
+          # Run R script
+          Rscript generateLMRPickle.R query_params_updated.json ./
+
+          if [ $? -ne 0 ]; then
+            echo "ERROR: R script failed to generate LiPD data"
+            exit 1
+          fi
+
+          # Check if RDS files were created
+          if [ ! -f lipd.rds ]; then
+            echo "ERROR: R script did not generate lipd.rds"
+            echo "This may indicate no data matched the query parameters"
+            exit 1
+          fi
+
+      - name: Convert RDS to pickle
+        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
+        run: |
+          echo "Converting RDS to pickle format using Docker..."
+          docker run --rm \
+            -v $(pwd):/output \
+            davidedge/lipd_webapps:lipdPickler
+
+          if [ ! -f lipd_data.pkl ]; then
+            echo "ERROR: Docker container did not produce pickle file"
+            ls -la *.rds *.pkl || true
+            exit 1
+          fi
+
+          ls -lh lipd_data.pkl
+
+      # Verify pickle file exists (both paths)
+      - name: Verify LiPD data created
+        run: |
+          if [ -f lipd_data.pkl ]; then
+            echo "✓ LiPD data file created successfully"
+            FILE_SIZE=$(stat -c%s lipd_data.pkl 2>/dev/null || stat -f%z lipd_data.pkl)
+            echo "File size: $FILE_SIZE bytes"
+          else
+            echo "ERROR: LiPD data file not found"
+            exit 1
+          fi
 
       - name: Pull Docker image
         run: docker pull davidedge/lmr2:latest

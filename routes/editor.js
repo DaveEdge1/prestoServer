@@ -159,6 +159,8 @@ router.post('/sendReconRequest', async (req, res) => {
   const useGitHubActions = req.body.useGitHubActions === 'true';
   const isAuthenticated = !!(req.session && req.session.userId);
 
+  console.log(`Reconstruction submission - useGitHubActions: ${useGitHubActions}, isAuthenticated: ${isAuthenticated}, userId: ${req.session?.userId}, username: ${req.session?.githubUsername}`);
+
   // GitHub Actions workflow (OAuth or App)
   if (useGitHubActions) {
     try {
@@ -208,14 +210,14 @@ router.post('/sendReconRequest', async (req, res) => {
           configData
         );
 
-        // LMR-specific: Generate and upload LiPD pickle
+        // LMR-specific: Handle LiPD data
         let lipdDataUrl = null;
+        let lipdQueryJson = null;
+
         if (recon === 'LMR') {
-          console.log('Generating LiPD data for LMR reconstruction...');
+          console.log('Processing LiPD data for LMR reconstruction...');
 
-          const lipdService = require('../services/lipdDataService');
-
-          // Extract query parameters from formData
+          // Extract query parameters
           const queryParams = {
             compilation: req.body.data_selection_compilation || 'PAGES2kv2',
             coords: [
@@ -228,16 +230,52 @@ router.post('/sendReconRequest', async (req, res) => {
             variableName: req.body.paleoData_variableName || null
           };
 
-          // Generate and upload pickle to repository
-          lipdDataUrl = await lipdService.generateAndUploadLipdPickle(
-            queryParams,
-            uniqueID,
-            token,
-            repoData.owner,
-            repoData.name
-          );
+          // PATHWAY SPLIT: GitHub Actions vs Traditional Server
+          if (useGitHubActions && isAuthenticated) {
+            // ==== GITHUB ACTIONS PATHWAY ====
+            // Don't generate pickle on server - let workflow handle it
+            console.log('Using GitHub Actions pathway - preparing query JSON for workflow...');
 
-          console.log(`LiPD data uploaded: ${lipdDataUrl}`);
+            // Check if this is an archived compilation
+            const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_LMR`);
+            const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
+
+            if (fs.existsSync(archivedCompPath)) {
+              // Path A: Archived compilation
+              const archiveInfo = JSON.parse(fs.readFileSync(archivedCompPath, 'utf8'));
+              lipdQueryJson = JSON.stringify({
+                mode: 'archived',
+                compilation: archiveInfo.compilation,
+                version: archiveInfo.version
+              });
+              console.log(`Using archived compilation: ${archiveInfo.compilation} v${archiveInfo.version}`);
+            } else {
+              // Path B: Filtered query
+              lipdQueryJson = JSON.stringify({
+                mode: 'filtered',
+                ...queryParams
+              });
+              console.log('Using filtered query with parameters:', queryParams);
+            }
+
+          } else {
+            // ==== TRADITIONAL SERVER PATHWAY ====
+            // Generate and upload pickle on server (KEEP EXISTING CODE)
+            console.log('Using traditional server pathway - generating LiPD data on server...');
+
+            const lipdService = require('../services/lipdDataService');
+
+            // Generate and upload pickle to repository
+            lipdDataUrl = await lipdService.generateAndUploadLipdPickle(
+              queryParams,
+              uniqueID,
+              token,
+              repoData.owner,
+              repoData.name
+            );
+
+            console.log(`LiPD data uploaded: ${lipdDataUrl}`);
+          }
         }
 
         // Dispatch workflow
@@ -247,9 +285,15 @@ router.post('/sendReconRequest', async (req, res) => {
           recon_type: recon
         };
 
-        // Add lipd_data_url for LMR
-        if (recon === 'LMR' && lipdDataUrl) {
-          workflowInputs.lipd_data_url = lipdDataUrl;
+        // Add appropriate input based on pathway
+        if (recon === 'LMR') {
+          if (lipdQueryJson) {
+            // GitHub Actions pathway: pass JSON for workflow generation
+            workflowInputs.lipd_query_json = lipdQueryJson;
+          } else if (lipdDataUrl) {
+            // Traditional pathway: pass URL to uploaded pickle
+            workflowInputs.lipd_data_url = lipdDataUrl;
+          }
         }
 
         const workflowRun = await githubService.dispatchWorkflow(

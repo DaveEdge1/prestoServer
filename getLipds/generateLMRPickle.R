@@ -24,8 +24,35 @@ query_params <- fromJSON(query_params_file)
 cat("Query parameters:\n")
 print(query_params)
 
+# Use provided paths if available, otherwise use defaults
+csv_path <- if (!is.null(query_params$csv_path)) {
+  query_params$csv_path
+} else {
+  "/root/presto/getLipds/lipdverseQuery.csv"
+}
+
+tts_path <- if (!is.null(query_params$tts_path)) {
+  query_params$tts_path
+} else {
+  "/root/presto/getLipds/lipdverse_tts.RData"
+}
+
+# Download CSV if not exists (fallback for workflow context)
+csv_url <- "https://lipdverse.org/lipdverse/lipdverseQuery.csv"
+if (!file.exists(csv_path)) {
+  cat("Downloading lipdverse query table from:", csv_url, "\n")
+  tryCatch({
+    download.file(csv_url, csv_path, method = "auto", quiet = FALSE)
+    cat("Successfully downloaded query table\n")
+  }, error = function(e) {
+    stop("Failed to download query table: ", e$message)
+  })
+} else {
+  cat("Using existing query table at:", csv_path, "\n")
+}
+
 # Load the lipdverse query table
-qt <- read.csv("/root/presto/getLipds/lipdverseQuery.csv")
+qt <- read.csv(csv_path)
 cat("Loaded query table with", nrow(qt), "records\n")
 
 # Filter by compilation
@@ -105,8 +132,11 @@ if (length(tsPick) == 0) {
 }
 
 # Load the lipdverse time series tibble
-cat("Loading lipdverse time series data...\n")
-load("/root/presto/getLipds/lipdverse_tts.RData")
+cat("Loading lipdverse time series data from:", tts_path, "\n")
+if (!file.exists(tts_path)) {
+  stop("Time series data file not found: ", tts_path)
+}
+load(tts_path)
 
 # Filter tts
 tts <- tts[tts$datasetId %in% dsPick, ]
@@ -147,17 +177,18 @@ if (length(year_only_datasets) > 0) {
 }
 
 # Save to RDS format first
-temp_dir <- dirname(output_path)
-rds_path <- file.path(temp_dir, "lipd.rds")
-tts_path <- file.path(temp_dir, "lipd_tts.rds")
+# output_path is the directory where files should be saved
+output_dir <- if (dir.exists(output_path)) output_path else dirname(output_path)
+rds_path <- file.path(output_dir, "lipd.rds")
+tts_rds_path <- file.path(output_dir, "lipd_tts.rds")
 
 cat("Saving LiPD data to RDS format...\n")
 saveRDS(D, file = rds_path)
-saveRDS(tts, file = tts_path)
+saveRDS(tts, file = tts_rds_path)
 
 cat("LMR LiPD data generation completed successfully\n")
 cat("  - Datasets:", length(dsPick), "\n")
 cat("  - Time series:", length(tsPick), "\n")
 cat("  - RDS file:", rds_path, "\n")
-cat("  - TTS file:", tts_path, "\n")
+cat("  - TTS file:", tts_rds_path, "\n")
 cat("Note: Pickle conversion will be handled by Python Docker container\n")

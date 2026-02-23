@@ -50,6 +50,14 @@ services:
       # Docker socket for sibling containers (prestoGo.js spawns containers)
       # On Windows: //var/run/docker.sock or use named pipe
       - /var/run/docker.sock:/var/run/docker.sock
+      # Source code mounts - changes take effect on container restart (no rebuild needed)
+      - ./routes:/root/presto/routes
+      - ./services:/root/presto/services
+      - ./prestoForm:/root/presto/prestoForm
+      - ./jsonEditor:/root/presto/jsonEditor
+      - ./templates:/root/presto/templates
+      - ./getLipds:/root/presto/getLipds
+      - ./app.js:/root/presto/app.js
       # PRODUCTION ONLY (Linux server at /root/presto):
       # These mounts enable same-path strategy. Comment out for local dev.
       # - /root/presto:/root/presto

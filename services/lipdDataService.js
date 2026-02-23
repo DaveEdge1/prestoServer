@@ -25,6 +25,58 @@ async function generateLipdPickle(queryParams, uniqueID) {
   console.log('Generating LiPD pickle for reconstruction:', uniqueID);
   console.log('Query parameters:', JSON.stringify(queryParams, null, 2));
 
+  // Check if this is an archived compilation
+  const userReconDir = path.join(__dirname, '..', 'userRecons', `${uniqueID}_LMR`);
+  const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
+
+  if (fs.existsSync(archivedCompPath)) {
+    console.log('Archived compilation detected, using downloadCompilation approach...');
+    const archiveInfo = JSON.parse(fs.readFileSync(archivedCompPath, 'utf8'));
+    console.log('Compilation:', archiveInfo.compilation, 'Version:', archiveInfo.version);
+
+    // Download the pickle directly from lipdverse
+    const baseURL = `https://lipdverse.org/${archiveInfo.compilation}/${archiveInfo.version}/${archiveInfo.compilation}${archiveInfo.version}`;
+    const pickleUrl = `${baseURL}.pkl`;
+
+    // Create temp directory for download
+    const tempDir = path.join(__dirname, '..', 'temp', uniqueID);
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    const pickleOutputPath = path.join(tempDir, 'lipd_data.pkl');
+    console.log('Downloading pickle from:', pickleUrl);
+
+    await new Promise((resolve, reject) => {
+      const curlProcess = spawn('curl', ['-L', pickleUrl, '-o', pickleOutputPath]);
+
+      curlProcess.stdout.on('data', (data) => {
+        console.log('curl output:', data.toString());
+      });
+
+      curlProcess.stderr.on('data', (data) => {
+        console.log('curl progress:', data.toString());
+      });
+
+      curlProcess.on('close', (code) => {
+        if (code !== 0) {
+          reject(new Error(`curl download failed with code ${code}`));
+        } else {
+          console.log('Archived compilation pickle downloaded successfully');
+          resolve();
+        }
+      });
+    });
+
+    // Read and return the pickle file
+    const pickleData = fs.readFileSync(pickleOutputPath);
+    console.log(`Downloaded pickle file size: ${pickleData.length} bytes`);
+    return pickleData;
+  }
+
+  // Otherwise, use the filtering approach
+  console.log('Using database filtering approach...');
+
   // Create temp directory for this reconstruction
   const tempDir = path.join(__dirname, '..', 'temp', uniqueID);
   if (!fs.existsSync(tempDir)) {

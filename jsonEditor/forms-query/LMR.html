@@ -141,6 +141,7 @@ document.getElementById("recon").value = getQueryVariable("recon");
 document.getElementById("user").value = getQueryVariable("user");
 document.getElementById("domain").value = getQueryVariable("domain");
 document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
+document.getElementById("use-github-actions").value = getQueryVariable("useGitHubActions") || "false";
 }
 </script>
 <script>
@@ -536,90 +537,15 @@ popQueryVariable()
 <br>
 <br>
 <br>
-<!-- GitHub Authentication Required -->
-<div id="github-auth-section" style="margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #0969da;">
-  <h3 style="color: #0969da; margin-bottom: 15px;">GitHub Login Required</h3>
-
-  <!-- Not logged in -->
-  <div id="github-login" style="display:none;">
-    <p style="color: #666; font-size: 14px; margin: 10px 0;">
-      Login with GitHub to submit your reconstruction. Results will be stored in a new repository in your GitHub account.
-    </p>
-    <a href="#" id="github-login-link" class="btn btn-default" style="background-color: #24292e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-size: 16px; margin-top: 10px;">
-      <svg height="20" width="20" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 8px; fill: white;">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-      </svg>
-      Login with GitHub
-    </a>
-  </div>
-
-  <!-- Logged in -->
-  <div id="github-authenticated" style="display:none;">
-    <p style="color: #155724; font-size: 16px; margin: 10px 0;">
-      ✓ Logged in as: <strong style="color: #0969da;"><span id="github-username"></span></strong>
-      <button onclick="logoutGitHub()" class="btn btn-sm" style="margin-left: 15px; padding: 5px 10px; font-size: 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button>
-    </p>
-    <p style="color: #666; font-size: 13px; margin: 5px 0;">
-      Repository will be created at: <code style="background: #e7f3ff; padding: 2px 6px; border-radius: 3px;"><span id="github-username-repo"></span>/presto-LMR-...</code>
-    </p>
-  </div>
-</div>
-
 <div class="button-submit">
-<button id="submit-button" style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary" disabled>Submit</button>
-<p id="login-required-msg" style="color: #dc3545; font-size: 14px; margin-top: 10px; display:none;">Please login with GitHub to submit</p>
+<button id="submit-button" style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
 </div>
 
-<!-- Hidden input for GitHub Actions mode -->
-<input type="hidden" id="use-github-actions" name="useGitHubActions" value="true">
+<!-- Hidden input for GitHub Actions mode (populated by popQueryVariable) -->
+<input id="use-github-actions" name="useGitHubActions" type="hidden" value="">
 
 </form>
 <script>
-// Check GitHub authentication status
-let isUserAuthenticated = false;
-
-// Set up OAuth login link with current URL as returnTo
-document.addEventListener('DOMContentLoaded', function() {
-  const loginLink = document.getElementById('github-login-link');
-  if (loginLink) {
-    const currentUrl = window.location.pathname + window.location.search;
-    loginLink.href = '/oauth/github?returnTo=' + encodeURIComponent(currentUrl);
-  }
-});
-
-fetch('/oauth/github/status')
-  .then(r => r.json())
-  .then(data => {
-    isUserAuthenticated = data.authenticated;
-    if (data.authenticated) {
-      // User is logged in
-      document.getElementById('github-authenticated').style.display = 'block';
-      document.getElementById('github-username').textContent = data.username;
-      document.getElementById('github-username-repo').textContent = data.username;
-      document.getElementById('submit-button').disabled = false;
-    } else {
-      // User is not logged in
-      document.getElementById('github-login').style.display = 'block';
-      document.getElementById('login-required-msg').style.display = 'block';
-    }
-  })
-  .catch(err => {
-    console.error('Failed to check GitHub auth status:', err);
-    document.getElementById('github-login').style.display = 'block';
-    document.getElementById('login-required-msg').style.display = 'block';
-  });
-
-function logoutGitHub() {
-  if (confirm('Logout from GitHub?')) {
-    fetch('/oauth/github/logout', { method: 'POST' })
-      .then(() => location.reload())
-      .catch(err => {
-        console.error('Logout failed:', err);
-        alert('Logout failed. Please try again.');
-      });
-  }
-}
-
 function buildURL(){
 if (confirm("Submit Custom Reconstruction request?")){
 var urlParams = new URLSearchParams(window.location.search);

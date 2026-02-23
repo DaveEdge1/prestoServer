@@ -110,19 +110,38 @@ async function createRepository(token, recon, uniqueID, configData) {
   const userInfo = await getUserInfo(token);
   const owner = userInfo.username;
 
-  // Create repository
-  const { data: repo } = await octokit.rest.repos.createForAuthenticatedUser({
+  // Template repository mapping
+  const templates = {
+    'LMR': { owner: 'DaveEdge1', name: 'LMR2' },
+    'holocene_da': { owner: 'DaveEdge1', name: 'holocene_da_template' }, // TODO: create this
+    'temp12k': { owner: 'DaveEdge1', name: 'temp12k_template' } // TODO: create this
+  };
+
+  const template = templates[recon];
+  if (!template) {
+    throw new Error(`No template repository configured for ${recon}`);
+  }
+
+  console.log(`Creating repository from template ${template.owner}/${template.name}...`);
+
+  // Create repository from template
+  const { data: repo } = await octokit.rest.repos.createUsingTemplate({
+    template_owner: template.owner,
+    template_repo: template.name,
     name: repoName,
     description: `PReSto ${recon} reconstruction - ${uniqueID}`,
     private: config.github.defaultVisibility === 'private',
-    auto_init: false,
-    has_issues: true,
-    has_wiki: false,
-    has_projects: false
+    include_all_branches: false
   });
 
-  // Initialize repository with workflow files and configuration
-  await initializeRepository(octokit, owner, repoName, recon, uniqueID, configData);
+  console.log(`✓ Repository created from template: ${repo.html_url}`);
+
+  // Wait for template repository to be fully copied
+  console.log('Waiting for template files to be ready...');
+  await new Promise(resolve => setTimeout(resolve, 5000));
+
+  // Update configuration files with user's config
+  await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData);
 
   return {
     name: repoName,
@@ -134,7 +153,72 @@ async function createRepository(token, recon, uniqueID, configData) {
 }
 
 /**
- * Initialize repository with workflow files, scripts, and user configuration
+ * Update repository configuration files with user's parameters
+ * @param {Octokit} octokit - Authenticated Octokit instance
+ * @param {string} owner - Repository owner (username)
+ * @param {string} repo - Repository name
+ * @param {string} recon - Reconstruction type
+ * @param {string} uniqueID - Unique reconstruction identifier
+ * @param {Object} configData - User configuration data
+ */
+async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, configData) {
+  console.log('Updating repository configuration...');
+
+  // Update the config file with user's parameters
+  // LMR template has lmr_configs.yml at root level
+  const configPath = recon === 'LMR' ? 'lmr_configs.yml' : 'config/user_config.yml';
+  const configYaml = yaml.dump(configData);
+
+  try {
+    // Get existing config file to get its SHA
+    const { data: existingFile } = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path: configPath
+    });
+
+    // Update config file
+    await octokit.rest.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path: configPath,
+      message: `Update configuration for reconstruction ${uniqueID}`,
+      content: Buffer.from(configYaml).toString('base64'),
+      sha: existingFile.sha
+    });
+
+    console.log(`✓ Updated ${configPath}`);
+
+    // Update README with reconstruction ID
+    const { data: readmeFile } = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path: 'README.md'
+    });
+
+    const readmeContent = Buffer.from(readmeFile.content, 'base64').toString('utf8');
+    const updatedReadme = readmeContent.replace(/Reconstruction ID:.*/, `Reconstruction ID: ${uniqueID}`);
+
+    await octokit.rest.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path: 'README.md',
+      message: `Update README for reconstruction ${uniqueID}`,
+      content: Buffer.from(updatedReadme).toString('base64'),
+      sha: readmeFile.sha
+    });
+
+    console.log('✓ Updated README.md');
+    console.log('✓ Repository configuration complete');
+
+  } catch (error) {
+    console.error('Failed to update repository config:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * Initialize repository with workflow files, scripts, and user configuration (DEPRECATED - using templates now)
  * @param {Octokit} octokit - Authenticated Octokit instance
  * @param {string} owner - Repository owner (username)
  * @param {string} repo - Repository name
@@ -145,7 +229,9 @@ async function createRepository(token, recon, uniqueID, configData) {
 async function initializeRepository(octokit, owner, repo, recon, uniqueID, configData) {
   const templateDir = path.join(__dirname, '..', 'templates');
 
-  // Files to create in the repository
+  console.log('Initializing repository with Git Data API...');
+
+  //Files to create in the repository
   const filesToCreate = [];
 
   // 1. Workflow file
@@ -156,8 +242,7 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
   );
   filesToCreate.push({
     path: workflowPath,
-    content: workflowContent,
-    message: `Add ${recon} reconstruction workflow`
+    content: workflowContent
   });
 
   // 2. Shell scripts (not needed for download or LMR - they use different workflows)
@@ -175,8 +260,7 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
       );
       filesToCreate.push({
         path: scriptPath,
-        content: scriptContent,
-        message: `Add ${script} script`
+        content: scriptContent
       });
     }
   }
@@ -186,16 +270,14 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
   const configYaml = yaml.dump(configData);
   filesToCreate.push({
     path: configPath,
-    content: configYaml,
-    message: 'Add user configuration'
+    content: configYaml
   });
 
-  // 4. README
+  // 4. README (update the auto-generated one)
   const readmeContent = generateReadme(recon, uniqueID, configData);
   filesToCreate.push({
     path: 'README.md',
-    content: readmeContent,
-    message: 'Add README'
+    content: readmeContent
   });
 
   // 5. Dockerfile (if exists in templates)
@@ -204,12 +286,13 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
     const dockerfileContent = fs.readFileSync(dockerfilePath, 'utf8');
     filesToCreate.push({
       path: 'Dockerfile',
-      content: dockerfileContent,
-      message: 'Add Dockerfile'
+      content: dockerfileContent
     });
   }
 
-  // Create all files in a single commit
+  // Use Git Data API to create all files in a single commit
+  // Step 1: Create blobs for all files
+  console.log('Creating blobs...');
   const tree = await Promise.all(
     filesToCreate.map(async (file) => {
       const { data: blob } = await octokit.rest.git.createBlob({
@@ -218,6 +301,7 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
         content: Buffer.from(file.content).toString('base64'),
         encoding: 'base64'
       });
+      console.log(`✓ Blob created for ${file.path}`);
       return {
         path: file.path,
         mode: file.path.startsWith('scripts/') ? '100755' : '100644',
@@ -227,29 +311,34 @@ async function initializeRepository(octokit, owner, repo, recon, uniqueID, confi
     })
   );
 
-  // Create tree
+  // Step 2: Create tree
+  console.log('Creating tree...');
   const { data: newTree } = await octokit.rest.git.createTree({
     owner,
     repo,
     tree: tree
   });
 
-  // Create commit
+  // Step 3: Create commit
+  console.log('Creating initial commit...');
   const { data: newCommit } = await octokit.rest.git.createCommit({
     owner,
     repo,
     message: `Initialize PReSto ${recon} reconstruction\n\nReconstruction ID: ${uniqueID}\nGenerated by PReSto Custom Reconstruction Engine`,
     tree: newTree.sha,
-    parents: []
+    parents: []  // No parents - this is the initial commit
   });
 
-  // Update main branch reference
+  // Step 4: Create main branch reference
+  console.log('Creating main branch...');
   await octokit.rest.git.createRef({
     owner,
     repo,
     ref: 'refs/heads/main',
     sha: newCommit.sha
   });
+
+  console.log('✓ Repository initialized successfully with all files');
 
   // Enable GitHub Pages (for holocene_da visualizations)
   if (recon === 'holocene_da') {

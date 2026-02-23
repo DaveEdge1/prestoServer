@@ -148,6 +148,40 @@ Reproduce original rconstruction with updated poxy database</label>
 For users familiar with the code, upload reconstruction parameters directly</label>
         </div>
 	<br>
+	<!-- Execution Pathway (shown for reconstructions that support GitHub Actions) -->
+	<div id="execution-pathway-section" style="display:none;">
+	  <h4>How would you like to run this reconstruction?</h4>
+	  <div class="radio-group" style="padding:24px 24px; border-radius:16px;">
+	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;">
+	      <input type="radio" id="pathway-github" name="executionPathway" value="github" checked>
+	      <span style="font-weight:900">GitHub Actions (Recommended)</span>
+	      Run on GitHub's servers. Results stored in your GitHub repository.
+	    </label>
+	    <br>
+	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;">
+	      <input type="radio" id="pathway-server" name="executionPathway" value="server">
+	      <span style="font-weight:900">Traditional Server</span>
+	      Run on PReSto servers. Results emailed to you.
+	    </label>
+	  </div>
+	  <!-- GitHub Auth Panel (visible when GitHub pathway selected) -->
+	  <div id="github-auth-panel" style="margin:15px 0; padding:20px; background:#f8f9fa; border-radius:8px; border:2px solid #0969da;">
+	    <h5 style="color:#0969da; margin-bottom:10px;">GitHub Login Required</h5>
+	    <div id="github-login-box" style="display:none;">
+	      <p style="color:#666; font-size:14px; margin-bottom:10px;">Login with GitHub to run your reconstruction. A repository will be created in your account.</p>
+	      <a href="#" id="github-login-link" style="background-color:#24292e; color:white; padding:10px 20px; text-decoration:none; border-radius:6px; display:inline-block; font-size:14px;">
+	        <svg height="18" width="18" viewBox="0 0 16 16" style="vertical-align:middle; margin-right:8px; fill:white;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+	        Login with GitHub
+	      </a>
+	    </div>
+	    <div id="github-authenticated-box" style="display:none;">
+	      <p style="color:#155724; font-size:15px; margin:0;">
+	        ✓ Logged in as: <strong style="color:#0969da;"><span id="github-username-display"></span></strong>
+	        <button onclick="logoutGitHub()" style="margin-left:15px; padding:4px 10px; font-size:12px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer;">Logout</button>
+	      </p>
+	    </div>
+	  </div>
+	</div>
 	<!--div class="button-submit" style="text-align:center">
 		<button style="height:100%; width:200px; font-size:16px; text-align:center" Style="submit" class="btn btn-primary">Submit</button>
       </div-->
@@ -207,21 +241,75 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 
 	<script>
 		function goToQuery(e){
-			
 			if (validateEmail() == 0){
 				e.preventDefault();
 				const urlParams = new URLSearchParams(window.location.search);
-				//window.location.href="http://143.198.98.66:86/?recon=holocene_da&user=dce725&domain=gmail.com&uniqueID=17080345286042665&language=R";
-				window.location.href="/query/" + urlParams.get('recon') + "?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&user=' + document.getElementById('useremail').value.split('@')[0] + '&domain=' + document.getElementById('useremail').value.split('@')[1] + '&language=' + language
+				const pathwayEl = document.querySelector('input[name="executionPathway"]:checked');
+				const useGitHubActions = pathwayEl ? pathwayEl.value === 'github' : false;
+
+				if (useGitHubActions && !isUserAuthenticated) {
+					alert('Please login with GitHub first to use the GitHub Actions pathway.');
+					return false;
+				}
+
+				window.location.href = "/query/" + urlParams.get('recon')
+					+ "?recon=" + urlParams.get('recon')
+					+ '&uniqueID=' + urlParams.get('uniqueID')
+					+ '&user=' + document.getElementById('useremail').value.split('@')[0]
+					+ '&domain=' + document.getElementById('useremail').value.split('@')[1]
+					+ '&language=' + language
+					+ '&useGitHubActions=' + useGitHubActions;
 				return false;
 			} else {
 				alert("invalid email")
 			}
-			
-			/*
-			*/
 		}
 	</script>
+
+<script>
+	const GITHUB_ACTIONS_RECONS = ['LMR'];
+	let isUserAuthenticated = false;
+
+	document.addEventListener('DOMContentLoaded', function () {
+		const urlParams = new URLSearchParams(window.location.search);
+		const reconType = urlParams.get('recon');
+
+		if (GITHUB_ACTIONS_RECONS.includes(reconType)) {
+			document.getElementById('execution-pathway-section').style.display = 'block';
+
+			const loginLink = document.getElementById('github-login-link');
+			if (loginLink) {
+				loginLink.href = '/oauth/github?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+			}
+
+			fetch('/oauth/github/status')
+				.then(r => r.json())
+				.then(data => {
+					isUserAuthenticated = data.authenticated;
+					if (data.authenticated) {
+						document.getElementById('github-authenticated-box').style.display = 'block';
+						document.getElementById('github-username-display').textContent = data.username;
+					} else {
+						document.getElementById('github-login-box').style.display = 'block';
+					}
+				})
+				.catch(() => { document.getElementById('github-login-box').style.display = 'block'; });
+
+			document.querySelectorAll('input[name="executionPathway"]').forEach(radio => {
+				radio.addEventListener('change', function () {
+					document.getElementById('github-auth-panel').style.display =
+						this.value === 'github' ? 'block' : 'none';
+				});
+			});
+		}
+	});
+
+	function logoutGitHub() {
+		if (confirm('Logout from GitHub?')) {
+			fetch('/oauth/github/logout', { method: 'POST' })
+				.then(() => location.reload())
+				.catch(err => { console.error('Logout failed:', err); alert('Logout failed.'); });
+		}
+	}
+</script>
 </html>
-
-

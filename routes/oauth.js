@@ -92,15 +92,25 @@ router.get('/github/callback', async (req, res) => {
       [userId, encryptedToken, scope]
     );
 
+    console.log(`OAuth success: userId=${userId}, username=${userInfo.username}`);
+
     // Store user info in session
     req.session.userId = userId;
     req.session.githubUsername = userInfo.username;
     req.session.githubId = userInfo.id;
 
-    // Redirect back to original page
-    const returnTo = req.session.returnTo || '/forms';
-    delete req.session.returnTo;
-    res.redirect(returnTo);
+    // Save session before redirecting to ensure values persist
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).send('Failed to save session');
+      }
+
+      // Redirect back to original page
+      const returnTo = req.session.returnTo || '/forms';
+      delete req.session.returnTo;
+      res.redirect(returnTo);
+    });
 
   } catch (error) {
     console.error('OAuth callback error:', error);
@@ -127,6 +137,8 @@ router.post('/github/logout', (req, res) => {
  * Check if user is authenticated
  */
 router.get('/github/status', (req, res) => {
+  console.log('Session check - userId:', req.session.userId, 'username:', req.session.githubUsername);
+
   if (req.session.userId && req.session.githubUsername) {
     res.json({
       authenticated: true,

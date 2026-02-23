@@ -70,6 +70,11 @@ router.get('/query', (req, res) => {
   res.send(req.query.id + '<br>' + req.query.num);
 });
 
+// GET /getUserInfo - Get user info form (needed for OAuth callback redirect)
+router.get('/getUserInfo', (req, res) => {
+  res.sendFile(path.join(formDir, 'index2.html'));
+});
+
 // POST /getUserInfo - Get user info form
 router.post('/getUserInfo', (req, res) => {
   res.sendFile(path.join(formDir, 'index2.html'));
