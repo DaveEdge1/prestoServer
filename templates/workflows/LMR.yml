@@ -68,72 +68,25 @@ jobs:
 
           ls -lh lipd_data.pkl
 
-      # GITHUB ACTIONS PATHWAY - PATH B: Filtered Query (R script + Docker)
-      - name: Setup R environment
-        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
-        uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: '4.3.0'
-
-      - name: Install R dependencies
-        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
-        run: |
-          Rscript -e 'install.packages(c("jsonlite", "magrittr", "remotes", "tidyverse"), repos="https://cloud.r-project.org")'
-          Rscript -e 'remotes::install_github("nickmckay/lipdR")'
-
-      - name: Download lipdverse query table
-        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
-        run: |
-          curl -L "https://lipdverse.org/lipdverse/lipdverseQuery.csv" -o lipdverseQuery.csv
-          ls -lh lipdverseQuery.csv
-
-      - name: Download lipdverse time series data
-        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
-        run: |
-          curl -L "https://lipdverse.org/lipdverse/lipdverse_tts.RData" -o lipdverse_tts.RData
-          ls -lh lipdverse_tts.RData
-
-      - name: Download R script for LiPD generation
-        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
-        run: |
-          curl -L "https://raw.githubusercontent.com/LinkedEarth/prestoServer/master/getLipds/generateLMRPickle.R" -o generateLMRPickle.R
-          chmod +x generateLMRPickle.R
-
+      # GITHUB ACTIONS PATHWAY - PATH B: Filtered Query (lipdGenerator Docker)
       - name: Generate LiPD data from query
         if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
         run: |
-          # Update paths in query_params.json to point to current directory
-          jq '. + {csv_path: "./lipdverseQuery.csv", tts_path: "./lipdverse_tts.RData"}' query_params.json > query_params_updated.json
-
-          # Run R script
-          Rscript generateLMRPickle.R query_params_updated.json ./
-
-          if [ $? -ne 0 ]; then
-            echo "ERROR: R script failed to generate LiPD data"
-            exit 1
-          fi
-
-          # Check if RDS files were created
-          if [ ! -f lipd.rds ]; then
-            echo "ERROR: R script did not generate lipd.rds"
-            echo "This may indicate no data matched the query parameters"
-            exit 1
-          fi
-
-      - name: Convert RDS to pickle
-        if: steps.pathway.outputs.pathway == 'github_actions' && steps.pathway.outputs.mode == 'filtered'
-        run: |
-          echo "Converting RDS to pickle format using Docker..."
+          echo "Querying lipdverse and generating data using lipdGenerator container..."
+          mkdir -p lipd_output
           docker run --rm \
-            -v $(pwd):/output \
-            davidedge/lipd_webapps:lipdPickler
+            -v $(pwd)/query_params.json:/query_params.json:ro \
+            -v $(pwd)/lipd_output:/output \
+            davidedge/lipd_webapps:lipdGenerator /query_params.json /output all
 
-          if [ ! -f lipd_data.pkl ]; then
-            echo "ERROR: Docker container did not produce pickle file"
-            ls -la *.rds *.pkl || true
+          if [ ! -f lipd_output/lipd.pkl ]; then
+            echo "ERROR: lipdGenerator did not produce lipd.pkl"
+            ls -la lipd_output/ || true
             exit 1
           fi
 
+          # Normalize filename to lipd_data.pkl (consistent with other pathways)
+          mv lipd_output/lipd.pkl lipd_data.pkl
           ls -lh lipd_data.pkl
 
       # Verify pickle file exists (both paths)

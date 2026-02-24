@@ -1,19 +1,27 @@
 #!/usr/bin/Rscript
-# Generate LiPD pickle for LMR reconstruction based on query parameters
-# Usage: Rscript generateLMRPickle.R <query_params_json> <output_pickle_path>
+# Generate LiPD data for LMR reconstruction based on query parameters
+# Usage: Rscript generateLMRPickle.R <query_params_json> <output_dir> [format]
+# format: rds | lpd | lpd_zip | pickle | all (default: all)
+#   rds     -> lipd.rds
+#   lpd     -> *.lpd files (via lipdR::writeLipd)
+#   lpd_zip -> *.lpd files + lipd_files.zip
+#   pickle  -> *.lpd files (feed to lipdPickler container for .pkl)
+#   all     -> rds + lpd + zip
 
 args <- commandArgs(trailingOnly = TRUE)
 
-if (length(args) != 2) {
-  stop("Usage: Rscript generateLMRPickle.R <query_params_json> <output_pickle_path>")
+if (length(args) < 2) {
+  stop("Usage: Rscript generateLMRPickle.R <query_params_json> <output_dir> [format]")
 }
 
 query_params_file <- args[1]
-output_path <- args[2]
+output_dir <- args[2]
+output_format <- if (length(args) >= 3) args[3] else "all"
 
-cat("Starting LMR LiPD pickle generation...\n")
+cat("Starting LMR LiPD data generation...\n")
 cat("Query params file:", query_params_file, "\n")
-cat("Output path:", output_path, "\n")
+cat("Output dir:", output_dir, "\n")
+cat("Output format:", output_format, "\n")
 
 # Load required libraries
 library(jsonlite)
@@ -24,171 +32,94 @@ query_params <- fromJSON(query_params_file)
 cat("Query parameters:\n")
 print(query_params)
 
-# Use provided paths if available, otherwise use defaults
-csv_path <- if (!is.null(query_params$csv_path)) {
-  query_params$csv_path
+# Build coordinate filter (default: global)
+coord <- if (!is.null(query_params$coords) && length(query_params$coords) == 4) {
+  query_params$coords  # [lat_min, lat_max, lon_min, lon_max]
 } else {
-  "/root/presto/getLipds/lipdverseQuery.csv"
+  c(-90, 90, -180, 180)
 }
 
-tts_path <- if (!is.null(query_params$tts_path)) {
-  query_params$tts_path
-} else {
-  "/root/presto/getLipds/lipdverse_tts.RData"
-}
+# Query lipdverse with all provided filters
+cat("\nQuerying lipdverse...\n")
+qt <- queryLipdverse(
+  coord          = coord,
+  archive.type   = query_params$archiveTypes,
+  variable.name  = query_params$variableName,
+  compilation    = query_params$compilation,
+  verbose        = TRUE
+)
 
-# Download CSV if not exists (fallback for workflow context)
-csv_url <- "https://lipdverse.org/lipdverse/lipdverseQuery.csv"
-if (!file.exists(csv_path)) {
-  cat("Downloading lipdverse query table from:", csv_url, "\n")
-  tryCatch({
-    download.file(csv_url, csv_path, method = "auto", quiet = FALSE)
-    cat("Successfully downloaded query table\n")
-  }, error = function(e) {
-    stop("Failed to download query table: ", e$message)
-  })
-} else {
-  cat("Using existing query table at:", csv_path, "\n")
-}
-
-# Load the lipdverse query table
-qt <- read.csv(csv_path)
-cat("Loaded query table with", nrow(qt), "records\n")
-
-# Filter by compilation
-if (!is.null(query_params$compilation)) {
-  compilation_filter <- qt$paleoData_compilation == query_params$compilation
-  qt <- qt[compilation_filter, ]
-  cat("After compilation filter:", nrow(qt), "records\n")
-}
-
-# Filter by geographic bounds [lat_min, lat_max, lon_min, lon_max]
-if (!is.null(query_params$coords) && length(query_params$coords) == 4) {
-  lat_min <- query_params$coords[1]
-  lat_max <- query_params$coords[2]
-  lon_min <- query_params$coords[3]
-  lon_max <- query_params$coords[4]
-
-  geo_filter <- (qt$geo_latitude >= lat_min) &
-                (qt$geo_latitude <= lat_max) &
-                (qt$geo_longitude >= lon_min) &
-                (qt$geo_longitude <= lon_max)
-  qt <- qt[geo_filter, ]
-  cat("After geographic filter:", nrow(qt), "records\n")
-}
-
-# Filter by archive types
-if (!is.null(query_params$archiveTypes) && length(query_params$archiveTypes) > 0) {
-  archive_filter <- qt$archiveType %in% query_params$archiveTypes
-  qt <- qt[archive_filter, ]
-  cat("After archive type filter:", nrow(qt), "records\n")
-}
-
-# Filter by variable name
-if (!is.null(query_params$variableName)) {
-  var_filter <- qt$paleoData_variableName == query_params$variableName
-  qt <- qt[var_filter, ]
-  cat("After variable name filter:", nrow(qt), "records\n")
-}
-
-# Get unique TSIDs and datasets
-TSIDs <- unique(qt$paleoData_TSid)
-if (length(TSIDs) == 0) {
+if (nrow(qt) == 0) {
   stop("No data matching query parameters")
 }
 
-cat("Found", length(TSIDs), "matching time series\n")
+cat("\nFound", nrow(qt), "time series across",
+    length(unique(qt$datasetId)), "datasets\n")
 
-# Add age/year columns to TSIDs
-dsPick <- unique(qt$datasetId)
-age_year_indices <- which(qt$paleoData_variableName %in% c("age", "year"))
-timePick <- qt$paleoData_TSid[age_year_indices[age_year_indices %in% which(qt$datasetId %in% dsPick)]]
-tsPick <- c(TSIDs, timePick)
-tsPick <- unique(tsPick)
+# Get unique datasets and build download URLs
+# URL pattern: https://lipdverse.org/data/{datasetId}/{ver_underscores}/lipd.lpd
+# where version "1.0.2" becomes "1_0_2"
+datasets <- unique(qt[, c("datasetId", "datasetVersion")])
 
-cat("Total TSIDs including time columns:", length(tsPick), "\n")
+urls <- character(nrow(datasets))
+for (i in seq_len(nrow(datasets))) {
+  dsid <- datasets$datasetId[i]
+  vers <- gsub(".", "_", datasets$datasetVersion[i], fixed = TRUE)
+  urls[i] <- paste0("https://lipdverse.org/data/", dsid, "/", vers, "/lipd.lpd")
+}
 
-# Filter for datasets with age or year
-filtered_qt <- qt[qt$paleoData_TSid %in% tsPick, ]
-year_only_datasets <- c()
+cat("Downloading", length(urls), "LiPD files from lipdverse.org...\n")
 
-for (ds_id in dsPick) {
-  this_dataset <- filtered_qt[filtered_qt$datasetId == ds_id, ]
-  if ("age" %in% this_dataset$paleoData_variableName) {
-    # Has age, good
-  } else if ("year" %in% this_dataset$paleoData_variableName) {
-    year_only_datasets <- c(year_only_datasets, ds_id)
+# Download and load all matching LiPD files
+D <- readLipd(urls)
+
+if (is.null(D) || length(D) == 0) {
+  stop("Failed to load any LiPD datasets")
+}
+
+n_datasets <- if (is.lipd(D)) 1 else length(D)
+cat("Successfully loaded", n_datasets, "datasets\n")
+
+# Ensure output directory exists
+if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+
+write_rds <- output_format %in% c("rds", "all")
+write_lpd <- output_format %in% c("lpd", "lpd_zip", "pickle", "all")
+write_zip <- output_format %in% c("lpd_zip", "all")
+
+# RDS output
+if (write_rds) {
+  rds_path <- file.path(output_dir, "lipd.rds")
+  cat("Saving RDS...\n")
+  saveRDS(D, file = rds_path)
+  cat("  -", rds_path, "\n")
+}
+
+# LiPD file output
+if (write_lpd) {
+  cat("Writing LiPD files to:", output_dir, "\n")
+  if (is.lipd(D)) {
+    writeLipd(D, path = output_dir)
   } else {
-    cat("Dataset", ds_id, "has no age column, removing\n")
-    dsPick <- dsPick[!(dsPick %in% ds_id)]
-  }
-}
-
-tsPick <- filtered_qt$paleoData_TSid[filtered_qt$datasetId %in% dsPick]
-cat("After age/year filter:", length(tsPick), "TSIDs\n")
-
-if (length(tsPick) == 0) {
-  stop("No data remaining after removing datasets without age column")
-}
-
-# Load the lipdverse time series tibble
-cat("Loading lipdverse time series data from:", tts_path, "\n")
-if (!file.exists(tts_path)) {
-  stop("Time series data file not found: ", tts_path)
-}
-load(tts_path)
-
-# Filter tts
-tts <- tts[tts$datasetId %in% dsPick, ]
-tts <- tts[, unname(apply(tts, 2, function(x) sum(!is.na(x)))) != 0]
-tts <- tts[tts$paleoData_TSid %in% tsPick, ]
-
-cat("Filtered tts dimensions:", dim(tts), "\n")
-cat("Unique datasets:", length(unique(tts$datasetId)), "\n")
-
-# Convert to LiPD format
-if (length(dsPick) == 1) {
-  D <- lipdR::as.lipd(tts)
-} else {
-  D <- lipdR::as.multiLipd(tts)
-}
-
-# Create age columns where needed (for year-only datasets)
-if (length(year_only_datasets) > 0) {
-  for (ds_id in year_only_datasets) {
-    tryCatch({
-      cat("Creating age column for dataset:", ds_id, "\n")
-      L <- D[[ds_id]]
-      D[[ds_id]] <- createColumn(
-        L,
-        paleo.or.chron = "paleo",
-        paleo.or.chron.number = 1,
-        table.type = "measurement",
-        table.number = 1,
-        variableName = "age",
-        units = "yr BP",
-        values = 1950 - L$paleoData[[1]]$measurementTable[[1]]$year$values,
-        additional.metadata = NA
+    for (dsname in names(D)) {
+      tryCatch(
+        writeLipd(D[[dsname]], path = output_dir),
+        error = function(e) cat("Warning: failed to write", dsname, ":", e$message, "\n")
       )
-    }, error = function(e) {
-      cat("Warning: Failed to create age column for", ds_id, ":", e$message, "\n")
-    })
+    }
+  }
+  lpd_count <- length(list.files(output_dir, pattern = "\\.lpd$"))
+  cat("  -", lpd_count, ".lpd files written\n")
+
+  if (write_zip) {
+    zip_path <- file.path(output_dir, "lipd_files.zip")
+    lpd_files <- list.files(output_dir, pattern = "\\.lpd$", full.names = TRUE)
+    cat("Creating zip archive:", zip_path, "\n")
+    zip(zip_path, files = lpd_files, flags = "-j")
+    cat("  - ZIP created with", length(lpd_files), "files\n")
   }
 }
 
-# Save to RDS format first
-# output_path is the directory where files should be saved
-output_dir <- if (dir.exists(output_path)) output_path else dirname(output_path)
-rds_path <- file.path(output_dir, "lipd.rds")
-tts_rds_path <- file.path(output_dir, "lipd_tts.rds")
-
-cat("Saving LiPD data to RDS format...\n")
-saveRDS(D, file = rds_path)
-saveRDS(tts, file = tts_rds_path)
-
-cat("LMR LiPD data generation completed successfully\n")
-cat("  - Datasets:", length(dsPick), "\n")
-cat("  - Time series:", length(tsPick), "\n")
-cat("  - RDS file:", rds_path, "\n")
-cat("  - TTS file:", tts_rds_path, "\n")
-cat("Note: Pickle conversion will be handled by Python Docker container\n")
+cat("\nLMR LiPD data generation completed successfully\n")
+cat("  - Datasets:", n_datasets, "\n")
+cat("  - Format:", output_format, "\n")
