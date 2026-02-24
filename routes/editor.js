@@ -217,18 +217,16 @@ router.post('/sendReconRequest', async (req, res) => {
         if (recon === 'LMR') {
           console.log('Processing LiPD data for LMR reconstruction...');
 
-          // Extract query parameters
-          const queryParams = {
-            compilation: req.body.data_selection_compilation || 'PAGES2kv2',
-            coords: [
-              parseFloat(req.body.geo_proxy_coords?.[0] || -90),
-              parseFloat(req.body.geo_proxy_coords?.[1] || 90),
-              parseFloat(req.body.geo_proxy_coords?.[2] || -180),
-              parseFloat(req.body.geo_proxy_coords?.[3] || 180)
-            ],
-            archiveTypes: req.body.data_selection_archive_types || null,
-            variableName: req.body.paleoData_variableName || null
-          };
+          // Load query parameters saved by the query page
+          const userReconDir0 = path.join(config.paths.userRecons, `${uniqueID}_LMR`);
+          const queryParamsPath = path.join(userReconDir0, 'query_params.json');
+          let queryParams = {};
+          if (fs.existsSync(queryParamsPath)) {
+            queryParams = JSON.parse(fs.readFileSync(queryParamsPath, 'utf8'));
+            console.log('Loaded query params from query page:', queryParams);
+          } else {
+            console.warn('query_params.json not found for', uniqueID, '- queryParams will be empty');
+          }
 
           // PATHWAY SPLIT: GitHub Actions vs Traditional Server
           if (useGitHubActions && isAuthenticated) {

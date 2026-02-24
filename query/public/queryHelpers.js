@@ -731,15 +731,30 @@ getAllMonths = function(startSpan,endSpan){
                         console.log("Average TSIDs per dataset: " + (IDs.length / uniqueDatasetIds.length).toFixed(2));
                         console.log("First 5 unique datasetIds:", uniqueDatasetIds.slice(0, 5));
 
-                        var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) +
-                                     ',"datasetIds": ' + JSON.stringify(uniqueDatasetIds) +
-                                     ',"recon":"' + document.getElementById('recon').value +
-                                     '", "uniqueID":"' + document.getElementById('uniqueID').value + '"}'
-                        console.log("Sending POST with " + IDs.length + " TSIDs and " + uniqueDatasetIds.length + " datasetIds")
-                        console.log("All output formats will be generated (R, Python CFR, Python legacy, lipd_files.zip)")
-                        console.log("json body length: " + tsJSON.length + " characters")
-                        //postTSids(tsJSON);
-                        var TSIDsArray = JSON.parse(tsJSON).TSIDs
+                        // Collect query parameters from the filter UI for lipdGenerator
+                        var queryParams = {
+                            archiveTypes: document.getElementById('archiveTypeIn').value || null,
+                            variableName: document.getElementById('variableName').value || null,
+                            compilation: document.getElementById('compilationIn').value || null
+                        };
+                        if (document.getElementById('coordsOn').checked) {
+                            queryParams.coords = [
+                                parseFloat(document.getElementById('lat_min').value),
+                                parseFloat(document.getElementById('lat_max').value),
+                                parseFloat(document.getElementById('lon_min').value),
+                                parseFloat(document.getElementById('lon_max').value)
+                            ];
+                        }
+                        var postBody = {
+                            TSIDs: IDs,
+                            datasetIds: uniqueDatasetIds,
+                            recon: document.getElementById('recon').value,
+                            uniqueID: document.getElementById('uniqueID').value,
+                            queryParams: queryParams
+                        };
+                        var tsJSON = JSON.stringify(postBody);
+                        console.log("Sending POST with " + IDs.length + " TSIDs, " + uniqueDatasetIds.length + " datasetIds, queryParams:", queryParams)
+                        var TSIDsArray = postBody.TSIDs;
                         var numTSids = TSIDsArray.length
                     } else {
                         const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value

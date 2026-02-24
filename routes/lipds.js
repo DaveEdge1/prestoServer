@@ -70,6 +70,15 @@ router.post('/', (req, res) => {
             else console.log('File written successfully at: ' + path1);
           });
         }
+
+        // Save query parameters for lipdGenerator (GitHub Actions filtered pathway)
+        if ('queryParams' in req.body && req.body.queryParams) {
+          const path2 = path.join(dir1, 'query_params.json');
+          fs.writeFile(path2, JSON.stringify(req.body.queryParams, null, 2), (err) => {
+            if (err) console.log(err);
+            else console.log('File written successfully at: ' + path2);
+          });
+        }
       } else {
         const path0 = path.join(dir1, 'TSIDs_err.txt');
         fs.writeFile(path0, 'Rserver error! TSIDs not written.', (err) => {
