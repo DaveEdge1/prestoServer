@@ -358,8 +358,42 @@ router.post('/sendReconRequest', async (req, res) => {
 
       console.log(`Job saved to database for ${uniqueID} (auth_type: ${authType})`);
 
-      // Redirect to status page
-      res.redirect(`/status/${uniqueID}?repo=${encodeURIComponent(repo.url)}`);
+      // Temporary redirect page — 10s countdown then forward to the repo's Actions tab
+      const actionsUrl = `${repo.url}/actions`;
+      res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reconstruction Submitted</title>
+  <style>
+    body { font-family: sans-serif; max-width: 640px; margin: 60px auto; padding: 0 20px; color: #333; }
+    h2 { color: #2a6496; }
+    .countdown { font-size: 1.4em; font-weight: bold; color: #2a6496; }
+    a { color: #2a6496; }
+    .repo-link { word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h2>Reconstruction submitted!</h2>
+  <p>Your <strong>${recon}</strong> reconstruction has been queued in GitHub Actions.</p>
+  <p>Repository: <a class="repo-link" href="${repo.url}" target="_blank">${repo.url}</a></p>
+  <p>You will be redirected to the Actions page in <span class="countdown" id="t">10</span> seconds.</p>
+  <p><a href="${actionsUrl}">Go now &rarr;</a></p>
+  <p><em>Warning: Using your browser's Back button will resubmit the form.</em></p>
+  <script>
+    history.pushState(null, null, window.location.href);
+    history.back();
+    window.onpopstate = () => history.forward();
+    var seconds = 10;
+    var el = document.getElementById('t');
+    var interval = setInterval(function() {
+      seconds--;
+      el.textContent = seconds;
+      if (seconds <= 0) { clearInterval(interval); window.location = '${actionsUrl}'; }
+    }, 1000);
+  </script>
+</body>
+</html>`);
 
     } catch (error) {
       console.error('GitHub Actions error:', error);
