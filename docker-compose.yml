@@ -74,6 +74,20 @@ services:
         condition: service_healthy
 
   # ===========================================
+  # PROXY ANALYSIS SERVICE (port 8090, internal only)
+  # Detects duplicate proxy records for the Data Cleaning page.
+  # Long-running FastAPI service — no host port exposed.
+  # ===========================================
+  proxy-analysis:
+    build:
+      context: ./getLipds/proxyAnalysis
+    environment:
+      - GRAPHDB_URL=${GRAPHDB_URL:-https://linkedearth.graphdb.mint.isi.edu}
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  # ===========================================
   # BLUE MARBLE TILE SERVER (port 8080)
   # Tiles live in ../customTiles/ (outside repo - large binary data)
   # ===========================================

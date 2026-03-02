@@ -99,6 +99,9 @@ app.use('/sparql', require('./routes/sparql'));
 // LiPD data management (was Rserver:3010)
 app.use('/lipds', require('./routes/lipds'));
 
+// Data cleaning (between query and editor for filtered TSID path)
+app.use('/datacleaning', require('./routes/datacleaning'));
+
 // Visualization (was viz:3011)
 app.use('/viz', require('./routes/viz'));
 

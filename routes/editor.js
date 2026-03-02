@@ -249,9 +249,18 @@ router.post('/sendReconRequest', async (req, res) => {
               console.log(`Using archived compilation: ${archiveInfo.compilation} v${archiveInfo.version}`);
             } else {
               // Path B: Filtered query
+              // Check if the user cleaned the TSID selection on the data cleaning page
+              const cleanedPath = path.join(userReconDir, 'cleaned_TSIDs.json');
+              const cleanedTSIDs = fs.existsSync(cleanedPath)
+                ? JSON.parse(fs.readFileSync(cleanedPath, 'utf8')).TSIDs
+                : null;
+              if (cleanedTSIDs) {
+                console.log(`Using cleaned TSID selection: ${cleanedTSIDs.length} TSIDs (from cleaned_TSIDs.json)`);
+              }
               lipdQueryJson = JSON.stringify({
                 mode: 'filtered',
-                ...queryParams
+                ...queryParams,
+                ...(cleanedTSIDs ? { tsids: cleanedTSIDs } : {})
               });
               console.log('Using filtered query with parameters:', queryParams);
             }

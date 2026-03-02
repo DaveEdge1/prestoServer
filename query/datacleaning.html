@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Data Cleaning — Proxy Record Review</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+  <style>
+    /* ── Layout ── */
+    html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
+
+    #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+    header {
+      background: #2a6496;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    header h1 { font-size: 1.4rem; margin: 0; }
+    header p  { font-size: 0.85rem; margin: 0; opacity: 0.85; }
+
+    main { flex: 1; padding: 20px 24px 100px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+    footer .count { font-size: 0.95rem; color: #555; }
+
+    /* ── Loading overlay ── */
+    #loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 5px solid #e0e0e0;
+      border-top-color: #2a6496;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-msg { color: #555; font-size: 1rem; }
+
+    /* ── Panels ── */
+    .panel-section {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .panel-section .panel-heading {
+      background: #f7f7f7;
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ddd;
+      user-select: none;
+    }
+    .panel-section .panel-heading h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .panel-section .panel-heading .badge {
+      background: #2a6496;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    .chevron { font-size: 0.8rem; color: #888; transition: transform 0.2s; }
+    .chevron.open { transform: rotate(180deg); }
+    .panel-body { padding: 16px; }
+
+    /* ── Duplicate groups ── */
+    .dup-group {
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .dup-group-header {
+      background: #fff3cd;
+      padding: 8px 12px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .dup-group-header strong { color: #856404; }
+    .dup-group-header .scores { color: #555; }
+
+    .dup-records { padding: 8px 12px; }
+    .dup-record {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .dup-record:last-child { border-bottom: none; }
+    .dup-record .record-info { flex: 1; font-size: 0.85rem; }
+    .dup-record .record-name { font-weight: 600; }
+    .dup-record .record-meta { color: #666; }
+
+    .keep-remove { display: flex; gap: 8px; flex-shrink: 0; }
+    .keep-remove label {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 0.85rem; cursor: pointer; margin: 0;
+    }
+    .keep-remove input[type=radio] { cursor: pointer; }
+
+    /* ── All-records table ── */
+    #records-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    #records-table th {
+      background: #f0f4f8;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 2px solid #ccc;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #records-table th:hover { background: #e0e8f0; }
+    #records-table td { padding: 7px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    #records-table tr:hover td { background: #fafcff; }
+    #records-table tr.flagged td { background: #fff8e1; }
+    #records-table tr.removed td { opacity: 0.45; text-decoration: line-through; }
+
+    .sort-icon { font-size: 0.7rem; margin-left: 4px; color: #aaa; }
+
+    /* ── Buttons ── */
+    .btn-skip {
+      background: #fff;
+      border: 1px solid #aaa;
+      color: #555;
+      padding: 8px 18px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .btn-skip:hover { background: #f5f5f5; }
+
+    .btn-continue {
+      background: #2a6496;
+      color: #fff;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .btn-continue:hover { background: #1f4f77; }
+    .btn-continue:disabled { background: #8aaabf; cursor: not-allowed; }
+
+    /* ── Error box ── */
+    #error-box {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 14px 18px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ── Empty state ── */
+    .empty-state { text-align: center; color: #888; padding: 24px; font-size: 0.95rem; }
+
+    /* ── PCA plot ── */
+    #pca-plot { width: 100%; height: 400px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-msg">Analyzing proxy records…</div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <h1>Data Cleaning</h1>
+    <p>Review duplicate proxy records before running your reconstruction</p>
+  </header>
+
+  <main>
+    <div id="error-box"></div>
+
+    <!-- Section 1: Duplicate Review -->
+    <div class="panel-section" id="section-duplicates">
+      <div class="panel-heading" onclick="togglePanel('duplicates')">
+        <h3>Duplicate Review <span class="badge" id="dup-count">0</span></h3>
+        <span class="chevron open" id="chevron-duplicates">&#9660;</span>
+      </div>
+      <div class="panel-body" id="body-duplicates">
+        <p style="font-size:0.85rem;color:#555;margin-bottom:12px;">
+          Records below share the same variable type and are within 10 km of each other.
+          For each group, keep at least one record.
+        </p>
+        <div id="dup-groups-container">
+          <div class="empty-state">No duplicate groups detected.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: PCA Explorer -->
+    <div class="panel-section" id="section-pca">
+      <div class="panel-heading" onclick="togglePanel('pca')">
+        <h3>PCA Explorer</h3>
+        <span class="chevron open" id="chevron-pca">&#9660;</span>
+      </div>
+      <div class="panel-body" id="body-pca">
+        <p style="font-size:0.85rem;color:#555;margin-bottom:12px;">
+          Principal component analysis on record location, age range, and resolution.
+          Click a point to highlight it in the records table below.
+        </p>
+        <div id="pca-plot"></div>
+      </div>
+    </div>
+
+    <!-- Section 3: All Records Table -->
+    <div class="panel-section" id="section-table">
+      <div class="panel-heading" onclick="togglePanel('table')">
+        <h3>All Records <span class="badge" id="table-count">0</span></h3>
+        <span class="chevron open" id="chevron-table">&#9660;</span>
+      </div>
+      <div class="panel-body" id="body-table">
+        <p style="font-size:0.85rem;color:#555;margin-bottom:10px;">
+          Uncheck records you want to exclude. Records flagged as likely duplicates are highlighted.
+        </p>
+        <div style="overflow-x:auto;">
+          <table id="records-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="check-all" title="Select all" /></th>
+                <th onclick="sortTable('dataSetName')">Dataset <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('archiveType')">Archive <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('variableName')">Variable <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('lat')">Lat <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('lon')">Lon <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('minAge')">Min Age <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('maxAge')">Max Age <span class="sort-icon">&#8597;</span></th>
+                <th onclick="sortTable('resolution')">Res (yr) <span class="sort-icon">&#8597;</span></th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <span class="count" id="footer-count">Loading…</span>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-skip" onclick="skipCleaning()">Skip — use all records</button>
+      <button class="btn-continue" id="btn-continue" onclick="confirmCleaning()" disabled>
+        Continue with <span id="continue-count">0</span> selected records →
+      </button>
+    </div>
+  </footer>
+
+</div>
+
+<script src="/query/datacleaningApp.js"></script>
+</body>
+</html>

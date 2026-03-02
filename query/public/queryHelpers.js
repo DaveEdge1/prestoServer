@@ -775,7 +775,9 @@ getAllMonths = function(startSpan,endSpan){
                             }
                             // If no existing query params, queryParams already starts with ?
                             queryParams = queryParams.replace(/\s/g, '');
-                            resolve("/editor/querypath"+window.location.search+queryParams)
+                            // Filtered TSID queries go to data cleaning; archived compilations go directly to the editor
+                            var targetBase = (lipdSource === 'TSIDs') ? '/datacleaning' : '/editor/querypath';
+                            resolve(targetBase+window.location.search+queryParams)
                         }
                         })
                         .catch(error => {
