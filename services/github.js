@@ -143,8 +143,23 @@ async function createRepository(token, recon, uniqueID, configData) {
   // Update configuration files with user's config
   await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData);
 
-  // GitHub Pages is enabled by visualize.yml on first run via actions/configure-pages
-  // (Actions-based deployment — no server-side setup needed)
+  // Enable GitHub Pages with Actions build type.
+  // build_type:'workflow' doesn't require a gh-pages branch to exist, so this
+  // works immediately at repo creation time. configure-pages@v5 defaults to
+  // enablement:false and won't create Pages on its own.
+  try {
+    await octokit.rest.repos.createPagesSite({
+      owner,
+      repo: repoName,
+      build_type: 'workflow'
+    });
+    console.log(`✓ GitHub Pages (Actions) enabled for ${repoName}`);
+  } catch (err) {
+    // 409 = already configured — acceptable
+    if (err.status !== 409) {
+      console.warn(`GitHub Pages enablement failed (${err.status}): ${err.message}`);
+    }
+  }
 
   return {
     name: repoName,
