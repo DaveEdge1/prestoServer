@@ -57,6 +57,7 @@ services:
       - ./jsonEditor:/root/presto/jsonEditor
       - ./templates:/root/presto/templates
       - ./getLipds:/root/presto/getLipds
+      - ./query:/root/presto/query
       - ./app.js:/root/presto/app.js
       # PRODUCTION ONLY (Linux server at /root/presto):
       # These mounts enable same-path strategy. Comment out for local dev.
@@ -71,6 +72,29 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+
+  # ===========================================
+  # BLUE MARBLE TILE SERVER (port 8080)
+  # Tiles live in ../customTiles/ (outside repo - large binary data)
+  # ===========================================
+  tile-server:
+    build:
+      context: ./tileserver
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../customTiles/blueMarble/tiles_mollweide:/usr/share/nginx/html/tiles_bluemarble:ro
+      - ../customTiles/blueMarble_3031/tiles:/usr/share/nginx/html/tiles_bluemarble_3031:ro
+      - ../customTiles/blueMarble_3995/tiles:/usr/share/nginx/html/tiles_bluemarble_3995:ro
+    networks:
+      - presto-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # ===========================================
   # DATABASE
