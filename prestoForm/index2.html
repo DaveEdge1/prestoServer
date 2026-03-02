@@ -67,10 +67,10 @@
 			const urlParams = new URLSearchParams(window.location.search);
 			language = data[urlParams.get('recon')].language
 		      })
-		
+
 	</script>
 
-	  
+
   </head>
   <body>
         <header class="nav-holder make-sticky">
@@ -121,33 +121,8 @@
 	<div class="row">
 	<div class="col-md-12">
 	<h1>Who & How</h1>
-      <h4>Tell us where to send the results and how you would like to edit the reconstruction parameters</h4>
-      <br>
       <form id=tableForm2 onSubmit="EvaluateForm2()" method="POST">
-        <div class="form-group">
-          <label for="Name">Name</label>
-          <input type="text" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Enter your name" name="name">
-        </div>
-	<br>
-        <div class="form-group">
-		<div class="required-field">
-          		<label for="Email">Email</label>
-          		<input type="text" class="form-control" id="useremail" aria-describedby="emailHelp" name="useremail" placeholder="Enter your email address (eg. John.Doe@vsmu.edu)">
-		</div>
-	</div>
-	<br>
-	<p>Your name and email will not be stored or shared in any way</p>
-	<div class="radio-group" id="config" style="padding:24px 24px; border-radius:16px;">
-	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="GUI" name="optradio" checked="true"><span style="font-weight:900">Edit Parameters In Browser Window</span>
-Edit the default parameters using a web form</label>
-	<br>
-	<!--label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" name="optradio" value="0"><span style="font-weight:900">Use Defaults</span>
-Reproduce original rconstruction with updated poxy database</label>
-	<br-->
-	<label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="upload" name="optradio"><span style="font-weight:900">Upload Parameters File (Advanced)</span>
-For users familiar with the code, upload reconstruction parameters directly</label>
-        </div>
-	<br>
+
 	<!-- Execution Pathway (shown for reconstructions that support GitHub Actions) -->
 	<div id="execution-pathway-section" style="display:none;">
 	  <h4>How would you like to run this reconstruction?</h4>
@@ -182,18 +157,49 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	    </div>
 	  </div>
 	</div>
-	<!--div class="button-submit" style="text-align:center">
-		<button style="height:100%; width:200px; font-size:16px; text-align:center" Style="submit" class="btn btn-primary">Submit</button>
-      </div-->
-        </form>
+
+	<!-- Form body (locked until pathway condition is met) -->
+	<div id="form-body">
+	  <div id="form-lock-notice" style="display:none; background:#fff3cd; padding:12px 16px; border-radius:8px; border:1px solid #ffc107; margin-bottom:16px; color:#856404;">
+	    Please select a pathway above to continue. Login with GitHub to use GitHub Actions, or select Traditional Server.
+	  </div>
+	  <div id="email-section">
+	    <h4>Tell us where to send the results and how you would like to edit the reconstruction parameters</h4>
+	    <br>
+            <div class="form-group">
+              <label for="Name">Name</label>
+              <input type="text" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Enter your name" name="name">
+            </div>
+	    <br>
+            <div class="form-group">
+	      <div class="required-field">
+          	<label for="Email">Email</label>
+          	<input type="text" class="form-control" id="useremail" aria-describedby="emailHelp" name="useremail" placeholder="Enter your email address (eg. John.Doe@vsmu.edu)">
+	      </div>
+	    </div>
+	    <br>
+	    <p>Your name and email will not be stored or shared in any way</p>
+	  </div>
+	  <div class="radio-group" id="config" style="padding:24px 24px; border-radius:16px;">
+	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="GUI" name="optradio" checked="true"><span style="font-weight:900">Edit Parameters In Browser Window</span>
+Edit the default parameters using a web form</label>
+	    <br>
+	    <!--label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" name="optradio" value="0"><span style="font-weight:900">Use Defaults</span>
+Reproduce original rconstruction with updated poxy database</label>
+	    <br-->
+	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="upload" name="optradio"><span style="font-weight:900">Upload Parameters File (Advanced)</span>
+For users familiar with the code, upload reconstruction parameters directly</label>
+          </div>
+	  <br>
+	</div>
+
+      </form>
 	<br><br>
 
-	
-	<div class="button-submit" style="text-align:center">
+	<div id="submit-btn-container" class="button-submit" style="text-align:center">
 		<button style="height:100%; width:300px; font-size:16px; text-align:center" onclick="goToQuery(event)" class="btn btn-primary">Submit</button>
     		<!--input type="button" value="Go to Query (experimental)" onclick="goToQuery(event)" /-->
 	</div>
-	</form>
 	</section>
 	</div>
 	</div>
@@ -241,28 +247,37 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 
 	<script>
 		function goToQuery(e){
-			if (validateEmail() == 0){
-				e.preventDefault();
-				const urlParams = new URLSearchParams(window.location.search);
-				const pathwayEl = document.querySelector('input[name="executionPathway"]:checked');
-				const useGitHubActions = pathwayEl ? pathwayEl.value === 'github' : false;
+			e.preventDefault();
+			const urlParams = new URLSearchParams(window.location.search);
+			const pathwayEl = document.querySelector('input[name="executionPathway"]:checked');
+			const useGitHubActions = pathwayEl ? pathwayEl.value === 'github' : false;
 
-				if (useGitHubActions && !isUserAuthenticated) {
+			let user, domain;
+			if (useGitHubActions) {
+				if (!isUserAuthenticated) {
 					alert('Please login with GitHub first to use the GitHub Actions pathway.');
 					return false;
 				}
-
-				window.location.href = "/query/" + urlParams.get('recon')
-					+ "?recon=" + urlParams.get('recon')
-					+ '&uniqueID=' + urlParams.get('uniqueID')
-					+ '&user=' + document.getElementById('useremail').value.split('@')[0]
-					+ '&domain=' + document.getElementById('useremail').value.split('@')[1]
-					+ '&language=' + language
-					+ '&useGitHubActions=' + useGitHubActions;
-				return false;
+				const ghUsername = document.getElementById('github-username-display').textContent.trim();
+				user = ghUsername || 'github-user';
+				domain = 'github.com';
 			} else {
-				alert("invalid email")
+				if (validateEmail() !== 0) {
+					alert("invalid email");
+					return false;
+				}
+				user = document.getElementById('useremail').value.split('@')[0];
+				domain = document.getElementById('useremail').value.split('@')[1];
 			}
+
+			window.location.href = "/query/" + urlParams.get('recon')
+				+ "?recon=" + urlParams.get('recon')
+				+ '&uniqueID=' + urlParams.get('uniqueID')
+				+ '&user=' + user
+				+ '&domain=' + domain
+				+ '&language=' + language
+				+ '&useGitHubActions=' + useGitHubActions;
+			return false;
 		}
 	</script>
 
@@ -270,12 +285,41 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	const GITHUB_ACTIONS_RECONS = ['LMR'];
 	let isUserAuthenticated = false;
 
+	function updateFormLock() {
+		const pathwayEl = document.querySelector('input[name="executionPathway"]:checked');
+		const selectedServer = pathwayEl && pathwayEl.value === 'server';
+		const selectedGitHub = pathwayEl && pathwayEl.value === 'github';
+		const shouldUnlock = selectedServer || isUserAuthenticated;
+
+		const formBody = document.getElementById('form-body');
+		const submitContainer = document.getElementById('submit-btn-container');
+		const lockNotice = document.getElementById('form-lock-notice');
+		const emailSection = document.getElementById('email-section');
+
+		if (shouldUnlock) {
+			formBody.style.pointerEvents = '';
+			formBody.style.opacity = '';
+			submitContainer.style.pointerEvents = '';
+			submitContainer.style.opacity = '';
+			if (lockNotice) lockNotice.style.display = 'none';
+			// Hide email fields when GitHub Actions pathway is active
+			if (emailSection) emailSection.style.display = selectedGitHub ? 'none' : '';
+		} else {
+			formBody.style.pointerEvents = 'none';
+			formBody.style.opacity = '0.4';
+			submitContainer.style.pointerEvents = 'none';
+			submitContainer.style.opacity = '0.4';
+			if (lockNotice) lockNotice.style.display = 'block';
+		}
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		const urlParams = new URLSearchParams(window.location.search);
 		const reconType = urlParams.get('recon');
 
 		if (GITHUB_ACTIONS_RECONS.includes(reconType)) {
 			document.getElementById('execution-pathway-section').style.display = 'block';
+			updateFormLock();
 
 			const loginLink = document.getElementById('github-login-link');
 			if (loginLink) {
@@ -292,13 +336,18 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 					} else {
 						document.getElementById('github-login-box').style.display = 'block';
 					}
+					updateFormLock();
 				})
-				.catch(() => { document.getElementById('github-login-box').style.display = 'block'; });
+				.catch(() => {
+					document.getElementById('github-login-box').style.display = 'block';
+					updateFormLock();
+				});
 
 			document.querySelectorAll('input[name="executionPathway"]').forEach(radio => {
 				radio.addEventListener('change', function () {
 					document.getElementById('github-auth-panel').style.display =
 						this.value === 'github' ? 'block' : 'none';
+					updateFormLock();
 				});
 			});
 		}

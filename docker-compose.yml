@@ -63,6 +63,7 @@ services:
       # - /root/presto:/root/presto
       # - /root/holocene_da:/root/holocene_da
       # - /root/temp12k-regional-composites:/root/temp12k-regional-composites
+    init: true  # Prevents zombie processes when volume mounts hang
     # No port exposure needed - nginx proxies via port 81
     networks:
       - presto-network

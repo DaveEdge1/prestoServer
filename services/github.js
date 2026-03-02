@@ -143,6 +143,21 @@ async function createRepository(token, recon, uniqueID, configData) {
   // Update configuration files with user's config
   await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData);
 
+  // Enable GitHub Pages (gh-pages branch created by visualize.yml on first run)
+  // This call may fail on first creation if gh-pages branch doesn't exist yet —
+  // the visualize.yml workflow also enables Pages after its first push as a fallback.
+  try {
+    await octokit.rest.repos.createPagesSite({
+      owner,
+      repo: repoName,
+      source: { branch: 'gh-pages', path: '/' }
+    });
+    console.log(`✓ GitHub Pages enabled for ${repoName}`);
+  } catch (err) {
+    // 409 = already configured, 422 = branch doesn't exist yet — both are acceptable
+    console.warn(`GitHub Pages not enabled at creation time (${err.status}): will be enabled by visualize.yml on first run`);
+  }
+
   return {
     name: repoName,
     owner: owner,
@@ -474,7 +489,9 @@ async function dispatchWorkflow(token, owner, repo, inputs) {
   });
 
   if (runs.workflow_runs.length === 0) {
-    throw new Error('Workflow run not found after dispatch');
+    // Dispatch succeeded but run not yet registered — return without an ID
+    console.warn('Workflow dispatched but run not yet listed by GitHub (race condition). Continuing without run ID.');
+    return { id: null, status: 'queued', html_url: null };
   }
 
   return {

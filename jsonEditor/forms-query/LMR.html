@@ -122,7 +122,11 @@ For more information about the CFR method, visit: https://fzhu2e.github.io/cfr/
 <br>
 <br>
 <form id="paramsForm" method="POST" onsubmit="buildURL()">
-<input id="recon" name="recon" type="hidden" value="graph_em">
+<input id="recon" name="recon" type="hidden" value="">
+<input id="user" name="user" type="hidden" value="">
+<input id="domain" name="domain" type="hidden" value="">
+<input id="uniqueID" name="uniqueID" type="hidden" value="">
+<input id="use-github-actions" name="useGitHubActions" type="hidden" value="">
 <script>function getQueryVariable(variable)
 {
        var query = window.location.search.substring(1);
@@ -147,10 +151,6 @@ document.getElementById("use-github-actions").value = getQueryVariable("useGitHu
 <script>
 popQueryVariable()
 </script>
-<input id="recon" name="recon" type="hidden" value="">
-<input id="user" name="user" type="hidden" value="">
-<input id="domain" name="domain" type="hidden" value="">
-<input id="uniqueID" name="uniqueID" type="hidden" value="">
 <button type="button" class="collapsible">Reconstruction</button>
 <div class="content">
 <br>
@@ -459,8 +459,6 @@ popQueryVariable()
 <button id="submit-button" style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary">Submit</button>
 </div>
 
-<!-- Hidden input for GitHub Actions mode (populated by popQueryVariable) -->
-<input id="use-github-actions" name="useGitHubActions" type="hidden" value="">
 
 </form>
 <script>

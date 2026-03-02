@@ -276,30 +276,22 @@ router.post('/sendReconRequest', async (req, res) => {
           }
         }
 
-        // Dispatch workflow
-        console.log(`Dispatching workflow for ${repoData.name}...`);
-        const workflowInputs = {
-          unique_id: uniqueID,
-          recon_type: recon
-        };
-
-        // Add appropriate input based on pathway
-        if (recon === 'LMR') {
-          if (lipdQueryJson) {
-            // GitHub Actions pathway: pass JSON for workflow generation
-            workflowInputs.lipd_query_json = lipdQueryJson;
-          } else if (lipdDataUrl) {
-            // Traditional pathway: pass URL to uploaded pickle
-            workflowInputs.lipd_data_url = lipdDataUrl;
-          }
+        // LMR: workflow is already triggered by the push to lmr_configs.yml
+        // in updateRepositoryConfig() — no explicit dispatch needed.
+        // Other recon types dispatch their workflow explicitly.
+        let workflowRun = { id: null };
+        if (recon !== 'LMR') {
+          console.log(`Dispatching workflow for ${repoData.name}...`);
+          const workflowInputs = { unique_id: uniqueID, recon_type: recon };
+          workflowRun = await githubService.dispatchWorkflow(
+            token,
+            repoData.owner,
+            repoData.name,
+            workflowInputs
+          );
+        } else {
+          console.log(`LMR: workflow triggered by config push to ${repoData.name}`);
         }
-
-        const workflowRun = await githubService.dispatchWorkflow(
-          token,
-          repoData.owner,
-          repoData.name,
-          workflowInputs
-        );
 
         repo = {
           name: repoData.name,
@@ -371,19 +363,11 @@ router.post('/sendReconRequest', async (req, res) => {
 
     } catch (error) {
       console.error('GitHub Actions error:', error);
-
-      // Fallback to traditional workflow
-      console.warn('Falling back to traditional workflow...');
-      res.redirect(
-        writeConfigs(
-          req.query.recon,
-          req.query.user,
-          req.query.domain,
-          req.body,
-          req.query.uniqueID,
-          req.query.language
-        )
-      );
+      res.status(500).send(`
+        <h2>Reconstruction submission failed</h2>
+        <p>${error.message}</p>
+        <p><a href="javascript:history.back()">Go back</a></p>
+      `);
     }
   } else {
     // Traditional workflow (existing code)

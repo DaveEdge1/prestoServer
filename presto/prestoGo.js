@@ -538,7 +538,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 			console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
 		});
 	}
-	if (recon != "download"){
+	if (recon != "download" && recon != "LMR"){
 		await startContainer(launchText)
 		if (recon != "temp12k"){
 			await writeViz(uniqueID, dirname, recon)
