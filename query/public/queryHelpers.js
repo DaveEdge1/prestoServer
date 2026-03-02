@@ -710,6 +710,10 @@ getAllMonths = function(startSpan,endSpan){
                 //alert(params(useCoords=true))
                 getTSIDs().then(reso => {
                     if (lipdSource == 'TSIDs'){
+                        if (!reso) {
+                            alert('No proxy records found. Please uncheck "Use an archived compilation", update the map, then try again.');
+                            return; // leave the promise pending — user stays on the page
+                        }
                         var resoJSON = JSON.parse(reso);
 
                         // DEBUG: Check what /TS endpoint returned
@@ -785,6 +789,9 @@ getAllMonths = function(startSpan,endSpan){
                         alert("Error: failed to write data selection to server. Please start over.");
                         resolve("https://paleopresto.com/custom.html");
                         });
+                }).catch(error => {
+                    console.error("getLipds outer error:", error);
+                    alert("Error: " + error.message + "\nPlease try again.");
                 });
             });
         }
