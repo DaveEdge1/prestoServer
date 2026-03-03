@@ -20,20 +20,22 @@ GET /health
 
 from __future__ import annotations
 
+import concurrent.futures
 import io
 import json
 import logging
 import math
 import os
+import re
 import time
 import zipfile
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import numpy as np
 import pandas as pd
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from pydantic import BaseModel
 from scipy.stats import pearsonr
 from sklearn.decomposition import PCA
@@ -49,6 +51,7 @@ app = FastAPI(title="Proxy Analysis Service")
 # =============================================================================
 QUERY_CSV_URL = "https://lipdverse.org/lipdverse/lipdverseQuery.zip"
 GRAPHDB_URL = os.environ.get("GRAPHDB_URL", "https://linkedearth.graphdb.mint.isi.edu")
+ORCHESTRATOR_URL = os.environ.get("ORCHESTRATOR_URL", "http://presto-orchestrator:3000")
 SPATIAL_THRESHOLD_KM = 10.0
 CORR_THRESHOLD = 0.8
 DTW_NORM_THRESHOLD = 0.03
@@ -121,6 +124,13 @@ def _safe_str(val: Any) -> Optional[str]:
     return s if s and s.lower() not in ("nan", "none", "null", "") else None
 
 
+def _parse_compilations(comp_str: Optional[str]) -> Set[str]:
+    """Split a compilation string (e.g. 'Pages2k;LR04') into a set of names."""
+    if not comp_str:
+        return set()
+    return {part.strip().lower() for part in re.split(r"[;,|]", comp_str) if part.strip()}
+
+
 def normalize_series(arr: np.ndarray) -> np.ndarray:
     lo, hi = arr.min(), arr.max()
     if hi - lo < 1e-10:
@@ -132,11 +142,11 @@ def compute_dtw_norm(s1: List[float], s2: List[float]) -> Optional[float]:
     """DTW on normalized series, normalized by series length."""
     try:
         from fastdtw import fastdtw
-        from scipy.spatial.distance import euclidean
 
         a = normalize_series(np.array(s1, dtype=float))
         b = normalize_series(np.array(s2, dtype=float))
-        dist, _ = fastdtw(a, b, dist=euclidean)
+        # Use abs difference — euclidean() from scipy rejects scalar inputs
+        dist, _ = fastdtw(a, b, dist=lambda x, y: abs(x - y))
         return float(dist) / max(len(a), len(b), 1)
     except Exception as exc:
         logger.warning("DTW computation failed: %s", exc)
@@ -247,6 +257,7 @@ def row_to_record(row: pd.Series) -> Dict[str, Any]:
         ),
         "archiveType": _safe_str(row.get("archiveType")),
         "variableName": _safe_str(row.get("paleoData_variableName")),
+        "compilation": _safe_str(row.get("paleoData_mostRecentCompilations")),
         "lat": lat,
         "lon": lon,
         "minAge": min_age,
@@ -336,7 +347,7 @@ def make_union_find(n: int):
 # Main analysis endpoint
 # =============================================================================
 @app.post("/analyze")
-async def analyze(req: AnalyzeRequest) -> Dict[str, Any]:
+async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dict[str, Any]:
     tsids = req.tsids
     if not tsids:
         raise HTTPException(status_code=400, detail="No TSIDs provided")
@@ -385,6 +396,7 @@ async def analyze(req: AnalyzeRequest) -> Dict[str, Any]:
         var_i = ri.get("variableName")
         if lat_i is None or lon_i is None or not var_i:
             continue
+        comp_i = _parse_compilations(ri.get("compilation"))
         for j in range(i + 1, len(records)):
             rj = records[j]
             lat_j, lon_j = rj.get("lat"), rj.get("lon")
@@ -393,6 +405,11 @@ async def analyze(req: AnalyzeRequest) -> Dict[str, Any]:
                 continue
             if var_i.lower() != var_j.lower():
                 continue
+            # Records from the same compilation are different data products,
+            # not duplicates — skip them regardless of proximity.
+            comp_j = _parse_compilations(rj.get("compilation"))
+            if comp_i and comp_j and comp_i & comp_j:
+                continue
             dist = haversine_km(lat_i, lon_i, lat_j, lon_j)
             if dist < SPATIAL_THRESHOLD_KM:
                 candidate_pairs.append((i, j, dist))
@@ -400,45 +417,13 @@ async def analyze(req: AnalyzeRequest) -> Dict[str, Any]:
     logger.info("Found %d spatial candidate pairs", len(candidate_pairs))
 
     # -------------------------------------------------------------------------
-    # Fetch TS values for candidate TSIDs, compute Pearson + DTW
+    # All spatial candidate pairs are returned as potential duplicates.
+    # Correlation/DTW are computed on-demand per group via POST /correlate.
     # -------------------------------------------------------------------------
-    candidate_tsids: set = set()
-    for i, j, _ in candidate_pairs:
-        candidate_tsids.add(records[i]["tsid"])
-        candidate_tsids.add(records[j]["tsid"])
-
-    ts_values: Dict[str, List[float]] = {}
-    if candidate_tsids:
-        ts_values = fetch_ts_values(list(candidate_tsids))
-
-    # Evaluate each candidate pair
-    confirmed_pairs: List[tuple] = []  # (i, j, dist_km, pearson_r, dtw_norm)
-
-    for i, j, dist_km in candidate_pairs:
-        tsid_i = records[i]["tsid"]
-        tsid_j = records[j]["tsid"]
-        vals_i = ts_values.get(tsid_i)
-        vals_j = ts_values.get(tsid_j)
-
-        pearson_r: Optional[float] = None
-        dtw_norm: Optional[float] = None
-        is_duplicate = False
-
-        if vals_i and vals_j:
-            pearson_r = compute_pearson(vals_i, vals_j)
-            dtw_norm = compute_dtw_norm(vals_i, vals_j)
-            if pearson_r is not None and pearson_r > CORR_THRESHOLD:
-                is_duplicate = True
-            if dtw_norm is not None and dtw_norm < DTW_NORM_THRESHOLD:
-                is_duplicate = True
-        else:
-            # No TS data: conservatively flag all spatial candidates
-            is_duplicate = True
-
-        if is_duplicate:
-            confirmed_pairs.append((i, j, dist_km, pearson_r, dtw_norm))
-
-    logger.info("Confirmed %d duplicate pairs after correlation/DTW checks", len(confirmed_pairs))
+    confirmed_pairs: List[tuple] = [
+        (i, j, dist_km, None, None) for i, j, dist_km in candidate_pairs
+    ]
+    logger.info("Returning %d spatial candidate pairs as duplicate groups", len(confirmed_pairs))
 
     # -------------------------------------------------------------------------
     # Group confirmed pairs with union-find
@@ -495,11 +480,379 @@ async def analyze(req: AnalyzeRequest) -> Dict[str, Any]:
             "dtwDistances": dtw_distances,
         })
 
+    # Start background preload in group order so top groups are ready first
+    groups_tsids = [g["records"] for g in duplicate_groups]
+    if groups_tsids:
+        background_tasks.add_task(_preload_lipd_cache, groups_tsids)
+
     return {
         "records": records,
         "duplicateGroups": duplicate_groups,
         "pcaCoords": pca_coords,
     }
+
+
+# =============================================================================
+# On-demand correlation endpoint (called per duplicate group on click)
+# =============================================================================
+class CorrelateRequest(BaseModel):
+    tsids: List[str]
+
+
+# =============================================================================
+# LiPD file fallback: download directly from lipdverse.org
+# =============================================================================
+
+# Session cache: (dsid, dsver) -> {tsid: [float|None, ...]}
+# Avoids re-downloading the same dataset multiple times within one container run.
+# Only successful downloads are stored; failures are never cached.
+_lipd_series_cache: Dict[tuple, Dict[str, List]] = {}
+
+
+def _resolve_lipd_url(dsid: str, dsver: str) -> Optional[str]:
+    """
+    Return the actual .lpd download URL for a dataset on lipdverse.org.
+
+    The version stored in the metadata CSV (e.g. "1.0.8") sometimes differs
+    from the version actually hosted (e.g. "1_0_7").  Strategy:
+      1. Try the CSV version (dots → underscores) with a HEAD request.
+      2. If that 404s, fetch the bare directory listing and parse the
+         meta-refresh redirect to discover the real version.
+
+    No result is cached — every call hits lipdverse.org fresh.
+    """
+    base = f"https://lipdverse.org/data/{dsid}"
+    ver_underscored = dsver.replace(".", "_")
+    canonical_url = f"{base}/{ver_underscored}/lipd.lpd"
+
+    try:
+        head = requests.head(canonical_url, timeout=5, allow_redirects=True)
+        if head.status_code == 200:
+            return canonical_url
+    except Exception:
+        pass
+
+    try:
+        dir_resp = requests.get(f"{base}/", timeout=5)
+        if dir_resp.status_code == 200:
+            m = re.search(r"""url=['"]([\w_]+)/index\.html['"]""", dir_resp.text, re.IGNORECASE)
+            if m:
+                actual_ver = m.group(1)
+                resolved_url = f"{base}/{actual_ver}/lipd.lpd"
+                logger.info("LiPD URL resolved %s: %s → %s", dsid, ver_underscored, actual_ver)
+                return resolved_url
+    except Exception as exc:
+        logger.warning("LiPD URL resolution failed for %s: %s", dsid, exc)
+
+    return None
+
+
+def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
+    """
+    Download one LiPD ZIP, extract ALL column series, and cache by (dsid, dsver).
+    Returns the full {tsid: values} dict for that dataset.
+    Keyed by version so an updated dataset at the source gets a fresh download.
+    """
+    cache_key = (dsid, dsver)
+    if cache_key in _lipd_series_cache:
+        return _lipd_series_cache[cache_key]
+
+    url = _resolve_lipd_url(dsid, dsver)
+    if url is None:
+        logger.warning("LiPD fallback: could not resolve URL for dataset %s", dsid)
+        return {}
+
+    try:
+        resp = requests.get(url, timeout=45)
+        resp.raise_for_status()
+        zf = zipfile.ZipFile(io.BytesIO(resp.content))
+
+        # Parse metadata.jsonld for tsid → (csv_filename, column_number)
+        with zf.open("bag/data/metadata.jsonld") as f:
+            meta_json = json.load(f)
+
+        tsid_to_col: Dict[str, tuple] = {}
+        for paleo in meta_json.get("paleoData", []):
+            for table in paleo.get("measurementTable", []):
+                fname = table.get("filename", "")
+                for col in table.get("columns", []):
+                    t = str(col.get("TSid", ""))
+                    n = col.get("number")
+                    if t and n is not None and fname:
+                        tsid_to_col[t] = (fname, int(n))
+
+        # Extract every column and cache the full dataset.
+        # Store None for missing/non-finite values to preserve row alignment
+        # between proxy and time columns (needed for paired sort in /correlate).
+        dataset_series: Dict[str, List] = {}
+        for tsid, (fname, col_num) in tsid_to_col.items():
+            csv_path = f"bag/data/{fname}"
+            if csv_path not in zf.namelist():
+                continue
+            with zf.open(csv_path) as f:
+                # LiPD CSVs have no header row — first row is data
+                csv_df = pd.read_csv(f, header=None)
+            col_idx = col_num - 1
+            if col_idx >= csv_df.shape[1]:
+                continue
+            raw = []
+            for v in csv_df.iloc[:, col_idx].tolist():
+                try:
+                    fv = float(v)
+                    raw.append(fv if math.isfinite(fv) else None)
+                except (TypeError, ValueError):
+                    raw.append(None)
+            if any(v is not None for v in raw):
+                dataset_series[tsid] = raw
+
+        logger.info(
+            "LiPD fallback: loaded %d series from dataset %s", len(dataset_series), dsid
+        )
+        _lipd_series_cache[cache_key] = dataset_series
+        return dataset_series
+
+    except Exception as exc:
+        logger.warning("LiPD fallback failed for dataset %s: %s", dsid, exc)
+        return {}
+
+
+def _is_finite_float(v: Any) -> bool:
+    try:
+        return math.isfinite(float(v))
+    except (TypeError, ValueError):
+        return False
+
+
+def _preload_lipd_cache(groups: List[List[str]]) -> None:
+    """
+    Background task: warm _lipd_series_cache one group at a time, in display order.
+    Processing groups sequentially means group 0 is ready first (matches page order).
+    Within each group, datasets are downloaded in parallel by _fetch_ts_from_lipd.
+    """
+    for i, group_tsids in enumerate(groups):
+        try:
+            _fetch_ts_from_lipd(group_tsids)
+            logger.info("Background preload: group %d complete", i)
+        except Exception as exc:
+            logger.warning("Background preload: group %d failed: %s", i, exc)
+    logger.info("Background preload done (%d datasets cached)", len(_lipd_series_cache))
+
+
+def _fetch_ts_from_lipd(tsids: List[str]) -> Dict[str, List[float]]:
+    """
+    Download LiPD ZIP files in parallel and extract time series values by TSid.
+    Results are cached per dataset so repeated calls for the same dataset are free.
+    """
+    df = load_metadata()
+    tsid_col = next(
+        (c for c in ("paleoData_TSid", "TSid", "tsid", "TSID") if c in df.columns), None
+    )
+    if tsid_col is None:
+        return {}
+
+    tsid_set = set(tsids)
+
+    # Collect unique datasets that contain at least one requested TSid.
+    # Time-axis TSids may not appear as rows but live in the same LiPD file
+    # as their proxy TSid — the full-dataset extraction in _fetch_one_lipd
+    # captures them automatically.
+    dataset_meta: Dict[str, str] = {}  # dsid -> dsver
+    for _, row in df[df[tsid_col].isin(tsid_set)].iterrows():
+        dsid = str(row.get("datasetId", ""))
+        dsver = str(row.get("datasetVersion", "1.0.0"))
+        if dsid and dsid not in dataset_meta:
+            dataset_meta[dsid] = dsver
+
+    # Download datasets in parallel (I/O bound — use threads)
+    results: Dict[str, List[float]] = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {
+            executor.submit(_fetch_one_lipd, dsid, dsver): dsid
+            for dsid, dsver in dataset_meta.items()
+        }
+        for future in concurrent.futures.as_completed(futures):
+            dataset_series = future.result()
+            for tsid, vals in dataset_series.items():
+                if tsid in tsid_set and tsid not in results:
+                    results[tsid] = vals
+
+    logger.info(
+        "LiPD fallback total: %d / %d TSIDs resolved", len(results), len(tsid_set)
+    )
+    return results
+
+
+# =============================================================================
+# SPARQL via internal orchestrator
+# =============================================================================
+def _fetch_ts_via_orchestrator(tsids: List[str]) -> tuple[Dict[str, List[float]], Optional[str]]:
+    """Call the Node.js /sparql endpoint and return (values_dict, error_string)."""
+    try:
+        resp = requests.post(
+            f"{ORCHESTRATOR_URL}/sparql",
+            json={"TSIDs": tsids},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        raw = resp.json()  # outer JSON decode → a string (double-encoded by Node.js res.json)
+        if isinstance(raw, str):
+            if raw.startswith("{"):
+                parsed = json.loads(raw)
+                return {k: v for k, v in parsed.items() if isinstance(v, list)}, None
+            else:
+                return {}, raw  # e.g. "XHR didn't work: 500"
+        elif isinstance(raw, dict):
+            return {k: v for k, v in raw.items() if isinstance(v, list)}, None
+        return {}, f"Unexpected response type: {type(raw)}"
+    except Exception as exc:
+        logger.warning("SPARQL via orchestrator failed: %s", exc)
+        return {}, str(exc)
+
+
+@app.post("/correlate")
+async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
+    tsids = req.tsids
+    if len(tsids) < 2:
+        raise HTTPException(status_code=400, detail="Need at least 2 TSIDs")
+
+    logger.info("Correlating %d TSIDs: %s", len(tsids), tsids)
+
+    # Load metadata for lat/lon, variableName, and time TSids
+    try:
+        df = load_metadata()
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Failed to load metadata: {exc}")
+
+    tsid_col = next(
+        (c for c in ("paleoData_TSid", "TSid", "tsid", "TSID") if c in df.columns), None
+    )
+    if tsid_col is None:
+        raise HTTPException(status_code=500, detail="TSid column not found")
+
+    filtered = df[df[tsid_col].isin(set(tsids))]
+    meta = {str(row[tsid_col]): row for _, row in filtered.iterrows()}
+
+    # Map each proxy TSid → its corresponding time-axis TSid
+    time_tsid_map: Dict[str, str] = {}
+    for tsid in tsids:
+        row = meta.get(tsid)
+        if row is not None:
+            t_tsid = _safe_str(_first_present(row, "paleoData_hasTimeTsid"))
+            if t_tsid:
+                time_tsid_map[tsid] = t_tsid
+
+    # Query proxy + time TSids in one call
+    all_query_tsids = list(tsids) + [
+        t for t in time_tsid_map.values() if t not in tsids
+    ]
+
+    ts_values, sparql_error = _fetch_ts_via_orchestrator(all_query_tsids)
+    logger.info(
+        "SPARQL: got values for %d / %d TSIDs%s",
+        len(ts_values),
+        len(all_query_tsids),
+        f" (error: {sparql_error})" if sparql_error else "",
+    )
+
+    # Fallback: download LiPD files directly when SPARQL is unavailable
+    if sparql_error and not ts_values:
+        logger.info("SPARQL unavailable — falling back to LiPD file download")
+        try:
+            ts_values = _fetch_ts_from_lipd(all_query_tsids)
+            if ts_values:
+                logger.info("LiPD fallback succeeded: %d TSIDs", len(ts_values))
+                sparql_error = None  # suppress warning — fallback worked
+        except Exception as exc:
+            logger.warning("LiPD fallback also failed: %s", exc)
+
+    # Build per-tsid series objects (proxy values + time axis)
+    series: Dict[str, Dict] = {}
+    for tsid in tsids:
+        proxy_vals = ts_values.get(tsid, [])
+        t_tsid = time_tsid_map.get(tsid)
+        time_vals = ts_values.get(t_tsid, []) if t_tsid else []
+        row = meta.get(tsid)
+        label = (
+            _safe_str(_first_present(row, "paleoData_variableName")) if row is not None else None
+        )
+        dataset_name = (
+            _safe_str(_first_present(row, "dataSetName", "datasetId")) if row is not None else None
+        )
+        compilation = (
+            _safe_str(row.get("paleoData_mostRecentCompilations")) if row is not None else None
+        )
+        # Sort by time axis so traces don't zigzag and Pearson/DTW are meaningful.
+        # When arrays share the same row count (None-preserving extraction), pair
+        # them row-by-row, drop rows where either value is None, then sort by time.
+        if time_vals and proxy_vals and len(time_vals) == len(proxy_vals):
+            # Strip None rows (must be done before monotonicity check)
+            clean = [(t, v) for t, v in zip(time_vals, proxy_vals)
+                     if t is not None and v is not None]
+            # Fast monotonicity check — only sort if actually out of order
+            if len(clean) > 1 and any(clean[i][0] > clean[i+1][0] for i in range(len(clean)-1)):
+                clean = sorted(clean, key=lambda p: p[0])
+            time_vals  = [p[0] for p in clean]
+            proxy_vals = [p[1] for p in clean]
+        else:
+            # Lengths differ or no time axis — strip Nones independently.
+            # Do NOT use the time array as x when lengths don't match (different
+            # tables); the JS fallback will use sequential indices instead.
+            proxy_vals = [v for v in proxy_vals if v is not None]
+            time_vals  = []
+
+        series[tsid] = {
+            "values": proxy_vals,
+            "time": time_vals,
+            "label": label or tsid,
+            "dataSetName": dataset_name,
+            "compilation": compilation,
+        }
+
+    # Compute pairwise Pearson + DTW + distance
+    pairs = []
+    for i in range(len(tsids)):
+        for j in range(i + 1, len(tsids)):
+            ti, tj = tsids[i], tsids[j]
+            vals_i = series[ti]["values"]
+            vals_j = series[tj]["values"]
+
+            dist_km = None
+            ri, rj = meta.get(ti), meta.get(tj)
+            if ri is not None and rj is not None:
+                lat_i = _safe_float(_first_present(ri, "geo_latitude", "geo_meanLat"))
+                lon_i = _safe_float(_first_present(ri, "geo_longitude", "geo_meanLon"))
+                lat_j = _safe_float(_first_present(rj, "geo_latitude", "geo_meanLat"))
+                lon_j = _safe_float(_first_present(rj, "geo_longitude", "geo_meanLon"))
+                if all(v is not None for v in (lat_i, lon_i, lat_j, lon_j)):
+                    dist_km = round(haversine_km(lat_i, lon_i, lat_j, lon_j), 2)
+
+            pearson_r = compute_pearson(vals_i, vals_j) if vals_i and vals_j else None
+            dtw_norm = compute_dtw_norm(vals_i, vals_j) if vals_i and vals_j else None
+
+            pairs.append({
+                "tsid1": ti,
+                "tsid2": tj,
+                "pearson": round(pearson_r, 4) if pearson_r is not None else None,
+                "dtw": round(dtw_norm, 6) if dtw_norm is not None else None,
+                "distKm": dist_km,
+            })
+
+    result: Dict[str, Any] = {"pairs": pairs, "series": series}
+    if sparql_error:
+        result["warning"] = "Time series could not be retrieved — SPARQL service unavailable and LiPD file download returned no data."
+    return result
+
+
+# =============================================================================
+# Preload status — client polls this to discover which groups are ready
+# =============================================================================
+@app.get("/preload-status")
+def preload_status() -> Dict[str, Any]:
+    """Return the set of TSIDs whose data is already in the cache."""
+    ready: Set[str] = set()
+    for dataset_series in _lipd_series_cache.values():
+        ready.update(dataset_series.keys())
+    return {"readyTsids": list(ready)}
 
 
 # =============================================================================

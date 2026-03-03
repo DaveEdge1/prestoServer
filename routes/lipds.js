@@ -12,14 +12,11 @@ const config = require('../config');
 // Create directory with error handling
 async function createDirectory(dirPath) {
   try {
-    fs.mkdirSync(dirPath);
-    console.log(`Directory "${dirPath}" created successfully.`);
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`Directory "${dirPath}" created or already exists.`);
     return 200;
   } catch (error) {
-    if (error.code === 'EEXIST') {
-      console.error(`Directory "${dirPath}" already exists.`);
-      return 400;
-    } else if (error.code === 'EACCES' || error.code === 'EPERM') {
+    if (error.code === 'EACCES' || error.code === 'EPERM') {
       console.error(`Permission denied to create directory "${dirPath}".`);
       return 400;
     } else if (error.code === 'ENOENT') {

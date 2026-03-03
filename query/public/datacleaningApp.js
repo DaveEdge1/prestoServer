@@ -73,6 +73,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderPCA();
     renderTable();
     updateFooter();
+    startPreloadPolling();
 
     hideLoading();
   } catch (err) {
@@ -116,6 +117,65 @@ function togglePanel(id) {
   if (chevron) chevron.classList.toggle('open', hidden);
 }
 
+// Track which groups have had their details loaded / been saved
+const loadedGroups = new Set();
+const savedGroups  = new Set();
+
+// =============================================================================
+// Preload status polling — marks group headers "ready" as cache populates
+// =============================================================================
+let _preloadPollTimer = null;
+
+function startPreloadPolling() {
+  if (duplicateGroups.length === 0) return;
+
+  // Build a map: tsid → groupId for fast lookup
+  const tsidToGroup = {};
+  for (const g of duplicateGroups) {
+    for (const t of g.records) tsidToGroup[t] = g.groupId;
+  }
+
+  // Track which groups are fully ready
+  const readyGroups = new Set();
+  let pollCount = 0;
+  const MAX_POLLS = 90; // ~3 min at 2s interval
+
+  async function poll() {
+    pollCount++;
+    try {
+      const resp = await fetch('/datacleaning/preload-status');
+      if (resp.ok) {
+        const { readyTsids = [] } = await resp.json();
+        const readySet = new Set(readyTsids);
+
+        for (const g of duplicateGroups) {
+          if (readyGroups.has(g.groupId)) continue;
+          // Group is ready if every record TSid has cached data
+          if (g.records.every(t => readySet.has(t))) {
+            readyGroups.add(g.groupId);
+            markGroupReady(g.groupId);
+          }
+        }
+      }
+    } catch (_) { /* silently ignore poll errors */ }
+
+    const allReady = readyGroups.size === duplicateGroups.length;
+    if (!allReady && pollCount < MAX_POLLS) {
+      _preloadPollTimer = setTimeout(poll, 2000);
+    }
+  }
+
+  _preloadPollTimer = setTimeout(poll, 1500); // first poll after 1.5s
+}
+
+function markGroupReady(groupId) {
+  const scoresEl = document.getElementById(`scores-${groupId}`);
+  // Only update if the group hasn't been opened yet (no results loaded)
+  if (scoresEl && !loadedGroups.has(groupId)) {
+    scoresEl.innerHTML = '<span style="color:#3a7a3a;font-size:0.78rem;">● ready</span>';
+  }
+}
+
 // =============================================================================
 // Render: Duplicate Groups
 // =============================================================================
@@ -134,20 +194,6 @@ function renderDuplicates() {
   container.innerHTML = '';
 
   for (const group of duplicateGroups) {
-    // Build score summary string
-    const corrs = group.correlations || [];
-    const dtws = group.dtwDistances || [];
-    let scoreText = '';
-    if (corrs.length > 0) {
-      const validR = corrs.filter(c => c.pearson != null).map(c => c.pearson);
-      if (validR.length) scoreText += `r = ${Math.max(...validR).toFixed(2)}`;
-    }
-    if (dtws.length > 0) {
-      const validD = dtws.filter(d => d.dtw != null).map(d => d.dtw);
-      if (validD.length) scoreText += (scoreText ? ',  ' : '') + `DTW = ${Math.min(...validD).toFixed(4)}`;
-    }
-    const distKm = corrs[0]?.distKm != null ? `${corrs[0].distKm} km apart` : '';
-
     const groupEl = document.createElement('div');
     groupEl.className = 'dup-group';
     groupEl.id = `dup-group-${group.groupId}`;
@@ -155,30 +201,26 @@ function renderDuplicates() {
     let recordsHtml = '';
     group.records.forEach((tsid, idx) => {
       const meta = allRecords.find(r => r.tsid === tsid) || {};
-      const isFirst = idx === 0;
-      const keepVal = isFirst ? 'keep' : 'remove';
-      // Mark others as excluded by default
-      if (!isFirst) excludedTSIDs.add(tsid);
 
       recordsHtml += `
-        <div class="dup-record" id="dup-rec-${group.groupId}-${idx}">
+        <div class="dup-record" id="dup-rec-${group.groupId}-${idx}" data-tsid="${tsid}">
           <div class="record-info">
             <div class="record-name">${meta.dataSetName || tsid}</div>
             <div class="record-meta">
               ${meta.archiveType || ''} · ${meta.variableName || ''}
               ${(meta.lat != null && meta.lon != null) ? ` · ${meta.lat.toFixed(2)}°, ${meta.lon.toFixed(2)}°` : ''}
+              ${meta.compilation ? ` · <em>${meta.compilation}</em>` : ''}
             </div>
           </div>
           <div class="keep-remove">
             <label>
               <input type="radio" name="dup-${group.groupId}-${tsid}" value="keep"
-                ${isFirst ? 'checked' : ''}
+                checked
                 onchange="onDupRadioChange('${tsid}', 'keep')" />
               Keep
             </label>
             <label>
               <input type="radio" name="dup-${group.groupId}-${tsid}" value="remove"
-                ${!isFirst ? 'checked' : ''}
                 onchange="onDupRadioChange('${tsid}', 'remove')" />
               Remove
             </label>
@@ -187,12 +229,27 @@ function renderDuplicates() {
     });
 
     groupEl.innerHTML = `
-      <div class="dup-group-header">
-        <strong>Duplicate Group ${group.groupId + 1}</strong>
-        <span class="scores">${distKm}${scoreText ? '  |  ' + scoreText : ''}</span>
+      <div class="dup-group-header" id="header-${group.groupId}"
+           onclick="toggleGroupDetails(${group.groupId})">
+        <span class="expand-icon" id="expand-${group.groupId}">&#9654;</span>
+        <strong>Group ${group.groupId + 1}</strong>
+        <span class="scores" id="scores-${group.groupId}" style="color:#888;font-size:0.8rem;">click to analyse</span>
         <span style="margin-left:auto;font-size:0.8rem;color:#777;">${group.records.length} records</span>
       </div>
-      <div class="dup-records">${recordsHtml}</div>`;
+      <div class="dup-group-details" id="details-${group.groupId}" style="display:none">
+        <div class="detail-loading" id="detail-loading-${group.groupId}">Loading…</div>
+        <div class="pair-selector" id="pair-selector-${group.groupId}" style="display:none"></div>
+        <div id="detail-scores-${group.groupId}" style="display:none"></div>
+        <div class="series-toggle" id="series-toggle-${group.groupId}" style="display:none"></div>
+        <div class="dup-group-plot" id="plot-${group.groupId}" style="display:none"></div>
+        <div class="detail-warning" id="detail-warning-${group.groupId}" style="display:none"></div>
+      </div>
+      <div class="dup-records" id="dup-records-${group.groupId}">
+        ${recordsHtml}
+        <div class="save-row">
+          <button class="btn-save-group" onclick="saveGroup(${group.groupId})">Save</button>
+        </div>
+      </div>`;
 
     container.appendChild(groupEl);
   }
@@ -310,6 +367,7 @@ function renderTable() {
       <td title="${tsid}">${rec.dataSetName || '—'}</td>
       <td>${rec.archiveType || '—'}</td>
       <td>${rec.variableName || '—'}</td>
+      <td title="${rec.compilation || ''}">${rec.compilation || '—'}</td>
       <td>${rec.lat != null ? rec.lat.toFixed(2) : '—'}</td>
       <td>${rec.lon != null ? rec.lon.toFixed(2) : '—'}</td>
       <td>${rec.minAge != null ? Math.round(rec.minAge) : '—'}</td>
@@ -443,4 +501,419 @@ async function confirmCleaning() {
       btn.innerHTML = 'Continue with <span id="continue-count">' + keptTSIDs.length + '</span> selected records →';
     }
   }
+}
+
+// =============================================================================
+// Group expand / collapse
+// =============================================================================
+function toggleGroupDetails(groupId) {
+  const details = document.getElementById(`details-${groupId}`);
+  const records = document.getElementById(`dup-records-${groupId}`);
+  const icon    = document.getElementById(`expand-${groupId}`);
+  if (!details) return;
+
+  if (savedGroups.has(groupId)) {
+    // Saved groups: toggle both records section and details panel together
+    const isCollapsed = records && records.style.display === 'none';
+    if (records)  records.style.display  = isCollapsed ? '' : 'none';
+    if (details)  details.style.display  = (isCollapsed && loadedGroups.has(groupId)) ? '' : 'none';
+    if (icon)     icon.classList.toggle('open', isCollapsed);
+    return;
+  }
+
+  // Normal (unsaved): toggle just the details panel
+  const opening = details.style.display === 'none';
+  details.style.display = opening ? '' : 'none';
+  if (icon) icon.classList.toggle('open', opening);
+
+  if (opening && !loadedGroups.has(groupId)) {
+    // Clear the ready badge — loading indicator takes over
+    const scoresEl = document.getElementById(`scores-${groupId}`);
+    if (scoresEl) scoresEl.innerHTML = '';
+    loadGroupDetails(groupId);
+  }
+}
+
+// =============================================================================
+// Save a group's Keep/Remove selection and collapse it
+// =============================================================================
+function saveGroup(groupId) {
+  savedGroups.add(groupId);
+
+  // Collapse records section and details panel
+  const recordsEl = document.getElementById(`dup-records-${groupId}`);
+  const detailsEl = document.getElementById(`details-${groupId}`);
+  const icon      = document.getElementById(`expand-${groupId}`);
+  if (recordsEl) recordsEl.style.display = 'none';
+  if (detailsEl) detailsEl.style.display = 'none';
+  if (icon)      icon.classList.remove('open');
+
+  // Show saved badge in the group banner (re-show in case loadGroupDetails hid it)
+  const scoresEl = document.getElementById(`scores-${groupId}`);
+  if (scoresEl) {
+    scoresEl.style.display = '';
+    scoresEl.innerHTML = '<span style="color:#3a7a3a;font-weight:600;font-size:0.8rem;">✓ Saved</span>';
+  }
+
+  // Sync all records in this group to the table (in case any radio was changed
+  // without the table having been rendered yet)
+  const group = duplicateGroups.find(g => g.groupId === groupId);
+  if (group) {
+    for (const tsid of group.records) syncTableRow(tsid);
+  }
+  updateFooter();
+}
+
+// =============================================================================
+// Per-group state (set when correlation data loads)
+// =============================================================================
+const groupState = {};
+// groupState[groupId] = { pairs, series, selectedPairIdx, seriesFilter }
+
+// =============================================================================
+// Metric chip helper (module-level so it can be reused)
+// =============================================================================
+function chip(label, value, cls = '', title = '') {
+  return `<div class="metric-chip"${title ? ` title="${title}"` : ''}>
+    <span class="mc-label">${label}</span>
+    <span class="mc-value ${cls}">${value}</span>
+  </div>`;
+}
+
+function shortName(name, max = 20) {
+  if (!name) return '—';
+  return name.length > max ? name.slice(0, max - 1) + '…' : name;
+}
+
+// Plotly default color sequence — must match trace assignment order
+const PLOTLY_COLORS = [
+  '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+  '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'
+];
+function traceColor(idx) { return PLOTLY_COLORS[idx % PLOTLY_COLORS.length]; }
+
+// =============================================================================
+// Load correlation + time series for a group (called once on first open)
+// =============================================================================
+async function loadGroupDetails(groupId) {
+  const group = duplicateGroups.find(g => g.groupId === groupId);
+  if (!group) return;
+
+  loadedGroups.add(groupId);
+
+  const loadingEl    = document.getElementById(`detail-loading-${groupId}`);
+  const warningEl    = document.getElementById(`detail-warning-${groupId}`);
+  const plotEl       = document.getElementById(`plot-${groupId}`);
+  const headerScores = document.getElementById(`scores-${groupId}`);
+  const pairSelEl    = document.getElementById(`pair-selector-${groupId}`);
+  const toggleEl     = document.getElementById(`series-toggle-${groupId}`);
+
+  try {
+    const resp = await fetch('/datacleaning/correlate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tsids: group.records })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      throw new Error(err.error || 'Request failed');
+    }
+
+    const data = await resp.json();
+    const pairs  = data.pairs  || [];
+    const series = data.series || {};
+
+    if (loadingEl)    loadingEl.style.display = 'none';
+    if (headerScores) headerScores.style.display = 'none';
+
+    // Assign a stable color to each tsid based on its position in series
+    const tsidOrder = Object.keys(series);
+    const tsidColors = {};
+    tsidOrder.forEach((t, i) => { tsidColors[t] = traceColor(i); });
+
+    // Color the Keep/Remove record names to match the chips and plot traces
+    const groupDomEl = document.getElementById(`dup-group-${groupId}`);
+    if (groupDomEl) {
+      groupDomEl.querySelectorAll('.dup-record').forEach(recEl => {
+        const color = tsidColors[recEl.dataset.tsid];
+        if (color) {
+          const nameEl = recEl.querySelector('.record-name');
+          if (nameEl) nameEl.style.color = color;
+        }
+      });
+    }
+
+    const multiRecord = group.records.length > 2;
+
+    // For 2-record groups auto-select both; for 3+ start with nothing selected
+    const initSelected = tsidOrder.slice(0, 2);  // always pre-select first two
+
+    groupState[groupId] = {
+      pairs,
+      series,
+      tsidColors,
+      selectedTsids: [...initSelected],
+      seriesFilter: 'all'
+    };
+
+    // ── Record selector (3+ records only) ──
+    if (multiRecord && pairSelEl) {
+      pairSelEl.innerHTML = buildRecordSelector(groupId, tsidOrder, series, tsidColors);
+      pairSelEl.style.display = '';
+      // Mark the pre-selected chips
+      for (const tsid of initSelected) {
+        setChipSelected(groupId, tsid, true, tsidColors[tsid]);
+      }
+    }
+
+    // ── Series toggle (3+ records only) ──
+    if (multiRecord && toggleEl) {
+      toggleEl.innerHTML = buildSeriesToggle(groupId);
+      toggleEl.style.display = '';
+    }
+
+    // ── Metrics ──
+    renderGroupMetrics(groupId);
+
+    // ── Plot ──
+    const hasSeries = Object.values(series).some(s => s.values && s.values.length > 0);
+    if (plotEl) {
+      if (hasSeries) {
+        renderGroupPlot(groupId, series, tsidColors, plotEl, null);
+        plotEl.style.display = '';
+      } else {
+        plotEl.innerHTML = '<div style="text-align:center;color:#999;padding:32px 0;font-size:0.88rem;">Time series data not available for this group</div>';
+        plotEl.style.height = 'auto';
+        plotEl.style.display = '';
+      }
+    }
+
+    if (data.warning && warningEl && !hasSeries) {
+      // Clear from loadedGroups so the user can retry
+      loadedGroups.delete(groupId);
+      warningEl.innerHTML =
+        `⚠ ${data.warning} — ` +
+        `<a href="#" onclick="retryGroup(${groupId});return false;">try again</a>`;
+      warningEl.style.display = '';
+    }
+
+    group.correlations = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, pearson: p.pearson, distKm: p.distKm }));
+    group.dtwDistances = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, dtw: p.dtw }));
+
+  } catch (err) {
+    console.error('Group details error:', err);
+    // Remove from loadedGroups so the user can retry by clicking again
+    loadedGroups.delete(groupId);
+    if (loadingEl) {
+      loadingEl.innerHTML =
+        `Failed to load: ${err.message} — ` +
+        `<a href="#" onclick="retryGroup(${groupId});return false;">try again</a>`;
+    }
+  }
+}
+
+function retryGroup(groupId) {
+  const loadingEl = document.getElementById(`detail-loading-${groupId}`);
+  if (loadingEl) loadingEl.textContent = 'Loading…';
+  loadGroupDetails(groupId);
+}
+
+// =============================================================================
+// Build individual record selector
+// =============================================================================
+function buildRecordSelector(groupId, tsidOrder, series, tsidColors) {
+  const chips = tsidOrder.map(tsid => {
+    const color = tsidColors[tsid];
+    const name  = shortName((series[tsid]?.dataSetName) || tsid);
+    return `<button class="record-chip" id="record-chip-${groupId}-${CSS.escape(tsid)}"
+              style="--chip-color:${color};border-color:${color}"
+              onclick="toggleRecordSelection(${groupId}, '${tsid}')"
+              title="${series[tsid]?.dataSetName || tsid}">
+              <span class="record-dot" style="background:${color}"></span>${name}</button>`;
+  }).join('');
+  return `<span class="pair-selector-label">Select two:</span>${chips}`;
+}
+
+// =============================================================================
+// Build series toggle HTML
+// =============================================================================
+function buildSeriesToggle(groupId) {
+  return `<span class="series-toggle-label">Show:</span>
+    <button class="toggle-btn active" id="toggle-all-${groupId}"
+            onclick="setSeriesFilter(${groupId}, 'all')">All</button>
+    <button class="toggle-btn" id="toggle-pair-${groupId}"
+            onclick="setSeriesFilter(${groupId}, 'pair')">Selected pair</button>`;
+}
+
+// =============================================================================
+// User clicks a record chip — toggle selection (max 2; clicking a 3rd
+// replaces the first-selected)
+// =============================================================================
+function toggleRecordSelection(groupId, tsid) {
+  const state = groupState[groupId];
+  if (!state) return;
+
+  const idx = state.selectedTsids.indexOf(tsid);
+
+  if (idx !== -1) {
+    // Deselect
+    state.selectedTsids.splice(idx, 1);
+    setChipSelected(groupId, tsid, false, state.tsidColors[tsid]);
+  } else {
+    if (state.selectedTsids.length >= 2) {
+      // Replace oldest selection
+      const removed = state.selectedTsids.shift();
+      setChipSelected(groupId, removed, false, state.tsidColors[removed]);
+    }
+    state.selectedTsids.push(tsid);
+    setChipSelected(groupId, tsid, true, state.tsidColors[tsid]);
+  }
+
+  renderGroupMetrics(groupId);
+
+  if (state.seriesFilter === 'pair') {
+    const plotEl = document.getElementById(`plot-${groupId}`);
+    if (plotEl) {
+      renderGroupPlot(groupId, state.series, state.tsidColors, plotEl, state.selectedTsids);
+    }
+  }
+}
+
+function setChipSelected(groupId, tsid, selected, color) {
+  const el = document.getElementById(`record-chip-${groupId}-${CSS.escape(tsid)}`);
+  if (el) el.classList.toggle('selected', selected);
+}
+
+// =============================================================================
+// Render metrics for the currently selected pair (or blank if < 2 selected)
+// =============================================================================
+function renderGroupMetrics(groupId) {
+  const state    = groupState[groupId];
+  const scoresEl = document.getElementById(`detail-scores-${groupId}`);
+  if (!state || !scoresEl) return;
+
+  // Find the pair object for the two selected tsids
+  let pair = null;
+  if (state.selectedTsids.length === 2) {
+    const [t1, t2] = state.selectedTsids;
+    pair = state.pairs.find(p =>
+      (p.tsid1 === t1 && p.tsid2 === t2) ||
+      (p.tsid1 === t2 && p.tsid2 === t1)
+    );
+  } else if (state.pairs.length === 1) {
+    // 2-record group — only one pair, always show it
+    pair = state.pairs[0];
+  }
+
+  const TIPS = {
+    dist: 'Geographic distance between the two proxy sites in kilometres.',
+    r:    'Pearson r: linear correlation coefficient. Range: −1 to 1. Values above 0.8 suggest the two records co-vary strongly and may be duplicates. Unlike DTW, Pearson r is sensitive to the exact timing of each data point.',
+    dtw:  'DTW (Dynamic Time Warping): shape-similarity score. Range: 0 to 1 (both series are min–max scaled to [0, 1] before comparison, then the total path cost is divided by series length). ' +
+          '0 = perfectly identical shapes; 1 = completely opposite. ' +
+          'Values below 0.03 indicate near-identical records. ' +
+          'A value of 0.1 means the two series differ by ~10 % of their full amplitude on average — moderate similarity. ' +
+          'Unlike Pearson r, DTW allows for small age-model offsets, so two records can score well here even if their time axes are slightly misaligned.'
+  };
+
+  const na = (label, title) => chip(label, '—', 'na', title);
+
+  if (!pair) {
+    const hint = state.selectedTsids.length === 1
+      ? '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select one more record</span>'
+      : '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select two records to compare</span>';
+    scoresEl.innerHTML = `<div class="metrics-strip">${na('Distance', TIPS.dist)}${na('Pearson r', TIPS.r)}${na('DTW', TIPS.dtw)}${hint}</div>`;
+  } else {
+    const distChip = chip('Distance', pair.distKm  != null ? `${pair.distKm} km`     : '—', pair.distKm  == null ? 'na' : '',                              TIPS.dist);
+    const rChip    = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > 0.8 ? '' : 'warn', TIPS.r);
+    const dtwChip  = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < 0.03    ? '' : 'warn', TIPS.dtw);
+    scoresEl.innerHTML = `<div class="metrics-strip">${distChip}${rChip}${dtwChip}</div>`;
+  }
+  scoresEl.style.display = '';
+}
+
+// =============================================================================
+// User toggles All / Selected pair on the graph
+// =============================================================================
+function setSeriesFilter(groupId, filter) {
+  const state = groupState[groupId];
+  if (!state) return;
+
+  state.seriesFilter = filter;
+
+  const allBtn  = document.getElementById(`toggle-all-${groupId}`);
+  const pairBtn = document.getElementById(`toggle-pair-${groupId}`);
+  if (allBtn)  allBtn.classList.toggle('active',  filter === 'all');
+  if (pairBtn) pairBtn.classList.toggle('active', filter === 'pair');
+
+  const plotEl = document.getElementById(`plot-${groupId}`);
+  if (!plotEl) return;
+
+  if (filter === 'all') {
+    renderGroupPlot(groupId, state.series, state.tsidColors, plotEl, null);
+  } else {
+    // Show only the selected chips (up to 2); empty selection → show nothing
+    const selected = state.selectedTsids.length > 0 ? state.selectedTsids : [];
+    renderGroupPlot(groupId, state.series, state.tsidColors, plotEl, selected);
+  }
+}
+
+// =============================================================================
+// Render Plotly time series mini-chart for a duplicate group
+// tsidColors: {tsid: color} — must match record-chip colors
+// filterTsids: string[] | null — null means show all series
+// =============================================================================
+function renderGroupPlot(groupId, series, tsidColors, el, filterTsids) {
+  // Always iterate in the same stable order so colors stay consistent
+  let entries = Object.entries(series);
+  if (filterTsids) {
+    const keep = new Set(filterTsids);
+    entries = entries.filter(([tsid]) => keep.has(tsid));
+  }
+  if (!entries.length) return;
+
+  const hasTime = entries.some(([, s]) => s.time && s.time.length > 0);
+
+  const traces = entries.map(([tsid, s]) => {
+    let x = (hasTime && s.time.length > 0) ? s.time : s.values.map((_, i) => i);
+    let y = s.values;
+    if (x.length !== y.length) {
+      // Time and proxy arrays came from different tables — lengths don't align.
+      // Fall back to sequential index so the trace is never zigzag.
+      x = y.map((_, i) => i);
+    } else if (x.length > 1) {
+      // Fast monotonicity check (O(n)) — only sort if actually out of order.
+      let outOfOrder = false;
+      for (let i = 1; i < x.length; i++) {
+        if (x[i] < x[i - 1]) { outOfOrder = true; break; }
+      }
+      if (outOfOrder) {
+        const pairs = x.map((xi, i) => [xi, y[i]]).sort((a, b) => a[0] - b[0]);
+        x = pairs.map(p => p[0]);
+        y = pairs.map(p => p[1]);
+      }
+    }
+    const baseName  = s.dataSetName || tsid;
+    const traceName = s.compilation ? `${baseName} [${s.compilation}]` : baseName;
+    return {
+      type: 'scatter',
+      mode: 'lines',
+      name: traceName,
+      x,
+      y,
+      line: { width: 1.5, color: tsidColors[tsid] },
+      hovertemplate: `<b>${traceName}</b><br>x: %{x:.1f}<br>y: %{y:.3f}<extra></extra>`
+    };
+  });
+
+  const layout = {
+    margin: { l: 44, r: 10, t: 6, b: 36 },
+    xaxis: { title: hasTime ? 'Age / Year' : 'Index', titlefont: { size: 11 } },
+    yaxis: { title: entries[0][1].label || 'Value', titlefont: { size: 11 } },
+    showlegend: false,
+    hovermode: 'x unified',
+    font: { size: 10 }
+  };
+
+  Plotly.newPlot(el, traces, layout, { responsive: true, displayModeBar: false });
 }
