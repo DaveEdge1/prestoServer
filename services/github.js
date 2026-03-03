@@ -102,7 +102,7 @@ function generateRepoName(recon, uniqueID) {
  * @param {Object} configData - User configuration data
  * @returns {Promise<Object>} Repository information
  */
-async function createRepository(token, recon, uniqueID, configData) {
+async function createRepository(token, recon, uniqueID, configData, queryParamsJson = null) {
   const octokit = new Octokit({ auth: token });
   const repoName = generateRepoName(recon, uniqueID);
 
@@ -141,7 +141,7 @@ async function createRepository(token, recon, uniqueID, configData) {
   await new Promise(resolve => setTimeout(resolve, 5000));
 
   // Update configuration files with user's config
-  await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData);
+  await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData, queryParamsJson);
 
   // Enable GitHub Pages with Actions build type.
   // build_type:'workflow' doesn't require a gh-pages branch to exist, so this
@@ -179,23 +179,71 @@ async function createRepository(token, recon, uniqueID, configData) {
  * @param {string} uniqueID - Unique reconstruction identifier
  * @param {Object} configData - User configuration data
  */
-async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, configData) {
+async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, configData, queryParamsJson = null) {
   console.log('Updating repository configuration...');
 
-  // Update the config file with user's parameters
-  // LMR template has lmr_configs.yml at root level
   const configPath = recon === 'LMR' ? 'lmr_configs.yml' : 'config/user_config.yml';
   const configYaml = yaml.dump(configData);
 
   try {
-    // Get existing config file to get its SHA
+    // ── LMR only: write query_params.json and workflow BEFORE lmr_configs.yml ──
+    // lmr_configs.yml is what triggers the push-triggered workflow run.
+    // query_params.json (with cleaned TSIDs) and the updated workflow file must
+    // be in the repo BEFORE that push fires.
+    if (recon === 'LMR' && queryParamsJson) {
+      // 1. Write query_params.json
+      try {
+        let qpSha;
+        try {
+          const { data: f } = await octokit.rest.repos.getContent({ owner, repo, path: 'query_params.json' });
+          qpSha = f.sha;
+        } catch (_) { /* file doesn't exist yet — will be created */ }
+
+        await octokit.rest.repos.createOrUpdateFileContents({
+          owner, repo,
+          path: 'query_params.json',
+          message: `Add query parameters for reconstruction ${uniqueID}`,
+          content: Buffer.from(queryParamsJson).toString('base64'),
+          ...(qpSha ? { sha: qpSha } : {})
+        });
+        console.log('✓ Written query_params.json');
+      } catch (err) {
+        console.warn('Failed to write query_params.json (non-fatal):', err.message);
+      }
+
+      // 2. Overwrite .github/workflows/LMR.yml with our template version so the
+      //    workflow knows to read query_params.json from the checkout.
+      try {
+        const workflowContent = fs.readFileSync(
+          path.join(__dirname, '..', 'templates', 'workflows', 'LMR.yml'), 'utf8'
+        );
+        let wfSha;
+        try {
+          const { data: f } = await octokit.rest.repos.getContent({ owner, repo, path: '.github/workflows/LMR.yml' });
+          wfSha = f.sha;
+        } catch (_) { /* file doesn't exist yet */ }
+
+        await octokit.rest.repos.createOrUpdateFileContents({
+          owner, repo,
+          path: '.github/workflows/LMR.yml',
+          message: `Update LMR workflow for reconstruction ${uniqueID}`,
+          content: Buffer.from(workflowContent).toString('base64'),
+          ...(wfSha ? { sha: wfSha } : {})
+        });
+        console.log('✓ Updated .github/workflows/LMR.yml');
+      } catch (err) {
+        console.warn('Failed to update workflow file (non-fatal):', err.message);
+      }
+    }
+
+    // Get existing config file SHA
     const { data: existingFile } = await octokit.rest.repos.getContent({
       owner,
       repo,
       path: configPath
     });
 
-    // Update config file
+    // Update config file — for LMR this push triggers the workflow run
     await octokit.rest.repos.createOrUpdateFileContents({
       owner,
       repo,

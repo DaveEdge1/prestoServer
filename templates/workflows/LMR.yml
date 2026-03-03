@@ -1,6 +1,9 @@
 name: LMR CFR Reconstruction
 
 on:
+  push:
+    paths:
+      - 'lmr_configs.yml'   # server commits this last, after query_params.json
   workflow_dispatch:
     inputs:
       unique_id:
@@ -12,7 +15,7 @@ on:
         required: false
         type: string
       lipd_query_json:
-        description: 'LiPD data query parameters for workflow generation (GitHub Actions pathway)'
+        description: 'LiPD data query parameters for workflow generation (dispatch pathway)'
         required: false
         type: string
 
@@ -25,21 +28,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Detect which pathway to use
+      # Detect which pathway to use.
+      # Priority order:
+      #   1. query_params.json in repo  — server-committed (push trigger pathway)
+      #   2. lipd_data_url input        — traditional pre-generated pickle
+      #   3. lipd_query_json input      — manual workflow_dispatch
       - name: Detect data acquisition pathway
         id: pathway
         run: |
-          if [ -n "${{ inputs.lipd_data_url }}" ]; then
+          if [ -f "query_params.json" ]; then
+            echo "pathway=github_actions" >> $GITHUB_OUTPUT
+            MODE=$(jq -r '.mode' query_params.json)
+            echo "mode=$MODE" >> $GITHUB_OUTPUT
+            echo "Using query_params.json from repo (mode: $MODE)"
+          elif [ -n "${{ inputs.lipd_data_url }}" ]; then
             echo "pathway=traditional" >> $GITHUB_OUTPUT
             echo "Using traditional pathway: download from URL"
           elif [ -n "${{ inputs.lipd_query_json }}" ]; then
             echo "pathway=github_actions" >> $GITHUB_OUTPUT
-            echo "Using GitHub Actions pathway: generate in workflow"
             echo '${{ inputs.lipd_query_json }}' > query_params.json
             MODE=$(jq -r '.mode' query_params.json)
             echo "mode=$MODE" >> $GITHUB_OUTPUT
+            echo "Using lipd_query_json input (mode: $MODE)"
           else
-            echo "ERROR: Neither lipd_data_url nor lipd_query_json provided"
+            echo "ERROR: No data source found (no query_params.json, no lipd_data_url, no lipd_query_json)"
             exit 1
           fi
 

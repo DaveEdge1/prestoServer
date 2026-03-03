@@ -202,88 +202,65 @@ router.post('/sendReconRequest', async (req, res) => {
 
         const token = githubService.decryptToken(tokens[0].encrypted_token);
 
-        // Create repository in user's account
-        const repoData = await githubService.createRepository(
-          token,
-          recon,
-          uniqueID,
-          configData
-        );
-
-        // LMR-specific: Handle LiPD data
-        let lipdDataUrl = null;
+        // ── Compute lipdQueryJson BEFORE creating repository ──────────────────
+        // Must be done first so createRepository can commit query_params.json
+        // (containing the cleaned TSID selection) to the repo before the push
+        // to lmr_configs.yml triggers the workflow run.
         let lipdQueryJson = null;
 
         if (recon === 'LMR') {
           console.log('Processing LiPD data for LMR reconstruction...');
+          const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_LMR`);
+          const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
 
-          // Load query parameters saved by the query page
-          const userReconDir0 = path.join(config.paths.userRecons, `${uniqueID}_LMR`);
-          const queryParamsPath = path.join(userReconDir0, 'query_params.json');
-          let queryParams = {};
-          if (fs.existsSync(queryParamsPath)) {
-            queryParams = JSON.parse(fs.readFileSync(queryParamsPath, 'utf8'));
-            console.log('Loaded query params from query page:', queryParams);
+          if (fs.existsSync(archivedCompPath)) {
+            // Path A: Archived compilation
+            const archiveInfo = JSON.parse(fs.readFileSync(archivedCompPath, 'utf8'));
+            lipdQueryJson = JSON.stringify({
+              mode: 'archived',
+              compilation: archiveInfo.compilation,
+              version: archiveInfo.version
+            });
+            console.log(`Using archived compilation: ${archiveInfo.compilation} v${archiveInfo.version}`);
           } else {
-            console.warn('query_params.json not found for', uniqueID, '- queryParams will be empty');
-          }
-
-          // PATHWAY SPLIT: GitHub Actions vs Traditional Server
-          if (useGitHubActions && isAuthenticated) {
-            // ==== GITHUB ACTIONS PATHWAY ====
-            // Don't generate pickle on server - let workflow handle it
-            console.log('Using GitHub Actions pathway - preparing query JSON for workflow...');
-
-            // Check if this is an archived compilation
-            const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_LMR`);
-            const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
-
-            if (fs.existsSync(archivedCompPath)) {
-              // Path A: Archived compilation
-              const archiveInfo = JSON.parse(fs.readFileSync(archivedCompPath, 'utf8'));
-              lipdQueryJson = JSON.stringify({
-                mode: 'archived',
-                compilation: archiveInfo.compilation,
-                version: archiveInfo.version
-              });
-              console.log(`Using archived compilation: ${archiveInfo.compilation} v${archiveInfo.version}`);
+            // Path B: Filtered query — load server-side params + cleaned TSID selection
+            const queryParamsPath = path.join(userReconDir, 'query_params.json');
+            let queryParams = {};
+            if (fs.existsSync(queryParamsPath)) {
+              queryParams = JSON.parse(fs.readFileSync(queryParamsPath, 'utf8'));
+              console.log('Loaded query params from query page:', queryParams);
             } else {
-              // Path B: Filtered query
-              // Check if the user cleaned the TSID selection on the data cleaning page
-              const cleanedPath = path.join(userReconDir, 'cleaned_TSIDs.json');
-              const cleanedTSIDs = fs.existsSync(cleanedPath)
-                ? JSON.parse(fs.readFileSync(cleanedPath, 'utf8')).TSIDs
-                : null;
-              if (cleanedTSIDs) {
-                console.log(`Using cleaned TSID selection: ${cleanedTSIDs.length} TSIDs (from cleaned_TSIDs.json)`);
-              }
-              lipdQueryJson = JSON.stringify({
-                mode: 'filtered',
-                ...queryParams,
-                ...(cleanedTSIDs ? { tsids: cleanedTSIDs } : {})
-              });
-              console.log('Using filtered query with parameters:', queryParams);
+              console.warn('query_params.json not found for', uniqueID, '- queryParams will be empty');
             }
 
-          } else {
-            // ==== TRADITIONAL SERVER PATHWAY ====
-            // Generate and upload pickle on server (KEEP EXISTING CODE)
-            console.log('Using traditional server pathway - generating LiPD data on server...');
+            const cleanedPath = path.join(userReconDir, 'cleaned_TSIDs.json');
+            const cleanedTSIDs = fs.existsSync(cleanedPath)
+              ? JSON.parse(fs.readFileSync(cleanedPath, 'utf8')).TSIDs
+              : null;
+            if (cleanedTSIDs) {
+              console.log(`Using cleaned TSID selection: ${cleanedTSIDs.length} TSIDs (from cleaned_TSIDs.json)`);
+            }
 
-            const lipdService = require('../services/lipdDataService');
-
-            // Generate and upload pickle to repository
-            lipdDataUrl = await lipdService.generateAndUploadLipdPickle(
-              queryParams,
-              uniqueID,
-              token,
-              repoData.owner,
-              repoData.name
-            );
-
-            console.log(`LiPD data uploaded: ${lipdDataUrl}`);
+            lipdQueryJson = JSON.stringify({
+              mode: 'filtered',
+              ...queryParams,
+              ...(cleanedTSIDs ? { tsids: cleanedTSIDs } : {})
+            });
+            console.log('Using filtered query with parameters:', queryParams);
           }
         }
+
+        // Create repository in user's account.
+        // For LMR: commits query_params.json + updated workflow to the repo
+        // before pushing lmr_configs.yml so they are available when the
+        // push-triggered workflow run starts.
+        const repoData = await githubService.createRepository(
+          token,
+          recon,
+          uniqueID,
+          configData,
+          lipdQueryJson   // null for non-LMR
+        );
 
         // LMR: workflow is already triggered by the push to lmr_configs.yml
         // in updateRepositoryConfig() — no explicit dispatch needed.

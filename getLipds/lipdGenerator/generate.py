@@ -43,6 +43,27 @@ def download_query_csv():
 
 
 def filter_datasets(df, query_params):
+    # If the user made a specific TSID selection (e.g. via the Data Cleaning page),
+    # honour it directly instead of re-running the broad field filters.
+    tsids = query_params.get('tsids')
+    if tsids:
+        tsid_col = next(
+            (c for c in ['paleoData_TSid', 'paleoData_TSID', 'TSid', 'TSID'] if c in df.columns),
+            None
+        )
+        if tsid_col:
+            tsid_set = set(tsids)
+            filtered = df[df[tsid_col].isin(tsid_set)]
+            n_datasets = filtered['datasetId'].nunique()
+            print(f"TSID filter: {len(tsids)} TSIDs requested → "
+                  f"{len(filtered)} matching rows across {n_datasets} datasets")
+            if n_datasets == 0:
+                raise RuntimeError("No datasets match the specified TSIDs")
+            return filtered
+        else:
+            print(f"Warning: TSID column not found in metadata CSV "
+                  f"(tried paleoData_TSid / TSid). Falling back to field filters.")
+
     mask = pd.Series(True, index=df.index)
 
     coords = query_params.get('coords')

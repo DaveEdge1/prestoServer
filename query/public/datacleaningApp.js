@@ -234,7 +234,8 @@ function renderDuplicates() {
         <span class="expand-icon" id="expand-${group.groupId}">&#9654;</span>
         <strong>Group ${group.groupId + 1}</strong>
         <span class="scores" id="scores-${group.groupId}" style="color:#888;font-size:0.8rem;">click to analyse</span>
-        <span style="margin-left:auto;font-size:0.8rem;color:#777;">${group.records.length} records</span>
+        <span style="font-size:0.8rem;color:#777;margin-left:auto;">${group.records.length} records</span>
+        <button class="btn-expand-group" onclick="openGroupModal(${group.groupId}, event)" title="Expand to full screen">&#x26F6; Expand</button>
       </div>
       <div class="dup-group-details" id="details-${group.groupId}" style="display:none">
         <div class="detail-loading" id="detail-loading-${group.groupId}">Loading…</div>
@@ -308,7 +309,7 @@ function renderPCA() {
     hovermode: 'closest'
   };
 
-  Plotly.newPlot(el, traces, layout, { responsive: true });
+  Plotly.newPlot(el, traces, layout, { responsive: true, displayModeBar: 'hover', scrollZoom: true });
 
   // Clicking a point scrolls the table row into view
   el.on('plotly_click', function (eventData) {
@@ -915,5 +916,365 @@ function renderGroupPlot(groupId, series, tsidColors, el, filterTsids) {
     font: { size: 10 }
   };
 
-  Plotly.newPlot(el, traces, layout, { responsive: true, displayModeBar: false });
+  Plotly.newPlot(el, traces, layout, { responsive: true, displayModeBar: 'hover', scrollZoom: true });
 }
+
+// =============================================================================
+// Expand modal — opens a full-screen view of a duplicate group
+// =============================================================================
+let activeModalGroupId = null;
+
+function openGroupModal(groupId, event) {
+  if (event) event.stopPropagation();
+  activeModalGroupId = groupId;
+
+  const group = duplicateGroups.find(g => g.groupId === groupId);
+  if (!group) return;
+
+  const overlay = document.getElementById('group-modal-overlay');
+  const title   = document.getElementById('group-modal-title');
+  const left    = document.getElementById('group-modal-left');
+
+  title.textContent = `Group ${groupId + 1} — ${group.records.length} records`;
+
+  // --- Left panel: Keep / Remove record cards ---
+  const state      = groupState[groupId];
+  const tsidColors = state ? state.tsidColors : {};
+  let recordsHtml  = '';
+
+  group.records.forEach(tsid => {
+    const meta     = allRecords.find(r => r.tsid === tsid) || {};
+    const color    = tsidColors[tsid] || '';
+    const excluded = excludedTSIDs.has(tsid);
+    recordsHtml += `
+      <div class="dup-record" data-tsid="${tsid}">
+        <div class="record-info">
+          <div class="record-name"${color ? ` style="color:${color}"` : ''}>${meta.dataSetName || tsid}</div>
+          <div class="record-meta">
+            ${meta.archiveType || ''} · ${meta.variableName || ''}
+            ${(meta.lat != null && meta.lon != null) ? ` · ${meta.lat.toFixed(2)}°, ${meta.lon.toFixed(2)}°` : ''}
+            ${meta.compilation ? ` · <em>${meta.compilation}</em>` : ''}
+          </div>
+        </div>
+        <div class="keep-remove">
+          <label>
+            <input type="radio" name="modal-dup-${groupId}-${tsid}" value="keep"
+              ${excluded ? '' : 'checked'}
+              onchange="onDupRadioChange('${tsid}', 'keep')" />
+            Keep
+          </label>
+          <label>
+            <input type="radio" name="modal-dup-${groupId}-${tsid}" value="remove"
+              ${excluded ? 'checked' : ''}
+              onchange="onDupRadioChange('${tsid}', 'remove')" />
+            Remove
+          </label>
+        </div>
+      </div>`;
+  });
+  recordsHtml += `
+    <div class="save-row">
+      <button class="btn-save-group" onclick="saveGroup(${groupId});closeGroupModal()">Save &amp; Close</button>
+    </div>`;
+  left.innerHTML = recordsHtml;
+
+  // --- Right panel: analysis ---
+  renderModalAnalysis(groupId);
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeGroupModal() {
+  const overlay = document.getElementById('group-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+
+  if (activeModalGroupId !== null) {
+    // Sync table rows after any modal Keep/Remove changes
+    const group = duplicateGroups.find(g => g.groupId === activeModalGroupId);
+    if (group) {
+      for (const tsid of group.records) syncTableRow(tsid);
+    }
+    // Re-colour inline record names to match loaded state
+    const state = groupState[activeModalGroupId];
+    if (state) {
+      const groupEl = document.getElementById(`dup-group-${activeModalGroupId}`);
+      if (groupEl) {
+        groupEl.querySelectorAll('.dup-record').forEach(recEl => {
+          const color = state.tsidColors[recEl.dataset.tsid];
+          if (color) {
+            const nameEl = recEl.querySelector('.record-name');
+            if (nameEl) nameEl.style.color = color;
+          }
+        });
+      }
+    }
+    updateFooter();
+  }
+  activeModalGroupId = null;
+}
+
+// Renders the right-panel analysis (chips, toggle, metrics, plot) into modal
+function renderModalAnalysis(groupId) {
+  const right = document.getElementById('group-modal-right');
+  if (!right) return;
+
+  const state = groupState[groupId];
+  if (!state) {
+    // Trigger load — show spinner while waiting
+    right.innerHTML = `<div class="detail-loading" style="padding:20px">Loading correlation data…</div>`;
+    if (!loadedGroups.has(groupId)) loadGroupDetailsModal(groupId);
+    return;
+  }
+
+  const { pairs, series, tsidColors, selectedTsids, seriesFilter } = state;
+  const tsidOrder   = Object.keys(series);
+  const multiRecord = tsidOrder.length > 2;
+  const hasSeries   = Object.values(series).some(s => s.values && s.values.length > 0);
+
+  let html = '';
+
+  if (multiRecord) {
+    const chips = tsidOrder.map(tsid => {
+      const color = tsidColors[tsid];
+      const name  = shortName((series[tsid]?.dataSetName) || tsid);
+      return `<button class="record-chip" id="m-chip-${groupId}-${CSS.escape(tsid)}"
+                style="--chip-color:${color};border-color:${color}"
+                onclick="toggleModalChip(${groupId}, '${tsid}')"
+                title="${series[tsid]?.dataSetName || tsid}">
+                <span class="record-dot" style="background:${color}"></span>${name}</button>`;
+    }).join('');
+    html += `<div class="pair-selector"><span class="pair-selector-label">Select two:</span>${chips}</div>`;
+    html += `<div class="series-toggle">
+      <span class="series-toggle-label">Show:</span>
+      <button class="toggle-btn${seriesFilter === 'all'  ? ' active' : ''}" id="m-toggle-all-${groupId}"
+              onclick="setModalSeriesFilter(${groupId}, 'all')">All</button>
+      <button class="toggle-btn${seriesFilter === 'pair' ? ' active' : ''}" id="m-toggle-pair-${groupId}"
+              onclick="setModalSeriesFilter(${groupId}, 'pair')">Selected pair</button>
+    </div>`;
+  }
+
+  html += `<div id="m-scores-${groupId}" style="flex-shrink:0"></div>`;
+  html += `<div id="m-plot-${groupId}" style="flex:1;min-height:0"></div>`;
+
+  right.innerHTML = html;
+
+  // Apply chip selected state
+  if (multiRecord) {
+    for (const tsid of selectedTsids) {
+      const chipEl = document.getElementById(`m-chip-${groupId}-${CSS.escape(tsid)}`);
+      if (chipEl) chipEl.classList.add('selected');
+    }
+  }
+
+  // Metrics
+  renderModalMetrics(groupId);
+
+  // Plot
+  if (hasSeries) {
+    const plotEl = document.getElementById(`m-plot-${groupId}`);
+    if (plotEl) {
+      const filterForPlot = seriesFilter === 'pair' && selectedTsids.length > 0 ? selectedTsids : null;
+      renderGroupPlot(groupId, series, tsidColors, plotEl, filterForPlot);
+    }
+  } else {
+    const plotEl = document.getElementById(`m-plot-${groupId}`);
+    if (plotEl) {
+      plotEl.innerHTML = '<div style="text-align:center;color:#999;padding:48px 0;font-size:0.88rem;">Time series data not available for this group</div>';
+    }
+  }
+}
+
+function renderModalMetrics(groupId) {
+  const scoresEl = document.getElementById(`m-scores-${groupId}`);
+  if (!scoresEl) return;
+
+  const state = groupState[groupId];
+  if (!state) return;
+
+  let pair = null;
+  if (state.selectedTsids.length === 2) {
+    const [t1, t2] = state.selectedTsids;
+    pair = state.pairs.find(p =>
+      (p.tsid1 === t1 && p.tsid2 === t2) || (p.tsid1 === t2 && p.tsid2 === t1)
+    );
+  } else if (state.pairs.length === 1) {
+    pair = state.pairs[0];
+  }
+
+  const TIPS = {
+    dist: 'Geographic distance between the two proxy sites in kilometres.',
+    r:    'Pearson r: linear correlation coefficient. Values above 0.8 suggest the records may be duplicates.',
+    dtw:  'DTW (Dynamic Time Warping): shape-similarity. 0 = identical; 1 = opposite. Values below 0.03 indicate near-identical records.'
+  };
+  const na = (label, title) => chip(label, '—', 'na', title);
+
+  if (!pair) {
+    const hint = state.selectedTsids.length === 1
+      ? '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select one more record</span>'
+      : '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select two records to compare</span>';
+    scoresEl.innerHTML = `<div class="metrics-strip">${na('Distance', TIPS.dist)}${na('Pearson r', TIPS.r)}${na('DTW', TIPS.dtw)}${hint}</div>`;
+  } else {
+    const distChip = chip('Distance', pair.distKm  != null ? `${pair.distKm} km`     : '—', pair.distKm  == null ? 'na' : '',                              TIPS.dist);
+    const rChip    = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > 0.8 ? '' : 'warn', TIPS.r);
+    const dtwChip  = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < 0.03    ? '' : 'warn', TIPS.dtw);
+    scoresEl.innerHTML = `<div class="metrics-strip">${distChip}${rChip}${dtwChip}</div>`;
+  }
+}
+
+function toggleModalChip(groupId, tsid) {
+  const state = groupState[groupId];
+  if (!state) return;
+
+  const idx = state.selectedTsids.indexOf(tsid);
+  if (idx !== -1) {
+    state.selectedTsids.splice(idx, 1);
+    const el = document.getElementById(`m-chip-${groupId}-${CSS.escape(tsid)}`);
+    if (el) el.classList.remove('selected');
+  } else {
+    if (state.selectedTsids.length >= 2) {
+      const removed = state.selectedTsids.shift();
+      const oldEl = document.getElementById(`m-chip-${groupId}-${CSS.escape(removed)}`);
+      if (oldEl) oldEl.classList.remove('selected');
+    }
+    state.selectedTsids.push(tsid);
+    const el = document.getElementById(`m-chip-${groupId}-${CSS.escape(tsid)}`);
+    if (el) el.classList.add('selected');
+  }
+
+  renderModalMetrics(groupId);
+
+  if (state.seriesFilter === 'pair') {
+    const plotEl = document.getElementById(`m-plot-${groupId}`);
+    if (plotEl) renderGroupPlot(groupId, state.series, state.tsidColors, plotEl, state.selectedTsids);
+  }
+}
+
+function setModalSeriesFilter(groupId, filter) {
+  const state = groupState[groupId];
+  if (!state) return;
+  state.seriesFilter = filter;
+
+  const allBtn  = document.getElementById(`m-toggle-all-${groupId}`);
+  const pairBtn = document.getElementById(`m-toggle-pair-${groupId}`);
+  if (allBtn)  allBtn.classList.toggle('active',  filter === 'all');
+  if (pairBtn) pairBtn.classList.toggle('active', filter === 'pair');
+
+  const plotEl = document.getElementById(`m-plot-${groupId}`);
+  if (!plotEl) return;
+
+  const filterTsids = filter === 'pair' && state.selectedTsids.length > 0 ? state.selectedTsids : null;
+  renderGroupPlot(groupId, state.series, state.tsidColors, plotEl, filterTsids);
+}
+
+// Load correlation data triggered from the modal (same logic as loadGroupDetails but
+// renders into modal on completion rather than inline elements)
+async function loadGroupDetailsModal(groupId) {
+  const group = duplicateGroups.find(g => g.groupId === groupId);
+  if (!group) return;
+  loadedGroups.add(groupId);
+
+  try {
+    const resp = await fetch('/datacleaning/correlate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tsids: group.records })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ error: resp.statusText }));
+      throw new Error(err.error || 'Request failed');
+    }
+
+    const data = await resp.json();
+    const pairs    = data.pairs  || [];
+    const series   = data.series || {};
+    const tsidOrder = Object.keys(series);
+    const tsidColors = {};
+    tsidOrder.forEach((t, i) => { tsidColors[t] = traceColor(i); });
+
+    const initSelected = tsidOrder.slice(0, 2);
+    groupState[groupId] = {
+      pairs,
+      series,
+      tsidColors,
+      selectedTsids: [...initSelected],
+      seriesFilter: 'all'
+    };
+
+    group.correlations = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, pearson: p.pearson, distKm: p.distKm }));
+    group.dtwDistances = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, dtw: p.dtw }));
+
+    // Populate inline detail elements so the inline expand panel works later
+    const headerScores = document.getElementById(`scores-${groupId}`);
+    if (headerScores) headerScores.style.display = 'none';
+    const loadingInline = document.getElementById(`detail-loading-${groupId}`);
+    if (loadingInline) loadingInline.style.display = 'none';
+
+    const multiRecord = tsidOrder.length > 2;
+    const pairSelEl   = document.getElementById(`pair-selector-${groupId}`);
+    const toggleEl    = document.getElementById(`series-toggle-${groupId}`);
+    if (multiRecord && pairSelEl) {
+      pairSelEl.innerHTML = buildRecordSelector(groupId, tsidOrder, series, tsidColors);
+      pairSelEl.style.display = '';
+      for (const tsid of initSelected) setChipSelected(groupId, tsid, true, tsidColors[tsid]);
+    }
+    if (multiRecord && toggleEl) {
+      toggleEl.innerHTML = buildSeriesToggle(groupId);
+      toggleEl.style.display = '';
+    }
+    renderGroupMetrics(groupId);
+    const hasSeries = Object.values(series).some(s => s.values && s.values.length > 0);
+    const inlinePlotEl = document.getElementById(`plot-${groupId}`);
+    if (inlinePlotEl) {
+      if (hasSeries) {
+        renderGroupPlot(groupId, series, tsidColors, inlinePlotEl, null);
+        inlinePlotEl.style.display = '';
+      } else {
+        inlinePlotEl.innerHTML = '<div style="text-align:center;color:#999;padding:32px 0;font-size:0.88rem;">Time series data not available for this group</div>';
+        inlinePlotEl.style.height = 'auto';
+        inlinePlotEl.style.display = '';
+      }
+    }
+    // Colour inline record names
+    const groupDomEl = document.getElementById(`dup-group-${groupId}`);
+    if (groupDomEl) {
+      groupDomEl.querySelectorAll('.dup-record').forEach(recEl => {
+        const color = tsidColors[recEl.dataset.tsid];
+        if (color) {
+          const nameEl = recEl.querySelector('.record-name');
+          if (nameEl) nameEl.style.color = color;
+        }
+      });
+    }
+
+    // If the modal is still open for this group, render analysis and update record colours
+    if (activeModalGroupId === groupId) {
+      renderModalAnalysis(groupId);
+      const left = document.getElementById('group-modal-left');
+      if (left) {
+        left.querySelectorAll('.dup-record').forEach(recEl => {
+          const color = tsidColors[recEl.dataset.tsid];
+          if (color) {
+            const nameEl = recEl.querySelector('.record-name');
+            if (nameEl) nameEl.style.color = color;
+          }
+        });
+      }
+    }
+
+  } catch (err) {
+    console.error('Modal group details error:', err);
+    loadedGroups.delete(groupId);
+    const right = document.getElementById('group-modal-right');
+    if (right && activeModalGroupId === groupId) {
+      right.innerHTML = `<div style="padding:20px;color:#a00;font-size:0.88rem;">Failed to load: ${err.message} — <a href="#" onclick="loadGroupDetailsModal(${groupId});return false;">try again</a></div>`;
+    }
+  }
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && activeModalGroupId !== null) closeGroupModal();
+});
