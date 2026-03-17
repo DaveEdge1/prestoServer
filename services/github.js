@@ -183,98 +183,84 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
   console.log('Updating repository configuration...');
 
   const configPath = recon === 'LMR' ? 'lmr_configs.yml' : 'config/user_config.yml';
-  const configYaml = yaml.dump(configData);
+
+  // For LMR, generate a user_config.yml with proper CFR key names and types.
+  // This is mounted as /app/user_config.yml and merged over the base lmr_configs.yml
+  // by cfr_main_code.py — so only override keys need to be present here.
+  let effectiveConfigData;
+  if (recon === 'LMR') {
+    const toIntArray = arr => (Array.isArray(arr) ? arr : []).map(v => parseInt(v, 10)).filter(n => !isNaN(n));
+    effectiveConfigData = {
+      recon_period:            toIntArray(configData.recon_period).length   ? toIntArray(configData.recon_period)            : [0, 2000],
+      recon_seeds:             toIntArray(configData.recon_seeds).length    ? toIntArray(configData.recon_seeds)             : [1, 2, 3],
+      prior_annualize_months:  toIntArray(configData.prior_annualize_months).length ? toIntArray(configData.prior_annualize_months) : [1,2,3,4,5,6,7,8,9,10,11,12],
+      prior_anom_period:       toIntArray(configData.prior_anom_period).length ? toIntArray(configData.prior_anom_period)      : [850, 1850],
+      assim_frac:              parseFloat(configData.proxy_assim_frac) || 0.75,
+      nens:                    parseInt(configData.proxy_nens, 10)     || 10,
+      recon_loc_rad:           parseInt(configData.recon_loc_rad, 10)  || 25000,
+      proxydb_path:            '/app/lipd_cfr.pkl',
+      save_dirpath:            '/recons',
+    };
+  } else {
+    effectiveConfigData = configData;
+  }
+
+  const configYaml = yaml.dump(effectiveConfigData);
 
   try {
-    // ── LMR only: write query_params.json and workflow BEFORE lmr_configs.yml ──
-    // lmr_configs.yml is what triggers the push-triggered workflow run.
-    // query_params.json (with cleaned TSIDs) and the updated workflow file must
-    // be in the repo BEFORE that push fires.
-    if (recon === 'LMR' && queryParamsJson) {
-      // 1. Write query_params.json
-      try {
-        let qpSha;
-        try {
-          const { data: f } = await octokit.rest.repos.getContent({ owner, repo, path: 'query_params.json' });
-          qpSha = f.sha;
-        } catch (_) { /* file doesn't exist yet — will be created */ }
+    // ── Single commit via Git Trees API ───────────────────────────────────
+    // Previously three separate createOrUpdateFileContents calls produced
+    // three pushes, each triggering a spurious validation failure for
+    // visualize.yml (which has a workflow_run trigger but no push: trigger).
+    // One commit = one push = one validation run instead of three.
 
-        await octokit.rest.repos.createOrUpdateFileContents({
-          owner, repo,
-          path: 'query_params.json',
-          message: `Add query parameters for reconstruction ${uniqueID}`,
-          content: Buffer.from(queryParamsJson).toString('base64'),
-          ...(qpSha ? { sha: qpSha } : {})
-        });
-        console.log('✓ Written query_params.json');
-      } catch (err) {
-        console.warn('Failed to write query_params.json (non-fatal):', err.message);
-      }
+    // 1. Get current HEAD
+    const { data: refData } = await octokit.rest.git.getRef({
+      owner, repo, ref: 'heads/main'
+    });
+    const headSha = refData.object.sha;
 
-      // 2. Overwrite .github/workflows/LMR.yml with our template version so the
-      //    workflow knows to read query_params.json from the checkout.
-      try {
-        const workflowContent = fs.readFileSync(
-          path.join(__dirname, '..', 'templates', 'workflows', 'LMR.yml'), 'utf8'
-        );
-        let wfSha;
-        try {
-          const { data: f } = await octokit.rest.repos.getContent({ owner, repo, path: '.github/workflows/LMR.yml' });
-          wfSha = f.sha;
-        } catch (_) { /* file doesn't exist yet */ }
-
-        await octokit.rest.repos.createOrUpdateFileContents({
-          owner, repo,
-          path: '.github/workflows/LMR.yml',
-          message: `Update LMR workflow for reconstruction ${uniqueID}`,
-          content: Buffer.from(workflowContent).toString('base64'),
-          ...(wfSha ? { sha: wfSha } : {})
-        });
-        console.log('✓ Updated .github/workflows/LMR.yml');
-      } catch (err) {
-        console.warn('Failed to update workflow file (non-fatal):', err.message);
-      }
-    }
-
-    // Get existing config file SHA
-    const { data: existingFile } = await octokit.rest.repos.getContent({
-      owner,
-      repo,
-      path: configPath
+    const { data: headCommit } = await octokit.rest.git.getCommit({
+      owner, repo, commit_sha: headSha
     });
 
-    // Update config file — for LMR this push triggers the workflow run
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path: configPath,
-      message: `Update configuration for reconstruction ${uniqueID}`,
-      content: Buffer.from(configYaml).toString('base64'),
-      sha: existingFile.sha
-    });
-
-    console.log(`✓ Updated ${configPath}`);
-
-    // Update README with reconstruction ID
+    // 2. Read README so we can update the Reconstruction ID line
     const { data: readmeFile } = await octokit.rest.repos.getContent({
-      owner,
-      repo,
-      path: 'README.md'
+      owner, repo, path: 'README.md'
     });
-
     const readmeContent = Buffer.from(readmeFile.content, 'base64').toString('utf8');
     const updatedReadme = readmeContent.replace(/Reconstruction ID:.*/, `Reconstruction ID: ${uniqueID}`);
 
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path: 'README.md',
-      message: `Update README for reconstruction ${uniqueID}`,
-      content: Buffer.from(updatedReadme).toString('base64'),
-      sha: readmeFile.sha
+    // 3. Build file list — Trees API accepts raw content strings directly
+    const treeItems = [
+      { path: configPath,  mode: '100644', type: 'blob', content: configYaml },
+      { path: 'README.md', mode: '100644', type: 'blob', content: updatedReadme },
+    ];
+    if (recon === 'LMR' && queryParamsJson) {
+      treeItems.push({ path: 'query_params.json', mode: '100644', type: 'blob', content: queryParamsJson });
+    }
+
+    // 4. Create tree, commit, and advance the ref in one push
+    const { data: newTree } = await octokit.rest.git.createTree({
+      owner, repo,
+      base_tree: headCommit.tree.sha,
+      tree: treeItems,
     });
 
-    console.log('✓ Updated README.md');
+    const { data: newCommit } = await octokit.rest.git.createCommit({
+      owner, repo,
+      message: `Configure reconstruction ${uniqueID}`,
+      tree: newTree.sha,
+      parents: [headSha],
+    });
+
+    await octokit.rest.git.updateRef({
+      owner, repo,
+      ref: 'heads/main',
+      sha: newCommit.sha,
+    });
+
+    console.log(`✓ Committed ${treeItems.map(f => f.path).join(', ')} in a single push`);
     console.log('✓ Repository configuration complete');
 
   } catch (error) {
