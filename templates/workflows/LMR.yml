@@ -3,7 +3,7 @@ name: LMR CFR Reconstruction
 on:
   push:
     paths:
-      - 'lmr_configs.yml'   # server commits this last, after query_params.json
+      - 'query_params.json'   # not in template; server commits this LAST so all files are present
   workflow_dispatch:
     inputs:
       unique_id:
@@ -20,9 +20,14 @@ on:
         type: string
 
 jobs:
-  reconstruct:
+  # ── Job 1: Acquire and convert proxy data ─────────────────────────────────
+  # Uploads lipd_cfr.pkl as an artifact so Job 2 can be re-run independently
+  # when only the CFR reconstruction step needs debugging.
+  prepare-data:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 200
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -91,27 +96,75 @@ jobs:
             -v $(pwd)/lipd_output:/output \
             davidedge/lipd_webapps:lipdGenerator /query_params.json /output all
 
-          if [ ! -f lipd_output/lipd.pkl ]; then
-            echo "ERROR: lipdGenerator did not produce lipd.pkl"
+          if [ ! -f lipd_output/lipd_legacy.pkl ]; then
+            echo "ERROR: lipdGenerator did not produce lipd_legacy.pkl"
             ls -la lipd_output/ || true
             exit 1
           fi
 
-          # Normalize filename to lipd_data.pkl (consistent with other pathways)
-          mv lipd_output/lipd.pkl lipd_data.pkl
+          cp lipd_output/lipd_legacy.pkl lipd_data.pkl
           ls -lh lipd_data.pkl
 
-      # Verify pickle file exists (both paths)
       - name: Verify LiPD data created
         run: |
           if [ -f lipd_data.pkl ]; then
-            echo "✓ LiPD data file created successfully"
             FILE_SIZE=$(stat -c%s lipd_data.pkl 2>/dev/null || stat -f%z lipd_data.pkl)
-            echo "File size: $FILE_SIZE bytes"
+            echo "LiPD data ready: $FILE_SIZE bytes"
           else
-            echo "ERROR: LiPD data file not found"
+            echo "ERROR: No LiPD data file found (lipd_data.pkl)"
             exit 1
           fi
+
+      - name: Pull Docker image
+        run: docker pull davidedge/lmr2:latest
+
+      # Convert raw LiPD dict pickle → CFR-compatible DataFrame pickle.
+      - name: Convert LiPD format
+        run: |
+          echo "Converting LiPD pickle to CFR DataFrame format..."
+          docker run --rm \
+            -v $(pwd)/lipd_data.pkl:/app/lipd_data.pkl:ro \
+            -v $(pwd)/convert_lipd_to_cfr_dataframe.py:/app/convert_lipd_to_cfr_dataframe.py:ro \
+            -v $(pwd):/output \
+            -w /app \
+            davidedge/lmr2:latest \
+            conda run -n cfr-env python convert_lipd_to_cfr_dataframe.py lipd_data.pkl /output/lipd_cfr.pkl
+
+      - name: Verify CFR data created
+        run: |
+          if [ -f lipd_cfr.pkl ]; then
+            echo "CFR data file ready"
+            ls -lh lipd_cfr.pkl
+          else
+            echo "ERROR: lipd_cfr.pkl not found"
+            exit 1
+          fi
+
+      - name: Upload CFR data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lipd-cfr-data-${{ inputs.unique_id || github.run_id }}
+          path: lipd_cfr.pkl
+          retention-days: 7
+
+  # ── Job 2: Run CFR reconstruction ─────────────────────────────────────────
+  # Re-run this job alone (via "Re-run failed jobs") when only CFR config
+  # changes are needed — no need to redo the 20-min data generation.
+  reconstruct:
+    needs: prepare-data
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download CFR data artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lipd-cfr-data-${{ inputs.unique_id || github.run_id }}
 
       - name: Pull Docker image
         run: docker pull davidedge/lmr2:latest
@@ -119,31 +172,13 @@ jobs:
       - name: Create results directory
         run: mkdir -p ./recons
 
-      - name: Convert LiPD format
-        run: |
-          echo "Converting LiPD pickle to CFR DataFrame format..."
-          docker run --rm \
-            -v $(pwd)/lipd_data.pkl:/lipd_data.pkl \
-            -v $(pwd):/workspace \
-            davidedge/lmr2:latest \
-            python convert_lipd_to_cfr_dataframe.py
-
-      - name: Verify CFR data created
-        run: |
-          if [ -f lipd_cfr.pkl ]; then
-            echo "CFR data file created successfully"
-            ls -lh lipd_cfr.pkl
-          else
-            echo "ERROR: CFR data file not created"
-            exit 1
-          fi
-
       - name: Run CFR reconstruction
         run: |
           echo "Running LMR CFR reconstruction..."
           docker run --rm \
-            -v $(pwd)/config/lmr_configs.yml:/lmr_configs.yml \
-            -v $(pwd)/lipd_cfr.pkl:/lipd_cfr.pkl \
+            -v $(pwd)/cfr_main_code.py:/app/cfr_main_code.py:ro \
+            -v $(pwd)/lmr_configs.yml:/app/user_config.yml:ro \
+            -v $(pwd)/lipd_cfr.pkl:/app/lipd_cfr.pkl:ro \
             -v $(pwd)/recons:/recons \
             davidedge/lmr2:latest \
             python cfr_main_code.py
@@ -158,10 +193,15 @@ jobs:
             exit 1
           fi
 
+      - name: Combine seed runs into combined_recon.nc
+        run: |
+          echo "Combining all seed runs into combined_recon.nc for visualization..."
+          docker run --rm             -v $(pwd)/combine_seeds.py:/app/combine_seeds.py:ro             -v $(pwd)/recons:/recons             davidedge/lmr2:latest             python /app/combine_seeds.py
+
       - name: Upload reconstruction results
         uses: actions/upload-artifact@v4
         with:
-          name: lmr-reconstruction-${{ inputs.unique_id }}
+          name: lmr-reconstruction-${{ inputs.unique_id || github.run_id }}
           path: ./recons/
           retention-days: 90
 
@@ -170,5 +210,5 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add recons/
-          git commit -m "Add LMR reconstruction results for ${{ inputs.unique_id }}"
+          git diff --staged --quiet || git commit -m "Add LMR reconstruction results for ${{ inputs.unique_id || github.run_id }}"
           git push
