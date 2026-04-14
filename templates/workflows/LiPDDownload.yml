@@ -1,0 +1,68 @@
+name: LiPD File Download
+
+on:
+  push:
+    paths:
+      - 'query_params.json'   # not in template; server commits this so workflow triggers
+
+jobs:
+  prepare-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Only the filtered pathway reaches GitHub — archived downloads bypass
+      # GitHub entirely (redirected to lipdverse.org by queryHelpers.js).
+      - name: Detect data acquisition mode
+        id: pathway
+        run: |
+          if [ -f "query_params.json" ]; then
+            MODE=$(jq -r '.mode' query_params.json)
+            echo "mode=$MODE" >> $GITHUB_OUTPUT
+            echo "Using query_params.json (mode: $MODE)"
+          else
+            echo "ERROR: query_params.json not found"
+            exit 1
+          fi
+
+      # FILTERED PATHWAY: Run lipdGenerator to produce .lpd files
+      - name: Generate LiPD files from query
+        if: steps.pathway.outputs.mode == 'filtered'
+        run: |
+          echo "Generating LiPD files using lipdGenerator container..."
+          mkdir -p lipd_output
+          docker run --rm \
+            -v $(pwd)/query_params.json:/query_params.json:ro \
+            -v $(pwd)/lipd_output:/output \
+            davidedge/lipd_webapps:lipdGenerator /query_params.json /output lpd
+
+          if [ ! -f lipd_output/lipd_files.zip ]; then
+            echo "ERROR: lipdGenerator did not produce lipd_files.zip"
+            ls -la lipd_output/ || true
+            exit 1
+          fi
+
+          echo "lipd_files.zip ready:"
+          ls -lh lipd_output/lipd_files.zip
+
+      - name: Verify output
+        run: |
+          if [ -f lipd_output/lipd_files.zip ]; then
+            FILE_SIZE=$(stat -c%s lipd_output/lipd_files.zip 2>/dev/null || stat -f%z lipd_output/lipd_files.zip)
+            echo "lipd_files.zip ready: $FILE_SIZE bytes"
+          else
+            echo "ERROR: lipd_files.zip not found"
+            exit 1
+          fi
+
+      - name: Upload LiPD files artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lipd-files-${{ github.run_id }}
+          path: lipd_output/lipd_files.zip
+          retention-days: 90

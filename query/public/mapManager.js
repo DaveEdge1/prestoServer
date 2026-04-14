@@ -15,6 +15,8 @@
       currentProjection: 'mollweide',
       map: null,
       tiles: null,
+      imageryTiles: null,
+      baseLayerControl: null,
       layerGroup: null,
       legend: null,
       legendRadioControl: null,
@@ -341,14 +343,23 @@
          crs: L.CRS.EPSG3857,
          center: [0, 0],
          zoom: 2,
-         minZoom: 1,
-         maxZoom: 18,
-         tileLayer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+         minZoom: 0,
+         maxZoom: 7,
+         tileLayer: 'http://localhost:8080/tiles_naturalearth_3857/{z}/{x}/{y}.png',
          tileOptions: {
-            maxZoom: 18,
-            minZoom: 1
+            maxZoom: 7,
+            minZoom: 0,
+            tileSize: 256,
+            attribution: 'Natural Earth'
          },
-         bounds: [[-90, -180], [90, 180]]
+         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble_3857/{z}/{x}/{y}.png',
+         imageryTileOptions: {
+            maxZoom: 7,
+            minZoom: 0,
+            tileSize: 256,
+            attribution: 'Blue Marble'
+         },
+         bounds: [[-85, -180], [85, 180]]
       },
       mollweide: {
          crs: null, // Will be set from mollweideCRS
@@ -356,8 +367,15 @@
          zoom: 3,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_bluemarble/{z}/{x}/{y}.png',
+         tileLayer: 'http://localhost:8080/tiles_naturalearth_mollweide/{z}/{x}/{y}.png',
          tileOptions: {
+            tms: true,
+            tileSize: 256,
+            noWrap: true,
+            attribution: 'Natural Earth'
+         },
+         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble/{z}/{x}/{y}.png',
+         imageryTileOptions: {
             tms: true,
             tileSize: 256,
             noWrap: true,
@@ -387,8 +405,14 @@
          zoom: 2,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_bluemarble_3031/{z}/{x}/{y}.png',
+         tileLayer: 'http://localhost:8080/tiles_naturalearth_3031/{z}/{x}/{y}.png',
          tileOptions: {
+            attribution: 'Natural Earth',
+            tileSize: 256,
+            tms: true
+         },
+         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble_3031/{z}/{x}/{y}.png',
+         imageryTileOptions: {
             attribution: 'Blue Marble',
             tileSize: 256,
             tms: true
@@ -417,8 +441,14 @@
          zoom: 2,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_bluemarble_3995/{z}/{x}/{y}.png',
+         tileLayer: 'http://localhost:8080/tiles_naturalearth_3995/{z}/{x}/{y}.png',
          tileOptions: {
+            attribution: 'Natural Earth',
+            tileSize: 256,
+            tms: true
+         },
+         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble_3995/{z}/{x}/{y}.png',
+         imageryTileOptions: {
             attribution: 'Blue Marble',
             tileSize: 256,
             tms: true
@@ -496,7 +526,7 @@
 
       var LegendControl = L.Control.extend({
          options: {
-            position: 'topright'
+            position: 'topleft'
          },
          onAdd: function(map) {
             var container = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control');
@@ -506,7 +536,8 @@
             container.style.boxShadow = '0 1px 5px rgba(0,0,0,0.4)';
 
             // Build radio buttons HTML based on enabled modes
-            var radioHtml = '<div style="margin-bottom: 8px; border-bottom: 1px solid #ccc; padding-bottom: 8px;">';
+            var radioHtml = '<div style="font-weight:bold; font-size:12px; margin-bottom:4px;">Map Markers</div>';
+            radioHtml += '<div>';
 
             if (state.config.enabledLegendModes.indexOf('archiveType') !== -1) {
                radioHtml += '<label style="display: block; margin: 2px 0; cursor: pointer; font-size: 12px;">' +
@@ -691,8 +722,19 @@
 
       state.boundaryLayerControl = L.control.layers(null, boundaryOverlays, {
          collapsed: false,
-         position: 'bottomright'
+         position: 'topleft'
       }).addTo(state.map);
+
+      // Add "Ocean Fronts" title to the boundary layer control
+      var blContainer = state.boundaryLayerControl.getContainer();
+      if (blContainer) {
+         var titleDiv = document.createElement('div');
+         titleDiv.style.fontWeight = 'bold';
+         titleDiv.style.fontSize = '12px';
+         titleDiv.style.marginBottom = '4px';
+         titleDiv.textContent = 'Ocean Fronts';
+         blContainer.insertBefore(titleDiv, blContainer.firstChild);
+      }
 
       console.log('Southern Ocean boundary layers added');
    }
@@ -766,17 +808,42 @@
 
          // Create new map
          console.log('Creating map with zoom level:', config.zoom, 'center:', config.center);
-         state.map = L.map(containerId, {
+         var mapOptions = {
             crs: config.crs,
             center: config.center,
             zoom: config.zoom,
             minZoom: config.minZoom,
             maxZoom: config.maxZoom,
             attributionControl: false
-         });
+         };
 
-         // Add tile layer
+         // Allow fractional zoom for Antarctic to get an intermediate view
+         if (projectionType === 'antarctic') {
+            mapOptions.zoomSnap = 0.5;
+            mapOptions.zoomDelta = 0.5;
+            mapOptions.zoom = 1.5;
+         }
+
+         state.map = L.map(containerId, mapOptions);
+
+         // Add tile layers
          state.tiles = L.tileLayer(config.tileLayer, config.tileOptions).addTo(state.map);
+
+         // Add imagery base layer and switcher if available for this projection
+         if (config.imageryTileLayer) {
+            state.imageryTiles = L.tileLayer(config.imageryTileLayer, config.imageryTileOptions);
+            var baseLayers = {
+               'Relief': state.tiles,
+               'Imagery': state.imageryTiles
+            };
+            state.baseLayerControl = L.control.layers(baseLayers, null, {
+               collapsed: false,
+               position: 'topleft'
+            }).addTo(state.map);
+         } else {
+            state.imageryTiles = null;
+            state.baseLayerControl = null;
+         }
 
          // Add layer group for points
          state.layerGroup = L.layerGroup().addTo(state.map);
@@ -805,16 +872,25 @@
 
          // Update coordinate filter checkbox based on projection
          if (document.getElementById('coordsOn')) {
-            if (projectionType === 'standard' || projectionType === 'mollweide') {
-               // Standard/Mollweide projection: keep existing state
-            } else {
+            if (projectionType === 'arctic' || projectionType === 'antarctic') {
                // Polar projections: enable coordinate filtering by default
                document.getElementById('coordsOn').checked = true;
                if (document.getElementById('coordsDiv')) {
                   document.getElementById('coordsDiv').style.visibility = 'visible';
+                  document.getElementById('coordsDiv').style.display = 'block';
                }
                if (typeof filters1 !== 'undefined') {
                   filters1['coords'] = 'true';
+               }
+            } else {
+               // Standard/Mollweide: disable coordinate filtering
+               document.getElementById('coordsOn').checked = false;
+               if (document.getElementById('coordsDiv')) {
+                  document.getElementById('coordsDiv').style.visibility = 'hidden';
+                  document.getElementById('coordsDiv').style.display = 'none';
+               }
+               if (typeof filters1 !== 'undefined') {
+                  filters1['coords'] = 'false';
                }
             }
          }
@@ -869,15 +945,30 @@
             state.legend = null;
          }
 
+         // Remove legend mode radio control so it gets recreated on new map
+         if (state.legendRadioControl) {
+            state.map.removeControl(state.legendRadioControl);
+            state.legendRadioControl = null;
+         }
+
          // Remove boundary layer control if it exists
          if (state.boundaryLayerControl) {
             state.map.removeControl(state.boundaryLayerControl);
             state.boundaryLayerControl = null;
          }
 
+         // Remove base layer control if it exists
+         if (state.baseLayerControl) {
+            state.map.removeControl(state.baseLayerControl);
+            state.baseLayerControl = null;
+         }
+
          // Clear layer references
          if (state.tiles) {
             state.tiles = null;
+         }
+         if (state.imageryTiles) {
+            state.imageryTiles = null;
          }
          if (state.layerGroup) {
             state.layerGroup = null;
@@ -1035,22 +1126,22 @@
             _addLegendModeControl();
          }
 
-         // Remove existing legend
+         // Remove existing Leaflet legend control
          if (state.legend && state.map) {
             state.map.removeControl(state.legend);
             state.legend = null;
          }
 
-         // Add updated legend with only visible types
+         // Add updated legend as Leaflet control inside the map
          if (legendEntries.length > 0 && state.map) {
             state.legend = L.control.Legend({
-               position: "topright",
+               position: "bottomright",
                title: legendTitle,
                collapsed: false,
                symbolWidth: 12,
                symbolHeight: 12,
                opacity: 1,
-               column: 1,
+               column: 5,
                legends: legendEntries
             }).addTo(state.map);
          }

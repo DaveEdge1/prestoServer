@@ -54,52 +54,194 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   </head>
   <body>
-    <div class="wide" id="all">
-      <div class="top-bar py-0" id="topBar" style="background: #555"></div>
-      <!-- Navbar Sticky-->
-      <header class="nav-holder make-sticky">
-        <div class="navbar navbar-light bg-white navbar-expand-lg py-0" id="navbar">
-          <div class="container py-3 py-lg-0 px-lg-0">
-            <!-- Navbar brand--><a class="navbar-brand" href="https://paleopresto.com/"><img class="d-none d-md-inline-block" src="img/logo.png" alt="Universal logo"><img class="d-inline-block d-md-none" src="img/logo-small.png" alt="Universal logo"><span class="sr-only">Universal - go to homepage</span></a> <!-- TODO: Update the logo. -->
-            <!-- Navbar toggler-->
-            <button class="navbar-toggler text-primary border-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navigationCollapse" aria-controls="navigationCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="sr-only">Toggle navigation</span><i class="fas fa-align-justify"></i></button>
-            <!-- Collapsed Navigation    -->
-            <div class="collapse navbar-collapse" id="navigationCollapse">
-              <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <a class="nav-link" href="https://paleopresto.com/">Home</a>
-                <!-- megamenu [features]-->
-                <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="featuresMegamenu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reconstructions</a>
-                  <ul class="dropdown-menu megamenu p-4" aria-labelledby="featuresMegamenu">
-                    <li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/holocene.html">Holocene</a></li>
-                    <li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/common_era.html">Common Era</a></li>
-                  </ul>
-                </li>
-                <!-- megamenu [portfolio]-->
-                <a class="nav-link" href="https://paleopresto.com/analysis.html">Analysis</a>
-	        <a class="nav-link" href="https://paleopresto.com/custom.html">Custom</a>
-                <a class="nav-link" href="https://paleopresto.com/about.html">About Us</a>
-              </ul>
-            </div>
-          </div>
+    <style>
+      .pce-header {
+        background: #1a1a2e;
+        border-bottom: 3px solid #c4956a;
+        padding: 0;
+      }
+      .pce-header-inner {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      .pce-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+      }
+      .pce-brand-logo {
+        height: 28px;
+        filter: invert(1);
+      }
+      .pce-brand-tag {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 300;
+        font-size: 0.75rem;
+        color: #c4956a;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .pce-nav {
+        display: flex;
+        align-items: center;
+        gap: 1.75rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .pce-nav a {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        transition: color 0.2s;
+      }
+      .pce-nav a:hover { color: #c4956a; }
+      .pce-nav .pce-nav-active { color: #fff; }
+      .pce-hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+        padding: 2.5rem 1.5rem 2rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(196,149,106,0.15);
+      }
+      .pce-hero h1 {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 300;
+        font-size: 1.6rem;
+        color: #fff;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin: 0 0 0.4rem;
+      }
+      .pce-hero p {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 300;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 0.04em;
+        margin: 0;
+      }
+      .pce-footer {
+        background: #1a1a2e;
+        border-top: 3px solid #c4956a;
+        padding: 0;
+      }
+      .pce-footer-inner {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .pce-footer-text {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 300;
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.45);
+        letter-spacing: 0.03em;
+        margin: 0;
+      }
+      .pce-footer-text a {
+        color: #c4956a;
+        text-decoration: none;
+      }
+      .pce-footer-text a:hover { text-decoration: underline; }
+      body { display: flex; flex-direction: column; min-height: 100vh; }
+      .pce-main { flex: 1; }
+
+      /* Step cards – single column, horizontal layout */
+      .pce-steps-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin: 1.5rem 0 2rem;
+      }
+      .pce-step-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 0.75rem 1.25rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .pce-step-card:hover {
+        border-color: #c4956a;
+        box-shadow: 0 2px 12px rgba(196,149,106,0.15);
+      }
+      .pce-step-num {
+        flex-shrink: 0;
+        width: 1.6rem;
+        height: 1.6rem;
+        background: #1a1a2e;
+        color: #c4956a;
+        border-radius: 50%;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        line-height: 1.6rem;
+        text-align: center;
+      }
+      .pce-step-icon {
+        flex-shrink: 0;
+        font-size: 1.2rem;
+        color: #1a1a2e;
+        width: 1.5rem;
+        text-align: center;
+      }
+      .pce-step-title {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #1a1a2e;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+      }
+      .pce-step-desc {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 300;
+        font-size: 0.85rem;
+        color: #555;
+        margin: 0;
+        line-height: 1.4;
+      }
+    </style>
+
+      <header class="pce-header">
+        <div class="pce-header-inner">
+          <a class="pce-brand" href="/forms/">
+            <img class="pce-brand-logo" src="img/logo.png" alt="Presto">
+            <span class="pce-brand-tag">Custom Engine</span>
+          </a>
+          <nav>
+            <ul class="pce-nav">
+              <li><a class="pce-nav-active" href="/forms/">Engine</a></li>
+              <li><a href="https://paleopresto.com/">PReSto Home</a></li>
+            </ul>
+          </nav>
         </div>
       </header>
-                  <!-- HEADING BREADCRUMB-->
-            <section class="bg-pentagon py-4">
-              <div class="container py-3">
-                <div class="row d-flex align-items-center gy-4">
-                  <div class="col-md-7">
-                    <h1 class="h2 mb-0 text-uppercase">Custom Reconstructions</h1>
-                  </div>
-                  <div class="col-md-5">
-                    <!-- Breadcrumb-->
-                    <ol class="text-sm justify-content-start justify-content-lg-end mb-0 breadcrumb undefined">
-                      <li class="breadcrumb-item"><a class="text-uppercase" href="https://paleopresto.com/">Home</a></li>
-                      <li class="breadcrumb-item text-uppercase active">Custom Reconstructions</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            </section>
+      <div class="pce-main">
+      <div class="pce-hero">
+        <h1>Custom Reconstructions</h1>
+        <p>Paleoclimate Reconstruction Storehouse</p>
+      </div>
 
       <!-- TEXT SECTION-->
       <section class="py-5">
@@ -109,18 +251,44 @@
               <h1>Welcome to the Presto Custom Reconstruction Engine (beta)</h1><br>
 	      <p id="recon_descr" class="lead mb-1" align="justify">Each reconstruction method comes with a unique set of strengths and weaknesses. The table below provides useful summaries. For more in-depth analysis, links to the corresponding publications are also in the table.</p><br>
 
-              <ol>
-		<li>Choose a Reconstruction Method</li>
-		<li>Provide your contact information to receive results</li>
-		<li>Customize the Reconstruction Parameters using one of the following:</li>
-		  <ul>
-		    <li>Web form: a browser window simplifies the editing process</li>
-		    <li>Use defaults: just click go, run with the published parameter set</li>
-		    <li>Manually upload parameters file (advanced): this option requires direct editing of the reconstruction yaml file</li>
-		  </ul>
-		  <li>Custom reconstruction computed by Presto Engine</li>
-		  <li>Results emailed to address provided</li>
-              </ol>
+              <div class="pce-steps-grid">
+                <div class="pce-step-card">
+                  <div class="pce-step-num">1</div>
+                  <div class="pce-step-icon"><i class="fas fa-flask"></i></div>
+                  <h3 class="pce-step-title">Choose Method</h3>
+                  <p class="pce-step-desc">Select a reconstruction method from the table below</p>
+                </div>
+                <div class="pce-step-card">
+                  <div class="pce-step-num">2</div>
+                  <div class="pce-step-icon"><i class="fab fa-github"></i></div>
+                  <h3 class="pce-step-title">Sign In</h3>
+                  <p class="pce-step-desc">Authenticate with your GitHub account</p>
+                </div>
+                <div class="pce-step-card">
+                  <div class="pce-step-num">3</div>
+                  <div class="pce-step-icon"><i class="fas fa-database"></i></div>
+                  <h3 class="pce-step-title">Select Data</h3>
+                  <p class="pce-step-desc">Choose an archived compilation or build a filtered query by location, archive type, etc.</p>
+                </div>
+                <div class="pce-step-card">
+                  <div class="pce-step-num">4</div>
+                  <div class="pce-step-icon"><i class="fas fa-broom"></i></div>
+                  <h3 class="pce-step-title">Clean</h3>
+                  <p class="pce-step-desc">Inspect potential duplicates, review PCA analysis, and remove unwanted records</p>
+                </div>
+                <div class="pce-step-card">
+                  <div class="pce-step-num">5</div>
+                  <div class="pce-step-icon"><i class="fas fa-sliders-h"></i></div>
+                  <h3 class="pce-step-title">Configure</h3>
+                  <p class="pce-step-desc">Customize reconstruction parameters or use the published defaults</p>
+                </div>
+                <div class="pce-step-card">
+                  <div class="pce-step-num">6</div>
+                  <div class="pce-step-icon"><i class="fas fa-rocket"></i></div>
+                  <h3 class="pce-step-title">Run</h3>
+                  <p class="pce-step-desc">Presto creates a repository, runs via GitHub Actions, and deploys an interactive visualization</p>
+                </div>
+              </div>
 
 	      <!--<div style="margin:auto; padding-left:40px;"><iframe id="abstract2" src="reconTable.html" width="100%" height="100%" frameborder="20px" scrolling="no" onload="resizeIframe(this)"></iframe></div>
 	      -->
@@ -140,31 +308,15 @@
 		<td><a href="https://lipdverse.org/project/temp12k/" target="_blank">Temperature 12k proxy database</a></td>
 		<td><a href="https://www.earthsystemgrid.org/project/trace.html" target="_blank">TraCE-21ka</a> and a <a href="https://www.metoffice.gov.uk/research/approach/modelling-systems/unified-model/climate-models/hadcm3" target="_blank">HadCM3</a> transient deglacial simulation</td>
 		<td>Data assimilation</td>
-		<td><a href="https://doi.org/10.5194/cp-18-2599-2022" target=:"_blank">Publication link</a><td>
-		</tr>
-		<tr>
-		<td>Temperature 12k Composites</td>
-		<td>0-12,000 years BP</td>
-		<td><a href="https://lipdverse.org/project/temp12k/" target="_blank">Temperature 12k proxy database</a></td>
-		<td>N/A</td>
-		<td>Standard calibrated composite (SCC)</td>
-		<td><a href="https://www.nature.com/articles/s41597-020-0530-7" target=:"_blank">Publication link</a><td>
-		</tr>
-		<tr>
-		<td>GraphEM</td>
-		<td>0-2,000 years BP</td>
-		<td><a href="https://lipdverse.org/project/pages2k/" target="_blank">Pages 2k proxy database</a></td>
-		<td>N/A</td>
-		<td>Graphical Expectation Maximization (GraphEM)</td>
-		<td><a href="https://doi.org/10.1214/14-AOAS794" target=:"_blank">Publication link</a><td>
+		<td><a href="https://doi.org/10.5194/cp-18-2599-2022" target="_blank">Erb et al., 2022</a><td>
 		</tr>
 		<tr>
 		<td>LMR (Last Millennium Reanalysis)</td>
 		<td>0-2,000 years BP</td>
 		<td><a href="https://lipdverse.org/project/pages2k/" target="_blank">PAGES 2k proxy database</a></td>
-		<td>Climate model simulations (CFR framework)</td>
+		<td><a href="https://www.cesm.ucar.edu/models/ccsm4.0/" target="_blank">CCSM4</a> last millennium simulation (past1000)</td>
 		<td>Data assimilation with Climate Field Reconstruction (CFR)</td>
-		<td><a href="https://fzhu2e.github.io/cfr/" target="_blank">CFR Documentation</a><td>
+		<td><a href="https://doi.org/10.5194/cp-15-1251-2019" target="_blank">Tardif et al., 2019</a>; <a href="https://doi.org/10.1002/2016JD024751" target="_blank">Hakim et al., 2016</a><td>
 		</tr>
 		</table>
                 <br><br>
@@ -173,10 +325,8 @@
 		<form id="tableForm" style="padding-right:50px; font-size:24px" onSubmit="EvaluateForm()" method="POST">
       <select id="select_id" name="select_id" style="font-size:24px">
           <optgroup label="Select Reconstruction" style="font-size:24px">
-	      <option name="download" value="download">LiPD Download</option>
+	      <option name="lipdDownload" value="lipdDownload">LiPD Download</option>
               <option name="HoloceneDA" value="holocene_da">Holocene DA</option>
-              <!--option name="GraphEM" value="graph_em">GraphEM</option-->
-	      <option name="temp12k" value="temp12k">Temp12k</option>
 	      <option name="LMR" value="LMR">LMR (Last Millennium Reanalysis)</option>
           </optgroup>
       </select>
@@ -227,20 +377,11 @@
   -->
   
 
-        <footer>
-        <!-- COPYRIGHTS                -->
-        <div class="bg-dark py-5">
-          <div class="container">
-            <div class="row align-items-cenrer gy-3 text-center">
-              <div class="col-md-6 text-md-start">
-                <p class="mb-0 text-sm text-gray-500">&copy; 2023. The Presto Team </p>
-              </div>
-              <div class="col-md-6 text text-md-end">
-                <p class="mb-0 text-sm text-gray-500">Template designed by  <a href="https://bootstrapious.com" target="_blank">Bootstrapious</a></p>
-                <!-- Please do not remove the backlink to us unless you purchase the Attribution-free License at https://bootstrapious.com/attribution-free-license. Thank you.-->
-              </div>
-            </div>
-          </div>
+      </div>
+      <footer class="pce-footer">
+        <div class="pce-footer-inner">
+          <p class="pce-footer-text">&copy; 2025 <a href="https://paleopresto.com/">The Presto Team</a></p>
+          <p class="pce-footer-text">Presto Custom Engine &middot; Paleoclimate Reconstruction Storehouse</p>
         </div>
       </footer>
       </body>

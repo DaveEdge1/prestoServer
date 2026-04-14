@@ -125,7 +125,7 @@ $(function() {
     }
 
     function setupAutocomplete(selector, dataSource) {
-        $(selector)
+        var widget = $(selector)
             .on("keydown", function(event) {
                 if (
                     event.keyCode === $.ui.keyCode.TAB &&
@@ -151,6 +151,17 @@ $(function() {
                     return false;
                 }
             });
+        // Render canonical LiPD term in bold, synonyms in light gray
+        widget.data("ui-autocomplete")._renderItem = function(ul, item) {
+            var canonical = item.value;
+            var synonyms = item.label.slice(canonical.length);
+            if (synonyms.charAt(0) === ',') synonyms = synonyms.slice(1);
+            var $a = $('<a>').append($('<strong>').text(canonical));
+            if (synonyms) {
+                $a.append($('<span>').css({ color: '#aaa', fontSize: '0.88em', marginLeft: '6px' }).text(synonyms));
+            }
+            return $('<li>').append($a).appendTo(ul);
+        };
     }
 
     // Example usage for your elements
@@ -736,10 +747,15 @@ getAllMonths = function(startSpan,endSpan){
                         console.log("First 5 unique datasetIds:", uniqueDatasetIds.slice(0, 5));
 
                         // Collect query parameters from the filter UI for lipdGenerator
+                        // rmBlanks strips trailing ", " left by the autocomplete widget
                         var queryParams = {
-                            archiveTypes: document.getElementById('archiveTypeIn').value || null,
-                            variableName: document.getElementById('variableName').value || null,
-                            compilation: document.getElementById('compilationIn').value || null
+                            archiveTypes: rmBlanks(document.getElementById('archiveTypeIn').value) || null,
+                            proxy: rmBlanks(document.getElementById('proxy').value) || null,
+                            variableName: rmBlanks(document.getElementById('variableName').value) || null,
+                            country: rmBlanks(document.getElementById('countryIn').value) || null,
+                            continent: rmBlanks(document.getElementById('continentIn').value) || null,
+                            compilation: rmBlanks(document.getElementById('compilationIn').value) || null,
+                            seasonality: rmBlanks(document.getElementById('seasonality1').value) || null
                         };
                         if (document.getElementById('coordsOn').checked) {
                             queryParams.coords = [
@@ -748,6 +764,18 @@ getAllMonths = function(startSpan,endSpan){
                                 parseFloat(document.getElementById('lon_min').value),
                                 parseFloat(document.getElementById('lon_max').value)
                             ];
+                        }
+                        if (JSON.parse(filters1['ages'])) {
+                            queryParams.ages = [
+                                parseFloat(document.getElementById('time_range_to_reconstruct_fromInput').value),
+                                parseFloat(document.getElementById('time_range_to_reconstruct_toInput').value)
+                            ];
+                        }
+                        if (JSON.parse(filters1['resolution'])) {
+                            queryParams.resolution = parseFloat(document.getElementById('resolutionInput').value);
+                        }
+                        if (JSON.parse(filters1['terrestrial'])) {
+                            queryParams.terrestrial = document.getElementById('Terrestrial').checked;
                         }
                         var postBody = {
                             TSIDs: IDs,
@@ -761,6 +789,14 @@ getAllMonths = function(startSpan,endSpan){
                         var TSIDsArray = postBody.TSIDs;
                         var numTSids = TSIDsArray.length
                     } else {
+                        // Short-circuit for lipdDownload archived path — no GitHub needed
+                        const reconVal = document.getElementById('recon').value;
+                        if (reconVal === 'lipdDownload') {
+                            const compilation = document.getElementById('archivedCompilationIn').value;
+                            const version = document.getElementById('archivedCompilationVersionIn').value;
+                            resolve(`https://lipdverse.org/${compilation}/${version}/`);
+                            return;
+                        }
                         const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
                         var tsJSON = '{"compilation": "' + document.getElementById('archivedCompilationIn').value + '", "version": "' + document.getElementById('archivedCompilationVersionIn').value + '", "recon": "' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '"}'
                         console.log("Sending POST for archived compilation (both R and Python formats will be downloaded): ", tsJSON)
@@ -833,7 +869,7 @@ function updatePoints (coords){
 		},
 
 		onEachFeature: function (feature, layer) {
-	    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {
+	    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Min/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="/query/paleoPlots/'+feature.properties.datasetId+'" height="200" width="600" title="paleoData Plot"></iframe>', {
 		   maxWidth : 600
 	    });
 	},
@@ -887,6 +923,6 @@ function updatePoints (coords){
 	    }
 		}
 	    }).addTo(layerGroup);
-    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + coords.length + " (" + inRectCount + " unique locations)"
+    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + coords.length + " (" + inRectCount + " unique locations) &mdash; datasets may contain multiple proxy time series"
     document.getElementById("my-css-spinner").style.display = "none";
 }

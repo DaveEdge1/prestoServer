@@ -94,7 +94,7 @@ router.post('/github', express.raw({ type: 'application/json' }), async (req, re
 
     // Find reconstruction job by workflow_run_id or repo name
     const [jobs] = await db.query(
-      'SELECT id, unique_id, email FROM reconstruction_jobs WHERE workflow_run_id = ? OR github_repo_name = ?',
+      'SELECT id, unique_id, email, user_id, recon_type FROM reconstruction_jobs WHERE workflow_run_id = ? OR github_repo_name = ?',
       [runId, repoName]
     );
 
@@ -137,6 +137,88 @@ router.post('/github', express.raw({ type: 'application/json' }), async (req, re
     );
 
     console.log(`Updated job ${job.unique_id} to status ${dbStatus}`);
+
+    // For completed visualization workflows, set the repo homepage to the Pages URL.
+    // GITHUB_TOKEN in Actions lacks admin permission, so we use the user's OAuth token.
+    const workflowName = workflowRun.name || '';
+    if (dbStatus === 'completed' && workflowName.toLowerCase().includes('visualize')) {
+      try {
+        const githubService = require('../services/github');
+        const { Octokit } = require('@octokit/rest');
+
+        const [tokens] = await db.query(
+          'SELECT encrypted_token FROM github_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+          [job.user_id]
+        );
+
+        if (tokens.length > 0) {
+          const token = githubService.decryptToken(tokens[0].encrypted_token);
+          const octokit = new Octokit({ auth: token });
+          const repoOwner = payload.repository.owner.login;
+          const pagesUrl = `https://${repoOwner}.github.io/${repoName}/docs/visualizer.html`;
+
+          await octokit.rest.repos.update({
+            owner: repoOwner,
+            repo: repoName,
+            homepage: pagesUrl
+          });
+
+          console.log(`Set ${repoName} homepage to Pages URL: ${pagesUrl}`);
+        } else {
+          console.warn(`No stored token for user_id ${job.user_id} — cannot set Pages homepage`);
+        }
+      } catch (homepageErr) {
+        console.error(`Failed to set Pages homepage for ${repoName}:`, homepageErr.message);
+      }
+    }
+
+    // For completed lipdDownload jobs, set the repo's About/homepage URL to the artifact
+    if (dbStatus === 'completed' && job.recon_type === 'lipdDownload') {
+      try {
+        const githubService = require('../services/github');
+        const { Octokit } = require('@octokit/rest');
+
+        // Retrieve the user's stored OAuth token
+        const [tokens] = await db.query(
+          'SELECT encrypted_token FROM github_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
+          [job.user_id]
+        );
+
+        if (tokens.length > 0) {
+          const token = githubService.decryptToken(tokens[0].encrypted_token);
+          const octokit = new Octokit({ auth: token });
+          const repoOwner = payload.repository.owner.login;
+
+          // List artifacts for this workflow run to get the artifact ID
+          const { data: artifactsData } = await octokit.rest.actions.listWorkflowRunArtifacts({
+            owner: repoOwner,
+            repo: repoName,
+            run_id: runId
+          });
+
+          if (artifactsData.artifacts.length > 0) {
+            const artifact = artifactsData.artifacts[0];
+            const artifactUrl = `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}/artifacts/${artifact.id}`;
+
+            // Update the repo's homepage (About section website link)
+            await octokit.rest.repos.update({
+              owner: repoOwner,
+              repo: repoName,
+              homepage: artifactUrl
+            });
+
+            console.log(`Set ${repoName} homepage to artifact: ${artifactUrl}`);
+          } else {
+            console.warn(`No artifacts found for workflow run ${runId} in ${repoName}`);
+          }
+        } else {
+          console.warn(`No stored token for user_id ${job.user_id} — cannot update repo homepage`);
+        }
+      } catch (homepageErr) {
+        console.error(`Failed to set repo homepage for ${repoName}:`, homepageErr.message);
+        // Non-fatal — don't fail the webhook
+      }
+    }
 
     // Send email notification on completion (optional)
     if (dbStatus === 'completed' && job.email) {

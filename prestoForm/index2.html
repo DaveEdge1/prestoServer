@@ -73,77 +73,54 @@
 
   </head>
   <body>
-        <header class="nav-holder make-sticky">
-        <div class="navbar navbar-light bg-white navbar-expand-lg py-0" id="navbar">
-	<div class="container py-3 py-lg-0 px-lg-0">
-	<!-- Navbar brand--><a class="navbar-brand" href="https://paleopresto.com/"><img class="d-none d-md-inline-block" src="img/logo.png" alt="Universal logo"><img class="d-inline-block d-md-none" src="img/logo-small.png" alt="Universal logo"><span class="sr-only">Universal - go to homepage</span></a> <!-- TODO: Update the logo. -->
-	<!-- Navbar toggler-->
-	<button class="navbar-toggler text-primary border-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navigationCollapse" aria-controls="navigationCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="sr-only">Toggle navigation</span><i class="fas fa-align-justify"></i></button>
-	<!-- Collapsed Navigation    -->
-	<div class="collapse navbar-collapse" id="navigationCollapse">
-	<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-	<a class="nav-link" href="https://paleopresto.com/">Home</a>
-	<!-- megamenu [features]-->
-	<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="featuresMegamenu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reconstructions</a>
-	<ul class="dropdown-menu megamenu p-4" aria-labelledby="featuresMegamenu">
-	<li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/holocene.html">Holocene</a></li>
-	<li class="nav-item"><a class="nav-link-sub py-2 text-uppercase" href="https://paleopresto.com/common_era.html">Common Era</a></li>
-	</ul>
-	</li>
-	<!-- megamenu [portfolio]-->
-	<a class="nav-link" href="https://paleopresto.com/analysis.html">Analysis</a>
-	<a class="nav-link" href="https://paleopresto.com/custom.html">Custom</a>
-	<a class="nav-link" href="https://paleopresto.com/about.html">About Us</a>
-	</ul>
-	</div>
-	</div>
-	</div>
-	</header>
-	<!-- HEADING BREADCRUMB-->
-	<section class="bg-pentagon py-4">
-	<div class="container py-3">
-	<div class="row d-flex align-items-center gy-4">
-	<div class="col-md-7">
-	<h1 class="h2 mb-0 text-uppercase">Custom Reconstructions</h1>
-	</div>
-	<div class="col-md-5">
-	<!-- Breadcrumb-->
-	<ol class="text-sm justify-content-start justify-content-lg-end mb-0 breadcrumb undefined">
-	<li class="breadcrumb-item"><a class="text-uppercase" href="https://paleopresto.com/">Home</a></li>
-	<li class="breadcrumb-item text-uppercase active">Custom Reconstructions</li>
-	</ol>
-	</div>
-	</div>
-	</div>
-	</section>
+    <style>
+      .pce-header { background: #1a1a2e; border-bottom: 3px solid #c4956a; padding: 0; }
+      .pce-header-inner { max-width: 1140px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+      .pce-brand { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+      .pce-brand-logo { height: 28px; filter: invert(1); }
+      .pce-brand-tag { font-family: 'Roboto', sans-serif; font-weight: 300; font-size: 0.75rem; color: #c4956a; letter-spacing: 0.12em; text-transform: uppercase; }
+      .pce-nav { display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0; }
+      .pce-nav a { font-family: 'Roboto', sans-serif; font-weight: 400; font-size: 0.85rem; color: rgba(255,255,255,0.7); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+      .pce-nav a:hover { color: #c4956a; }
+      .pce-footer { background: #1a1a2e; border-top: 3px solid #c4956a; padding: 0; }
+      .pce-footer-inner { max-width: 1140px; margin: 0 auto; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+      .pce-footer-text { font-family: 'Roboto', sans-serif; font-weight: 300; font-size: 0.8rem; color: rgba(255,255,255,0.45); letter-spacing: 0.03em; margin: 0; }
+      .pce-footer-text a { color: #c4956a; text-decoration: none; }
+      .pce-footer-text a:hover { text-decoration: underline; }
+      html, body { height: 100%; margin: 0; }
+      body { display: flex; flex-direction: column; min-height: 100vh; }
+      .pce-main { flex: 1; }
+    </style>
+
+      <header class="pce-header">
+        <div class="pce-header-inner">
+          <a class="pce-brand" href="/forms/">
+            <img class="pce-brand-logo" src="img/logo.png" alt="Presto">
+            <span class="pce-brand-tag">Custom Engine</span>
+          </a>
+          <nav>
+            <ul class="pce-nav">
+              <li><a href="/forms/">Engine</a></li>
+              <li><a href="https://paleopresto.com/">PReSto Home</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+      <div class="pce-main">
         <section class="py-5">
 	<div class="container py-5">
 	<div class="row">
 	<div class="col-md-12">
-	<h1>Who & How</h1>
-      <form id=tableForm2 onSubmit="EvaluateForm2()" method="POST">
+	<h1>GitHub Authorization</h1>
+	<h4>Login to your GitHub Account to authorize Presto</h4>
+	<p>Presto will create a new repository in your GitHub account to process your Presto request</p>
+      <form id=tableForm2 onSubmit="return false;" method="POST">
 
-	<!-- Execution Pathway (shown for reconstructions that support GitHub Actions) -->
-	<div id="execution-pathway-section" style="display:none;">
-	  <h4>How would you like to run this reconstruction?</h4>
-	  <div class="radio-group" style="padding:24px 24px; border-radius:16px;">
-	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;">
-	      <input type="radio" id="pathway-github" name="executionPathway" value="github" checked>
-	      <span style="font-weight:900">GitHub Actions (Recommended)</span>
-	      Run on GitHub's servers. Results stored in your GitHub repository.
-	    </label>
-	    <br>
-	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;">
-	      <input type="radio" id="pathway-server" name="executionPathway" value="server">
-	      <span style="font-weight:900">Traditional Server</span>
-	      Run on PReSto servers. Results emailed to you.
-	    </label>
-	  </div>
-	  <!-- GitHub Auth Panel (visible when GitHub pathway selected) -->
+	<!-- GitHub Auth Section -->
+	<div id="execution-pathway-section">
+	  <input type="hidden" name="executionPathway" value="github">
 	  <div id="github-auth-panel" style="margin:15px 0; padding:20px; background:#f8f9fa; border-radius:8px; border:2px solid #0969da;">
-	    <h5 style="color:#0969da; margin-bottom:10px;">GitHub Login Required</h5>
 	    <div id="github-login-box" style="display:none;">
-	      <p style="color:#666; font-size:14px; margin-bottom:10px;">Login with GitHub to run your reconstruction. A repository will be created in your account.</p>
 	      <a href="#" id="github-login-link" style="background-color:#24292e; color:white; padding:10px 20px; text-decoration:none; border-radius:6px; display:inline-block; font-size:14px;">
 	        <svg height="18" width="18" viewBox="0 0 16 16" style="vertical-align:middle; margin-right:8px; fill:white;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
 	        Login with GitHub
@@ -151,7 +128,7 @@
 	    </div>
 	    <div id="github-authenticated-box" style="display:none;">
 	      <p style="color:#155724; font-size:15px; margin:0;">
-	        ✓ Logged in as: <strong style="color:#0969da;"><span id="github-username-display"></span></strong>
+	        &#10003; Logged in as: <strong style="color:#0969da;"><span id="github-username-display"></span></strong>
 	        <button onclick="logoutGitHub()" style="margin-left:15px; padding:4px 10px; font-size:12px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer;">Logout</button>
 	      </p>
 	    </div>
@@ -161,36 +138,8 @@
 	<!-- Form body (locked until pathway condition is met) -->
 	<div id="form-body">
 	  <div id="form-lock-notice" style="display:none; background:#fff3cd; padding:12px 16px; border-radius:8px; border:1px solid #ffc107; margin-bottom:16px; color:#856404;">
-	    Please select a pathway above to continue. Login with GitHub to use GitHub Actions, or select Traditional Server.
+	    Login with GitHub above to continue.
 	  </div>
-	  <div id="email-section">
-	    <h4>Tell us where to send the results and how you would like to edit the reconstruction parameters</h4>
-	    <br>
-            <div class="form-group">
-              <label for="Name">Name</label>
-              <input type="text" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Enter your name" name="name">
-            </div>
-	    <br>
-            <div class="form-group">
-	      <div class="required-field">
-          	<label for="Email">Email</label>
-          	<input type="text" class="form-control" id="useremail" aria-describedby="emailHelp" name="useremail" placeholder="Enter your email address (eg. John.Doe@vsmu.edu)">
-	      </div>
-	    </div>
-	    <br>
-	    <p>Your name and email will not be stored or shared in any way</p>
-	  </div>
-	  <div class="radio-group" id="config" style="padding:24px 24px; border-radius:16px;">
-	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="GUI" name="optradio" checked="true"><span style="font-weight:900">Edit Parameters In Browser Window</span>
-Edit the default parameters using a web form</label>
-	    <br>
-	    <!--label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" name="optradio" value="0"><span style="font-weight:900">Use Defaults</span>
-Reproduce original rconstruction with updated poxy database</label>
-	    <br-->
-	    <label class="radio-inline" style="padding:12px 12px; white-space: pre-wrap;"><input type="radio" id="upload" name="optradio"><span style="font-weight:900">Upload Parameters File (Advanced)</span>
-For users familiar with the code, upload reconstruction parameters directly</label>
-          </div>
-	  <br>
 	</div>
 
       </form>
@@ -200,110 +149,57 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 		<button style="height:100%; width:300px; font-size:16px; text-align:center" onclick="goToQuery(event)" class="btn btn-primary">Submit</button>
     		<!--input type="button" value="Go to Query (experimental)" onclick="goToQuery(event)" /-->
 	</div>
+	</div>
+	</div>
+	</div>
 	</section>
-	</div>
-	</div>
-	</div>
-  </body>
+      </div>
 
-        <footer>
-	<!-- COPYRIGHTS                -->
-	<div class="bg-dark py-5">
-	<div class="container">
-	<div class="row align-items-cenrer gy-3 text-center">
-	<div class="col-md-6 text-md-start">
-	<p class="mb-0 text-sm text-gray-500">&copy; 2023. The Presto Team </p>
-	</div>
-	<div class="col-md-6 text text-md-end">
-	<p class="mb-0 text-sm text-gray-500">Template designed by  <a href="https://bootstrapious.com" target="_blank">Bootstrapious</a></p>
-	<!-- Please do not remove the backlink to us unless you purchase the Attribution-free License at https://bootstrapious.com/attribution-free-license. Thank you.-->
-	</div>
-	</div>
-	</div>
-	</div>
-	</footer>
-
-	<script>
-		function validateEmail(){
-			var email1 = document.getElementById('useremail').value
-			var regex1 = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-			var validate1 = email1.search(regex1)
-			return(validate1)
-		}
-	</script>
-
-	<script>
-		        function EvaluateForm2(){
-				if (validateEmail() == 0){
-				//document.getElementById('tableForm2').action = "/manualORdefault"}
-	            		const urlParams = new URLSearchParams(window.location.search);
-				//document.getElementById('tableForm2').action = "/manualORdefault"
-	            		document.getElementById('tableForm2').action = "/forms/manualORdefault?recon=" + urlParams.get('recon') + '&uniqueID=' + urlParams.get('uniqueID') + '&email=' + document.getElementById('useremail').value + '&parampath=' + document.getElementById('GUI').value
-				} else {
-					alert("invalid email")
-				}
-			}
-	</script>
+      <footer class="pce-footer">
+        <div class="pce-footer-inner">
+          <p class="pce-footer-text">&copy; 2025 <a href="https://paleopresto.com/">The Presto Team</a></p>
+          <p class="pce-footer-text">Presto Custom Engine &middot; Paleoclimate Reconstruction Storehouse</p>
+        </div>
+      </footer>
 
 	<script>
 		function goToQuery(e){
 			e.preventDefault();
-			const urlParams = new URLSearchParams(window.location.search);
-			const pathwayEl = document.querySelector('input[name="executionPathway"]:checked');
-			const useGitHubActions = pathwayEl ? pathwayEl.value === 'github' : false;
-
-			let user, domain;
-			if (useGitHubActions) {
-				if (!isUserAuthenticated) {
-					alert('Please login with GitHub first to use the GitHub Actions pathway.');
-					return false;
-				}
-				const ghUsername = document.getElementById('github-username-display').textContent.trim();
-				user = ghUsername || 'github-user';
-				domain = 'github.com';
-			} else {
-				if (validateEmail() !== 0) {
-					alert("invalid email");
-					return false;
-				}
-				user = document.getElementById('useremail').value.split('@')[0];
-				domain = document.getElementById('useremail').value.split('@')[1];
+			if (!isUserAuthenticated) {
+				alert('Please login with GitHub first.');
+				return false;
 			}
-
-			window.location.href = "/query/" + urlParams.get('recon')
-				+ "?recon=" + urlParams.get('recon')
+			const urlParams = new URLSearchParams(window.location.search);
+			const recon = urlParams.get('recon');
+			const ghUsername = document.getElementById('github-username-display').textContent.trim();
+			const user = ghUsername || 'github-user';
+			// lipdDownload uses the LMR query page (same proxy selection UI)
+			const queryPath = (recon === 'lipdDownload') ? 'LMR' : recon;
+			window.location.href = "/query/" + queryPath
+				+ "?recon=" + recon
 				+ '&uniqueID=' + urlParams.get('uniqueID')
 				+ '&user=' + user
-				+ '&domain=' + domain
+				+ '&domain=github.com'
 				+ '&language=' + language
-				+ '&useGitHubActions=' + useGitHubActions;
+				+ '&useGitHubActions=true';
 			return false;
 		}
 	</script>
 
 <script>
-	const GITHUB_ACTIONS_RECONS = ['LMR'];
 	let isUserAuthenticated = false;
 
 	function updateFormLock() {
-		const pathwayEl = document.querySelector('input[name="executionPathway"]:checked');
-		const selectedServer = pathwayEl && pathwayEl.value === 'server';
-		const selectedGitHub = pathwayEl && pathwayEl.value === 'github';
-		const shouldUnlock = selectedServer || isUserAuthenticated;
-
 		const formBody = document.getElementById('form-body');
 		const submitContainer = document.getElementById('submit-btn-container');
 		const lockNotice = document.getElementById('form-lock-notice');
-		const emailSection = document.getElementById('email-section');
 
-		if (shouldUnlock) {
+		if (isUserAuthenticated) {
 			formBody.style.pointerEvents = '';
 			formBody.style.opacity = '';
 			submitContainer.style.pointerEvents = '';
 			submitContainer.style.opacity = '';
 			if (lockNotice) lockNotice.style.display = 'none';
-			// Hide email fields when GitHub Actions pathway is active
-			if (emailSection) emailSection.style.display = selectedGitHub ? 'none' : '';
 		} else {
 			formBody.style.pointerEvents = 'none';
 			formBody.style.opacity = '0.4';
@@ -314,43 +210,29 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 	}
 
 	document.addEventListener('DOMContentLoaded', function () {
-		const urlParams = new URLSearchParams(window.location.search);
-		const reconType = urlParams.get('recon');
+		updateFormLock();
 
-		if (GITHUB_ACTIONS_RECONS.includes(reconType)) {
-			document.getElementById('execution-pathway-section').style.display = 'block';
-			updateFormLock();
-
-			const loginLink = document.getElementById('github-login-link');
-			if (loginLink) {
-				loginLink.href = '/oauth/github?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
-			}
-
-			fetch('/oauth/github/status')
-				.then(r => r.json())
-				.then(data => {
-					isUserAuthenticated = data.authenticated;
-					if (data.authenticated) {
-						document.getElementById('github-authenticated-box').style.display = 'block';
-						document.getElementById('github-username-display').textContent = data.username;
-					} else {
-						document.getElementById('github-login-box').style.display = 'block';
-					}
-					updateFormLock();
-				})
-				.catch(() => {
-					document.getElementById('github-login-box').style.display = 'block';
-					updateFormLock();
-				});
-
-			document.querySelectorAll('input[name="executionPathway"]').forEach(radio => {
-				radio.addEventListener('change', function () {
-					document.getElementById('github-auth-panel').style.display =
-						this.value === 'github' ? 'block' : 'none';
-					updateFormLock();
-				});
-			});
+		const loginLink = document.getElementById('github-login-link');
+		if (loginLink) {
+			loginLink.href = '/oauth/github?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
 		}
+
+		fetch('/oauth/github/status')
+			.then(r => r.json())
+			.then(data => {
+				isUserAuthenticated = data.authenticated;
+				if (data.authenticated) {
+					document.getElementById('github-authenticated-box').style.display = 'block';
+					document.getElementById('github-username-display').textContent = data.username;
+				} else {
+					document.getElementById('github-login-box').style.display = 'block';
+				}
+				updateFormLock();
+			})
+			.catch(() => {
+				document.getElementById('github-login-box').style.display = 'block';
+				updateFormLock();
+			});
 	});
 
 	function logoutGitHub() {
@@ -361,4 +243,5 @@ For users familiar with the code, upload reconstruction parameters directly</lab
 		}
 	}
 </script>
+</body>
 </html>

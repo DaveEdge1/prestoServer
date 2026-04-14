@@ -90,18 +90,6 @@
         <p><strong>Execution Mode:</strong> <span id="execution-mode"></span></p>
       </div>
 
-      <div id="github-info" class="info-section" style="display: none;">
-        <h4>GitHub Repository</h4>
-        <p>
-          <strong>Repository:</strong>
-          <a id="repo-link" href="#" target="_blank"></a>
-        </p>
-        <p>
-          <strong>Workflow Run:</strong>
-          <a id="workflow-link" href="#" target="_blank">View logs on GitHub</a>
-        </p>
-      </div>
-
       <div id="timestamps" class="info-section">
         <h4>Timeline</h4>
         <p><strong>Created:</strong> <span id="created-time"></span></p>
@@ -117,7 +105,7 @@
 
       <div id="auto-refresh" style="margin-top: 20px; text-align: center;">
         <p class="text-muted">
-          <small>Auto-refreshing every 10 seconds... <span id="countdown">10</span>s</small>
+          <small id="redirect-text">Redirecting to GitHub Actions in <span id="countdown">10</span>s...</small>
         </p>
       </div>
     </div>
@@ -125,9 +113,9 @@
 
   <script>
     const uniqueID = window.location.pathname.split('/').pop();
-    let refreshInterval;
     let countdownInterval;
     let countdown = 10;
+    let redirectUrl = null;
 
     function formatDate(dateString) {
       if (!dateString) return 'N/A';
@@ -163,17 +151,11 @@
       document.getElementById('recon-type').textContent = data.reconType;
       document.getElementById('execution-mode').textContent = data.executionMode;
 
-      // GitHub info
-      if (data.repository && data.repository.url) {
-        document.getElementById('github-info').style.display = 'block';
-        const repoLink = document.getElementById('repo-link');
-        repoLink.href = data.repository.url;
-        repoLink.textContent = data.repository.name;
-
-        if (data.workflowRunId) {
-          const workflowLink = document.getElementById('workflow-link');
-          workflowLink.href = `${data.repository.url}/actions/runs/${data.workflowRunId}`;
-        }
+      // Build redirect URL for workflow run
+      if (data.repository && data.repository.url && data.workflowRunId) {
+        redirectUrl = `${data.repository.url}/actions/runs/${data.workflowRunId}`;
+      } else if (data.repository && data.repository.url) {
+        redirectUrl = `${data.repository.url}/actions`;
       }
 
       // Timestamps
@@ -206,11 +188,11 @@
         `).join('');
       }
 
-      // Hide auto-refresh if completed
+      // Terminal states: stop polling, hide countdown
       if (data.status === 'completed' || data.status === 'failed' || data.status === 'cancelled') {
         document.getElementById('auto-refresh').style.display = 'none';
-        clearInterval(refreshInterval);
         clearInterval(countdownInterval);
+        stopPolling();
       }
     }
 
@@ -228,31 +210,58 @@
         }
         const data = await response.json();
         updateStatus(data);
-        countdown = 10;
+        return data;
       } catch (error) {
         showError(error.message);
+        return null;
+      }
+    }
+
+    // Poll every 3s until redirect URL is available
+    let pollInterval = null;
+    function startPolling() {
+      pollInterval = setInterval(async () => {
+        const data = await fetchStatus();
+        if (redirectUrl) {
+          stopPolling();
+          startCountdown();
+        }
+      }, 3000);
+    }
+    function stopPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
       }
     }
 
     function startCountdown() {
+      countdown = 10;
+      document.getElementById('auto-refresh').style.display = 'block';
+      document.getElementById('redirect-text').innerHTML =
+        'Redirecting to GitHub Actions in <span id="countdown">10</span>s...';
       countdownInterval = setInterval(() => {
         countdown--;
         const countdownEl = document.getElementById('countdown');
         if (countdownEl) {
           countdownEl.textContent = countdown;
         }
-        if (countdown <= 0) {
-          countdown = 10;
+        if (countdown <= 0 && redirectUrl) {
+          clearInterval(countdownInterval);
+          window.location.href = redirectUrl;
         }
       }, 1000);
     }
 
-    // Initial fetch
-    fetchStatus();
-
-    // Auto-refresh every 10 seconds
-    refreshInterval = setInterval(fetchStatus, 10000);
-    startCountdown();
+    // Initial fetch — if repo URL is already available, start countdown; otherwise poll
+    fetchStatus().then(() => {
+      if (redirectUrl) {
+        startCountdown();
+      } else {
+        document.getElementById('redirect-text').textContent = 'Setting up GitHub repository...';
+        startPolling();
+      }
+    });
   </script>
 </body>
 </html>

@@ -167,10 +167,12 @@ router.post('/sendReconRequest', async (req, res) => {
       const mysql = require('mysql2/promise');
       const db = await mysql.createPool(config.mysql);
 
+      // ── Fast synchronous work (before redirect) ───────────────────────────
+
       // Save configuration to prestoForm directory
       const reconID = uniqueID + '_' + recon;
       const configLoc = path.join(config.paths.prestoForm, recon, 'configs.yml');
-      const configPath = editConfigs(configLoc, req.body, recon, reconID);
+      editConfigs(configLoc, req.body, recon, reconID);
 
       // Prepare configuration data for GitHub repository
       const configData = {
@@ -182,204 +184,171 @@ router.post('/sendReconRequest', async (req, res) => {
         language: language || 'en'
       };
 
-      let repo, authType, isAnonymous, userId, githubOrg;
+      const authType = isAuthenticated ? 'oauth' : 'github_app';
+      const isAnonymous = !isAuthenticated;
+      const userId = isAuthenticated ? req.session.userId : null;
 
-      // OPTION 1: OAuth - Personal Repository (User is authenticated)
+      // Validate prerequisites and capture token before redirect
+      let token = null;
       if (isAuthenticated) {
-        console.log(`Creating personal GitHub repository for ${recon} reconstruction ${uniqueID}...`);
-
         const githubService = require('../services/github');
-
-        // Get user's GitHub token
         const [tokens] = await db.query(
           'SELECT encrypted_token FROM github_tokens WHERE user_id = ? ORDER BY created_at DESC LIMIT 1',
-          [req.session.userId]
+          [userId]
         );
-
         if (tokens.length === 0) {
           throw new Error('GitHub token not found. Please login again.');
         }
-
-        const token = githubService.decryptToken(tokens[0].encrypted_token);
-
-        // ── Compute lipdQueryJson BEFORE creating repository ──────────────────
-        // Must be done first so createRepository can commit query_params.json
-        // (containing the cleaned TSID selection) to the repo before the push
-        // to lmr_configs.yml triggers the workflow run.
-        let lipdQueryJson = null;
-
-        if (recon === 'LMR') {
-          console.log('Processing LiPD data for LMR reconstruction...');
-          const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_LMR`);
-          const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
-
-          if (fs.existsSync(archivedCompPath)) {
-            // Path A: Archived compilation
-            const archiveInfo = JSON.parse(fs.readFileSync(archivedCompPath, 'utf8'));
-            lipdQueryJson = JSON.stringify({
-              mode: 'archived',
-              compilation: archiveInfo.compilation,
-              version: archiveInfo.version
-            });
-            console.log(`Using archived compilation: ${archiveInfo.compilation} v${archiveInfo.version}`);
-          } else {
-            // Path B: Filtered query — load server-side params + cleaned TSID selection
-            const queryParamsPath = path.join(userReconDir, 'query_params.json');
-            let queryParams = {};
-            if (fs.existsSync(queryParamsPath)) {
-              queryParams = JSON.parse(fs.readFileSync(queryParamsPath, 'utf8'));
-              console.log('Loaded query params from query page:', queryParams);
-            } else {
-              console.warn('query_params.json not found for', uniqueID, '- queryParams will be empty');
-            }
-
-            const cleanedPath = path.join(userReconDir, 'cleaned_TSIDs.json');
-            const cleanedTSIDs = fs.existsSync(cleanedPath)
-              ? JSON.parse(fs.readFileSync(cleanedPath, 'utf8')).TSIDs
-              : null;
-            if (cleanedTSIDs) {
-              console.log(`Using cleaned TSID selection: ${cleanedTSIDs.length} TSIDs (from cleaned_TSIDs.json)`);
-            }
-
-            lipdQueryJson = JSON.stringify({
-              mode: 'filtered',
-              ...queryParams,
-              ...(cleanedTSIDs ? { tsids: cleanedTSIDs } : {})
-            });
-            console.log('Using filtered query with parameters:', queryParams);
-          }
-        }
-
-        // Create repository in user's account.
-        // For LMR: commits query_params.json + updated workflow to the repo
-        // before pushing lmr_configs.yml so they are available when the
-        // push-triggered workflow run starts.
-        const repoData = await githubService.createRepository(
-          token,
-          recon,
-          uniqueID,
-          configData,
-          lipdQueryJson   // null for non-LMR
-        );
-
-        // LMR: workflow is already triggered by the push to lmr_configs.yml
-        // in updateRepositoryConfig() — no explicit dispatch needed.
-        // Other recon types dispatch their workflow explicitly.
-        let workflowRun = { id: null };
-        if (recon !== 'LMR') {
-          console.log(`Dispatching workflow for ${repoData.name}...`);
-          const workflowInputs = { unique_id: uniqueID, recon_type: recon };
-          workflowRun = await githubService.dispatchWorkflow(
-            token,
-            repoData.owner,
-            repoData.name,
-            workflowInputs
-          );
-        } else {
-          console.log(`LMR: workflow triggered by config push to ${repoData.name}`);
-        }
-
-        repo = {
-          name: repoData.name,
-          url: repoData.url,
-          workflowRunId: workflowRun.id
-        };
-        authType = 'oauth';
-        isAnonymous = false;
-        userId = req.session.userId;
-        githubOrg = null;
-
-        console.log(`Personal repository created: ${repo.url}`);
-      }
-      // OPTION 2: GitHub App - Anonymous/Centralized Repository
-      else {
-        console.log(`Creating anonymous GitHub repository for ${recon} reconstruction ${uniqueID}...`);
-
+        token = githubService.decryptToken(tokens[0].encrypted_token);
+      } else {
         const githubAppService = require('../services/githubApp');
-
-        // Check if GitHub App is available
         if (!githubAppService.isAvailable()) {
-          throw new Error('Anonymous reconstructions are not available. Please login with GitHub or use traditional workflow.');
+          throw new Error('Anonymous reconstructions are not available. Please login with GitHub.');
         }
-
-        // Create and run reconstruction using GitHub App
-        const result = await githubAppService.createAndRunReconstruction({
-          uniqueId: uniqueID,
-          reconType: recon,
-          formData: configData
-        });
-
-        repo = {
-          name: result.repoName,
-          url: result.repoUrl,
-          workflowRunId: null // GitHub App doesn't return workflow run ID immediately
-        };
-        authType = 'github_app';
-        isAnonymous = true;
-        userId = null;
-        githubOrg = result.organization;
-
-        console.log(`Anonymous repository created: ${repo.url}`);
       }
 
-      // Save job to database with auth type tracking
+      // Compute lipdQueryJson (reads local files — fast, no network)
+      let lipdQueryJson = null;
+      let cleaningReportJson = null;
+      let variableFilterYaml = null;
+      if ((recon === 'LMR' || recon === 'holocene_da') && isAuthenticated) {
+        console.log(`Processing LiPD data for ${recon} reconstruction...`);
+        const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_${recon}`);
+        const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
+
+        if (fs.existsSync(archivedCompPath)) {
+          const archiveInfo = JSON.parse(fs.readFileSync(archivedCompPath, 'utf8'));
+          lipdQueryJson = JSON.stringify({
+            mode: 'archived',
+            compilation: archiveInfo.compilation,
+            version: archiveInfo.version
+          });
+          console.log(`Using archived compilation: ${archiveInfo.compilation} v${archiveInfo.version}`);
+        } else {
+          const queryParamsPath = path.join(userReconDir, 'query_params.json');
+          let queryParams = {};
+          if (fs.existsSync(queryParamsPath)) {
+            queryParams = JSON.parse(fs.readFileSync(queryParamsPath, 'utf8'));
+            console.log('Loaded query params from query page:', queryParams);
+          } else {
+            console.warn('query_params.json not found for', uniqueID, '- queryParams will be empty');
+          }
+
+          const cleanedPath = path.join(userReconDir, 'cleaned_TSIDs.json');
+          let cleanedTSIDs = null;
+          let removedTSIDs = null;
+          if (fs.existsSync(cleanedPath)) {
+            const cleanedData = JSON.parse(fs.readFileSync(cleanedPath, 'utf8'));
+            cleanedTSIDs = cleanedData.TSIDs || null;
+            removedTSIDs = cleanedData.removedTSIDs || null;
+          }
+          if (cleanedTSIDs) {
+            console.log(`Using cleaned TSID selection: ${cleanedTSIDs.length} TSIDs (from cleaned_TSIDs.json)`);
+          }
+
+          const reportPath = path.join(userReconDir, 'cleaning_report.json');
+          cleaningReportJson = fs.existsSync(reportPath)
+            ? fs.readFileSync(reportPath, 'utf8')
+            : null;
+
+          // variable_filter.yaml — written by /datacleaning/confirm. Passed
+          // through to the repo so the workflow can read it alongside
+          // query_params.json.
+          const variableFilterPath = path.join(userReconDir, 'variable_filter.yaml');
+          variableFilterYaml = fs.existsSync(variableFilterPath)
+            ? fs.readFileSync(variableFilterPath, 'utf8')
+            : null;
+
+          lipdQueryJson = JSON.stringify({
+            mode: 'filtered',
+            ...queryParams,
+            ...(cleanedTSIDs ? { tsids: cleanedTSIDs } : {}),
+            ...(removedTSIDs ? { removedTsids: removedTSIDs } : {})
+          });
+          console.log('Using filtered query with parameters:', queryParams);
+        }
+      }
+
+      // Insert pending job record, then redirect immediately
       await db.query(
         `INSERT INTO reconstruction_jobs
          (unique_id, user_id, email, recon_type, execution_mode, github_repo_name, github_repo_url, workflow_run_id, workflow_status, config_json, auth_type, is_anonymous, github_org)
-         VALUES (?, ?, ?, ?, 'github_actions', ?, ?, ?, 'queued', ?, ?, ?, ?)`,
-        [
-          uniqueID,
-          userId,
-          user + '@' + domain,
-          recon,
-          repo.name,
-          repo.url,
-          repo.workflowRunId,
-          JSON.stringify(configData),
-          authType,
-          isAnonymous,
-          githubOrg
-        ]
+         VALUES (?, ?, ?, ?, 'github_actions', NULL, NULL, NULL, 'pending', ?, ?, ?, NULL)`,
+        [uniqueID, userId, user + '@' + domain, recon, JSON.stringify(configData), authType, isAnonymous]
       );
 
-      console.log(`Job saved to database for ${uniqueID} (auth_type: ${authType})`);
+      console.log(`Redirecting to status page for ${uniqueID} — GitHub setup starting in background`);
+      res.redirect(`/status/${uniqueID}`);
 
-      // Temporary redirect page — 10s countdown then forward to the repo's Actions tab
-      const actionsUrl = `${repo.url}/actions`;
-      res.send(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Reconstruction Submitted</title>
-  <style>
-    body { font-family: sans-serif; max-width: 640px; margin: 60px auto; padding: 0 20px; color: #333; }
-    h2 { color: #2a6496; }
-    .countdown { font-size: 1.4em; font-weight: bold; color: #2a6496; }
-    a { color: #2a6496; }
-    .repo-link { word-break: break-all; }
-  </style>
-</head>
-<body>
-  <h2>Reconstruction submitted!</h2>
-  <p>Your <strong>${recon}</strong> reconstruction has been queued in GitHub Actions.</p>
-  <p>Repository: <a class="repo-link" href="${repo.url}" target="_blank">${repo.url}</a></p>
-  <p>You will be redirected to the Actions page in <span class="countdown" id="t">10</span> seconds.</p>
-  <p><a href="${actionsUrl}">Go now &rarr;</a></p>
-  <p><em>Warning: Using your browser's Back button will resubmit the form.</em></p>
-  <script>
-    history.pushState(null, null, window.location.href);
-    history.back();
-    window.onpopstate = () => history.forward();
-    var seconds = 10;
-    var el = document.getElementById('t');
-    var interval = setInterval(function() {
-      seconds--;
-      el.textContent = seconds;
-      if (seconds <= 0) { clearInterval(interval); window.location = '${actionsUrl}'; }
-    }, 1000);
-  </script>
-</body>
-</html>`);
+      // ── Slow GitHub API work (background, after redirect) ─────────────────
+      setImmediate(async () => {
+        try {
+          let repo, githubOrg;
+
+          if (isAuthenticated) {
+            const githubService = require('../services/github');
+            console.log(`Creating personal GitHub repository for ${recon} reconstruction ${uniqueID}...`);
+
+            // Create repository in user's account.
+            const repoData = await githubService.createRepository(
+              token,
+              recon,
+              uniqueID,
+              configData,
+              lipdQueryJson,        // null for non-LMR
+              cleaningReportJson,   // null if no cleaning was done
+              variableFilterYaml    // null if no variable filter state
+            );
+
+            // LMR & holocene_da: workflow triggered by the push to query_params.json — no explicit dispatch needed.
+            let workflowRun = { id: null };
+            if (recon !== 'LMR' && recon !== 'holocene_da') {
+              console.log(`Dispatching workflow for ${repoData.name}...`);
+              workflowRun = await githubService.dispatchWorkflow(
+                token,
+                repoData.owner,
+                repoData.name,
+                { unique_id: uniqueID, recon_type: recon }
+              );
+            } else {
+              console.log(`${recon}: workflow triggered by config push to ${repoData.name}`);
+            }
+
+            repo = { name: repoData.name, url: repoData.url, workflowRunId: workflowRun.id };
+            githubOrg = null;
+            console.log(`Personal repository created: ${repo.url}`);
+          } else {
+            const githubAppService = require('../services/githubApp');
+            console.log(`Creating anonymous GitHub repository for ${recon} reconstruction ${uniqueID}...`);
+
+            const result = await githubAppService.createAndRunReconstruction({
+              uniqueId: uniqueID,
+              reconType: recon,
+              formData: configData
+            });
+
+            repo = { name: result.repoName, url: result.repoUrl, workflowRunId: null };
+            githubOrg = result.organization;
+            console.log(`Anonymous repository created: ${repo.url}`);
+          }
+
+          // Update DB record with actual repo info
+          await db.query(
+            `UPDATE reconstruction_jobs
+             SET github_repo_name=?, github_repo_url=?, workflow_run_id=?, workflow_status='queued', github_org=?
+             WHERE unique_id=?`,
+            [repo.name, repo.url, repo.workflowRunId, githubOrg, uniqueID]
+          );
+          console.log(`Job updated in database for ${uniqueID} (auth_type: ${authType})`);
+
+        } catch (error) {
+          console.error('Background GitHub Actions error:', error);
+          await db.query(
+            `UPDATE reconstruction_jobs SET workflow_status='failed' WHERE unique_id=?`,
+            [uniqueID]
+          );
+        }
+      });
 
     } catch (error) {
       console.error('GitHub Actions error:', error);

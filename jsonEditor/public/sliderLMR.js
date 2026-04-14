@@ -65,18 +65,19 @@ function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
 		        ${sliderColor} 0%,
 			      ${sliderColor} ${(fromPosition)/(rangeDistance)*100}%,
 			            ${rangeColor} ${((fromPosition)/(rangeDistance))*100}%,
-				          ${rangeColor} ${(toPosition)/(rangeDistance)*100}%, 
-					        ${sliderColor} ${(toPosition)/(rangeDistance)*100}%, 
+				          ${rangeColor} ${(toPosition)/(rangeDistance)*100}%,
+					        ${sliderColor} ${(toPosition)/(rangeDistance)*100}%,
 						      ${sliderColor} 100%)`;
 }
 
 function fillSingleSlider(controlSlider) {
 	            const rangeDistance = controlSlider.max-controlSlider.min
+	            const pct = (controlSlider.value - controlSlider.min) / rangeDistance * 100;
 	            controlSlider.style.background = `linear-gradient(
 			    to right,
 			    ${color1} 0%,
-			    ${color1} ${(controlSlider.value)/(rangeDistance)*100}%,
-		            ${color2} ${(controlSlider.value)/(rangeDistance)*100}%,
+			    ${color1} ${pct}%,
+		            ${color2} ${pct}%,
 		            ${color2} 100%)`;
 }								      
 
@@ -122,20 +123,17 @@ for (i = 0; i < coll.length; i++) {
 }
 
 function showAdv() {
-	//document.getElementById("advCheck").value = 0;
-	//document.getElementById("advancedShow").innerHTML = val1
+	 var hints = document.querySelectorAll('.advanced-hint');
          if (Boolean(document.getElementById("advCheck").checked)) {
-             //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
-	     //document.getElementById("advancedShow").innerHTML = "TRUE"
 	     advAll.forEach(adv1 => {
 	        adv1.style.display = 'block';
 	        })
+	     hints.forEach(h => { h.style.display = 'none'; })
 	 } else {
-	     //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
-	     //document.getElementById("advancedShow").innerHTML = "FALSE"
 	     advAll.forEach(adv1 => {
 	        adv1.style.display = 'none';
 	     })
+	     hints.forEach(h => { h.style.display = 'block'; })
 	 }
 }
 
@@ -155,7 +153,7 @@ function uncheckAll(divid, checkCycle) {
 }
 
 var canvas = document.getElementById('canvas'),
-	    ctx = canvas.getContext('2d'),
+	    ctx = canvas ? canvas.getContext('2d') : null,
 	    rect = {
 			x: 150,
 			y: 100,
@@ -355,7 +353,7 @@ function updateRect(maxOfMap) {
 	draw()
 }
 
-init();
+if (canvas) init();
 
 const recon_period_fromSilder = document.getElementById("recon_period_fromSilder");
 const recon_period_toSilder = document.getElementById("recon_period_toSilder");
@@ -397,11 +395,11 @@ function data_selection_archive_types_incrementCheckCycle(){
 data_selection_archive_types_checkCycle = data_selection_archive_types_checkCycle+1;
 return (data_selection_archive_types_checkCycle);
 }
-var recon_seeds_checkCycle = 0;
-function recon_seeds_incrementCheckCycle(){
-recon_seeds_checkCycle = recon_seeds_checkCycle+1;
-return (recon_seeds_checkCycle);
-}
+const recon_seedsSilder = document.getElementById("recon_seedsSilder");
+const recon_seedsInput = document.getElementById("recon_seedsInput");
+recon_seedsSilder.oninput = () => changeInput(recon_seedsSilder, recon_seedsInput);
+recon_seedsInput.onchange = () => changeSlider(recon_seedsInput, recon_seedsSilder);
+fillSingleSlider(recon_seedsSilder);
 var prior_annualize_months_checkCycle = 0;
 function prior_annualize_months_incrementCheckCycle(){
 prior_annualize_months_checkCycle = prior_annualize_months_checkCycle+1;

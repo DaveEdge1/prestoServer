@@ -102,7 +102,7 @@ function generateRepoName(recon, uniqueID) {
  * @param {Object} configData - User configuration data
  * @returns {Promise<Object>} Repository information
  */
-async function createRepository(token, recon, uniqueID, configData, queryParamsJson = null) {
+async function createRepository(token, recon, uniqueID, configData, queryParamsJson = null, cleaningReportJson = null, variableFilterYaml = null) {
   const octokit = new Octokit({ auth: token });
   const repoName = generateRepoName(recon, uniqueID);
 
@@ -112,9 +112,10 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
 
   // Template repository mapping
   const templates = {
-    'LMR': { owner: 'DaveEdge1', name: 'LMR2' },
-    'holocene_da': { owner: 'DaveEdge1', name: 'holocene_da_template' }, // TODO: create this
-    'temp12k': { owner: 'DaveEdge1', name: 'temp12k_template' } // TODO: create this
+    'LMR':          { owner: 'DaveEdge1', name: 'LMR2' },
+    'lipdDownload': { owner: 'DaveEdge1', name: 'lipd-downloads' },
+    'holocene_da':  { owner: 'DaveEdge1', name: 'presto-holocene_da' },
+    'temp12k':      { owner: 'DaveEdge1', name: 'temp12k_template' } // TODO: create this
   };
 
   const template = templates[recon];
@@ -141,23 +142,40 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
   await new Promise(resolve => setTimeout(resolve, 5000));
 
   // Update configuration files with user's config
-  await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData, queryParamsJson);
+  await updateRepositoryConfig(octokit, owner, repoName, recon, uniqueID, configData, queryParamsJson, cleaningReportJson, variableFilterYaml);
 
   // Enable GitHub Pages with Actions build type.
   // build_type:'workflow' doesn't require a gh-pages branch to exist, so this
   // works immediately at repo creation time. configure-pages@v5 defaults to
   // enablement:false and won't create Pages on its own.
-  try {
-    await octokit.rest.repos.createPagesSite({
-      owner,
-      repo: repoName,
-      build_type: 'workflow'
-    });
-    console.log(`✓ GitHub Pages (Actions) enabled for ${repoName}`);
-  } catch (err) {
-    // 409 = already configured — acceptable
-    if (err.status !== 409) {
-      console.warn(`GitHub Pages enablement failed (${err.status}): ${err.message}`);
+  // Downloads don't publish Pages — skip for lipdDownload.
+  if (recon !== 'lipdDownload') {
+    try {
+      await octokit.rest.repos.createPagesSite({
+        owner,
+        repo: repoName,
+        build_type: 'workflow'
+      });
+      console.log(`✓ GitHub Pages (Actions) enabled for ${repoName}`);
+    } catch (err) {
+      // 409 = already configured — acceptable
+      if (err.status !== 409) {
+        console.warn(`GitHub Pages enablement failed (${err.status}): ${err.message}`);
+      }
+    }
+
+    // Set the repo "About" homepage URL to the predicted Pages URL so it
+    // shows up immediately, before the first Pages build completes.
+    const pagesUrl = `https://${owner.toLowerCase()}.github.io/${repoName}/`;
+    try {
+      await octokit.rest.repos.update({
+        owner,
+        repo: repoName,
+        homepage: pagesUrl
+      });
+      console.log(`✓ Repo homepage set to ${pagesUrl}`);
+    } catch (err) {
+      console.warn(`Setting repo homepage failed (${err.status}): ${err.message}`);
     }
   }
 
@@ -171,6 +189,94 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
 }
 
 /**
+ * Generate a descriptive README for lipdDownload repositories
+ * @param {string} uniqueID - Unique reconstruction identifier
+ * @param {string} queryParamsJson - JSON string of query parameters
+ * @returns {string} Markdown README content
+ */
+function generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJson) {
+  let qp = {};
+  try { qp = JSON.parse(queryParamsJson); } catch (e) { /* ignore */ }
+
+  let cleaningGroups = [];
+  try { if (cleaningReportJson) cleaningGroups = JSON.parse(cleaningReportJson); } catch (e) { /* ignore */ }
+
+  const lines = [
+    '# LiPD Download',
+    '',
+    `**Reconstruction ID:** ${uniqueID}`,
+    '',
+    'LiPD files selected via [PReSto](https://paleopresto.com/) and packaged by a GitHub Actions workflow.',
+    'When the workflow completes, download `lipd_files.zip` from the **Actions → Artifacts** section.',
+    '',
+    '## Query Filters',
+    '',
+  ];
+
+  const filters = [];
+  if (qp.proxy)        filters.push(`- **Proxy:** ${qp.proxy}`);
+  if (qp.variableName) filters.push(`- **Variable Name:** ${qp.variableName}`);
+  if (qp.archiveTypes) filters.push(`- **Archive Type:** ${qp.archiveTypes}`);
+  if (qp.country)      filters.push(`- **Country:** ${qp.country}`);
+  if (qp.continent)    filters.push(`- **Continent:** ${qp.continent}`);
+  if (qp.compilation)  filters.push(`- **Compilation:** ${qp.compilation}`);
+  if (qp.seasonality)  filters.push(`- **Seasonality:** ${qp.seasonality}`);
+  if (qp.coords && Array.isArray(qp.coords) && qp.coords.length === 4) {
+    filters.push(`- **Coordinates:** lat ${qp.coords[0]}° to ${qp.coords[1]}°, lon ${qp.coords[2]}° to ${qp.coords[3]}°`);
+  }
+  if (qp.ages && Array.isArray(qp.ages) && qp.ages.length === 2) {
+    filters.push(`- **Age range:** ${qp.ages[0]} – ${qp.ages[1]}`);
+  }
+  if (qp.resolution != null) {
+    filters.push(`- **Max median resolution:** ${qp.resolution}`);
+  }
+  if (qp.terrestrial != null) {
+    filters.push(`- **Terrestrial only:** ${qp.terrestrial ? 'yes' : 'no'}`);
+  }
+
+  if (filters.length > 0) {
+    lines.push(...filters);
+  } else {
+    lines.push('_No query filters recorded._');
+  }
+
+  // TSID count
+  if (qp.tsids && Array.isArray(qp.tsids)) {
+    lines.push('', `**Selected records:** ${qp.tsids.length} TSIDs`);
+  }
+
+  lines.push('', 'See [`query_params.json`](query_params.json) for the full query specification and TSID list.');
+
+  // Data Cleaning section
+  if (cleaningGroups.length > 0) {
+    const removedCount = cleaningGroups.reduce((n, g) =>
+      n + g.records.filter(r => r.decision === 'remove').length, 0);
+
+    lines.push(
+      '',
+      '## Data Cleaning',
+      '',
+      `${cleaningGroups.length} duplicate group(s) were reviewed and **${removedCount} record(s) removed**.`,
+      '',
+      'See [`cleaning_report.json`](cleaning_report.json) for per-group decisions, TSIDs, and notes.',
+      '',
+      '> **Important:** Removed records are excluded from the TSID list in `query_params.json`,',
+      '> but LiPD files are downloaded at the dataset level and may still contain time series',
+      '> from removed TSIDs. Use the TSID list in `query_params.json` to filter if needed.'
+    );
+  }
+
+  lines.push(
+    '',
+    '---',
+    `Generated by [PReSto Custom Engine](https://paleopresto.com/)`,
+    ''
+  );
+
+  return lines.join('\n');
+}
+
+/**
  * Update repository configuration files with user's parameters
  * @param {Octokit} octokit - Authenticated Octokit instance
  * @param {string} owner - Repository owner (username)
@@ -179,7 +285,7 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
  * @param {string} uniqueID - Unique reconstruction identifier
  * @param {Object} configData - User configuration data
  */
-async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, configData, queryParamsJson = null) {
+async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, configData, queryParamsJson = null, cleaningReportJson = null, variableFilterYaml = null) {
   console.log('Updating repository configuration...');
 
   const configPath = recon === 'LMR' ? 'lmr_configs.yml' : 'config/user_config.yml';
@@ -187,25 +293,66 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
   // For LMR, generate a user_config.yml with proper CFR key names and types.
   // This is mounted as /app/user_config.yml and merged over the base lmr_configs.yml
   // by cfr_main_code.py — so only override keys need to be present here.
-  let effectiveConfigData;
-  if (recon === 'LMR') {
-    const toIntArray = arr => (Array.isArray(arr) ? arr : []).map(v => parseInt(v, 10)).filter(n => !isNaN(n));
-    effectiveConfigData = {
-      recon_period:            toIntArray(configData.recon_period).length   ? toIntArray(configData.recon_period)            : [0, 2000],
-      recon_seeds:             toIntArray(configData.recon_seeds).length    ? toIntArray(configData.recon_seeds)             : [1, 2, 3],
-      prior_annualize_months:  toIntArray(configData.prior_annualize_months).length ? toIntArray(configData.prior_annualize_months) : [1,2,3,4,5,6,7,8,9,10,11,12],
-      prior_anom_period:       toIntArray(configData.prior_anom_period).length ? toIntArray(configData.prior_anom_period)      : [850, 1850],
-      assim_frac:              parseFloat(configData.proxy_assim_frac) || 0.75,
-      nens:                    parseInt(configData.proxy_nens, 10)     || 10,
-      recon_loc_rad:           parseInt(configData.recon_loc_rad, 10)  || 25000,
-      proxydb_path:            '/app/lipd_cfr.pkl',
-      save_dirpath:            '/recons',
-    };
-  } else {
-    effectiveConfigData = configData;
-  }
+  let configYaml = null;
+  if (recon !== 'lipdDownload') {
+    let effectiveConfigData;
+    if (recon === 'LMR') {
+      const toIntArray = arr => (Array.isArray(arr) ? arr : []).map(v => parseInt(v, 10)).filter(n => !isNaN(n));
+      effectiveConfigData = {
+        recon_period:            toIntArray(configData.recon_period).length   ? toIntArray(configData.recon_period)            : [0, 2000],
+        recon_seeds:             parseInt(configData.recon_seeds, 10) > 0     ? Array.from({length: parseInt(configData.recon_seeds, 10)}, (_, i) => i + 1) : [1, 2, 3],
+        prior_annualize_months:  toIntArray(configData.prior_annualize_months).length ? toIntArray(configData.prior_annualize_months) : [1,2,3,4,5,6,7,8,9,10,11,12],
+        prior_anom_period:       toIntArray(configData.prior_anom_period).length ? toIntArray(configData.prior_anom_period)      : [850, 1850],
+        assim_frac:              parseFloat(configData.proxy_assim_frac) || 0.75,
+        nens:                    parseInt(configData.proxy_nens, 10)     || 10,
+        recon_loc_rad:           parseInt(configData.recon_loc_rad, 10)  || 25000,
+        proxydb_path:            '/app/lipd_cfr.pkl',
+        save_dirpath:            '/recons',
+      };
+    } else if (recon === 'holocene_da') {
+      // Translate standardized form values to flat config_default.yml keys
+      // using the lookup.json mapping (same logic as prestoForm/holocene_da/translate.js)
+      const lookup = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', 'holocene_da', 'lookup.json'), 'utf8'));
+      const defaults = yaml.load(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', 'holocene_da', 'config_default.yml'), 'utf8'));
 
-  const configYaml = yaml.dump(effectiveConfigData);
+      for (const [formKey, mapping] of Object.entries(lookup)) {
+        // configData comes from req.body which has the standardized nested structure
+        if (configData[formKey] !== undefined) {
+          let val = configData[formKey];
+          // Extract .value if it's an object with a value property
+          if (val && typeof val === 'object' && 'value' in val) val = val.value;
+
+          // Coerce form strings to match the type of the default value
+          const defaultVal = defaults[mapping.orig];
+          if (typeof defaultVal === 'number') {
+            val = Number(val);
+          } else if (typeof defaultVal === 'boolean') {
+            val = (val === true || val === 'true');
+          } else if (Array.isArray(defaultVal)) {
+            if (!Array.isArray(val)) val = [val];
+            // Coerce array elements to match the type of the first default element
+            if (defaultVal.length > 0 && typeof defaultVal[0] === 'number') {
+              val = val.map(v => Number(v));
+            } else if (defaultVal.length > 0 && typeof defaultVal[0] === 'boolean') {
+              val = val.map(v => v === true || v === 'true');
+            }
+          }
+          // Handle special 'null'/'None' strings
+          if (val === 'null' || val === 'None') val = null;
+
+          defaults[mapping.orig] = val;
+        }
+      }
+      // Hardcode data_dir so paths resolve to /proxies/... and /models/...
+      defaults.data_dir = '/';
+      effectiveConfigData = defaults;
+    } else {
+      effectiveConfigData = configData;
+    }
+    configYaml = yaml.dump(effectiveConfigData);
+  }
 
   try {
     // ── Single commit via Git Trees API ───────────────────────────────────
@@ -224,20 +371,45 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
       owner, repo, commit_sha: headSha
     });
 
-    // 2. Read README so we can update the Reconstruction ID line
+    // 2. Read README so we can update it
     const { data: readmeFile } = await octokit.rest.repos.getContent({
       owner, repo, path: 'README.md'
     });
     const readmeContent = Buffer.from(readmeFile.content, 'base64').toString('utf8');
-    const updatedReadme = readmeContent.replace(/Reconstruction ID:.*/, `Reconstruction ID: ${uniqueID}`);
+
+    let updatedReadme;
+    if (recon === 'lipdDownload' && queryParamsJson) {
+      updatedReadme = generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJson);
+    } else {
+      updatedReadme = readmeContent.replace(/Reconstruction ID:.*/, `Reconstruction ID: ${uniqueID}`);
+    }
 
     // 3. Build file list — Trees API accepts raw content strings directly
+    // lipdDownload only needs README + query_params.json (no config YAML)
     const treeItems = [
-      { path: configPath,  mode: '100644', type: 'blob', content: configYaml },
       { path: 'README.md', mode: '100644', type: 'blob', content: updatedReadme },
     ];
-    if (recon === 'LMR' && queryParamsJson) {
+    if (recon !== 'lipdDownload') {
+      treeItems.push({ path: configPath, mode: '100644', type: 'blob', content: configYaml });
+    }
+    if ((recon === 'LMR' || recon === 'lipdDownload' || recon === 'holocene_da') && queryParamsJson) {
       treeItems.push({ path: 'query_params.json', mode: '100644', type: 'blob', content: queryParamsJson });
+    }
+    if (cleaningReportJson) {
+      treeItems.push({ path: 'cleaning_report.json', mode: '100644', type: 'blob', content: cleaningReportJson });
+    }
+    // variable_filter.yaml — committed for LMR and holocene_da so the workflow
+    // can inspect which variable names the user included/excluded. Not used
+    // by lipdDownload (no reconstruction step there).
+    if (variableFilterYaml && (recon === 'LMR' || recon === 'holocene_da')) {
+      treeItems.push({ path: 'variable_filter.yaml', mode: '100644', type: 'blob', content: variableFilterYaml });
+    }
+    if (recon === 'LMR') {
+      const scriptsDir = path.join(__dirname, '..', 'templates', 'scripts');
+      for (const script of ['lipd_to_pdb.py', 'combine_seeds.py']) {
+        const content = fs.readFileSync(path.join(scriptsDir, script), 'utf8');
+        treeItems.push({ path: `scripts/${script}`, mode: '100644', type: 'blob', content });
+      }
     }
 
     // 4. Create tree, commit, and advance the ref in one push

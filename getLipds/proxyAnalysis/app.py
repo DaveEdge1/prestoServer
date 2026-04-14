@@ -20,6 +20,7 @@ GET /health
 
 from __future__ import annotations
 
+import asyncio
 import concurrent.futures
 import io
 import json
@@ -30,12 +31,13 @@ import re
 import time
 import zipfile
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 import pandas as pd
 import requests
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from scipy.stats import pearsonr
 from sklearn.decomposition import PCA
@@ -46,6 +48,18 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Proxy Analysis Service")
 
+
+@app.on_event("startup")
+async def _startup_sparql_health():
+    """Warm metadata cache and start hourly SPARQL health probe.
+
+    The lipdverse SPARQL endpoint periodically returns "XHR didn't work: 0",
+    which stalls every /correlate call for ~20 s. This background task probes
+    SPARQL once per hour and keeps _sparql_cooldown_until in sync so
+    interactive requests never wait on a broken upstream.
+    """
+    asyncio.create_task(_sparql_health_loop())
+
 # =============================================================================
 # Configuration
 # =============================================================================
@@ -55,6 +69,44 @@ ORCHESTRATOR_URL = os.environ.get("ORCHESTRATOR_URL", "http://presto-orchestrato
 SPATIAL_THRESHOLD_KM = 10.0
 CORR_THRESHOLD = 0.8
 DTW_NORM_THRESHOLD = 0.03
+
+# variableName values that are metadata / chronology artifacts, not proxy
+# time series — skip them during duplicate detection. Kept in sync with
+# DEFAULT_BLACKLIST_VARIABLE_NAMES in query/public/datacleaningApp.js.
+NON_PROXY_VARIABLE_NAMES = {
+    # axes
+    "age", "year", "depth", "depthtop", "depthbottom", "juliandate", "duration",
+    # uncertainty
+    "uncertainty", "uncertaintyhigh", "uncertaintylow",
+    "uncertainty1s", "uncertainty2s", "uncertaintyhigh95", "uncertaintylow95",
+    # tree-ring chronology statistics
+    "arstan", "rbar", "eps", "correlationcoefficient",
+    "segmentlength", "samplecount", "residualchronology", "correction",
+    # metadata / flags
+    "sampleid", "core", "notes", "hashiatus", "hasgap",
+    "composite", "needstobechanged", "count",
+    # derived / dimensionality reduction
+    "pc1", "cca1",
+    # varve/sediment thickness — blacklisted except when annually resolved
+    "thickness",
+    # misc statistics
+    "numberofsamples", "standarddeviation", "standarderror",
+}
+
+
+def _is_blacklisted(var_name: Optional[str], resolution: Optional[float]) -> bool:
+    """Return True if a record's variableName should be skipped during duplicate
+    detection. Mirrors the client-side rescue rule: `thickness` passes when
+    the record is annually resolved (resolution <= 1).
+    """
+    if not var_name:
+        return False
+    vn = var_name.strip().lower()
+    if vn not in NON_PROXY_VARIABLE_NAMES:
+        return False
+    if vn == "thickness" and resolution is not None and resolution <= 1:
+        return False
+    return True
 CACHE_TTL_SECONDS = 3600  # refresh metadata hourly
 
 # =============================================================================
@@ -109,6 +161,24 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
+def _ages_overlap(
+    min_a: Optional[float],
+    max_a: Optional[float],
+    min_b: Optional[float],
+    max_b: Optional[float],
+) -> bool:
+    """
+    True iff two [minAge, maxAge] ranges overlap, or if either range is
+    unknown (we conservatively keep records with missing age metadata rather
+    than dropping them from duplicate review).
+    """
+    if min_a is None or max_a is None or min_b is None or max_b is None:
+        return True
+    lo_a, hi_a = (min_a, max_a) if min_a <= max_a else (max_a, min_a)
+    lo_b, hi_b = (min_b, max_b) if min_b <= max_b else (max_b, min_b)
+    return hi_a >= lo_b and hi_b >= lo_a
+
+
 def _safe_float(val: Any) -> Optional[float]:
     try:
         v = float(val)
@@ -122,6 +192,131 @@ def _safe_str(val: Any) -> Optional[str]:
         return None
     s = str(val).strip()
     return s if s and s.lower() not in ("nan", "none", "null", "") else None
+
+
+# -----------------------------------------------------------------------------
+# Time-unit normalization
+# -----------------------------------------------------------------------------
+# LiPD / lipdverse time axes use a handful of conventions — "yr BP" (years
+# before 1950), "yr AD" / "CE" (calendar years), "ky BP" (thousands of years
+# BP), "Ma BP" (millions).  We normalize to a single common unit per request
+# so that plots, duplicate detection, and temporal-overlap checks all speak
+# the same language.
+CANONICAL_YR_BP  = "yr BP"
+CANONICAL_YR_AD  = "yr AD"
+CANONICAL_KY_BP  = "ka BP"
+CANONICAL_MA_BP  = "Ma BP"
+# Preference order used as a tie-breaker when two units are equally popular.
+_UNIT_PREFERENCE = [CANONICAL_YR_BP, CANONICAL_YR_AD, CANONICAL_KY_BP, CANONICAL_MA_BP]
+
+
+def _canonical_time_unit(raw: Optional[str]) -> Optional[str]:
+    """
+    Map a raw unit string (from a LiPD column's ``units`` or ``variableName``)
+    to one of our canonical tokens, or None if unrecognised.
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip().lower()
+    if not s or s in ("nan", "none", "null"):
+        return None
+
+    # Strip common suffixes / prefixes ("cal ", "calibrated ", "[...]", etc.)
+    s = re.sub(r"[\[\](){}]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+
+    has_bp = "bp" in s or "before present" in s
+    has_ad = ("ad" in s and "add" not in s) or " ce" == s or s == "ce" or s.startswith("ce ") or s.endswith(" ce") or "year ce" in s or "year ad" in s or s in ("year", "years", "yr", "yrs", "yr ce", "yrs ce", "year ad", "years ad")
+
+    # Mega-annum (millions of years before present)
+    if re.search(r"\b(ma|myr|million\s*year|megayear)\b", s) and has_bp:
+        return CANONICAL_MA_BP
+    if re.search(r"\b(ma|myr)\b", s) and not has_ad:
+        return CANONICAL_MA_BP
+
+    # Kilo-annum (thousands of years before present)
+    if re.search(r"\b(ka|kyr|kyrs|ky|kyear|kiloyear|thousand\s*year)\b", s) and has_bp:
+        return CANONICAL_KY_BP
+    if re.search(r"\b(ka|kyr|kyrs|ky)\b", s) and not has_ad:
+        return CANONICAL_KY_BP
+
+    # Years before present
+    if has_bp:
+        return CANONICAL_YR_BP
+
+    # Calendar years AD / CE
+    if has_ad:
+        return CANONICAL_YR_AD
+
+    # Bare "year" / "years" with no BP marker — treat as calendar year (AD).
+    # This is the convention used by most recent instrumental records.
+    if re.search(r"\byears?\b", s) or re.search(r"\byrs?\b", s):
+        return CANONICAL_YR_AD
+
+    return None
+
+
+def _convert_time_value(v: float, src: str, dst: str) -> float:
+    """
+    Convert a single time value from ``src`` canonical unit to ``dst``.
+    Both units must be canonical tokens from this module. Returns the value
+    unchanged if the units are the same.
+    """
+    if src == dst:
+        return v
+
+    # First convert src → yr BP as the common intermediate.
+    if src == CANONICAL_YR_BP:
+        bp = v
+    elif src == CANONICAL_YR_AD:
+        bp = 1950.0 - v
+    elif src == CANONICAL_KY_BP:
+        bp = v * 1000.0
+    elif src == CANONICAL_MA_BP:
+        bp = v * 1_000_000.0
+    else:
+        return v  # unknown src
+
+    # Then yr BP → dst.
+    if dst == CANONICAL_YR_BP:
+        return bp
+    if dst == CANONICAL_YR_AD:
+        return 1950.0 - bp
+    if dst == CANONICAL_KY_BP:
+        return bp / 1000.0
+    if dst == CANONICAL_MA_BP:
+        return bp / 1_000_000.0
+    return v
+
+
+def _convert_time_array(
+    time_vals: List[float], src: Optional[str], dst: Optional[str]
+) -> List[float]:
+    """Convert a whole time array. If either unit is unknown, returns input."""
+    if not time_vals or not src or not dst or src == dst:
+        return time_vals
+    return [_convert_time_value(float(t), src, dst) for t in time_vals]
+
+
+def _pick_common_unit(units: List[Optional[str]]) -> Optional[str]:
+    """
+    Return the most frequent canonical unit in the list, with ties broken by
+    ``_UNIT_PREFERENCE``. Returns None if every entry is None.
+    """
+    counts: Dict[str, int] = defaultdict(int)
+    for u in units:
+        if u:
+            counts[u] += 1
+    if not counts:
+        return None
+    max_n = max(counts.values())
+    top = [u for u, n in counts.items() if n == max_n]
+    if len(top) == 1:
+        return top[0]
+    for pref in _UNIT_PREFERENCE:
+        if pref in top:
+            return pref
+    return sorted(top)[0]
 
 
 def _parse_compilations(comp_str: Optional[str]) -> Set[str]:
@@ -241,10 +436,10 @@ def row_to_record(row: pd.Series) -> Dict[str, Any]:
     lat = _safe_float(_first_present(row, "geo_latitude", "geo_meanLat"))
     lon = _safe_float(_first_present(row, "geo_longitude", "geo_meanLon"))
     min_age = _safe_float(
-        _first_present(row, "age_min", "ageMin", "age_min_ky", "minYear", "age_min_BP")
+        _first_present(row, "minAge", "age_min", "ageMin", "age_min_ky", "minYear", "age_min_BP")
     )
     max_age = _safe_float(
-        _first_present(row, "age_max", "ageMax", "age_max_ky", "maxYear", "age_max_BP")
+        _first_present(row, "maxAge", "age_max", "ageMax", "age_max_ky", "maxYear", "age_max_BP")
     )
     resolution = _safe_float(
         _first_present(row, "resolution", "medianResolution", "median_resolution")
@@ -257,6 +452,7 @@ def row_to_record(row: pd.Series) -> Dict[str, Any]:
         ),
         "archiveType": _safe_str(row.get("archiveType")),
         "variableName": _safe_str(row.get("paleoData_variableName")),
+        "proxy": _safe_str(row.get("paleoData_proxy")),
         "compilation": _safe_str(row.get("paleoData_mostRecentCompilations")),
         "lat": lat,
         "lon": lon,
@@ -396,12 +592,17 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
         var_i = ri.get("variableName")
         if lat_i is None or lon_i is None or not var_i:
             continue
+        if _is_blacklisted(var_i, ri.get("resolution")):
+            continue
         comp_i = _parse_compilations(ri.get("compilation"))
+        min_i, max_i = ri.get("minAge"), ri.get("maxAge")
         for j in range(i + 1, len(records)):
             rj = records[j]
             lat_j, lon_j = rj.get("lat"), rj.get("lon")
             var_j = rj.get("variableName")
             if lat_j is None or lon_j is None or not var_j:
+                continue
+            if _is_blacklisted(var_j, rj.get("resolution")):
                 continue
             if var_i.lower() != var_j.lower():
                 continue
@@ -409,6 +610,11 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
             # not duplicates — skip them regardless of proximity.
             comp_j = _parse_compilations(rj.get("compilation"))
             if comp_i and comp_j and comp_i & comp_j:
+                continue
+            # Temporal overlap — if both records have a defined age range and
+            # those ranges don't overlap, they cannot be duplicates.
+            min_j, max_j = rj.get("minAge"), rj.get("maxAge")
+            if not _ages_overlap(min_i, max_i, min_j, max_j):
                 continue
             dist = haversine_km(lat_i, lon_i, lat_j, lon_j)
             if dist < SPATIAL_THRESHOLD_KM:
@@ -493,6 +699,172 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
 
 
 # =============================================================================
+# Streaming analysis endpoint (SSE)
+# =============================================================================
+def _sse_event(data: dict) -> str:
+    return f"data: {json.dumps(data)}\n\n"
+
+
+@app.post("/analyze-stream")
+async def analyze_stream(req: AnalyzeRequest, background_tasks: BackgroundTasks):
+    tsids = req.tsids
+    if not tsids:
+        raise HTTPException(status_code=400, detail="No TSIDs provided")
+
+    async def generate():
+        logger.info("Stream: analyzing %d TSIDs", len(tsids))
+
+        # Phase 1: metadata
+        yield _sse_event({"phase": "metadata", "status": "loading"})
+        try:
+            df = load_metadata()
+        except Exception as exc:
+            yield _sse_event({"phase": "metadata", "status": "error", "message": str(exc)})
+            return
+
+        # Find TSid column
+        tsid_col = None
+        for candidate in ("paleoData_TSid", "TSid", "tsid", "TSID"):
+            if candidate in df.columns:
+                tsid_col = candidate
+                break
+        if tsid_col is None:
+            yield _sse_event({"phase": "metadata", "status": "error", "message": "TSid column not found"})
+            return
+
+        filtered = df[df[tsid_col].isin(set(tsids))].copy()
+        yield _sse_event({"phase": "metadata", "status": "done", "recordCount": len(filtered)})
+
+        # Phase 2: build records
+        seen: set = set()
+        records: list = []
+        for _, row in filtered.iterrows():
+            rec = row_to_record(row)
+            if rec["tsid"] and rec["tsid"] not in seen:
+                seen.add(rec["tsid"])
+                records.append(rec)
+
+        yield _sse_event({"phase": "records", "status": "done", "records": records})
+
+        # Phase 3: PCA
+        pca_coords = compute_pca(records)
+        yield _sse_event({"phase": "pca", "status": "done", "pcaCoords": pca_coords})
+
+        # Phase 4: spatial duplicate detection with progress.
+        # We iterate by record index i (0..n) and report progress after each
+        # outer-loop step rather than per pair — checking n records is the
+        # natural unit and gives ~one update per ~10ms even for large n.
+        n = len(records)
+        total_records = n
+        yield _sse_event({"phase": "duplicates", "status": "progress", "checked": 0, "total": total_records})
+        await asyncio.sleep(0)
+
+        candidate_pairs: list = []
+        last_yield_time = time.time()
+
+        for i in range(n):
+            ri = records[i]
+            lat_i, lon_i = ri.get("lat"), ri.get("lon")
+            var_i = ri.get("variableName")
+            if (
+                lat_i is not None and lon_i is not None and var_i
+                and not _is_blacklisted(var_i, ri.get("resolution"))
+            ):
+                comp_i = _parse_compilations(ri.get("compilation"))
+                var_i_lower = var_i.lower()
+                min_i, max_i = ri.get("minAge"), ri.get("maxAge")
+                for j in range(i + 1, n):
+                    rj = records[j]
+                    lat_j, lon_j = rj.get("lat"), rj.get("lon")
+                    var_j = rj.get("variableName")
+                    if lat_j is None or lon_j is None or not var_j:
+                        continue
+                    if _is_blacklisted(var_j, rj.get("resolution")):
+                        continue
+                    if var_i_lower != var_j.lower():
+                        continue
+                    comp_j = _parse_compilations(rj.get("compilation"))
+                    if comp_i and comp_j and comp_i & comp_j:
+                        continue
+                    min_j, max_j = rj.get("minAge"), rj.get("maxAge")
+                    if not _ages_overlap(min_i, max_i, min_j, max_j):
+                        continue
+                    dist = haversine_km(lat_i, lon_i, lat_j, lon_j)
+                    if dist < SPATIAL_THRESHOLD_KM:
+                        candidate_pairs.append((i, j, dist))
+
+            # Throttle by wall-clock time: emit a progress event at most once
+            # every 0.5s, regardless of dataset size.
+            now = time.time()
+            if now - last_yield_time >= 0.5:
+                yield _sse_event({"phase": "duplicates", "status": "progress", "checked": i + 1, "total": total_records})
+                last_yield_time = now
+                await asyncio.sleep(0)  # release event loop so the chunk flushes
+
+        # Group with union-find
+        confirmed_pairs = [(i, j, d, None, None) for i, j, d in candidate_pairs]
+        find, union = make_union_find(len(records))
+        pair_info: dict = {}
+
+        for i, j, dist_km, pearson_r, dtw_norm in confirmed_pairs:
+            union(i, j)
+            key = (min(i, j), max(i, j))
+            pair_info[key] = {
+                "distKm": round(dist_km, 2),
+                "pearson": round(pearson_r, 4) if pearson_r is not None else None,
+                "dtw": round(dtw_norm, 6) if dtw_norm is not None else None,
+            }
+
+        groups_dict: dict = defaultdict(list)
+        for i, j, *_ in confirmed_pairs:
+            root = find(i)
+            if i not in groups_dict[root]:
+                groups_dict[root].append(i)
+            if j not in groups_dict[root]:
+                groups_dict[root].append(j)
+
+        duplicate_groups: list = []
+        for group_id, (root, members) in enumerate(groups_dict.items()):
+            if len(members) < 2:
+                continue
+            correlations: list = []
+            dtw_distances: list = []
+            for k1 in range(len(members)):
+                for k2 in range(k1 + 1, len(members)):
+                    mi, mj = members[k1], members[k2]
+                    key = (min(mi, mj), max(mi, mj))
+                    info = pair_info.get(key, {})
+                    correlations.append({
+                        "tsid1": records[mi]["tsid"],
+                        "tsid2": records[mj]["tsid"],
+                        "pearson": info.get("pearson"),
+                        "distKm": info.get("distKm"),
+                    })
+                    dtw_distances.append({
+                        "tsid1": records[mi]["tsid"],
+                        "tsid2": records[mj]["tsid"],
+                        "dtw": info.get("dtw"),
+                    })
+            duplicate_groups.append({
+                "groupId": group_id,
+                "records": [records[m]["tsid"] for m in members],
+                "correlations": correlations,
+                "dtwDistances": dtw_distances,
+            })
+
+        yield _sse_event({"phase": "duplicates", "status": "done", "duplicateGroups": duplicate_groups})
+
+        # Start background preload
+        groups_tsids = [g["records"] for g in duplicate_groups]
+        if groups_tsids:
+            background_tasks.add_task(_preload_lipd_cache, groups_tsids)
+
+        yield _sse_event({"phase": "complete"})
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+# =============================================================================
 # On-demand correlation endpoint (called per duplicate group on click)
 # =============================================================================
 class CorrelateRequest(BaseModel):
@@ -507,6 +879,10 @@ class CorrelateRequest(BaseModel):
 # Avoids re-downloading the same dataset multiple times within one container run.
 # Only successful downloads are stored; failures are never cached.
 _lipd_series_cache: Dict[tuple, Dict[str, List]] = {}
+# Per-tsid column metadata captured while parsing LiPD files.  Stores units
+# and variableName so callers can figure out the native unit of a time axis
+# (e.g. "yr BP" vs "AD") without re-reading the LiPD.
+_lipd_column_meta_cache: Dict[str, Dict[str, Optional[str]]] = {}
 
 
 def _resolve_lipd_url(dsid: str, dsver: str) -> Optional[str]:
@@ -580,6 +956,14 @@ def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
                     n = col.get("number")
                     if t and n is not None and fname:
                         tsid_to_col[t] = (fname, int(n))
+                        # Cache per-column metadata (units / variableName).
+                        # Used later to determine the native unit of a time
+                        # axis so we can normalize all series to a common
+                        # reference frame.
+                        _lipd_column_meta_cache[t] = {
+                            "units":        _safe_str(col.get("units")),
+                            "variableName": _safe_str(col.get("variableName")),
+                        }
 
         # Extract every column and cache the full dataset.
         # Store None for missing/non-finite values to preserve row alignment
@@ -638,6 +1022,44 @@ def _preload_lipd_cache(groups: List[List[str]]) -> None:
     logger.info("Background preload done (%d datasets cached)", len(_lipd_series_cache))
 
 
+def _get_time_units(time_tsids: List[str]) -> Dict[str, Optional[str]]:
+    """
+    Return {time_tsid: canonical_unit} for each time-axis TSid.
+
+    Reads from ``_lipd_column_meta_cache``; if a TSid is not present, the
+    parent dataset's LiPD file is downloaded (via ``_fetch_ts_from_lipd``)
+    to populate the cache, then the lookup retries.
+    """
+    out: Dict[str, Optional[str]] = {}
+    missing: List[str] = []
+    for t in time_tsids:
+        meta = _lipd_column_meta_cache.get(t)
+        if meta is None:
+            missing.append(t)
+        else:
+            canon = _canonical_time_unit(meta.get("units"))
+            if canon is None:
+                # Fall back to variableName hints ("year", "age", …)
+                canon = _canonical_time_unit(meta.get("variableName"))
+            out[t] = canon
+
+    if missing:
+        try:
+            _fetch_ts_from_lipd(missing)
+        except Exception as exc:
+            logger.warning("Units: warm-cache fetch failed: %s", exc)
+        for t in missing:
+            meta = _lipd_column_meta_cache.get(t)
+            if meta is None:
+                out[t] = None
+                continue
+            canon = _canonical_time_unit(meta.get("units"))
+            if canon is None:
+                canon = _canonical_time_unit(meta.get("variableName"))
+            out[t] = canon
+    return out
+
+
 def _fetch_ts_from_lipd(tsids: List[str]) -> Dict[str, List[float]]:
     """
     Download LiPD ZIP files in parallel and extract time series values by TSid.
@@ -685,8 +1107,68 @@ def _fetch_ts_from_lipd(tsids: List[str]) -> Dict[str, List[float]]:
 # =============================================================================
 # SPARQL via internal orchestrator
 # =============================================================================
+# Circuit breaker: when the upstream SPARQL endpoint is broken (e.g. lipdverse
+# returns "XHR didn't work: 0"), every request wastes ~20s. After a failure,
+# suppress SPARQL attempts for a cooldown window so the LiPD file fallback runs
+# immediately. The hourly health loop keeps this flag in sync with reality so
+# users don't have to pay the timeout themselves.
+_sparql_cooldown_until: float = 0.0
+SPARQL_COOLDOWN_SECONDS = 3900  # slightly longer than the 1-hour probe interval
+SPARQL_PROBE_INTERVAL = 3600    # 1 hour
+
+
+async def _sparql_health_loop() -> None:
+    """Background task: probe SPARQL once per hour and update the cooldown."""
+    global _sparql_cooldown_until
+    # Wait briefly so the app can finish starting before the first probe.
+    await asyncio.sleep(5)
+    while True:
+        try:
+            # Need a real TSID to probe with; pull one from metadata.
+            probe_tsid: Optional[str] = None
+            try:
+                df = await asyncio.to_thread(load_metadata)
+                tsid_col = next(
+                    (c for c in ("paleoData_TSid", "TSid", "tsid", "TSID") if c in df.columns),
+                    None,
+                )
+                if tsid_col and not df.empty:
+                    series = df[tsid_col].dropna()
+                    if not series.empty:
+                        probe_tsid = str(series.iloc[0])
+            except Exception as exc:
+                logger.warning("SPARQL health probe: metadata load failed: %s", exc)
+
+            if probe_tsid:
+                # Bypass the cooldown for the probe itself.
+                _sparql_cooldown_until = 0.0
+                result, err = await asyncio.to_thread(
+                    _fetch_ts_via_orchestrator, [probe_tsid]
+                )
+                if err or not result:
+                    # _fetch_ts_via_orchestrator already set the cooldown on real failures;
+                    # make sure it's set here too (covers empty-but-no-error edge case).
+                    _sparql_cooldown_until = time.time() + SPARQL_COOLDOWN_SECONDS
+                    logger.info("SPARQL health probe: unhealthy (%s)", err or "empty result")
+                else:
+                    _sparql_cooldown_until = 0.0
+                    logger.info(
+                        "SPARQL health probe: OK (%d values for %s)",
+                        len(result), probe_tsid,
+                    )
+        except Exception as exc:
+            logger.warning("SPARQL health loop iteration error: %s", exc)
+
+        await asyncio.sleep(SPARQL_PROBE_INTERVAL)
+
+
 def _fetch_ts_via_orchestrator(tsids: List[str]) -> tuple[Dict[str, List[float]], Optional[str]]:
     """Call the Node.js /sparql endpoint and return (values_dict, error_string)."""
+    global _sparql_cooldown_until
+    now = time.time()
+    if now < _sparql_cooldown_until:
+        remaining = int(_sparql_cooldown_until - now)
+        return {}, f"SPARQL in cooldown ({remaining}s remaining after prior failure)"
     try:
         resp = requests.post(
             f"{ORCHESTRATOR_URL}/sparql",
@@ -700,12 +1182,22 @@ def _fetch_ts_via_orchestrator(tsids: List[str]) -> tuple[Dict[str, List[float]]
                 parsed = json.loads(raw)
                 return {k: v for k, v in parsed.items() if isinstance(v, list)}, None
             else:
-                return {}, raw  # e.g. "XHR didn't work: 500"
+                # e.g. "XHR didn't work: 0" — upstream is broken, start cooldown
+                _sparql_cooldown_until = time.time() + SPARQL_COOLDOWN_SECONDS
+                logger.warning(
+                    "SPARQL upstream failed (%s); suppressing for %ds",
+                    raw, SPARQL_COOLDOWN_SECONDS,
+                )
+                return {}, raw
         elif isinstance(raw, dict):
             return {k: v for k, v in raw.items() if isinstance(v, list)}, None
         return {}, f"Unexpected response type: {type(raw)}"
     except Exception as exc:
-        logger.warning("SPARQL via orchestrator failed: %s", exc)
+        _sparql_cooldown_until = time.time() + SPARQL_COOLDOWN_SECONDS
+        logger.warning(
+            "SPARQL via orchestrator failed: %s; suppressing for %ds",
+            exc, SPARQL_COOLDOWN_SECONDS,
+        )
         return {}, str(exc)
 
 
@@ -716,12 +1208,14 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail="Need at least 2 TSIDs")
 
     logger.info("Correlating %d TSIDs: %s", len(tsids), tsids)
+    _t0 = time.time()
 
     # Load metadata for lat/lon, variableName, and time TSids
     try:
         df = load_metadata()
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Failed to load metadata: {exc}")
+    _t_meta = time.time()
 
     tsid_col = next(
         (c for c in ("paleoData_TSid", "TSid", "tsid", "TSID") if c in df.columns), None
@@ -746,22 +1240,43 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
         t for t in time_tsid_map.values() if t not in tsids
     ]
 
+    _t_sparql_start = time.time()
     ts_values, sparql_error = _fetch_ts_via_orchestrator(all_query_tsids)
+    _t_sparql = time.time()
     logger.info(
-        "SPARQL: got values for %d / %d TSIDs%s",
+        "SPARQL: got values for %d / %d TSIDs in %.2fs%s",
         len(ts_values),
         len(all_query_tsids),
+        _t_sparql - _t_sparql_start,
         f" (error: {sparql_error})" if sparql_error else "",
     )
 
-    # Fallback: download LiPD files directly when SPARQL is unavailable
-    if sparql_error and not ts_values:
-        logger.info("SPARQL unavailable — falling back to LiPD file download")
+    # Fallback: download LiPD files when SPARQL failed OR returned incomplete data.
+    # A partial SPARQL result (some TSIDs missing) is the common case for newer
+    # records not yet indexed in GraphDB — don't wait until ts_values is empty.
+    missing_proxy = [t for t in tsids if t not in ts_values]
+    if sparql_error or missing_proxy:
+        if sparql_error:
+            logger.info("SPARQL unavailable — falling back to LiPD file download")
+        else:
+            logger.info(
+                "SPARQL missing %d/%d proxy TSIDs — supplementing with LiPD fallback",
+                len(missing_proxy), len(tsids),
+            )
         try:
-            ts_values = _fetch_ts_from_lipd(all_query_tsids)
-            if ts_values:
-                logger.info("LiPD fallback succeeded: %d TSIDs", len(ts_values))
-                sparql_error = None  # suppress warning — fallback worked
+            lipd_values = _fetch_ts_from_lipd(all_query_tsids)
+            if lipd_values:
+                # Merge: fill gaps without overwriting good SPARQL data
+                for k, v in lipd_values.items():
+                    if k not in ts_values:
+                        ts_values[k] = v
+                still_missing = [t for t in tsids if t not in ts_values]
+                logger.info(
+                    "After LiPD fallback: %d TSIDs resolved, %d still missing",
+                    len(ts_values), len(still_missing),
+                )
+                if not still_missing:
+                    sparql_error = None  # all gaps filled — suppress warning
         except Exception as exc:
             logger.warning("LiPD fallback also failed: %s", exc)
 
@@ -808,6 +1323,44 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
             "compilation": compilation,
         }
 
+    # -------------------------------------------------------------------------
+    # Normalize time axes to a common unit across the entire group.
+    # Each proxy TSid's time axis lives under its `paleoData_hasTimeTsid`.
+    # We look up the raw unit for each time TSid, pick the mode across the
+    # group, then convert every series' time array into that unit so plots
+    # and comparisons share a coordinate system.
+    # -------------------------------------------------------------------------
+    time_tsids_unique = list({tt for tt in time_tsid_map.values() if tt})
+    time_unit_by_ttsid = _get_time_units(time_tsids_unique) if time_tsids_unique else {}
+    # Per-series native unit (keyed by proxy tsid, via its time tsid)
+    native_unit_by_tsid: Dict[str, Optional[str]] = {
+        tsid: time_unit_by_ttsid.get(time_tsid_map.get(tsid, ""))
+        for tsid in tsids
+    }
+    common_unit = _pick_common_unit(list(native_unit_by_tsid.values()))
+    if common_unit:
+        for tsid in tsids:
+            s = series[tsid]
+            if not s["time"]:
+                continue
+            src = native_unit_by_tsid.get(tsid)
+            if not src:
+                # Unknown native unit — skip conversion rather than guess.
+                s["timeUnit"] = None
+                continue
+            s["time"] = _convert_time_array(s["time"], src, common_unit)
+            s["timeUnit"] = common_unit
+            # Re-sort monotonically after conversion (AD↔BP flips direction)
+            if len(s["time"]) > 1:
+                pairs_tv = list(zip(s["time"], s["values"]))
+                if any(pairs_tv[i][0] > pairs_tv[i + 1][0] for i in range(len(pairs_tv) - 1)):
+                    pairs_tv.sort(key=lambda p: p[0])
+                    s["time"]   = [p[0] for p in pairs_tv]
+                    s["values"] = [p[1] for p in pairs_tv]
+    else:
+        for tsid in tsids:
+            series[tsid]["timeUnit"] = None
+
     # Compute pairwise Pearson + DTW + distance
     pairs = []
     for i in range(len(tsids)):
@@ -826,7 +1379,11 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
                 if all(v is not None for v in (lat_i, lon_i, lat_j, lon_j)):
                     dist_km = round(haversine_km(lat_i, lon_i, lat_j, lon_j), 2)
 
-            pearson_r = compute_pearson(vals_i, vals_j) if vals_i and vals_j else None
+            # Use the time-aware correlation so the UI shows the same Pearson
+            # value the automated-review detector sees. compute_pearson() does
+            # naive positional prefix comparison and misaligns series with
+            # different sampling grids.
+            pearson_r = _pair_correlation(series[ti], series[tj]) if vals_i and vals_j else None
             dtw_norm = compute_dtw_norm(vals_i, vals_j) if vals_i and vals_j else None
 
             pairs.append({
@@ -837,10 +1394,486 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
                 "distKm": dist_km,
             })
 
-    result: Dict[str, Any] = {"pairs": pairs, "series": series}
+    _t_end = time.time()
+    logger.info(
+        "/correlate timing: total=%.2fs meta=%.2fs sparql=%.2fs rest=%.2fs (tsids=%d, pairs=%d)",
+        _t_end - _t0,
+        _t_meta - _t0,
+        _t_sparql - _t_sparql_start,
+        _t_end - _t_sparql,
+        len(tsids),
+        len(pairs),
+    )
+
+    result: Dict[str, Any] = {
+        "pairs": pairs,
+        "series": series,
+        "commonTimeUnit": common_unit,
+    }
     if sparql_error:
         result["warning"] = "Time series could not be retrieved — SPARQL service unavailable and LiPD file download returned no data."
     return result
+
+
+# =============================================================================
+# Exact-duplicate detection endpoint
+# =============================================================================
+class ExactDuplicatesRequest(BaseModel):
+    groups: List[List[str]]
+    include_near: bool = False
+    near_threshold: float = 0.99
+
+
+def _clean_series_for_tsids(tsids: List[str]) -> Dict[str, Dict[str, List[float]]]:
+    """
+    Resolve cleaned (None-stripped, time-axis-sorted) value and time arrays for
+    each TSID.  Returns {tsid: {"values": [...], "time": [...]}}; "time" may be
+    an empty list if the record has no usable time axis.
+
+    Mirrors the extraction logic used by /correlate: fetch via orchestrator SPARQL
+    with a LiPD file fallback, pair proxy values to their time axis when possible,
+    strip rows where either value is None, and sort by time.
+    """
+    if not tsids:
+        return {}
+
+    try:
+        df = load_metadata()
+    except Exception:
+        df = None
+
+    meta: Dict[str, pd.Series] = {}
+    if df is not None:
+        tsid_col = next(
+            (c for c in ("paleoData_TSid", "TSid", "tsid", "TSID") if c in df.columns),
+            None,
+        )
+        if tsid_col is not None:
+            filtered = df[df[tsid_col].isin(set(tsids))]
+            meta = {str(row[tsid_col]): row for _, row in filtered.iterrows()}
+
+    # Map each proxy TSid → its corresponding time-axis TSid (if known)
+    time_tsid_map: Dict[str, str] = {}
+    for tsid in tsids:
+        row = meta.get(tsid)
+        if row is not None:
+            t_tsid = _safe_str(_first_present(row, "paleoData_hasTimeTsid"))
+            if t_tsid:
+                time_tsid_map[tsid] = t_tsid
+
+    all_query_tsids = list(tsids) + [
+        t for t in time_tsid_map.values() if t not in tsids
+    ]
+
+    ts_values, sparql_error = _fetch_ts_via_orchestrator(all_query_tsids)
+    missing_proxy = [t for t in tsids if t not in ts_values]
+    if sparql_error or missing_proxy:
+        try:
+            lipd_values = _fetch_ts_from_lipd(all_query_tsids)
+            for k, v in lipd_values.items():
+                if k not in ts_values:
+                    ts_values[k] = v
+        except Exception as exc:
+            logger.warning("LiPD fallback failed in exact-duplicates: %s", exc)
+
+    clean: Dict[str, Dict[str, List[float]]] = {}
+    for tsid in tsids:
+        proxy_vals = ts_values.get(tsid, [])
+        t_tsid = time_tsid_map.get(tsid)
+        time_vals_raw = ts_values.get(t_tsid, []) if t_tsid else []
+        if time_vals_raw and proxy_vals and len(time_vals_raw) == len(proxy_vals):
+            rows = [(t, v) for t, v in zip(time_vals_raw, proxy_vals)
+                    if t is not None and v is not None]
+            if len(rows) > 1 and any(rows[i][0] > rows[i + 1][0] for i in range(len(rows) - 1)):
+                rows.sort(key=lambda p: p[0])
+            clean[tsid] = {
+                "values": [p[1] for p in rows],
+                "time":   [p[0] for p in rows],
+            }
+        else:
+            clean[tsid] = {
+                "values": [v for v in proxy_vals if v is not None],
+                "time":   [],
+            }
+
+    # Normalize all time arrays to a common unit (mode across this batch) so
+    # exact-duplicate detection and temporal-overlap checks are comparable.
+    time_tsids_unique = list({tt for tt in time_tsid_map.values() if tt})
+    if time_tsids_unique:
+        unit_by_ttsid = _get_time_units(time_tsids_unique)
+        native_unit_by_tsid = {
+            tsid: unit_by_ttsid.get(time_tsid_map.get(tsid, ""))
+            for tsid in tsids
+        }
+        common_unit = _pick_common_unit(list(native_unit_by_tsid.values()))
+        if common_unit:
+            for tsid in tsids:
+                entry = clean[tsid]
+                if not entry["time"]:
+                    continue
+                src = native_unit_by_tsid.get(tsid)
+                if not src or src == common_unit:
+                    continue
+                entry["time"] = _convert_time_array(entry["time"], src, common_unit)
+                if len(entry["time"]) > 1:
+                    rows = list(zip(entry["time"], entry["values"]))
+                    if any(rows[i][0] > rows[i + 1][0] for i in range(len(rows) - 1)):
+                        rows.sort(key=lambda p: p[0])
+                        entry["time"]   = [r[0] for r in rows]
+                        entry["values"] = [r[1] for r in rows]
+    return clean
+
+
+def _pair_correlation(
+    series_i: Dict[str, List[float]],
+    series_j: Dict[str, List[float]],
+) -> Optional[float]:
+    """
+    Return the Pearson r between two cleaned series, or None if incomputable.
+
+    Prefers time-axis intersection (matches value pairs at equal time points,
+    requires ≥ 2 matched pairs and ≥ 90 % of the shorter series to line up).
+    Falls back to prefix comparison on the min-length when a time axis is
+    missing on either side.
+    """
+    vals_i = series_i.get("values") or []
+    vals_j = series_j.get("values") or []
+    time_i = series_i.get("time")   or []
+    time_j = series_j.get("time")   or []
+
+    if not vals_i or not vals_j:
+        return None
+
+    # --- Fast path: identical time axes (same length + same values) ----------
+    # This is the common case for exact-duplicate records, so avoid the dict
+    # construction below and just correlate the raw values in place.
+    if (
+        time_i and time_j
+        and len(time_i) == len(time_j) == len(vals_i) == len(vals_j)
+        and time_i == time_j
+    ):
+        try:
+            r, _ = pearsonr(vals_i, vals_j)
+        except Exception:
+            return None
+        if math.isnan(r):
+            return None
+        return float(r)
+
+    # --- Time-axis intersection path -----------------------------------------
+    # Try matching by equal time values first. If ≥ 90 % of the shorter series
+    # lines up, trust that result.
+    if time_i and time_j and len(time_i) == len(vals_i) and len(time_j) == len(vals_j):
+        idx_j = {t: v for t, v in zip(time_j, vals_j)}
+        matched_i: List[float] = []
+        matched_j: List[float] = []
+        for t, v in zip(time_i, vals_i):
+            if t in idx_j:
+                matched_i.append(v)
+                matched_j.append(idx_j[t])
+        shorter = min(len(vals_i), len(vals_j))
+        if len(matched_i) >= max(2, int(0.9 * shorter)):
+            try:
+                r, _ = pearsonr(matched_i, matched_j)
+            except Exception:
+                return None
+            if math.isnan(r):
+                return None
+            return float(r)
+
+        # --- Overlap + linear interpolation path -------------------------
+        # Different sampling grids: resample one onto the other's time
+        # points within the overlapping time range, then correlate. This
+        # catches e.g. annual vs depth-sampled copies of the same record
+        # that would otherwise be misaligned by the prefix fallback.
+        lo = max(min(time_i), min(time_j))
+        hi = min(max(time_i), max(time_j))
+        if hi > lo:
+            try:
+                ti = np.asarray(time_i, dtype=float)
+                vi = np.asarray(vals_i, dtype=float)
+                tj = np.asarray(time_j, dtype=float)
+                vj = np.asarray(vals_j, dtype=float)
+                # Pick the denser of the two series in the overlap as the
+                # reference grid so we preserve as much signal as possible.
+                mask_i = (ti >= lo) & (ti <= hi)
+                mask_j = (tj >= lo) & (tj <= hi)
+                ni, nj = int(mask_i.sum()), int(mask_j.sum())
+                if ni >= 2 and nj >= 2:
+                    if ni >= nj:
+                        ref_t = ti[mask_i]
+                        ref_v = vi[mask_i]
+                        other_v = np.interp(ref_t, tj, vj)
+                    else:
+                        ref_t = tj[mask_j]
+                        ref_v = vj[mask_j]
+                        other_v = np.interp(ref_t, ti, vi)
+                    if ref_v.size >= 2:
+                        r, _ = pearsonr(ref_v, other_v)
+                        if not math.isnan(r):
+                            return float(r)
+            except Exception:
+                pass
+        # else: fall through to prefix fallback
+
+    # --- Fallback: prefix comparison on equal-length min prefix --------------
+    min_len = min(len(vals_i), len(vals_j))
+    if min_len < 2:
+        return None
+    try:
+        r, _ = pearsonr(vals_i[:min_len], vals_j[:min_len])
+    except Exception:
+        return None
+    if math.isnan(r):
+        return None
+    return float(r)
+
+
+def _classify_pair(
+    series_i: Dict[str, List[float]],
+    series_j: Dict[str, List[float]],
+    include_near: bool,
+    near_threshold: float,
+) -> Optional[Tuple[str, float]]:
+    """
+    Classify the relationship between two cleaned series.
+
+    Returns:
+      * ("exact", r) when Pearson r > 0.999. Loose enough to catch records
+        republished across compilations with minor re-processing (trimming,
+        interpolation, unit conversion).
+      * ("near",  r) when r ≥ near_threshold (any length combination),
+        if include_near.
+      * None otherwise.
+
+    No temporal-range short-circuit here: if time-unit normalization fails
+    for one of the series (e.g. the LiPD column lacks a recognised ``units``
+    field) the ranges can look disjoint even when the records are identical.
+    Since duplicate groups are already filtered spatially to a handful of
+    members, running the correlation directly is cheap and avoids that
+    false-negative.
+    """
+    r = _pair_correlation(series_i, series_j)
+    if r is None:
+        return None
+    if r > 0.999:
+        return ("exact", r)
+    if include_near and r >= near_threshold:
+        return ("near", r)
+    return None
+
+
+def _build_group_clusters(
+    members: List[str],
+    clean: Dict[str, Dict[str, List[float]]],
+    include_near: bool,
+    near_threshold: float,
+) -> List[Dict[str, Any]]:
+    """
+    Run union-find over all exact / near-duplicate pairs within a single group
+    and return the resulting clusters. A cluster is tagged "near" if any pair
+    inside it is only a near-match; otherwise "exact".
+    """
+    n = len(members)
+    if n < 2:
+        return []
+
+    find, union = make_union_find(n)
+    pairs: List[Dict[str, Any]] = []
+
+    for i in range(n):
+        series_i = clean[members[i]]
+        for j in range(i + 1, n):
+            series_j = clean[members[j]]
+            classified = _classify_pair(series_i, series_j, include_near, near_threshold)
+            if classified is None:
+                continue
+            kind, r = classified
+            union(i, j)
+            pairs.append({
+                "tsid1": members[i],
+                "tsid2": members[j],
+                "pearson": r,
+                "kind": kind,
+            })
+
+    if not pairs:
+        return []
+
+    roots: Dict[int, List[int]] = defaultdict(list)
+    for idx in range(n):
+        roots[find(idx)].append(idx)
+
+    clusters: List[Dict[str, Any]] = []
+    for root_members in roots.values():
+        if len(root_members) < 2:
+            continue
+        cluster_tsids = [members[m] for m in root_members]
+        cluster_set = set(cluster_tsids)
+        cluster_pairs = [
+            p for p in pairs
+            if p["tsid1"] in cluster_set and p["tsid2"] in cluster_set
+        ]
+        cluster_kind = "near" if any(p["kind"] == "near" for p in cluster_pairs) else "exact"
+        lengths = {t: len(clean[t]["values"]) for t in cluster_tsids}
+        min_r = min(p["pearson"] for p in cluster_pairs)
+        clusters.append({
+            "tsids":   cluster_tsids,
+            "lengths": lengths,
+            "length":  max(lengths.values()),   # legacy single-length field
+            "pairs":   cluster_pairs,
+            "kind":    cluster_kind,
+            "minPearson": min_r,
+        })
+    return clusters
+
+
+@app.post("/exact-duplicates")
+async def exact_duplicates(req: ExactDuplicatesRequest) -> Dict[str, Any]:
+    """
+    Given the spatial duplicate groups already surfaced by /analyze, return
+    clusters of exact (Pearson r = 1.0) and optionally near-duplicate
+    (different length, Pearson r ≥ near_threshold) records.
+
+    Clusters are computed per-group via union-find.
+    """
+    groups = req.groups or []
+    if not groups:
+        return {"clusters": [], "skipped": []}
+
+    all_tsids: List[str] = []
+    seen: Set[str] = set()
+    for grp in groups:
+        for t in grp:
+            if t and t not in seen:
+                seen.add(t)
+                all_tsids.append(t)
+
+    logger.info(
+        "exact-duplicates: scanning %d tsids across %d groups (near=%s, thr=%.3f)",
+        len(all_tsids), len(groups), req.include_near, req.near_threshold,
+    )
+
+    clean = _clean_series_for_tsids(all_tsids)
+
+    skipped: List[Dict[str, str]] = []
+    for t in all_tsids:
+        if not clean.get(t, {}).get("values"):
+            skipped.append({"tsid": t, "reason": "no_series"})
+
+    clusters_out: List[Dict[str, Any]] = []
+    for grp in groups:
+        members = [t for t in grp if clean.get(t, {}).get("values")]
+        clusters_out.extend(
+            _build_group_clusters(members, clean, req.include_near, req.near_threshold)
+        )
+
+    logger.info(
+        "exact-duplicates: found %d clusters (%d tsids skipped)",
+        len(clusters_out), len(skipped),
+    )
+
+    return {"clusters": clusters_out, "skipped": skipped}
+
+
+@app.post("/exact-duplicates-stream")
+async def exact_duplicates_stream(req: ExactDuplicatesRequest):
+    """
+    Streaming variant of /exact-duplicates.
+
+    Previously this endpoint called ``_clean_series_for_tsids`` once per group,
+    which meant N sequential SPARQL round-trips and N independent time-unit
+    normalization passes — slow once N grew past a few dozen groups.  We now
+    flatten all groups into a single tsid list, fetch them in one batch, and
+    stream progress only for the (cheap) clustering phase.
+    """
+    groups = req.groups or []
+    include_near = req.include_near
+    near_threshold = req.near_threshold
+
+    async def generate():
+        total = len(groups)
+        yield _sse_event({"phase": "start", "total": total})
+        await asyncio.sleep(0)
+
+        if total == 0:
+            yield _sse_event({"phase": "done", "clusters": [], "skipped": []})
+            return
+
+        # ---- Phase A: single batched fetch for every tsid across all groups
+        all_tsids: List[str] = []
+        seen: Set[str] = set()
+        for grp in groups:
+            for t in grp:
+                if t and t not in seen:
+                    seen.add(t)
+                    all_tsids.append(t)
+
+        # Fetch in chunks so we can emit a real progress fraction. Precision
+        # is not critical — the point is to show the bar moving while a long
+        # SPARQL round-trip is in flight.
+        FETCH_CHUNK = 20
+        total_tsids = len(all_tsids)
+        yield _sse_event({
+            "phase": "fetch",
+            "fetched": 0,
+            "totalTsids": total_tsids,
+            "total": total,
+        })
+        await asyncio.sleep(0)
+
+        clean: Dict[str, Dict[str, List[float]]] = {}
+        try:
+            for start in range(0, total_tsids, FETCH_CHUNK):
+                chunk = all_tsids[start:start + FETCH_CHUNK]
+                chunk_clean = await asyncio.to_thread(_clean_series_for_tsids, chunk)
+                clean.update(chunk_clean)
+                yield _sse_event({
+                    "phase": "fetch",
+                    "fetched": min(start + FETCH_CHUNK, total_tsids),
+                    "totalTsids": total_tsids,
+                    "total": total,
+                })
+                await asyncio.sleep(0)
+        except Exception as exc:
+            logger.warning("exact-duplicates-stream: batch fetch failed: %s", exc)
+            yield _sse_event({"phase": "error", "message": f"Fetch failed: {exc}"})
+            return
+
+        skipped: List[Dict[str, str]] = [
+            {"tsid": t, "reason": "no_series"}
+            for t in all_tsids
+            if not clean.get(t, {}).get("values")
+        ]
+
+        # ---- Phase B: clustering per group (pure Python, fast)
+        clusters_out: List[Dict[str, Any]] = []
+        for idx, grp in enumerate(groups):
+            members = [
+                t for t in dict.fromkeys(grp)
+                if t and clean.get(t, {}).get("values")
+            ]
+            if len(members) >= 2:
+                clusters_out.extend(
+                    _build_group_clusters(members, clean, include_near, near_threshold)
+                )
+            # Emit progress after every group; these events are tiny and
+            # clustering is cheap, so the UI stays responsive.
+            yield _sse_event({
+                "phase": "progress",
+                "checked": idx + 1,
+                "total": total,
+            })
+            if (idx & 7) == 0:
+                await asyncio.sleep(0)
+
+        yield _sse_event({
+            "phase": "done",
+            "clusters": clusters_out,
+            "skipped": skipped,
+        })
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 
 # =============================================================================

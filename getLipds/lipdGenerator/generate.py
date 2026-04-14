@@ -18,6 +18,7 @@ import io
 import glob
 import zipfile
 import pickle
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 import pandas as pd
@@ -88,8 +89,14 @@ def filter_datasets(df, query_params):
 
     compilation = query_params.get('compilation')
     if compilation:
-        mask &= df['paleoData_mostRecentCompilations'].str.contains(compilation, case=False, na=False)
-        print(f"Compilation filter: {compilation}")
+        # May be a comma-separated list (e.g. "Pages2kTemperature-2_2_0, iso2k-1_1_2, ")
+        if isinstance(compilation, str):
+            compilations = [c.strip() for c in compilation.split(',') if c.strip()]
+        else:
+            compilations = [compilation]
+        pattern = '|'.join(re.escape(c) for c in compilations)
+        mask &= df['paleoData_mostRecentCompilations'].str.contains(pattern, case=False, na=False)
+        print(f"Compilation filter: {compilations}")
 
     filtered = df[mask]
     n_datasets = filtered['datasetId'].nunique()
@@ -113,22 +120,210 @@ def build_urls(filtered_df):
     return urls
 
 
-def download_lpd_files(urls, output_dir):
+def _resolve_version_url(dataset_id, original_url):
+    """
+    If the CSV version doesn't exist on the server (404), fetch the dataset's
+    root index page to discover the actual latest version via its meta-refresh,
+    then return the corrected URL.  Returns None if resolution fails.
+    """
+    try:
+        root = requests.get(
+            f"https://lipdverse.org/data/{dataset_id}/", timeout=30)
+        m = re.search(r"content=\"0; url='([^']+)'", root.text)
+        if m:
+            ver_dir = m.group(1).split('/')[0]          # e.g. "1_0_7"
+            base = original_url.rsplit('/', 2)[0]        # .../data/{datasetId}
+            return f"{base}/{ver_dir}/lipd.lpd"
+    except Exception:
+        pass
+    return None
+
+
+def _download_one(dataset_id, url, output_dir):
+    """Download a single .lpd file. Returns (dataset_id, version_mismatch, error)."""
+    fname = os.path.join(output_dir, f"{dataset_id}.lpd")
+    try:
+        resp = requests.get(url, timeout=60)
+        version_mismatch = False
+        if resp.status_code == 404:
+            fallback_url = _resolve_version_url(dataset_id, url)
+            if fallback_url:
+                resp = requests.get(fallback_url, timeout=60)
+                version_mismatch = True
+        resp.raise_for_status()
+        with open(fname, 'wb') as f:
+            f.write(resp.content)
+        return (dataset_id, version_mismatch, None)
+    except Exception as e:
+        return (dataset_id, False, str(e))
+
+
+def download_lpd_files(urls, output_dir, max_workers=20):
     downloaded = 0
-    for dataset_id, url in urls:
-        fname = os.path.join(output_dir, f"{dataset_id}.lpd")
-        try:
-            resp = requests.get(url, timeout=60)
-            resp.raise_for_status()
-            with open(fname, 'wb') as f:
-                f.write(resp.content)
-            downloaded += 1
-        except Exception as e:
-            print(f"Warning: failed to download {dataset_id}: {e}")
+    version_mismatches = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(_download_one, dataset_id, url, output_dir): dataset_id
+            for dataset_id, url in urls
+        }
+        for future in as_completed(futures):
+            dataset_id, version_mismatch, error = future.result()
+            if error:
+                print(f"Warning: failed to download {dataset_id}: {error}")
+            else:
+                downloaded += 1
+                if version_mismatch:
+                    version_mismatches += 1
+    if version_mismatches:
+        print(f"  (version fallback used for {version_mismatches} datasets)")
     print(f"Downloaded {downloaded}/{len(urls)} .lpd files")
     if downloaded == 0:
         raise RuntimeError("Failed to download any .lpd files")
     return downloaded
+
+
+# ---------------------------------------------------------------------------
+# Step 2b: Remove explicitly rejected TSIDs from .lpd files
+# ---------------------------------------------------------------------------
+
+def _remove_tsids_from_lpd(lpd_path, removed_tsids):
+    """
+    Remove columns matching removed_tsids from a single .lpd file (in-place).
+    LiPD files are BagIt zips containing JSON-LD metadata + CSV data files.
+    Returns the number of columns removed.
+    """
+    import csv as csv_mod
+    import hashlib
+
+    with zipfile.ZipFile(lpd_path, 'r') as zf_in:
+        file_contents = {}
+        for name in zf_in.namelist():
+            file_contents[name] = zf_in.read(name)
+
+    jsonld_name = next((n for n in file_contents if n.endswith('.jsonld')), None)
+    if not jsonld_name:
+        return 0
+
+    metadata = json.loads(file_contents[jsonld_name])
+    csv_columns_to_remove = {}  # csv_zip_path → set of 1-based column numbers
+    removed_count = 0
+
+    paleo_data = metadata.get('paleoData', [])
+    if not isinstance(paleo_data, list):
+        paleo_data = [paleo_data] if paleo_data else []
+
+    for pg in paleo_data:
+        tables = pg.get('measurementTable', [])
+        if not isinstance(tables, list):
+            tables = [tables] if tables else []
+        for table in tables:
+            columns = table.get('columns', [])
+            csv_filename = table.get('filename', '')
+
+            cols_to_remove = []
+            col_numbers_to_remove = set()
+            for col in columns:
+                tsid = col.get('TSid', col.get('tsid', ''))
+                if tsid in removed_tsids:
+                    cols_to_remove.append(col)
+                    col_num = col.get('number')
+                    if col_num is not None:
+                        col_numbers_to_remove.add(int(col_num))
+                    removed_count += 1
+
+            if not cols_to_remove:
+                continue
+
+            # Remove columns from JSON and renumber
+            new_columns = [c for c in columns if c not in cols_to_remove]
+            for idx, col in enumerate(new_columns):
+                col['number'] = idx + 1
+            table['columns'] = new_columns
+
+            # Track CSV columns to remove
+            if csv_filename:
+                csv_zip_path = next(
+                    (n for n in file_contents if n.endswith(csv_filename)), None)
+                if csv_zip_path:
+                    csv_columns_to_remove[csv_zip_path] = col_numbers_to_remove
+
+    if removed_count == 0:
+        return 0
+
+    # Update JSON-LD
+    file_contents[jsonld_name] = json.dumps(metadata, indent=2).encode('utf-8')
+
+    # Update CSV files — remove columns by 1-based number
+    for csv_path, col_nums in csv_columns_to_remove.items():
+        if csv_path not in file_contents:
+            continue
+        csv_text = file_contents[csv_path].decode('utf-8')
+        reader = csv_mod.reader(io.StringIO(csv_text))
+        output = io.StringIO()
+        writer = csv_mod.writer(output)
+        for row in reader:
+            writer.writerow([v for i, v in enumerate(row) if (i + 1) not in col_nums])
+        file_contents[csv_path] = output.getvalue().encode('utf-8')
+
+    # Recompute BagIt manifest checksums
+    manifest_name = next((n for n in file_contents if n.endswith('manifest-md5.txt')), None)
+    if manifest_name:
+        bag_prefix = manifest_name.rsplit('manifest-md5.txt', 1)[0]
+        new_lines = []
+        for line in file_contents[manifest_name].decode('utf-8').strip().split('\n'):
+            parts = line.split(None, 1)
+            if len(parts) == 2:
+                _, filepath = parts
+                full_path = bag_prefix + filepath
+                if full_path in file_contents:
+                    h = hashlib.md5(file_contents[full_path]).hexdigest()
+                    new_lines.append(f"{h}  {filepath}")
+                else:
+                    new_lines.append(line)
+            else:
+                new_lines.append(line)
+        file_contents[manifest_name] = ('\n'.join(new_lines) + '\n').encode('utf-8')
+
+    # Recompute tag manifest
+    tagmanifest_name = next((n for n in file_contents if n.endswith('tagmanifest-md5.txt')), None)
+    if tagmanifest_name:
+        bag_prefix = tagmanifest_name.rsplit('tagmanifest-md5.txt', 1)[0]
+        new_lines = []
+        for line in file_contents[tagmanifest_name].decode('utf-8').strip().split('\n'):
+            parts = line.split(None, 1)
+            if len(parts) == 2:
+                _, filepath = parts
+                full_path = bag_prefix + filepath
+                if full_path in file_contents:
+                    h = hashlib.md5(file_contents[full_path]).hexdigest()
+                    new_lines.append(f"{h}  {filepath}")
+                else:
+                    new_lines.append(line)
+            else:
+                new_lines.append(line)
+        file_contents[tagmanifest_name] = ('\n'.join(new_lines) + '\n').encode('utf-8')
+
+    # Write modified .lpd file
+    with zipfile.ZipFile(lpd_path, 'w', zipfile.ZIP_DEFLATED) as zf_out:
+        for name, content in file_contents.items():
+            zf_out.writestr(name, content)
+
+    return removed_count
+
+
+def remove_rejected_tsids(output_dir, removed_tsids):
+    """Remove explicitly rejected TSIDs from all .lpd files in output_dir."""
+    removed_set = set(removed_tsids)
+    lpd_files = glob.glob(os.path.join(output_dir, '*.lpd'))
+    total_removed = 0
+    files_modified = 0
+    for fpath in lpd_files:
+        n = _remove_tsids_from_lpd(fpath, removed_set)
+        if n > 0:
+            total_removed += n
+            files_modified += 1
+            print(f"  {os.path.basename(fpath)}: removed {n} column(s)")
+    print(f"Removed {total_removed} column(s) from {files_modified} file(s)")
 
 
 # ---------------------------------------------------------------------------
@@ -256,14 +451,17 @@ def create_pickles(output_dir):
             print(f"Dropping {dropped} records with non-numeric paleoData_values")
             df = df[numeric_mask].copy()
 
-    # Validate primary time columns (age/year) — depth is optional and skipped
-    for col in ['age', 'year']:
-        if col in df.columns:
-            time_mask = df[col].apply(_is_numeric_array)
-            dropped = (~time_mask).sum()
-            if dropped > 0:
-                print(f"Dropping {dropped} records with non-numeric {col}")
-                df = df[time_mask].copy()
+    # Keep records that have at least one valid time axis (age or year).
+    # LMR can use either, so dropping records with no age but valid year is wrong.
+    time_cols = [c for c in ['age', 'year'] if c in df.columns]
+    if time_cols:
+        has_time = pd.Series(False, index=df.index)
+        for col in time_cols:
+            has_time |= df[col].apply(_is_numeric_array)
+        dropped = (~has_time).sum()
+        if dropped > 0:
+            print(f"Dropping {dropped} records with neither numeric age nor numeric year")
+        df = df[has_time].copy()
 
     print(f"\nFinal DataFrame: {df.shape} "
           f"({initial_count - len(df)} records removed)")
@@ -313,6 +511,12 @@ def main():
     urls = build_urls(filtered)
     print(f"\nDownloading {len(urls)} .lpd files...")
     download_lpd_files(urls, output_dir)
+
+    # Remove explicitly rejected TSIDs from .lpd files (from data cleaning)
+    removed_tsids = query_params.get('removedTsids', [])
+    if removed_tsids:
+        print(f"\nRemoving {len(removed_tsids)} rejected TSID(s) from .lpd files...")
+        remove_rejected_tsids(output_dir, removed_tsids)
 
     if write_lpd:
         create_zip(output_dir)

@@ -50,6 +50,8 @@ services:
       # Docker socket for sibling containers (prestoGo.js spawns containers)
       # On Windows: //var/run/docker.sock or use named pipe
       - /var/run/docker.sock:/var/run/docker.sock
+      # Persistent data — survives container restarts and recreations
+      - user-recons-data:/root/presto/userRecons
       # Source code mounts - changes take effect on container restart (no rebuild needed)
       - ./routes:/root/presto/routes
       - ./services:/root/presto/services
@@ -58,6 +60,7 @@ services:
       - ./templates:/root/presto/templates
       - ./getLipds:/root/presto/getLipds
       - ./query:/root/presto/query
+      - ./public:/root/presto/public
       - ./app.js:/root/presto/app.js
       # PRODUCTION ONLY (Linux server at /root/presto):
       # These mounts enable same-path strategy. Comment out for local dev.
@@ -100,6 +103,11 @@ services:
       - ../customTiles/blueMarble/tiles_mollweide:/usr/share/nginx/html/tiles_bluemarble:ro
       - ../customTiles/blueMarble_3031/tiles:/usr/share/nginx/html/tiles_bluemarble_3031:ro
       - ../customTiles/blueMarble_3995/tiles:/usr/share/nginx/html/tiles_bluemarble_3995:ro
+      - ../customTiles/blueMarble_3857/tiles:/usr/share/nginx/html/tiles_bluemarble_3857:ro
+      - ../customTiles/naturalEarth_3857/tiles:/usr/share/nginx/html/tiles_naturalearth_3857:ro
+      - ../customTiles/naturalEarth_mollweide/tiles:/usr/share/nginx/html/tiles_naturalearth_mollweide:ro
+      - ../customTiles/naturalEarth_3031/tiles:/usr/share/nginx/html/tiles_naturalearth_3031:ro
+      - ../customTiles/naturalEarth_3995/tiles:/usr/share/nginx/html/tiles_naturalearth_3995:ro
     networks:
       - presto-network
     restart: unless-stopped
@@ -154,6 +162,7 @@ services:
 
 volumes:
   mysql-data:
+  user-recons-data:
 
 networks:
   presto-network:

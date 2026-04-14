@@ -55,51 +55,39 @@
   </head>
 
 <body>
-<div class="wide" id="all">
-<div class="top-bar py-0" id="topBar" style="background: #555"></div>
-<!-- Navbar Sticky-->
-<header class="nav-holder make-sticky">
-<div class="navbar navbar-light bg-white navbar-expand-lg py-0" id="navbar">
-<div class="container py-3 py-lg-0 px-lg-0">
-<!-- Navbar brand--><a class="navbar-brand"><img class="d-none d-md-inline-block" src="/editor/img/logo.png" alt="Universal logo"><img class="d-inline-block d-md-none" src="/editor/img/logo-small.png" alt="Universal logo"><span class="sr-only">Universal - go to homepage</span></a> <!-- TODO: Update the logo. -->
-<!-- Navbar toggler-->
-<button class="navbar-toggler text-primary border-primary" type="button" data-bs-toggle="collapse" data-bs-target="#navigationCollapse" aria-controls="navigationCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="sr-only">Toggle navigation</span><i class="fas fa-align-justify"></i></button>
-<!-- Collapsed Navigation    -->
-<div class="collapse navbar-collapse" id="navigationCollapse">
-<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-<a class="nav-link">Home</a>
-<!-- megamenu [features]-->
-<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" id="featuresMegamenu" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reconstructions</a>
-<ul class="dropdown-menu megamenu p-4" aria-labelledby="featuresMegamenu">
-<li class="nav-item"><a class="nav-link-sub py-2 text-uppercase">Holocene</a></li>
-<li class="nav-item"><a class="nav-link-sub py-2 text-uppercase">Common Era</a></li>
-</ul>
-</li>
-<!-- megamenu [portfolio]-->
-<a class="nav-link">Analysis</a>
-<a class="nav-link">About Us</a>
-</ul>
-</div>
-</div>
-</div>
-</header>
-<!-- HEADING BREADCRUMB-->
-<section class="bg-pentagon py-4">
-<div class="container py-3">
-<div class="row d-flex align-items-center gy-4">
-<div class="col-md-7">
-<h1 class="h2 mb-0 text-uppercase">Custom Reconstructions</h1>
-</div>
-<div class="col-md-5">
-<!-- Breadcrumb-->
-<ol class="text-sm justify-content-start justify-content-lg-end mb-0 breadcrumb undefined">
-<li class="breadcrumb-item"><a class="text-uppercase">Home</a></li>
-<li class="breadcrumb-item text-uppercase active">Custom Reconstructions</li>
-</ol>
-</div>
-</div>
-</div>
-</section>
+    <style>
+      .pce-header { background: #1a1a2e; border-bottom: 3px solid #c4956a; padding: 0; }
+      .pce-header-inner { max-width: 1140px; margin: 0 auto; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
+      .pce-brand { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+      .pce-brand-logo { height: 28px; filter: invert(1); }
+      .pce-brand-tag { font-family: 'Roboto', sans-serif; font-weight: 300; font-size: 0.75rem; color: #c4956a; letter-spacing: 0.12em; text-transform: uppercase; }
+      .pce-nav { display: flex; align-items: center; gap: 1.75rem; list-style: none; margin: 0; padding: 0; }
+      .pce-nav a { font-family: 'Roboto', sans-serif; font-weight: 400; font-size: 0.85rem; color: rgba(255,255,255,0.7); text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase; transition: color 0.2s; }
+      .pce-nav a:hover { color: #c4956a; }
+      .pce-footer { background: #1a1a2e; border-top: 3px solid #c4956a; padding: 0; }
+      .pce-footer-inner { max-width: 1140px; margin: 0 auto; padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+      .pce-footer-text { font-family: 'Roboto', sans-serif; font-weight: 300; font-size: 0.8rem; color: rgba(255,255,255,0.45); letter-spacing: 0.03em; margin: 0; }
+      .pce-footer-text a { color: #c4956a; text-decoration: none; }
+      .pce-footer-text a:hover { text-decoration: underline; }
+      body { display: flex; flex-direction: column; min-height: 100vh; }
+      .pce-main { flex: 1; }
+    </style>
+
+      <header class="pce-header">
+        <div class="pce-header-inner">
+          <a class="pce-brand" href="/forms/">
+            <img class="pce-brand-logo" src="/forms/img/logo.png" alt="Presto">
+            <span class="pce-brand-tag">Custom Engine</span>
+          </a>
+          <nav>
+            <ul class="pce-nav">
+              <li><a href="/forms/">Engine</a></li>
+              <li><a href="https://paleopresto.com/">PReSto Home</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+<div class="pce-main">
 <div class="container">
 <br>
 <br>
@@ -120,7 +108,7 @@ For more information about each of the options, mouse over the question mark ico
 </form>
 <br>
 <br>
-<form id="paramsForm" method="POST" onsubmit="buildURL()">
+<form id="paramsForm" method="POST" onsubmit="return buildURL()">
 <input id="recon" name="recon" type="hidden" value="graph_em">
 <script>function getQueryVariable(variable)
 {
@@ -498,23 +486,13 @@ function val() {document.getElementById("abstract2").src = "/slider.css";}
 <script src"/editor/slidergraph_em.js"></script>
 </div>
 <br>
-</body>
 
-        <footer>
-        <!-- COPYRIGHTS                -->
-        <div class="bg-dark py-5">
-          <div class="container">
-            <div class="row align-items-cenrer gy-3 text-center">
-              <div class="col-md-6 text-md-start">
-                <p class="mb-0 text-sm text-gray-500">&copy; 2023. The Presto Team </p>
-              </div>
-              <div class="col-md-6 text text-md-end">
-                <p class="mb-0 text-sm text-gray-500">Template designed by  <a href="https://bootstrapious.com" target="_blank">Bootstrapious</a></p>
-                <!-- Please do not remove the backlink to us unless you purchase the Attribution-free License at https://bootstrapious.com/attribution-free-license. Thank you.-->
-              </div>
-            </div>
-          </div>
+      <footer class="pce-footer">
+        <div class="pce-footer-inner">
+          <p class="pce-footer-text">&copy; 2025 <a href="https://paleopresto.com/">The Presto Team</a></p>
+          <p class="pce-footer-text">Presto Custom Engine &middot; Paleoclimate Reconstruction Storehouse</p>
         </div>
       </footer>
 
+</body>
 </html>

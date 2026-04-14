@@ -102,6 +102,9 @@ app.use('/lipds', require('./routes/lipds'));
 // Data cleaning (between query and editor for filtered TSID path)
 app.use('/datacleaning', require('./routes/datacleaning'));
 
+// LiPD file download (confirmation + GitHub repo creation)
+app.use('/lipd-download', require('./routes/lipdDownload'));
+
 // Visualization (was viz:3011)
 app.use('/viz', require('./routes/viz'));
 
@@ -137,6 +140,9 @@ app.use((err, req, res, next) => {
 // ===========================================
 // START SERVER
 // ===========================================
+
+require('./services/cleanup').startCleanupScheduler();
+require('./services/compilationUpdater').startCompilationUpdater();
 
 app.listen(config.port, () => {
   console.log(`Presto server listening on port ${config.port}`);

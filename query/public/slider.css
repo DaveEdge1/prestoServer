@@ -269,9 +269,12 @@
 														     margin-left: 20px;
 													       }
 
-										       #fromSlider {
+										       #fromSlider,
+										       #time_range_to_reconstruct_fromSlider,
+										       #months_range_fromSlider {
 											         height: 0;
 												   z-index: 1;
+												   top: 5px;
 											   }
 										       #time_resolution_maxSilder {
 											       -webkit-appearance: none;

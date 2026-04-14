@@ -46,7 +46,7 @@
 				     position: absolute;
 				       z-index: 2;
 					 width: max-content;
-					 max-width: 300px;
+					 max-width: 450px;
 					  height: max-content;
 					   color: black;
 					   border-width:2px;
@@ -269,9 +269,15 @@
 														     margin-left: 20px;
 													       }
 
-										       #fromSlider {
+										       #fromSlider,
+										       #recon_period_fromSilder,
+										       #prior_anom_period_fromSilder,
+										       #time_range_to_reconstruct_fromSilder,
+										       #time_reference_fromSilder,
+										       #prior_model_interval_fromSilder {
 											         height: 0;
 												   z-index: 1;
+												   top: 5px;
 											   }
 										       #time_resolution_maxSilder {
 											       -webkit-appearance: none;

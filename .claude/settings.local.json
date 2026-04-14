@@ -31,7 +31,16 @@
       "Bash(docker cp:*)",
       "Bash(pkill -f \"docker-compose build\")",
       "Bash(docker ps:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout:*)",
+      "Bash(git log:*)",
+      "Bash(node:*)",
+      "Bash(test -f node_modules/crypto-js/package.json)",
+      "Bash(npm install:*)",
+      "Bash(PORT=81 node:*)",
+      "Bash(docker start:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(printf:*)"
     ]
   }
 }
