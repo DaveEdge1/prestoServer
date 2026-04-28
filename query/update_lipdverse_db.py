@@ -2,6 +2,11 @@
 """
 Update the lipdverse MySQL database with the latest data from lipdverse.org
 
+NOTE: Nightly automation now runs inside the orchestrator container at
+services/compilationUpdater.js (runs at 02:00 local, also regenerates
+query/public/compilationMetadata.js from the DB). This script is a manual
+fallback for host-level/admin use only.
+
 This script downloads the latest lipdverseQuery.csv, compares it with the current
 database, and updates the MySQL query table if changes are detected.
 

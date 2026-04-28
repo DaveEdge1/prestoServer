@@ -125,6 +125,60 @@
          #mode-toggle button:not(.active):hover {
             background: #e8f0f8;
          }
+         /* Chip-style multi-select (wraps a hidden input; the visible child is the typing box) */
+         .chip-input {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            min-height: 34px;
+            border: 1px solid #a8a8a8;
+            border-radius: 4px;
+            background: #fff;
+            cursor: text;
+            vertical-align: middle;
+            box-sizing: border-box;
+         }
+         .chip-input:focus-within {
+            border-color: #2a6496;
+            box-shadow: 0 0 0 2px rgba(42,100,150,0.15);
+         }
+         .chip-input .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e8f0f8;
+            color: #1a3a5c;
+            border: 1px solid #b5cce3;
+            border-radius: 12px;
+            padding: 2px 6px 2px 10px;
+            font-size: 14px;
+            line-height: 1.3;
+            max-width: 100%;
+         }
+         .chip-input .chip-x {
+            appearance: none;
+            background: transparent;
+            border: 0;
+            color: #1a3a5c;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 2px;
+            margin: 0;
+            opacity: 0.6;
+         }
+         .chip-input .chip-x:hover { opacity: 1; color: #b22; }
+         .chip-input .chip-input-typing {
+            flex: 1 1 120px;
+            min-width: 120px;
+            border: 0;
+            outline: 0;
+            padding: 2px 4px;
+            font-size: 14px;
+            background: transparent;
+         }
       </style>
    </head>
    <body>
@@ -232,7 +286,7 @@
             </form>
          </div>
       <form style="max-width: 90%; display: block; margin-left: auto; margin-right: auto;" id="queryForm" onsubmit="">
-         <button id="compilationButton" type="button" class="collapsible">Compilation Filter
+         <button id="compilationButton" type="button" class="collapsible">Compilation and Interpretation Filter
          </button>
          <div class="content">
             <br>
@@ -245,6 +299,24 @@
                </div>
                <br>
                <input style="width:80%;" name="paleoData_mostRecentCompilations" id="compilationIn" value="">
+            </div>
+            <br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="interpVar_label" for="interpVar">
+                  Interpretation Variable
+                  <span class="hover-text" style="background-color:#0d6efd; color:#fff; padding:2px 8px; margin-left:8px; cursor:help;">Recommended
+                     <span class="tooltip-text" style="font-weight:normal;">Choose time series with climate interpretations provided by the curators</span>
+                  </span>
+               </label>
+               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
+                  <span class="tooltip-text">Filter records by the phenomenon (eg. temperature) that drove variability in this timeseries. Strongly recommended for data-assimilation reconstructions (LMR, Holocene DA) so only records interpreted for the target variable are used.</span>
+               </div>
+               <br>
+               <input style="width:80%;" name="interp_Vars" id="interpVar" value="">
             </div>
             <br>
             <hr class="solid">
@@ -339,7 +411,7 @@
          <hr class="solid">
          <br>
          </div>
-         <button type="button" class="collapsible">Material and Interpretation Filters
+         <button type="button" class="collapsible">Material Filters
          </button>
          <div class="content">
             <br>
@@ -494,6 +566,29 @@
          <hr class="solid">
          <hr class="solid">
          <br>
+         <br>
+         <div style="width: 10%; vertical-align: middle; float: left;">
+            <br><br><br>
+            <label id="minLengthOn_label" for="minLengthOn">Filter by minimum record length</label>
+            <br>
+            <input class="form-check-input" type="checkbox" id="minLengthOn" value="TRUE" onclick='updateFilters();'>
+            <br><br><br>
+         </div>
+         <div id="minLengthDiv" style="vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
+            <label style="font-size:20px; padding-right:10px; color:black" id="minLength_label" for="minLengthInput">Minimum record length (yr)</label>
+            <div style="vertical-align: middle; height: 50px;" class="hover-text">?
+               <span class="tooltip-text">Exclude records whose maxAge − minAge span is shorter than this value (in years).</span>
+            </div>
+            <div class="range_container">
+               <div class="sliders_control">
+                  <input type="number" id="minLengthInput" name="minRecordLength" value="100" min="1" max="100000" step="1"/>
+               </div>
+            </div>
+         </div>
+         <br><br><br><br><br><br><br>
+         <hr class="solid">
+         <hr class="solid">
+         <br>
          </div>
       </form>
       <br><br>
@@ -518,7 +613,7 @@
    <script>
       document.getElementById("my-css-spinner").style.display = "block";
 
-      let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '"}')
+      let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '", "minLength":"' + document.getElementById("minLengthOn").checked + '"}')
       function updateFilters(){
       	if (document.getElementById("ageSliderOn").checked){
       		document.getElementById("timeSliderDiv").style.visibility = "visible";
@@ -545,6 +640,14 @@
       	if (!document.getElementById("resolutionOn").checked) {
       		document.getElementById("resolutionDiv").style.visibility = "hidden";
       		filters1['resolution'] = 'false'
+      	}
+      	if (document.getElementById("minLengthOn").checked){
+      		document.getElementById("minLengthDiv").style.visibility = "visible";
+      		filters1['minLength'] = 'true'
+      	}
+      	if (!document.getElementById("minLengthOn").checked) {
+      		document.getElementById("minLengthDiv").style.visibility = "hidden";
+      		filters1['minLength'] = 'false'
       	}
       	if (document.getElementById("isTerrestrialOn").checked){
       		document.getElementById("isTerrestrialDiv").style.visibility = "visible";
@@ -624,8 +727,21 @@
          document.getElementById('archivedCompilationIn').value = cfg.archivedCompilation.name;
          document.getElementById('archivedCompilationVersionIn').value = cfg.archivedCompilation.version;
 
-         // Compilation filter default
+         // Compilation filter default — set before chipify runs; chipify reads the
+         // original input's .value when replacing it with the chip widget.
          document.getElementById('compilationIn').value = cfg.compilationFilter;
+
+         // Interpretation Variable default (strongly recommended for DA recons)
+         if (cfg.interpVarDefault) {
+            document.getElementById('interpVar').value = cfg.interpVarDefault;
+         }
+
+         // Minimum record length default (enabled for DA recons)
+         if (cfg.minRecordLength != null) {
+            document.getElementById('minLengthInput').value = cfg.minRecordLength;
+            document.getElementById('minLengthOn').checked = true;
+            updateFilters();
+         }
 
          // Time slider configuration
          var ids = ['fromSlider', 'toSlider', 'fromInput', 'toInput'];

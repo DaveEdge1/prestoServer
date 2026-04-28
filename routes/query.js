@@ -16,12 +16,16 @@ const PAGE_CONFIGS = {
     defaultMode: 'archive',
     archivedCompilation: { name: 'Pages2kTemperature', version: '2_2_0' },
     compilationFilter: 'Pages2k',
+    interpVarDefault: 'temperature',
+    minRecordLength: 100,
     timeSlider: { max: 2000, step: 100 },
   },
   holocene_da: {
     defaultMode: 'archive',
     archivedCompilation: { name: 'Temp12k', version: '1_0_2' },
     compilationFilter: 'Temp12k-1_2_0',
+    interpVarDefault: 'temperature',
+    minRecordLength: 100,
     timeSlider: { max: 12000, step: 100 },
   },
   download: {

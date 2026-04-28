@@ -47,6 +47,9 @@ var MapExport = (function () {
       if (JSON.parse(filters1['resolution'])) {
         lines.push('Resolution < ' + document.getElementById('resolutionInput').value + ' yr');
       }
+      if (filters1['minLength'] && JSON.parse(filters1['minLength'])) {
+        lines.push('Min record length ≥ ' + document.getElementById('minLengthInput').value + ' yr');
+      }
       if (JSON.parse(filters1['terrestrial'])) {
         lines.push(document.getElementById('Terrestrial').checked ? 'Terrestrial only' : 'Marine only');
       }

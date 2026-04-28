@@ -17,6 +17,22 @@ var top15InterpVars = [
    "salinity"
 ];
 
+// Autocomplete source for the Interpretation Variable filter.
+// LIKE '%value%' in buildQstring means combo entries (e.g. "temperature|precipitationIsotope")
+// also match when the user picks "temperature" or "precipitationIsotope".
+var interpVarList = [
+   "temperature",
+   "precipitation",
+   "effectivePrecipitation",
+   "precipitationIsotope",
+   "seawaterIsotope",
+   "growingDegreeDays",
+   "seaIce",
+   "salinity",
+   "streamflow",
+   "upwelling"
+].map(function (v) { return { value: v, label: v }; });
+
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
 var countrylist = [{"value":"Afghanistan","label":"Afghanistan"},{"value":"Aland","label":"Aland"},{"value":"Albania","label":"Albania"},{"value":"Algeria","label":"Algeria"},{"value":"Antarctica","label":"Antarctica"},{"value":"Argentina","label":"Argentina"},{"value":"Armenia","label":"Armenia"},{"value":"Australia","label":"Australia"},{"value":"Austria","label":"Austria"},{"value":"Belarus","label":"Belarus"},{"value":"Belgium","label":"Belgium"},{"value":"Belize","label":"Belize"},{"value":"Bermuda","label":"Bermuda"},{"value":"Bhutan","label":"Bhutan"},{"value":"Bolivia","label":"Bolivia"},{"value":"Botswana","label":"Botswana"},{"value":"Brazil","label":"Brazil"},{"value":"Bulgaria","label":"Bulgaria"},{"value":"Burundi","label":"Burundi"},{"value":"Canada","label":"Canada"},{"value":"Cayman Islands","label":"Cayman Islands"},{"value":"Chad","label":"Chad"},{"value":"Chile","label":"Chile"},{"value":"China","label":"China"},{"value":"Colombia","label":"Colombia"},{"value":"Cook Islands","label":"Cook Islands"},{"value":"Costa Rica","label":"Costa Rica"},{"value":"Cuba","label":"Cuba"},{"value":"Czech Republic","label":"Czech Republic"},{"value":"Democratic Republic of the Congo","label":"Democratic Republic of the Congo"},{"value":"Denmark","label":"Denmark"},{"value":"Djibouti","label":"Djibouti"},{"value":"Dominican Republic","label":"Dominican Republic"},{"value":"Ecuador","label":"Ecuador"},{"value":"Egypt","label":"Egypt"},{"value":"Estonia","label":"Estonia"},{"value":"Ethiopia","label":"Ethiopia"},{"value":"Faroe Islands","label":"Faroe Islands"},{"value":"Finland","label":"Finland"},{"value":"France","label":"France"},{"value":"French Polynesia","label":"French Polynesia"},{"value":"Georgia","label":"Georgia"},{"value":"Germany","label":"Germany"},{"value":"Ghana","label":"Ghana"},{"value":"Greece","label":"Greece"},{"value":"Greenland","label":"Greenland"},{"value":"Guam","label":"Guam"},{"value":"Guatemala","label":"Guatemala"},{"value":"Haiti","label":"Haiti"},{"value":"Hungary","label":"Hungary"},{"value":"Iceland","label":"Iceland"},{"value":"India","label":"India"},{"value":"Indonesia","label":"Indonesia"},{"value":"Iran","label":"Iran"},{"value":"Ireland","label":"Ireland"},{"value":"Israel","label":"Israel"},{"value":"Italy","label":"Italy"},{"value":"Jamaica","label":"Jamaica"},{"value":"Japan","label":"Japan"},{"value":"Jordan","label":"Jordan"},{"value":"Kazakhstan","label":"Kazakhstan"},{"value":"Kenya","label":"Kenya"},{"value":"Kyrgyzstan","label":"Kyrgyzstan"},{"value":"Laos","label":"Laos"},{"value":"Lebanon","label":"Lebanon"},{"value":"Libya","label":"Libya"},{"value":"Lithuania","label":"Lithuania"},{"value":"Luxembourg","label":"Luxembourg"},{"value":"Macedonia","label":"Macedonia"},{"value":"Madagascar","label":"Madagascar"},{"value":"Malawi","label":"Malawi"},{"value":"Malaysia","label":"Malaysia"},{"value":"Mali","label":"Mali"},{"value":"Malta","label":"Malta"},{"value":"Mauritania","label":"Mauritania"},{"value":"Mexico","label":"Mexico"},{"value":"Mongolia","label":"Mongolia"},{"value":"Morocco","label":"Morocco"},{"value":"Namibia","label":"Namibia"},{"value":"Nauru","label":"Nauru"},{"value":"Nepal","label":"Nepal"},{"value":"Netherlands","label":"Netherlands"},{"value":"New Zealand","label":"New Zealand"},{"value":"Nicaragua","label":"Nicaragua"},{"value":"Niger","label":"Niger"},{"value":"Nigeria","label":"Nigeria"},{"value":"Norway","label":"Norway"},{"value":"Oman","label":"Oman"},{"value":"Pakistan","label":"Pakistan"},{"value":"Papua New Guinea","label":"Papua New Guinea"},{"value":"Peru","label":"Peru"},{"value":"Poland","label":"Poland"},{"value":"Portugal","label":"Portugal"},{"value":"Romania","label":"Romania"},{"value":"Russia","label":"Russia"},{"value":"Saudi Arabia","label":"Saudi Arabia"},{"value":"Senegal","label":"Senegal"},{"value":"Seychelles","label":"Seychelles"},{"value":"Slovakia","label":"Slovakia"},{"value":"Slovenia","label":"Slovenia"},{"value":"South Africa","label":"South Africa"},{"value":"South Korea","label":"South Korea"},{"value":"South Sudan","label":"South Sudan"},{"value":"Spain","label":"Spain"},{"value":"Sudan","label":"Sudan"},{"value":"Sweden","label":"Sweden"},{"value":"Switzerland","label":"Switzerland"},{"value":"Syria","label":"Syria"},{"value":"Taiwan","label":"Taiwan"},{"value":"Tajikistan","label":"Tajikistan"},{"value":"Thailand","label":"Thailand"},{"value":"The Bahamas","label":"The Bahamas"},{"value":"Togo","label":"Togo"},{"value":"Tunisia","label":"Tunisia"},{"value":"Turkey","label":"Turkey"},{"value":"Uganda","label":"Uganda"},{"value":"Ukraine","label":"Ukraine"},{"value":"United Kingdom","label":"United Kingdom"},{"value":"United Republic of Tanzania","label":"United Republic of Tanzania"},{"value":"United States of America","label":"United States of America"},{"value":"Uzbekistan","label":"Uzbekistan"},{"value":"Vanuatu","label":"Vanuatu"},{"value":"Venezuela","label":"Venezuela"},{"value":"Vietnam","label":"Vietnam"},{"value":"West Bank","label":"West Bank"},{"value":"Western Sahara","label":"Western Sahara"},{"value":"Yemen","label":"Yemen"},{"value":"Zambia","label":"Zambia"}]
@@ -125,6 +141,7 @@ $(function() {
     }
 
     function setupAutocomplete(selector, dataSource) {
+        if ($(selector).length === 0) return;
         var widget = $(selector)
             .on("keydown", function(event) {
                 if (
@@ -164,16 +181,223 @@ $(function() {
         };
     }
 
-    // Example usage for your elements
-    setupAutocomplete("#proxy", proxylist);
-    setupAutocomplete("#variableName", variablelist);
-    setupAutocomplete("#archiveTypeIn", archivelist);
-    setupAutocomplete("#countryIn", countrylist);
-    setupAutocomplete("#continentIn", continentlist);
-    setupAutocomplete("#compilationIn", latestCompilations);
-    setupAutocomplete("#seasonality1", seasonalitylist);
+    // Multi-select fields — rendered as chip/tag inputs.
+    // Pass lazy getters for any source that is populated asynchronously (so the autocomplete
+    // picks up the latest value at lookup time, not at setup time).
+    chipifyAutocomplete("#proxy", function() { return proxylist; });
+    chipifyAutocomplete("#variableName", function() { return variablelist; });
+    chipifyAutocomplete("#interpVar", function() { return interpVarList; });
+    chipifyAutocomplete("#archiveTypeIn", function() { return archivelist; });
+    chipifyAutocomplete("#countryIn", function() { return countrylist; });
+    chipifyAutocomplete("#continentIn", function() { return continentlist; });
+    chipifyAutocomplete("#compilationIn", function() { return latestCompilations; });
+    chipifyAutocomplete("#seasonality1", function() { return seasonalitylist; });
 
 });
+
+// After all chipify conversions have run, re-apply PAGE_CONFIG defaults onto the now-hidden
+// inputs and trigger a re-render. This is a safety net for cases where PAGE_CONFIG's inline
+// script set values on the pre-chipify <input> and those values somehow didn't carry through.
+$(function() {
+    var cfg = window.PAGE_CONFIG;
+    if (!cfg) return;
+    function apply(id, value) {
+        if (value == null || value === '') return;
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (!el.value) el.value = value;
+        $(el).trigger('chip:sync');
+    }
+    apply('compilationIn', cfg.compilationFilter);
+    apply('interpVar', cfg.interpVarDefault);
+});
+
+/**
+ * Runtime DOM rewrite: replace a plain <input> with a chip-style multi-select.
+ * The original id and name are preserved on a new hidden input so existing readers
+ * (`document.getElementById(id).value`) keep working without changes.
+ */
+function chipifyAutocomplete(selector, dataSource) {
+    var original = document.querySelector(selector);
+    if (!original) { console.warn('[chipify] no element found for', selector); return; }
+
+    var id = original.id;
+
+    // If the input is already a hidden mirror (server may have served pre-chipified HTML),
+    // just wire up the existing chip container/typing input instead of re-creating them.
+    if (original.type === 'hidden') {
+        var existingWrapper = document.getElementById(id + 'ChipContainer');
+        var existingTyping = document.getElementById(id + 'Typing');
+        if (existingWrapper && existingTyping) {
+            console.log('[chipify] wiring pre-existing chip widget for', selector, 'value:', JSON.stringify(original.value));
+            setupChipAutocomplete('#' + id, '#' + existingTyping.id, '#' + existingWrapper.id, dataSource);
+        } else {
+            console.warn('[chipify] hidden input with no chip container:', selector);
+        }
+        return;
+    }
+    console.log('[chipify]', selector, 'initial value:', JSON.stringify(original.value));
+
+    var parent = original.parentNode;
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'chip-input';
+    wrapper.id = id + 'ChipContainer';
+    if (original.style.width) wrapper.style.width = original.style.width;
+
+    var typing = document.createElement('input');
+    typing.type = 'text';
+    typing.id = id + 'Typing';
+    typing.className = 'chip-input-typing';
+    typing.setAttribute('autocomplete', 'off');
+    typing.placeholder = 'Begin typing for suggestions';
+    wrapper.appendChild(typing);
+
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.id = id;
+    if (original.name) hidden.name = original.name;
+    hidden.value = original.value || '';
+
+    parent.insertBefore(wrapper, original);
+    parent.insertBefore(hidden, wrapper.nextSibling);
+    parent.removeChild(original);
+
+    setupChipAutocomplete('#' + id, '#' + typing.id, '#' + wrapper.id, dataSource);
+}
+
+/**
+ * Chip-style multi-select autocomplete.
+ *   hiddenSelector:    the <input type="hidden"> holding the canonical comma-joined value
+ *   typingSelector:    the visible <input type="text"> inside the chip container
+ *   containerSelector: the .chip-input wrapper
+ *   dataSource:        jQuery-UI autocomplete source (array of strings or {label,value})
+ *
+ * Keeps the hidden input's value as a plain comma-joined list so existing readers
+ * (params(), queryParams) work unchanged. Chips render left-to-right before the typing input.
+ */
+function setupChipAutocomplete(hiddenSelector, typingSelector, containerSelector, dataSource) {
+    var $hidden = $(hiddenSelector);
+    var $typing = $(typingSelector);
+    var $container = $(containerSelector);
+    if ($hidden.length === 0 || $typing.length === 0 || $container.length === 0) return;
+
+    function readChips() {
+        var v = $hidden.val() || "";
+        return v.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    function commit(chips) {
+        var seen = {};
+        chips = chips.filter(function(c){ if (seen[c]) return false; seen[c] = 1; return true; });
+        $hidden.val(chips.join(","));
+        render(chips);
+        $hidden.trigger("change");
+    }
+    function render(chips) {
+        $container.find(".chip").remove();
+        chips.forEach(function(chip) {
+            var $chip = $('<span class="chip"></span>').text(chip);
+            var $x = $('<button type="button" class="chip-x" aria-label="Remove">&times;</button>');
+            $x.on("click", function(e) {
+                e.preventDefault();
+                var cur = readChips();
+                var idx = cur.indexOf(chip);
+                if (idx >= 0) {
+                    cur.splice(idx, 1);
+                    commit(cur);
+                }
+                $typing.focus();
+            });
+            $chip.append($x);
+            $typing.before($chip);
+        });
+    }
+    function addChip(value) {
+        value = (value || "").trim();
+        if (!value) return;
+        var cur = readChips();
+        if (cur.indexOf(value) !== -1) return;
+        cur.push(value);
+        commit(cur);
+    }
+    function removeLastChip() {
+        var cur = readChips();
+        if (cur.length === 0) return;
+        cur.pop();
+        commit(cur);
+    }
+
+    $container.on("mousedown", function(e) {
+        // Clicking empty space inside the wrapper focuses the typing input
+        if (e.target === $container[0]) {
+            e.preventDefault();
+            $typing.focus();
+        }
+    });
+
+    $typing
+        .on("keydown", function(event) {
+            if (event.keyCode === 8 && !$(this).val()) {
+                event.preventDefault();
+                removeLastChip();
+                return;
+            }
+            if (event.keyCode === 13) {
+                var inst = $(this).autocomplete("instance");
+                if (inst && inst.menu.active) {
+                    // Let the autocomplete select callback commit the highlighted suggestion.
+                    return;
+                }
+                event.preventDefault();
+                var val = $(this).val();
+                if (val) { addChip(val); $(this).val(""); }
+                return;
+            }
+            if (event.keyCode === $.ui.keyCode.TAB &&
+                $(this).autocomplete("instance") &&
+                $(this).autocomplete("instance").menu.active) {
+                event.preventDefault();
+            }
+        })
+        .on("blur", function() {
+            var val = $(this).val();
+            if (val) { addChip(val); $(this).val(""); }
+        })
+        .autocomplete({
+            minLength: 0,
+            source: function(request, response) {
+                var ds = (typeof dataSource === 'function') ? dataSource() : dataSource;
+                if (!ds || (!Array.isArray(ds) && typeof ds.length !== 'number')) ds = [];
+                response($.ui.autocomplete.filter(ds, request.term || ""));
+            },
+            focus: function() { return false; },
+            select: function(event, ui) {
+                addChip(ui.item.value);
+                $(this).val("");
+                return false;
+            }
+        });
+
+    var widget = $typing.data("ui-autocomplete");
+    if (widget) {
+        widget._renderItem = function(ul, item) {
+            var canonical = item.value;
+            var synonyms = (item.label || "").slice(canonical.length);
+            if (synonyms.charAt(0) === ',') synonyms = synonyms.slice(1);
+            var $a = $('<a>').append($('<strong>').text(canonical));
+            if (synonyms) {
+                $a.append($('<span>').css({ color: '#aaa', fontSize: '0.88em', marginLeft: '6px' }).text(synonyms));
+            }
+            return $('<li>').append($a).appendTo(ul);
+        };
+    }
+
+    // Re-render if some other code sets the hidden value programmatically (e.g. PAGE_CONFIG defaults).
+    $hidden.on("chip:sync", function() { render(readChips()); });
+
+    // Initial paint (picks up any default already assigned to the hidden input)
+    render(readChips());
+}
 function hideForm(){
 	if (document.getElementById("archivedCompilation").checked){
 		document.getElementById("queryForm").style.display = "none";
@@ -441,6 +665,12 @@ getAllMonths = function(startSpan,endSpan){
             part = qString(document.getElementById("proxy").value,document.getElementById("proxy").name,false);
             if (part) queryParts.push(part);
 
+            var interpVarEl = document.getElementById("interpVar");
+            if (interpVarEl) {
+                part = qString(interpVarEl.value, interpVarEl.name, false);
+                if (part) queryParts.push(part);
+            }
+
             part = qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name,false);
             if (part) queryParts.push(part);
 
@@ -469,6 +699,14 @@ getAllMonths = function(startSpan,endSpan){
             }
             if (JSON.parse(filters1['resolution'])){
                 queryParts.push('medianResolution < ' + document.getElementById("resolutionInput").value);
+            }
+            if (filters1['minLength'] && JSON.parse(filters1['minLength'])){
+                // Avoid '=' in the expression: the server's querystring parser treats '='
+                // as the key/value separator. ">= N" is equivalent to "> N-1" for this filter.
+                var minLenVal = parseFloat(document.getElementById("minLengthInput").value);
+                if (!isNaN(minLenVal)) {
+                    queryParts.push('maxAge - minAge > ' + (minLenVal - 1));
+                }
             }
             if (JSON.parse(filters1['terrestrial'])){
                 queryParts.push('isTerrestrial=' + +document.getElementById("Terrestrial").checked);
@@ -752,6 +990,7 @@ getAllMonths = function(startSpan,endSpan){
                             archiveTypes: rmBlanks(document.getElementById('archiveTypeIn').value) || null,
                             proxy: rmBlanks(document.getElementById('proxy').value) || null,
                             variableName: rmBlanks(document.getElementById('variableName').value) || null,
+                            interpVars: (document.getElementById('interpVar') ? rmBlanks(document.getElementById('interpVar').value) : null) || null,
                             country: rmBlanks(document.getElementById('countryIn').value) || null,
                             continent: rmBlanks(document.getElementById('continentIn').value) || null,
                             compilation: rmBlanks(document.getElementById('compilationIn').value) || null,
@@ -773,6 +1012,9 @@ getAllMonths = function(startSpan,endSpan){
                         }
                         if (JSON.parse(filters1['resolution'])) {
                             queryParams.resolution = parseFloat(document.getElementById('resolutionInput').value);
+                        }
+                        if (filters1['minLength'] && JSON.parse(filters1['minLength'])) {
+                            queryParams.minRecordLength = parseFloat(document.getElementById('minLengthInput').value);
                         }
                         if (JSON.parse(filters1['terrestrial'])) {
                             queryParams.terrestrial = document.getElementById('Terrestrial').checked;

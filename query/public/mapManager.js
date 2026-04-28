@@ -345,14 +345,14 @@
          zoom: 2,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_naturalearth_3857/{z}/{x}/{y}.png',
+         tileLayer: '/tiles_naturalearth_3857/{z}/{x}/{y}.png',
          tileOptions: {
             maxZoom: 7,
             minZoom: 0,
             tileSize: 256,
             attribution: 'Natural Earth'
          },
-         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble_3857/{z}/{x}/{y}.png',
+         imageryTileLayer: '/tiles_bluemarble_3857/{z}/{x}/{y}.png',
          imageryTileOptions: {
             maxZoom: 7,
             minZoom: 0,
@@ -367,14 +367,14 @@
          zoom: 3,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_naturalearth_mollweide/{z}/{x}/{y}.png',
+         tileLayer: '/tiles_naturalearth_mollweide/{z}/{x}/{y}.png',
          tileOptions: {
             tms: true,
             tileSize: 256,
             noWrap: true,
             attribution: 'Natural Earth'
          },
-         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble/{z}/{x}/{y}.png',
+         imageryTileLayer: '/tiles_bluemarble/{z}/{x}/{y}.png',
          imageryTileOptions: {
             tms: true,
             tileSize: 256,
@@ -405,13 +405,13 @@
          zoom: 2,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_naturalearth_3031/{z}/{x}/{y}.png',
+         tileLayer: '/tiles_naturalearth_3031/{z}/{x}/{y}.png',
          tileOptions: {
             attribution: 'Natural Earth',
             tileSize: 256,
             tms: true
          },
-         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble_3031/{z}/{x}/{y}.png',
+         imageryTileLayer: '/tiles_bluemarble_3031/{z}/{x}/{y}.png',
          imageryTileOptions: {
             attribution: 'Blue Marble',
             tileSize: 256,
@@ -441,13 +441,13 @@
          zoom: 2,
          minZoom: 0,
          maxZoom: 7,
-         tileLayer: 'http://localhost:8080/tiles_naturalearth_3995/{z}/{x}/{y}.png',
+         tileLayer: '/tiles_naturalearth_3995/{z}/{x}/{y}.png',
          tileOptions: {
             attribution: 'Natural Earth',
             tileSize: 256,
             tms: true
          },
-         imageryTileLayer: 'http://localhost:8080/tiles_bluemarble_3995/{z}/{x}/{y}.png',
+         imageryTileLayer: '/tiles_bluemarble_3995/{z}/{x}/{y}.png',
          imageryTileOptions: {
             attribution: 'Blue Marble',
             tileSize: 256,
