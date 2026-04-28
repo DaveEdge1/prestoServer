@@ -121,16 +121,18 @@ router.get('/analyze-stream', async (req, res) => {
 
 // POST /correlate - Compute Pearson + DTW for a specific group's TSIDs (on demand)
 router.post('/correlate', async (req, res) => {
-  const { tsids } = req.body;
+  const { tsids, display_unit } = req.body;
 
-  if (!Array.isArray(tsids) || tsids.length < 2) {
-    return res.status(400).json({ error: 'tsids array with at least 2 items is required' });
+  if (!Array.isArray(tsids) || tsids.length < 1) {
+    return res.status(400).json({ error: 'tsids array with at least 1 item is required' });
   }
 
   try {
+    const payload = { tsids };
+    if (typeof display_unit === 'string' && display_unit) payload.display_unit = display_unit;
     const response = await axios.post(
       `${PROXY_ANALYSIS_URL}/correlate`,
-      { tsids },
+      payload,
       { timeout: 180000 }
     );
     res.json(response.data);
@@ -237,7 +239,11 @@ router.get('/preload-status', async (req, res) => {
 
 // POST /save-progress - Persist keep/remove state + notes and email the user a resume link
 router.post('/save-progress', async (req, res) => {
-  const { uniqueID, recon, urlParams, excludedTSIDs, excludedVariableNames, groupNotes } = req.body;
+  const {
+    uniqueID, recon, urlParams,
+    excludedTSIDs, excludedVariableNames, filterState,
+    groupNotes, datasetNotes, savedDatasets, savedGroups,
+  } = req.body;
 
   if (!uniqueID || !recon) {
     return res.status(400).json({ error: 'uniqueID and recon are required' });
@@ -252,7 +258,11 @@ router.post('/save-progress', async (req, res) => {
     urlParams:             typeof urlParams === 'string' ? urlParams : '',
     excludedTSIDs:         Array.isArray(excludedTSIDs) ? excludedTSIDs : [],
     excludedVariableNames: Array.isArray(excludedVariableNames) ? excludedVariableNames : [],
+    filterState:           (filterState && typeof filterState === 'object') ? filterState : null,
     groupNotes:            (groupNotes && typeof groupNotes === 'object') ? groupNotes : {},
+    datasetNotes:          (datasetNotes && typeof datasetNotes === 'object') ? datasetNotes : {},
+    savedDatasets:         Array.isArray(savedDatasets) ? savedDatasets : [],
+    savedGroups:           Array.isArray(savedGroups) ? savedGroups : [],
     savedAt:               new Date().toISOString(),
   };
 
@@ -328,7 +338,7 @@ router.post('/email-progress', async (req, res) => {
 // POST /confirm - Save cleaned TSID selection, return redirect URL
 router.post('/confirm', (req, res) => {
   const {
-    uniqueID, recon, keptTSIDs, removedTSIDs, groupNotes, cleaningGroups,
+    uniqueID, recon, keptTSIDs, removedTSIDs, groupNotes, datasetNotes, cleaningGroups,
     variableFilterExcluded, excludedVariableKeys, includedVariableKeys,
   } = req.body;
 
@@ -359,6 +369,12 @@ router.post('/confirm', (req, res) => {
         Object.entries(groupNotes).filter(([, v]) => typeof v === 'string' && v.trim())
       );
       if (Object.keys(notes).length > 0) payload.groupNotes = notes;
+    }
+    if (datasetNotes && typeof datasetNotes === 'object') {
+      const dsNotes = Object.fromEntries(
+        Object.entries(datasetNotes).filter(([, v]) => typeof v === 'string' && v.trim())
+      );
+      if (Object.keys(dsNotes).length > 0) payload.datasetNotes = dsNotes;
     }
     fs.writeFileSync(cleanedPath, JSON.stringify(payload, null, 2));
     console.log(`Saved cleaned_TSIDs.json: ${keptTSIDs.length} TSIDs for ${uniqueID}_${recon} (${vfTsids.length} excluded by variable filter)`);

@@ -22,15 +22,17 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+import hashlib
 import io
 import json
 import logging
 import math
 import os
+import pickle
 import re
 import time
 import zipfile
-from collections import defaultdict
+from collections import defaultdict, deque
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -51,13 +53,14 @@ app = FastAPI(title="Proxy Analysis Service")
 
 @app.on_event("startup")
 async def _startup_sparql_health():
-    """Warm metadata cache and start hourly SPARQL health probe.
+    """Rehydrate the LiPD cache index and start hourly SPARQL health probe.
 
     The lipdverse SPARQL endpoint periodically returns "XHR didn't work: 0",
     which stalls every /correlate call for ~20 s. This background task probes
     SPARQL once per hour and keeps _sparql_cooldown_until in sync so
     interactive requests never wait on a broken upstream.
     """
+    _cache_rehydrate_on_startup()
     asyncio.create_task(_sparql_health_loop())
 
 # =============================================================================
@@ -107,6 +110,347 @@ def _is_blacklisted(var_name: Optional[str], resolution: Optional[float]) -> boo
     if vn == "thickness" and resolution is not None and resolution <= 1:
         return False
     return True
+
+
+# =============================================================================
+# Per-dataset auto-selection (Tier A/B/C cascade)
+# =============================================================================
+# Archive → ordered variableName priority list. Case-insensitive. Top of list
+# wins. Used as Tier C fallback when neither paleoData_useInGlobalTemperatureAnalysis
+# populated for any record in the dataset.
+ARCHIVE_VARIABLE_PRIORITY: Dict[str, List[str]] = {
+    "coral":               ["d18O", "Sr/Ca", "Mg/Ca", "calcification"],
+    "sclerosponge":        ["d18O", "Sr/Ca", "Mg/Ca"],
+    "wood":                ["trsgi", "TRW", "MXD", "density", "BI", "reflectance", "trmxdsgi", "d18O", "d13C"],
+    "glacierice":          ["d18O", "accumulation", "dD", "d2H", "melt"],
+    "speleothem":          ["d18O", "d13C"],
+    "marinesediment":      ["alkenone", "Uk37", "Mg/Ca", "d18O", "TEX86"],
+    "lakesediment":        ["chironomid", "varveThickness", "thickness", "BSi", "d18O", "d2H", "TEX86", "pollen"],
+    "peat":                ["d13C", "d18O", "testateAmoebae"],
+    "fluvialsediment":     ["thickness", "BSi"],
+    "shoreline":           ["lakeLevel"],
+    "terrestrialsediment": ["d18O", "d13C", "pollen"],
+    "midden":              ["pollen"],
+    "molluskshell":        ["d18O", "Mg/Ca"],
+    "groundice":           ["d18O"],
+    "borehole":            ["temperature"],
+    "documents":           ["phenology"],
+}
+
+# Case-insensitive aliases so "SrCa" matches "Sr/Ca", etc.
+VARIABLE_ALIASES: Dict[str, str] = {
+    "srca":   "sr/ca",
+    "mgca":   "mg/ca",
+    "uk'37":  "uk37",
+}
+
+
+def _norm_var(name: Optional[str]) -> str:
+    """Lower-case and alias-normalize a variable name for priority lookup."""
+    if not name:
+        return ""
+    s = str(name).strip().lower()
+    return VARIABLE_ALIASES.get(s, s)
+
+
+def _variable_rank(archive: Optional[str], variable: Optional[str]) -> int:
+    """Return 0-based priority rank for a (archive, variable) pair. Unknown
+    pairs get a large sentinel so step-5 tiebreakers decide."""
+    if not archive:
+        return 10_000
+    pri = ARCHIVE_VARIABLE_PRIORITY.get(archive.strip().lower())
+    if not pri:
+        return 10_000
+    norm = _norm_var(variable)
+    for i, v in enumerate(pri):
+        if _norm_var(v) == norm:
+            return i
+    return 10_000
+
+
+def _parse_version_tuple(v: str) -> Tuple[int, ...]:
+    """Parse a compilation version string like '2_1_4' into (2,1,4) for ordered
+    comparison. Returns empty tuple on non-numeric input so plain strings sort
+    lower than any versioned entry."""
+    parts = []
+    for chunk in v.split("_"):
+        try:
+            parts.append(int(chunk))
+        except ValueError:
+            return tuple()
+    return tuple(parts)
+
+
+def _tier_a_candidates(dataset_records: List[Dict]) -> List[Dict]:
+    """Return records explicitly flagged useInGlobalTempAnalysis=True.
+    The former inCompilationBeta branch was removed because
+    paleoData_mostRecentCompilations already encodes compilation membership.
+    """
+    return [r for r in dataset_records if r.get("useInGlobalTempAnalysis") is True]
+
+
+def _tier_b_candidates(dataset_records: List[Dict]) -> List[Dict]:
+    """Records with a populated interp_Vars (current pipeline signal)."""
+    out = []
+    for rec in dataset_records:
+        iv = rec.get("interp_Vars")
+        if iv and str(iv).strip() and str(iv).strip().lower() not in ("na", "null", "none"):
+            out.append(rec)
+    return out
+
+
+def _final_sort_key(rec: Dict) -> Tuple:
+    """Tiebreaker: longest age span DESC, finest resolution ASC, tsid ASC."""
+    min_age = rec.get("minAge")
+    max_age = rec.get("maxAge")
+    span = 0.0
+    if min_age is not None and max_age is not None:
+        span = abs(max_age - min_age)
+    res = rec.get("resolution")
+    res_key = res if res is not None else float("inf")
+    return (-span, res_key, rec.get("tsid") or "")
+
+
+def compute_auto_selection(
+    records: List[Dict],
+) -> Tuple[Set[str], Set[str], Set[str], List[Dict]]:
+    """Apply the three-tier cascade (Tier A: combined useInGlobal+inCompilationBeta,
+    Tier B: interp_Vars, Tier C: archive->variable priority) to each dataset.
+
+    Returns:
+        auto_kept_tsids: TSIDs auto-picked as the dataset's primary proxy
+        auto_dropped_tsids: every other record (includes needs-review members)
+        needs_review_tsids: subset of auto_dropped_tsids that the UI must surface
+            for manual resolution before Continue is allowed
+        datasets: list of per-dataset dicts with status/confidence/rationale
+    """
+    # Group by dataset. Prefilter blacklisted + missing lat/lon here.
+    by_dataset: Dict[str, List[Dict]] = defaultdict(list)
+    excluded: Set[str] = set()
+    for rec in records:
+        tsid = rec.get("tsid")
+        if not tsid:
+            continue
+        ds = rec.get("dataSetName")
+        if not ds:
+            # Records without a dataset name can't be grouped; auto-keep them
+            # conservatively so we don't silently drop them.
+            excluded.add(tsid)
+            continue
+        if _is_blacklisted(rec.get("variableName"), rec.get("resolution")):
+            excluded.add(tsid)
+            continue
+        if rec.get("lat") is None or rec.get("lon") is None:
+            excluded.add(tsid)
+            continue
+        by_dataset[ds].append(rec)
+
+    auto_kept: Set[str] = set()
+    auto_dropped: Set[str] = set(excluded)
+    needs_review: Set[str] = set()
+    datasets_out: List[Dict] = []
+
+    for ds_name, ds_recs in by_dataset.items():
+        archive = ds_recs[0].get("archiveType") if ds_recs else None
+        tier = "C"
+        candidates: List[Dict] = []
+        confidence = "low"
+
+        # Hard rule: any record explicitly flagged `useInGlobalTempAnalysis=TRUE`
+        # by a compilation curator is always auto-kept, regardless of how many
+        # such records exist in the dataset. These are presumed primary by the
+        # community; the user can still override by expanding the card.
+        forced_keep = [r for r in ds_recs if r.get("useInGlobalTempAnalysis") is True]
+        if forced_keep:
+            # Sort the forced-keep set so the first variable shown in the UI is
+            # the top-priority proxy for the archive.
+            forced_keep.sort(key=lambda r: (_variable_rank(archive, r.get("variableName")),
+                                            _final_sort_key(r)))
+            tier, candidates, confidence = "A", forced_keep, "high"
+            # Fall through to the single-assignment block below — picked = candidates
+            # (all of them) because forced_keep always auto-picks, never reviews.
+        else:
+            # Tier A (inCompilationBeta latest-version) → Tier B → Tier C cascade
+            tier_a = _tier_a_candidates(ds_recs)
+            if tier_a:
+                tier, candidates, confidence = "A", tier_a, "high"
+            else:
+                tier_b = _tier_b_candidates(ds_recs)
+                if tier_b:
+                    tier, candidates, confidence = "B", tier_b, "medium"
+                else:
+                    # Tier C — everything in the dataset is a candidate; pick by priority
+                    tier, candidates, confidence = "C", list(ds_recs), "low"
+
+        # Sort candidates by priority rank, then final-sort key
+        candidates.sort(key=lambda r: (_variable_rank(archive, r.get("variableName")),
+                                       _final_sort_key(r)))
+
+        picked: List[Dict] = []
+        status = "auto-picked"
+
+        if forced_keep:
+            # Explicit curator flag — keep every flagged record, no review.
+            picked = list(forced_keep)
+        elif tier in ("A", "B"):
+            if len(candidates) == 1:
+                picked = [candidates[0]]
+            else:
+                # ≥2 candidates with no single clear primary. Auto-keep them
+                # all (the plot + comparison table on expand show the user the
+                # full picture); they can uncheck any row they decide to drop.
+                # The `needs-review` status remains as a visual flag so the UI
+                # can highlight these datasets for attention, but no Next-button
+                # gating applies.
+                status = "needs-review"
+                picked = list(candidates)
+        else:  # Tier C
+            if not candidates:
+                continue
+            best_rank = _variable_rank(archive, candidates[0].get("variableName"))
+            top = [r for r in candidates
+                   if _variable_rank(archive, r.get("variableName")) == best_rank]
+            if len(top) == 1 or best_rank < 10_000:
+                # Unambiguous top or at least one match in the priority list
+                picked = [top[0]]
+            else:
+                # No archive/variable match anywhere → pick single longest record
+                picked = [candidates[0]]
+
+        picked_tsids = {r["tsid"] for r in picked}
+        ds_kept, ds_dropped = [], []
+        for r in ds_recs:
+            if r["tsid"] in picked_tsids:
+                auto_kept.add(r["tsid"])
+                ds_kept.append(r["tsid"])
+            else:
+                auto_dropped.add(r["tsid"])
+                ds_dropped.append(r["tsid"])
+
+        datasets_out.append({
+            "dataSetName": ds_name,
+            "archiveType": archive,
+            "status": status,
+            "tier": tier,
+            "confidence": confidence,
+            "autoKeptTsids": ds_kept,
+            "autoDroppedTsids": ds_dropped,
+            "candidateTsids": [r["tsid"] for r in candidates],
+        })
+
+    return auto_kept, auto_dropped, needs_review, datasets_out
+
+
+# =============================================================================
+# Filter-options metadata (for client-side auto-selection panel)
+# =============================================================================
+# Per-archive default whitelist. Flattened from ARCHIVE_VARIABLE_PRIORITY —
+# every variable listed there is treated as a "default on" primary proxy for
+# that archive. Archives present in the data but absent from this map have
+# empty defaults (all variables start unchecked for those).
+_ARCHIVE_DEFAULT_VARS: Dict[str, Set[str]] = {
+    arch.lower(): {_norm_var(v) for v in vars_}
+    for arch, vars_ in ARCHIVE_VARIABLE_PRIORITY.items()
+}
+
+
+def _is_default_variable(archive: Optional[str], variable: Optional[str]) -> bool:
+    """Default-on policy for the Step-1 auto-selection variable list. Every
+    variable present in the data starts checked — the Variable filter is
+    primarily an opt-OUT tool for excluding known-unwanted proxies, not an
+    opt-IN whitelist. The per-archive priority map (ARCHIVE_VARIABLE_PRIORITY)
+    still drives server-side ranking; defaults here only control which
+    checkboxes start selected in the UI.
+    """
+    return bool(variable)
+
+
+_NO_INTERP_VALUE = "(no interpretation)"
+
+
+def _interp_buckets(raw: Optional[str]) -> List[str]:
+    """Split a raw interp_Vars cell into the deduped list of buckets it
+    contributes to. Empty / NA / null → [_NO_INTERP_VALUE]. Multi-valued
+    cells like "temperature|precipitationIsotope" → ["temperature",
+    "precipitationIsotope"]. Duplicates within a cell (e.g. when a TS has
+    the same interpretation in interpretation1_* and interpretation2_*) are
+    collapsed so each record contributes at most 1 to any bucket's count.
+
+    The upstream separator produced by lipdverseR's queryCsv.R is `|`;
+    `;` and `,` are accepted defensively in case cells ever use them."""
+    if raw is None:
+        return [_NO_INTERP_VALUE]
+    s = str(raw).strip()
+    if not s or s.lower() in ("nan", "none", "null", "na"):
+        return [_NO_INTERP_VALUE]
+    seen: Set[str] = set()
+    out: List[str] = []
+    for p in re.split(r"[|;,]", s):
+        v = p.strip()
+        if v and v not in seen:
+            seen.add(v)
+            out.append(v)
+    return out or [_NO_INTERP_VALUE]
+
+
+def compute_filter_options(records: List[Dict]) -> Dict[str, Any]:
+    """Build the filter-options payload consumed by the Step-1 auto-selection
+    panel. Counts are over the raw (non-blacklisted) record set — the client
+    derives "kept" counts by re-running the AND-filter in JS.
+
+    Returns:
+        {
+          "interpVarSummary":  [{"value": str, "count": int}, ...],
+          "variablesByArchive": {
+              "<archive>": [
+                  {"name": str, "count": int, "isDefault": bool}, ...
+              ],
+              ...
+          },
+        }
+    """
+    # interp_Vars counts (including "(no interpretation)" bucket)
+    interp_counts: Dict[str, int] = defaultdict(int)
+    # variablesByArchive: {archive: {variable_name: count}}
+    vars_by_archive: Dict[str, Dict[str, int]] = defaultdict(lambda: defaultdict(int))
+
+    for rec in records:
+        if _is_blacklisted(rec.get("variableName"), rec.get("resolution")):
+            continue
+        for bucket in _interp_buckets(rec.get("interp_Vars")):
+            interp_counts[bucket] += 1
+        archive = (rec.get("archiveType") or "").strip() or "(unknown)"
+        variable = (rec.get("variableName") or "").strip()
+        if variable:
+            vars_by_archive[archive][variable] += 1
+
+    # Sort interp values by count desc, with "(no interpretation)" last
+    interp_summary = sorted(
+        interp_counts.items(),
+        key=lambda kv: (kv[0] == _NO_INTERP_VALUE, -kv[1], kv[0].lower()),
+    )
+    interp_out = [{"value": v, "count": c} for v, c in interp_summary]
+
+    # Sort each archive's variables by count desc
+    variables_out: Dict[str, List[Dict[str, Any]]] = {}
+    for archive, var_counts in vars_by_archive.items():
+        entries = [
+            {
+                "name": name,
+                "count": count,
+                "isDefault": _is_default_variable(archive, name),
+            }
+            for name, count in var_counts.items()
+        ]
+        entries.sort(key=lambda e: (-e["count"], e["name"].lower()))
+        variables_out[archive] = entries
+
+    return {
+        "interpVarSummary": interp_out,
+        "variablesByArchive": variables_out,
+    }
+
+
 CACHE_TTL_SECONDS = 3600  # refresh metadata hourly
 
 # =============================================================================
@@ -126,20 +470,61 @@ class AnalyzeRequest(BaseModel):
 # =============================================================================
 # Metadata loading
 # =============================================================================
+# Prefer the local MySQL `query` table when MYSQL_HOST is configured — that's
+# where the local-primary-proxy updater writes the enriched column
+# (paleoData_useInGlobalTemperatureAnalysis) that doesn't exist in the
+# upstream lipdverseQuery.zip. Fall back to the CSV zip when the DB is
+# unavailable so the service still works standalone.
+MYSQL_HOST = os.environ.get("MYSQL_HOST")
+MYSQL_USER = os.environ.get("MYSQL_USER", "dave")
+MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD")
+MYSQL_DATABASE = os.environ.get("MYSQL_DATABASE", "lipdverse")
+
+
+def _load_metadata_from_mysql() -> pd.DataFrame:
+    import mysql.connector  # local import so non-MySQL deployments stay lean
+    conn = mysql.connector.connect(
+        host=MYSQL_HOST,
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=MYSQL_DATABASE,
+    )
+    try:
+        df = pd.read_sql("SELECT * FROM query", conn)
+    finally:
+        conn.close()
+    return df
+
+
 def load_metadata() -> pd.DataFrame:
     global _metadata_df, _metadata_cache_time
     now = time.time()
     if _metadata_df is not None and (now - _metadata_cache_time) < CACHE_TTL_SECONDS:
         return _metadata_df
 
-    logger.info("Downloading lipdverse metadata from %s", QUERY_CSV_URL)
-    resp = requests.get(QUERY_CSV_URL, timeout=180)
-    resp.raise_for_status()
-    zf = zipfile.ZipFile(io.BytesIO(resp.content))
-    with zf.open(zf.namelist()[0]) as f:
-        df = pd.read_csv(f, low_memory=False)
+    df: Optional[pd.DataFrame] = None
+    if MYSQL_HOST and MYSQL_PASSWORD:
+        try:
+            logger.info("Loading metadata from MySQL %s/%s", MYSQL_HOST, MYSQL_DATABASE)
+            df = _load_metadata_from_mysql()
+            logger.info(
+                "Loaded %d records from MySQL; has_useInGlobal=%s",
+                len(df),
+                "paleoData_useInGlobalTemperatureAnalysis" in df.columns,
+            )
+        except Exception as exc:
+            logger.warning("MySQL load failed, falling back to CSV: %s", exc)
+            df = None
 
-    logger.info("Loaded %d records; columns: %s", len(df), list(df.columns[:25]))
+    if df is None:
+        logger.info("Downloading lipdverse metadata from %s", QUERY_CSV_URL)
+        resp = requests.get(QUERY_CSV_URL, timeout=180)
+        resp.raise_for_status()
+        zf = zipfile.ZipFile(io.BytesIO(resp.content))
+        with zf.open(zf.namelist()[0]) as f:
+            df = pd.read_csv(f, low_memory=False)
+        logger.info("Loaded %d records; columns: %s", len(df), list(df.columns[:25]))
+
     _metadata_df = df
     _metadata_cache_time = now
     return df
@@ -300,23 +685,53 @@ def _convert_time_array(
 
 def _pick_common_unit(units: List[Optional[str]]) -> Optional[str]:
     """
-    Return the most frequent canonical unit in the list, with ties broken by
-    ``_UNIT_PREFERENCE``. Returns None if every entry is None.
+    Canonicalize every series to ``yr BP`` when at least one parseable unit
+    is present in the group. Used by internal duplicate-detection code where
+    the choice of unit doesn't affect downstream math — we pick BP because
+    it's lipdverse's native convention.
+
+    UI-facing /correlate uses `_pick_display_unit` instead, which switches
+    between yr AD and yr BP based on whether the data lives in the common
+    era or extends deeper into the past.
     """
-    counts: Dict[str, int] = defaultdict(int)
-    for u in units:
-        if u:
-            counts[u] += 1
-    if not counts:
-        return None
-    max_n = max(counts.values())
-    top = [u for u, n in counts.items() if n == max_n]
-    if len(top) == 1:
-        return top[0]
-    for pref in _UNIT_PREFERENCE:
-        if pref in top:
-            return pref
-    return sorted(top)[0]
+    if any(u for u in units):
+        return CANONICAL_YR_BP
+    return None
+
+
+def pick_session_display_unit(
+    records: List[Dict],
+    ad_threshold_bp: float = 2000.0,
+) -> str:
+    """Decide the user-facing time unit for an entire data-cleaning session.
+
+    Looks at every record's CSV-derived ``maxAge`` (always yr BP by
+    lipdverseR convention). If a majority of records with a defined maxAge
+    don't extend beyond ``ad_threshold_bp`` years BP, return ``yr AD``;
+    otherwise ``yr BP``. Defaults to yr BP when no records have a defined
+    maxAge.
+
+    This single decision is shipped in /analyze's response and applied
+    consistently to every downstream display in the session (main records
+    table, per-dataset plots, candidate tables, Step 2 plots, and anywhere
+    else that renders an Age or Year axis).
+    """
+    within, beyond = 0, 0
+    for r in records:
+        ma = r.get("maxAge")
+        if ma is None:
+            continue
+        try:
+            ma = float(ma)
+        except (TypeError, ValueError):
+            continue
+        if ma <= ad_threshold_bp:
+            within += 1
+        else:
+            beyond += 1
+    if within == 0 and beyond == 0:
+        return CANONICAL_YR_BP
+    return CANONICAL_YR_AD if within > beyond else CANONICAL_YR_BP
 
 
 def _parse_compilations(comp_str: Optional[str]) -> Set[str]:
@@ -445,6 +860,16 @@ def row_to_record(row: pd.Series) -> Dict[str, Any]:
         _first_present(row, "resolution", "medianResolution", "median_resolution")
     )
 
+    # Parse the useInGlobalTemperatureAnalysis string ("TRUE"/"FALSE"/NA) into
+    # a strict bool. Absent column or any non-TRUE value → False (never None),
+    # so compute_auto_selection can rely on `is True`.
+    ugta_raw = _first_present(
+        row,
+        "paleoData_useInGlobalTemperatureAnalysis",
+        "useInGlobalTemperatureAnalysis",
+    )
+    ugta = isinstance(ugta_raw, str) and ugta_raw.strip().upper() == "TRUE"
+
     return {
         "tsid": _safe_str(_first_present(row, "paleoData_TSid", "TSid", "tsid")),
         "dataSetName": _safe_str(
@@ -453,7 +878,16 @@ def row_to_record(row: pd.Series) -> Dict[str, Any]:
         "archiveType": _safe_str(row.get("archiveType")),
         "variableName": _safe_str(row.get("paleoData_variableName")),
         "proxy": _safe_str(row.get("paleoData_proxy")),
+        "units": _safe_str(row.get("paleoData_units")),
         "compilation": _safe_str(row.get("paleoData_mostRecentCompilations")),
+        "interp_Vars": _safe_str(_first_present(row, "interp_Vars", "interpVars")),
+        "interp_Details": _safe_str(
+            _first_present(row, "interp_Details", "interpDetails")
+        ),
+        "seasonality": _safe_str(
+            _first_present(row, "interpretation1_seasonality", "seasonality")
+        ),
+        "useInGlobalTempAnalysis": ugta,
         "lat": lat,
         "lon": lon,
         "minAge": min_age,
@@ -582,11 +1016,29 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
     pca_coords = compute_pca(records)
 
     # -------------------------------------------------------------------------
-    # Spatial duplicate detection: pairs within SPATIAL_THRESHOLD_KM with same variableName
+    # Filter-options payload for client-side auto-selection (Step 1 panel).
+    # The client re-runs an AND-filter in JS on every toggle, so the server no
+    # longer needs to pick primaries — it just ships the facet counts.
+    # -------------------------------------------------------------------------
+    filter_options = compute_filter_options(records)
+
+    # -------------------------------------------------------------------------
+    # Spatial duplicate detection: pairs within SPATIAL_THRESHOLD_KM with same
+    # variableName, computed over *all* non-blacklisted records. The client
+    # hides groups whose members don't survive the current filter, so we do
+    # not need to recompute when filters change.
     # -------------------------------------------------------------------------
     candidate_pairs: List[tuple] = []  # (i, j, dist_km)
+    kept_indices = [
+        i for i, r in enumerate(records)
+        if r.get("lat") is not None
+        and r.get("lon") is not None
+        and r.get("variableName")
+        and not _is_blacklisted(r.get("variableName"), r.get("resolution"))
+    ]
 
-    for i in range(len(records)):
+    for idx_i in range(len(kept_indices)):
+        i = kept_indices[idx_i]
         ri = records[i]
         lat_i, lon_i = ri.get("lat"), ri.get("lon")
         var_i = ri.get("variableName")
@@ -596,7 +1048,8 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
             continue
         comp_i = _parse_compilations(ri.get("compilation"))
         min_i, max_i = ri.get("minAge"), ri.get("maxAge")
-        for j in range(i + 1, len(records)):
+        for idx_j in range(idx_i + 1, len(kept_indices)):
+            j = kept_indices[idx_j]
             rj = records[j]
             lat_j, lon_j = rj.get("lat"), rj.get("lon")
             var_j = rj.get("variableName")
@@ -695,6 +1148,9 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
         "records": records,
         "duplicateGroups": duplicate_groups,
         "pcaCoords": pca_coords,
+        "interpVarSummary": filter_options["interpVarSummary"],
+        "variablesByArchive": filter_options["variablesByArchive"],
+        "displayTimeUnit": pick_session_display_unit(records),
     }
 
 
@@ -744,25 +1200,50 @@ async def analyze_stream(req: AnalyzeRequest, background_tasks: BackgroundTasks)
                 seen.add(rec["tsid"])
                 records.append(rec)
 
-        yield _sse_event({"phase": "records", "status": "done", "records": records})
+        yield _sse_event({
+            "phase": "records",
+            "status": "done",
+            "records": records,
+            # Single global time unit applied to every Age/Year display in
+            # the session. Client stores + echoes back via /correlate so plots
+            # stay consistent with tables.
+            "displayTimeUnit": pick_session_display_unit(records),
+        })
 
-        # Phase 3: PCA
+        # Phase 2b: filter-options (interp_Vars counts + per-archive variable
+        # whitelist). The client uses these to drive the Step-1 auto-selection
+        # panel and runs the AND-filter in JS on every toggle.
+        filter_options = compute_filter_options(records)
+        yield _sse_event({
+            "phase": "filterOptions",
+            "status": "done",
+            "interpVarSummary": filter_options["interpVarSummary"],
+            "variablesByArchive": filter_options["variablesByArchive"],
+        })
+
+        # Phase 3: PCA (over full record set so the visualization keeps context).
         pca_coords = compute_pca(records)
         yield _sse_event({"phase": "pca", "status": "done", "pcaCoords": pca_coords})
 
-        # Phase 4: spatial duplicate detection with progress.
-        # We iterate by record index i (0..n) and report progress after each
-        # outer-loop step rather than per pair — checking n records is the
-        # natural unit and gives ~one update per ~10ms even for large n.
-        n = len(records)
-        total_records = n
+        # Phase 4: spatial duplicate detection — over all non-blacklisted
+        # records. The client hides groups whose members don't survive the
+        # current filter, so filter changes don't require server recomputation.
+        kept_indices = [
+            i for i, r in enumerate(records)
+            if r.get("lat") is not None
+            and r.get("lon") is not None
+            and r.get("variableName")
+            and not _is_blacklisted(r.get("variableName"), r.get("resolution"))
+        ]
+        total_records = len(kept_indices)
         yield _sse_event({"phase": "duplicates", "status": "progress", "checked": 0, "total": total_records})
         await asyncio.sleep(0)
 
         candidate_pairs: list = []
         last_yield_time = time.time()
 
-        for i in range(n):
+        for idx_i in range(len(kept_indices)):
+            i = kept_indices[idx_i]
             ri = records[i]
             lat_i, lon_i = ri.get("lat"), ri.get("lon")
             var_i = ri.get("variableName")
@@ -773,7 +1254,8 @@ async def analyze_stream(req: AnalyzeRequest, background_tasks: BackgroundTasks)
                 comp_i = _parse_compilations(ri.get("compilation"))
                 var_i_lower = var_i.lower()
                 min_i, max_i = ri.get("minAge"), ri.get("maxAge")
-                for j in range(i + 1, n):
+                for idx_j in range(idx_i + 1, len(kept_indices)):
+                    j = kept_indices[idx_j]
                     rj = records[j]
                     lat_j, lon_j = rj.get("lat"), rj.get("lon")
                     var_j = rj.get("variableName")
@@ -797,7 +1279,7 @@ async def analyze_stream(req: AnalyzeRequest, background_tasks: BackgroundTasks)
             # every 0.5s, regardless of dataset size.
             now = time.time()
             if now - last_yield_time >= 0.5:
-                yield _sse_event({"phase": "duplicates", "status": "progress", "checked": i + 1, "total": total_records})
+                yield _sse_event({"phase": "duplicates", "status": "progress", "checked": idx_i + 1, "total": total_records})
                 last_yield_time = now
                 await asyncio.sleep(0)  # release event loop so the chunk flushes
 
@@ -869,20 +1351,116 @@ async def analyze_stream(req: AnalyzeRequest, background_tasks: BackgroundTasks)
 # =============================================================================
 class CorrelateRequest(BaseModel):
     tsids: List[str]
+    # Optional: the session-wide display unit chosen at /analyze time. When
+    # provided, it overrides the per-request unit detection so every group's
+    # plot shares the same axis as the main records table.
+    display_unit: Optional[str] = None
 
 
 # =============================================================================
 # LiPD file fallback: download directly from lipdverse.org
 # =============================================================================
 
-# Session cache: (dsid, dsver) -> {tsid: [float|None, ...]}
-# Avoids re-downloading the same dataset multiple times within one container run.
-# Only successful downloads are stored; failures are never cached.
-_lipd_series_cache: Dict[tuple, Dict[str, List]] = {}
-# Per-tsid column metadata captured while parsing LiPD files.  Stores units
-# and variableName so callers can figure out the native unit of a time axis
-# (e.g. "yr BP" vs "AD") without re-reading the LiPD.
+# =============================================================================
+# Disk-backed LiPD series cache
+# =============================================================================
+# Heavy per-dataset time series are stored as pickle files under _CACHE_DIR so
+# container memory stays flat regardless of how many datasets have been seen.
+# Two small structures stay resident:
+#   _lipd_index            (dsid, dsver) -> set(tsids in that dataset)
+#   _lipd_column_meta_cache tsid -> {units, variableName}
+# These power /preload-status and _get_time_units without touching disk.
+# On startup the cache directory is walked and both are rebuilt, so a restart
+# is free — no re-download of previously cached datasets.
+
+_CACHE_DIR = os.environ.get("LIPD_CACHE_DIR", "/cache/lipd")
+os.makedirs(_CACHE_DIR, exist_ok=True)
+
+_lipd_index: Dict[Tuple[str, str], Set[str]] = {}
 _lipd_column_meta_cache: Dict[str, Dict[str, Optional[str]]] = {}
+
+
+def _cache_path(dsid: str, dsver: str) -> str:
+    key_bytes = f"{dsid}|{dsver}".encode("utf-8")
+    return os.path.join(_CACHE_DIR, hashlib.sha256(key_bytes).hexdigest() + ".pkl")
+
+
+def _cache_load_one(path: str) -> Optional[Dict[str, Any]]:
+    try:
+        with open(path, "rb") as f:
+            return pickle.load(f)
+    except Exception as exc:
+        logger.warning("LiPD cache: failed to load %s: %s", path, exc)
+        return None
+
+
+def _cache_lookup(dsid: str, dsver: str) -> Optional[Dict[str, List]]:
+    """Return cached {tsid: values} for a dataset, or None if not cached.
+
+    Disk is authoritative — under multi-worker uvicorn, another worker may
+    have written the pickle without updating this worker's in-memory index.
+    We lazy-populate the per-worker index + meta cache on hit.
+    """
+    key = (dsid, dsver)
+    path = _cache_path(dsid, dsver)
+    if not os.path.exists(path):
+        _lipd_index.pop(key, None)
+        return None
+    data = _cache_load_one(path)
+    if data is None:
+        _lipd_index.pop(key, None)
+        return None
+    series = data.get("series", {})
+    if key not in _lipd_index:
+        _lipd_index[key] = set(series.keys())
+        _lipd_column_meta_cache.update(data.get("meta", {}))
+    return series
+
+
+def _cache_store(
+    dsid: str,
+    dsver: str,
+    series: Dict[str, List],
+    meta: Dict[str, Dict[str, Optional[str]]],
+) -> None:
+    path = _cache_path(dsid, dsver)
+    tmp = path + ".tmp"
+    try:
+        with open(tmp, "wb") as f:
+            pickle.dump(
+                {"dsid": dsid, "dsver": dsver, "series": series, "meta": meta},
+                f,
+                protocol=pickle.HIGHEST_PROTOCOL,
+            )
+        os.replace(tmp, path)
+        _lipd_index[(dsid, dsver)] = set(series.keys())
+        _lipd_column_meta_cache.update(meta)
+    except Exception as exc:
+        logger.warning("LiPD cache: failed to write %s: %s", path, exc)
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+
+
+def _cache_rehydrate_on_startup() -> None:
+    if not os.path.isdir(_CACHE_DIR):
+        return
+    loaded = 0
+    for fname in os.listdir(_CACHE_DIR):
+        if not fname.endswith(".pkl"):
+            continue
+        data = _cache_load_one(os.path.join(_CACHE_DIR, fname))
+        if data is None:
+            continue
+        dsid = data.get("dsid")
+        dsver = data.get("dsver")
+        if not dsid or dsver is None:
+            continue
+        _lipd_index[(dsid, dsver)] = set(data.get("series", {}).keys())
+        _lipd_column_meta_cache.update(data.get("meta", {}))
+        loaded += 1
+    logger.info("LiPD cache rehydrated: %d datasets indexed from %s", loaded, _CACHE_DIR)
 
 
 def _resolve_lipd_url(dsid: str, dsver: str) -> Optional[str]:
@@ -923,23 +1501,86 @@ def _resolve_lipd_url(dsid: str, dsver: str) -> Optional[str]:
     return None
 
 
+# =============================================================================
+# Lipdverse circuit breaker
+# =============================================================================
+# Two-level protection against slow/dead lipdverse.org responses dragging
+# /analyze latency into the minutes.
+#
+#   Per-dataset negative cache: skip a (dsid, dsver) for 5 min after it fails
+#   Global breaker: if >50% of recent (60s) outcomes are failures with at
+#                   least 4 samples, open for 90s and short-circuit all calls
+#
+# State is per-worker (each uvicorn worker keeps its own dicts/deque). Under
+# fork that means a transient outage is "discovered" once per worker — minor
+# duplication but no correctness issue.
+
+_lipd_recent_failures: Dict[Tuple[str, str], float] = {}
+_LIPD_FAILURE_COOLDOWN = 300
+
+_lipd_global_open_until: float = 0.0
+_lipd_recent_outcomes: deque = deque(maxlen=40)
+_LIPD_BREAKER_FAIL_RATE = 0.5
+_LIPD_BREAKER_MIN_SAMPLES = 4
+_LIPD_BREAKER_WINDOW = 60
+_LIPD_BREAKER_OPEN_FOR = 90
+
+_LIPD_GET_TIMEOUT = 12
+
+
+def _breaker_should_skip(dsid: str, dsver: str) -> bool:
+    now = time.time()
+    if now < _lipd_global_open_until:
+        return True
+    last_fail = _lipd_recent_failures.get((dsid, dsver))
+    if last_fail is not None and (now - last_fail) < _LIPD_FAILURE_COOLDOWN:
+        return True
+    return False
+
+
+def _breaker_record(dsid: str, dsver: str, success: bool) -> None:
+    global _lipd_global_open_until
+    now = time.time()
+    _lipd_recent_outcomes.append((now, success))
+    if success:
+        _lipd_recent_failures.pop((dsid, dsver), None)
+    else:
+        _lipd_recent_failures[(dsid, dsver)] = now
+
+    recent = [ok for ts, ok in _lipd_recent_outcomes if (now - ts) < _LIPD_BREAKER_WINDOW]
+    if len(recent) >= _LIPD_BREAKER_MIN_SAMPLES:
+        fail_rate = sum(1 for ok in recent if not ok) / len(recent)
+        if fail_rate >= _LIPD_BREAKER_FAIL_RATE and now > _lipd_global_open_until:
+            logger.warning(
+                "LiPD breaker OPEN (fail rate %.0f%%, %d samples in last %ds) — "
+                "skipping lipdverse.org for %ds",
+                fail_rate * 100, len(recent),
+                _LIPD_BREAKER_WINDOW, _LIPD_BREAKER_OPEN_FOR,
+            )
+            _lipd_global_open_until = now + _LIPD_BREAKER_OPEN_FOR
+
+
 def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
     """
     Download one LiPD ZIP, extract ALL column series, and cache by (dsid, dsver).
     Returns the full {tsid: values} dict for that dataset.
     Keyed by version so an updated dataset at the source gets a fresh download.
     """
-    cache_key = (dsid, dsver)
-    if cache_key in _lipd_series_cache:
-        return _lipd_series_cache[cache_key]
+    cached = _cache_lookup(dsid, dsver)
+    if cached is not None:
+        return cached
+
+    if _breaker_should_skip(dsid, dsver):
+        return {}
 
     url = _resolve_lipd_url(dsid, dsver)
     if url is None:
         logger.warning("LiPD fallback: could not resolve URL for dataset %s", dsid)
+        _breaker_record(dsid, dsver, success=False)
         return {}
 
     try:
-        resp = requests.get(url, timeout=45)
+        resp = requests.get(url, timeout=_LIPD_GET_TIMEOUT)
         resp.raise_for_status()
         zf = zipfile.ZipFile(io.BytesIO(resp.content))
 
@@ -948,6 +1589,7 @@ def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
             meta_json = json.load(f)
 
         tsid_to_col: Dict[str, tuple] = {}
+        local_meta: Dict[str, Dict[str, Optional[str]]] = {}
         for paleo in meta_json.get("paleoData", []):
             for table in paleo.get("measurementTable", []):
                 fname = table.get("filename", "")
@@ -956,11 +1598,10 @@ def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
                     n = col.get("number")
                     if t and n is not None and fname:
                         tsid_to_col[t] = (fname, int(n))
-                        # Cache per-column metadata (units / variableName).
-                        # Used later to determine the native unit of a time
-                        # axis so we can normalize all series to a common
-                        # reference frame.
-                        _lipd_column_meta_cache[t] = {
+                        # Per-column metadata (units / variableName). Used
+                        # later to determine the native unit of a time axis
+                        # so we can normalize all series to a common frame.
+                        local_meta[t] = {
                             "units":        _safe_str(col.get("units")),
                             "variableName": _safe_str(col.get("variableName")),
                         }
@@ -992,11 +1633,13 @@ def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
         logger.info(
             "LiPD fallback: loaded %d series from dataset %s", len(dataset_series), dsid
         )
-        _lipd_series_cache[cache_key] = dataset_series
+        _cache_store(dsid, dsver, dataset_series, local_meta)
+        _breaker_record(dsid, dsver, success=True)
         return dataset_series
 
     except Exception as exc:
         logger.warning("LiPD fallback failed for dataset %s: %s", dsid, exc)
+        _breaker_record(dsid, dsver, success=False)
         return {}
 
 
@@ -1009,7 +1652,7 @@ def _is_finite_float(v: Any) -> bool:
 
 def _preload_lipd_cache(groups: List[List[str]]) -> None:
     """
-    Background task: warm _lipd_series_cache one group at a time, in display order.
+    Background task: warm the LiPD disk cache one group at a time, in display order.
     Processing groups sequentially means group 0 is ready first (matches page order).
     Within each group, datasets are downloaded in parallel by _fetch_ts_from_lipd.
     """
@@ -1019,7 +1662,7 @@ def _preload_lipd_cache(groups: List[List[str]]) -> None:
             logger.info("Background preload: group %d complete", i)
         except Exception as exc:
             logger.warning("Background preload: group %d failed: %s", i, exc)
-    logger.info("Background preload done (%d datasets cached)", len(_lipd_series_cache))
+    logger.info("Background preload done (%d datasets cached)", len(_lipd_index))
 
 
 def _get_time_units(time_tsids: List[str]) -> Dict[str, Optional[str]]:
@@ -1204,8 +1847,8 @@ def _fetch_ts_via_orchestrator(tsids: List[str]) -> tuple[Dict[str, List[float]]
 @app.post("/correlate")
 async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
     tsids = req.tsids
-    if len(tsids) < 2:
-        raise HTTPException(status_code=400, detail="Need at least 2 TSIDs")
+    if not tsids:
+        raise HTTPException(status_code=400, detail="tsids array is required")
 
     logger.info("Correlating %d TSIDs: %s", len(tsids), tsids)
     _t0 = time.time()
@@ -1226,14 +1869,37 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
     filtered = df[df[tsid_col].isin(set(tsids))]
     meta = {str(row[tsid_col]): row for _, row in filtered.iterrows()}
 
-    # Map each proxy TSid → its corresponding time-axis TSid
+    # Resolve bare hasTimeTsid pointers to the canonical year/age column TSid.
+    # Many LiPD exports store `paleoData_hasTimeTsid` as the raw LiPD column
+    # ID (e.g. "LPD33714919") while the year row itself carries a suffixed
+    # TSid (e.g. "LPD33714919_iso2k"). Querying the bare ID hits a different
+    # column or nothing at all. Build a lookup from hasTimeTsid → own_TSid
+    # by scanning the year/age rows in every dataset touched by this batch.
+    dataset_names = filtered["dataSetName"].dropna().unique().tolist() if "dataSetName" in filtered.columns else []
+    time_tsid_lookup: Dict[str, str] = {}
+    if dataset_names and "paleoData_variableName" in df.columns:
+        var_lower = df["paleoData_variableName"].astype(str).str.lower()
+        time_rows = df[
+            df["dataSetName"].isin(dataset_names)
+            & var_lower.isin(["year", "age", "yearad", "year ad"])
+        ]
+        for _, row in time_rows.iterrows():
+            htt = _safe_str(_first_present(row, "paleoData_hasTimeTsid"))
+            own = _safe_str(row.get(tsid_col))
+            if htt and own:
+                time_tsid_lookup[htt] = own
+
+    # Map each proxy TSid → its corresponding time-axis TSid (resolved).
     time_tsid_map: Dict[str, str] = {}
     for tsid in tsids:
         row = meta.get(tsid)
         if row is not None:
             t_tsid = _safe_str(_first_present(row, "paleoData_hasTimeTsid"))
             if t_tsid:
-                time_tsid_map[tsid] = t_tsid
+                # Prefer the canonical year-row TSid if present; otherwise
+                # fall back to the raw pointer (which may itself be the
+                # real TSid for datasets without the suffix mismatch).
+                time_tsid_map[tsid] = time_tsid_lookup.get(t_tsid, t_tsid)
 
     # Query proxy + time TSids in one call
     all_query_tsids = list(tsids) + [
@@ -1254,10 +1920,26 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
     # Fallback: download LiPD files when SPARQL failed OR returned incomplete data.
     # A partial SPARQL result (some TSIDs missing) is the common case for newer
     # records not yet indexed in GraphDB — don't wait until ts_values is empty.
+    # Also fall back when proxy/time lengths MISMATCH (SPARQL pre-strips Nones,
+    # which destroys the row alignment we need for per-series time axes).
     missing_proxy = [t for t in tsids if t not in ts_values]
-    if sparql_error or missing_proxy:
+    length_mismatch = False
+    for tsid in tsids:
+        t_tsid = time_tsid_map.get(tsid)
+        if not t_tsid:
+            continue
+        pv = ts_values.get(tsid, [])
+        tv = ts_values.get(t_tsid, [])
+        if pv and tv and len(pv) != len(tv):
+            length_mismatch = True
+            break
+    if sparql_error or missing_proxy or length_mismatch:
         if sparql_error:
             logger.info("SPARQL unavailable — falling back to LiPD file download")
+        elif length_mismatch:
+            logger.info(
+                "SPARQL proxy/time length mismatch — re-fetching via LiPD to preserve row alignment"
+            )
         else:
             logger.info(
                 "SPARQL missing %d/%d proxy TSIDs — supplementing with LiPD fallback",
@@ -1266,9 +1948,12 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
         try:
             lipd_values = _fetch_ts_from_lipd(all_query_tsids)
             if lipd_values:
-                # Merge: fill gaps without overwriting good SPARQL data
+                # Merge: fill gaps without overwriting good SPARQL data.
+                # But when a length mismatch was detected, OVERWRITE with
+                # LiPD values — SPARQL's None-stripped arrays are useless
+                # for time-aligned analysis even when non-empty.
                 for k, v in lipd_values.items():
-                    if k not in ts_values:
+                    if k not in ts_values or length_mismatch:
                         ts_values[k] = v
                 still_missing = [t for t in tsids if t not in ts_values]
                 logger.info(
@@ -1337,7 +2022,13 @@ async def correlate(req: CorrelateRequest) -> Dict[str, Any]:
         tsid: time_unit_by_ttsid.get(time_tsid_map.get(tsid, ""))
         for tsid in tsids
     }
-    common_unit = _pick_common_unit(list(native_unit_by_tsid.values()))
+    # Prefer the session-wide display unit from /analyze when the client
+    # passes it, so every plot in the session shares the same axis. Fall
+    # back to BP when native units are parseable but no hint was supplied.
+    if req.display_unit in (CANONICAL_YR_BP, CANONICAL_YR_AD, CANONICAL_KY_BP, CANONICAL_MA_BP):
+        common_unit = req.display_unit if any(native_unit_by_tsid.values()) else None
+    else:
+        common_unit = _pick_common_unit(list(native_unit_by_tsid.values()))
     if common_unit:
         for tsid in tsids:
             s = series[tsid]
@@ -1883,8 +2574,8 @@ async def exact_duplicates_stream(req: ExactDuplicatesRequest):
 def preload_status() -> Dict[str, Any]:
     """Return the set of TSIDs whose data is already in the cache."""
     ready: Set[str] = set()
-    for dataset_series in _lipd_series_cache.values():
-        ready.update(dataset_series.keys())
+    for tsids in _lipd_index.values():
+        ready.update(tsids)
     return {"readyTsids": list(ready)}
 
 

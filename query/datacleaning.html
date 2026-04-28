@@ -195,6 +195,203 @@
       font-size: 0.82rem;
       color: #555;
     }
+
+    /* Auto-selection filters panel */
+    .auto-filter-sub {
+      border: 1px solid #e5e5e5;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      background: #fafafa;
+    }
+    .auto-filter-sub-head {
+      margin: 0 0 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c5f8a;
+    }
+    .auto-filter-sub-desc {
+      margin: 0 0 8px;
+      font-size: 0.8rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    .auto-filter-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2px 12px;
+    }
+    .archive-var-section {
+      margin-bottom: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 3px;
+      background: #fff;
+    }
+    .archive-var-section > summary {
+      cursor: pointer;
+      padding: 6px 10px;
+      user-select: none;
+      background: #f3f5f8;
+      border-bottom: 1px solid #e5e5e5;
+      font-size: 0.88rem;
+    }
+    .archive-var-section > summary:hover { background: #eaeef3; }
+    .archive-var-section[open] > summary { border-radius: 3px 3px 0 0; }
+    .variable-filter-list-inner {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 2px 12px;
+      padding: 6px 10px;
+    }
+    .ds-review-card.excluded-ds {
+      border-color: #d0d5da;
+      background: #f3f4f6;
+      opacity: 0.8;
+    }
+    .ds-review-card.excluded-ds .ds-review-title { color: #556; }
+
+    .ds-review-card.needs-review {
+      border-color: #f5b841;
+      background: #fff8e5;
+    }
+    .ds-review-card.needs-review .ds-review-header { color: #5a3d00; }
+
+    .ds-table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0 6px;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .ds-table-toolbar .ds-table-count {
+      margin-right: auto;
+      font-variant-numeric: tabular-nums;
+    }
+    .btn-ds-bulk {
+      background: #fff;
+      border: 1px solid #c9c9c9;
+      color: #2a6496;
+      border-radius: 3px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .btn-ds-bulk:hover {
+      background: #f0f6fc;
+      border-color: #2a6496;
+    }
+
+    /* Near-duplicate buckets within the dataset expand view */
+    .ds-bucket { margin: 10px 0; }
+    .ds-bucket-multi {
+      border: 1px solid #e0d6a8;
+      background: #fffdf0;
+      border-radius: 5px;
+      padding: 8px 10px;
+    }
+    .ds-bucket-solo {
+      border: 1px dashed #e0e0e0;
+      border-radius: 5px;
+      padding: 6px 10px;
+      background: #fafafa;
+    }
+    .ds-bucket-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 2px 0 6px;
+      font-size: 0.85rem;
+      color: #5a4a10;
+      flex-wrap: wrap;
+    }
+    .ds-bucket-heading.multi strong { color: #856404; }
+    .ds-bucket-heading.solo {
+      color: #777;
+      font-size: 0.8rem;
+    }
+    .ds-bucket-label {
+      color: #555;
+      font-size: 0.82rem;
+    }
+    .ds-bucket-solo .ds-bucket-label { color: #777; }
+    .ds-bucket-count {
+      margin-left: auto;
+      font-size: 0.78rem;
+      color: #777;
+      font-variant-numeric: tabular-nums;
+    }
+    .preferred-row td { background: #f7f9ed; }
+    .preferred-star {
+      color: #b8860b;
+      font-size: 0.95em;
+      margin-right: 2px;
+    }
+
+    /* Correlation matrix */
+    .corr-matrix-wrap {
+      margin: 8px 0 4px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      background: #fff;
+    }
+    .corr-matrix-summary {
+      cursor: pointer;
+      padding: 6px 10px;
+      background: #f6f7f9;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2c5f8a;
+      border-radius: 4px 4px 0 0;
+      user-select: none;
+    }
+    .corr-matrix-summary:hover { background: #eef1f5; }
+    .corr-matrix-wrap[open] .corr-matrix-summary {
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .corr-matrix-scroll {
+      max-width: 100%;
+      overflow-x: auto;
+      padding: 6px 8px 8px;
+    }
+    .corr-matrix {
+      border-collapse: separate;
+      border-spacing: 1px;
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .corr-matrix th {
+      padding: 3px 6px;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-align: center;
+      white-space: nowrap;
+      background: #fafafa;
+    }
+    .corr-matrix th.corr-row-head {
+      text-align: left;
+      padding-right: 10px;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .corr-matrix td.corr-cell {
+      padding: 3px 7px;
+      text-align: center;
+      min-width: 44px;
+      border-radius: 2px;
+    }
+    .corr-matrix td.corr-cell:not(.diag):not(.na):hover {
+      outline: 2px solid #2a6496;
+      outline-offset: -2px;
+      cursor: pointer;
+    }
+    .corr-matrix td.corr-cell.diag { cursor: default; opacity: 0.8; }
+    .corr-matrix td.corr-cell.na {
+      background: #f5f5f5;
+      color: #aaa;
+      cursor: default;
+    }
     .panel-section .panel-heading {
       background: #f7f7f7;
       padding: 12px 16px;
@@ -540,6 +737,238 @@
     /* ── Empty state ── */
     .empty-state { text-align: center; color: #888; padding: 24px; font-size: 0.95rem; }
 
+    /* ── Step tabs (indicators, not clickable) ── */
+    #step-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 12px 0 16px;
+      padding: 0;
+    }
+    .step-pill {
+      flex: 1 1 0;
+      text-align: center;
+      padding: 9px 14px;
+      background: #e7eef5;
+      color: #7a8a99;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: 1px solid #cbd6e0;
+      border-radius: 6px;
+      user-select: none;
+      letter-spacing: 0.02em;
+      position: relative;
+    }
+    .step-pill.active {
+      background: #2a6496;
+      color: #fff;
+      border-color: #1f4f77;
+    }
+    .step-pill.done {
+      background: #d9ecd0;
+      color: #2b4f22;
+      border-color: #b6d7a8;
+    }
+    .step-pill.active::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -8px;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: #2a6496;
+    }
+
+    /* ── Back button (step 2 footer) ── */
+    .btn-back {
+      background: #f4f4f4;
+      color: #333;
+      border: 1px solid #c9c9c9;
+      padding: 9px 16px;
+      border-radius: 4px;
+      font-size: 0.92rem;
+      cursor: pointer;
+    }
+    .btn-back:hover { background: #e8e8e8; }
+
+    /* ── Dataset-first primary-proxy panel ── */
+    .ds-section-heading {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #444;
+      margin: 6px 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .ds-review-card {
+      border: 1px solid #f5b841;
+      background: #fff8e5;
+      border-radius: 5px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .ds-review-card.resolved,
+    .ds-review-card.auto {
+      border-color: #cddecf;
+      background: #fafbf8;
+    }
+    .ds-review-card.auto .ds-review-header { color: #2b4f22; }
+    .ds-review-card.saved {
+      opacity: 0.6;
+      border-color: #c9d0d6;
+      background: #f4f6f8;
+    }
+    .ds-review-card.saved:hover { opacity: 0.9; }
+    .ds-review-card.saved .ds-review-header strong,
+    .ds-review-card.saved .ds-review-title { color: #666; }
+
+    /* Save button row — sits at the bottom of the expanded detail section */
+    .ds-save-row {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+      margin-top: 4px;
+    }
+    .ds-review-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .ds-review-title { font-weight: 600; font-size: 0.92rem; color: #333; }
+    .ds-review-status {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .ds-review-status.pending { background: #f5b841; color: #5a3d00; }
+    .ds-review-status.done    { background: #b6d7a8; color: #2b4f22; }
+    .ds-review-archive {
+      font-size: 0.75rem;
+      color: #666;
+      background: #e7eef5;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    /* Legacy styles retained for auto-picked chips; new cards use table layout */
+    .ds-candidate-interp { color: #2a6496; font-size: 0.78rem; }
+
+    /* Comparison table for candidates (both needs-review and auto-picked
+       override views). Columns: checkbox, Variable, Proxy, Interp, Detail,
+       Season, Units, Age, Res, TSID, Primary. */
+    .ds-detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 6px;
+      background: #fff;
+    }
+    .ds-detail-table th {
+      text-align: left;
+      font-weight: 600;
+      color: #5d6a78;
+      font-size: 0.70rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 4px 6px;
+      background: #f3f5f8;
+      border-bottom: 1px solid #d9dde4;
+      white-space: nowrap;
+    }
+    .ds-detail-table td {
+      padding: 5px 6px;
+      border-bottom: 1px solid #eee;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .ds-detail-table tr:last-child td { border-bottom: none; }
+    .ds-detail-table tr.primary-row td { background: #f2f9ec; }
+    .ds-detail-table tr.excluded-row td { opacity: 0.55; text-decoration: line-through; }
+    .ds-detail-table td.ds-td-var { font-weight: 600; color: #1f4f77; }
+    .ds-detail-table td.ds-td-tsid { color: #888; font-size: 0.72rem; font-family: monospace; }
+    .ds-detail-table input[type=checkbox] { transform: scale(1.05); cursor: pointer; }
+    .ds-flag {
+      display: inline-block;
+      background: #d9edf7;
+      color: #31708f;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Collapsible needs-review card header (Step-2 style) */
+    .ds-review-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px;
+    }
+    .ds-review-header:hover { background: #fff0c8; border-radius: 4px; }
+    .ds-review-header .expand-icon { color: #856404; }
+    .ds-review-title { font-weight: 600; color: #333; }
+    .ds-review-hint  { color: #7a8a99; font-size: 0.78rem; }
+    .ds-review-details {
+      padding: 6px 4px 2px;
+      border-top: 1px dashed #e8d9a0;
+      margin-top: 4px;
+    }
+    .ds-review-plot {
+      min-height: 220px;
+      height: 220px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      background: #fafbfc;
+      margin: 6px 0 8px;
+    }
+    .ds-review-plot.loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    .ds-picked-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 0.85rem;
+    }
+    .ds-picked-row:hover { background: #fafcff; }
+    .ds-picked-row .ds-review-title { flex: 1 1 auto; min-width: 160px; }
+    .ds-confidence {
+      font-size: 0.70rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .ds-confidence.high   { background: #d9edf7; color: #31708f; }
+    .ds-confidence.medium { background: #fcf8e3; color: #8a6d3b; }
+    .ds-confidence.low    { background: #f2dede; color: #a94442; }
+    .ds-picked-pick { color: #333; font-weight: 500; }
+    .btn-ds-expand {
+      background: none;
+      border: 1px solid #c9c9c9;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      padding: 1px 7px;
+      cursor: pointer;
+      color: #555;
+    }
+    .btn-ds-expand:hover { background: #f0f0f0; }
+    .ds-expanded-candidates { padding: 8px 14px 4px 28px; background: #fafafa; }
+
     /* ── PCA plot ── */
     #pca-plot { width: 100%; height: 400px; }
 
@@ -820,25 +1249,112 @@
     </div>
     <div id="restore-banner"></div>
 
-    <!-- Intro -->
-    <div class="intro-card">
-      <h2>How potential duplicates are identified</h2>
-      Proxy records in your selection are compared using the following criteria to flag groups
-      that may represent the same underlying measurement:
-      <ul>
-        <li><strong>Spatial proximity</strong> — records within <strong>10 km</strong> of each other are considered candidates.</li>
-        <li><strong>Variable match</strong> — only records sharing the same proxy variable (e.g. <em>d18O</em>) are grouped.</li>
-        <li><strong>Compilation exclusion</strong> — records from the same named compilation are assumed to be intentionally distinct and are never grouped.</li>
-        <li><strong>Temporal overlap</strong> — records whose age ranges do not overlap cannot represent the same measurement and are never grouped.</li>
-      </ul>
-      For each flagged group, expand it to load time series plots and similarity metrics
-      (Pearson <em>r</em>, DTW distance). Use the <strong>Keep / Remove</strong> controls to choose
-      which records to carry forward, then click <strong>Save</strong> to collapse the group.
-      When you are finished, click <strong>Continue</strong> at the bottom of the page.
+    <!-- Step tabs -->
+    <div id="step-tabs">
+      <span class="step-pill active" id="pill-step-1">1 · By dataset</span>
+      <span class="step-pill" id="pill-step-2">2 · By location</span>
     </div>
 
-    <!-- Section 1a: Automated review -->
-    <div class="panel-section" id="section-automated-review">
+    <!-- Intro (step-aware; copy swapped on advance/return) -->
+    <div class="intro-card" id="intro-step-1" data-step="1">
+      <h2>Step 1 — Pick primary proxies per dataset</h2>
+      Each LiPD dataset usually contributes a canonical proxy record plus several auxiliary
+      series (uncertainties, metadata columns, secondary measurements). Presto keeps the
+      records that pass all three of the filters below (<em>interpretation variables</em>,
+      <em>valid proxy variables by archive</em>, and optionally <em>compilation membership</em>) —
+      records that fail any filter are excluded. Tweak the filters to broaden or narrow
+      selection; any dataset that falls out entirely is listed so you can spot accidental
+      over-filtering. Click <strong>Next → location review</strong> when you're done.
+    </div>
+
+    <div class="intro-card" id="intro-step-2" data-step="2" style="display:none">
+      <h2>Step 2 — Review duplicates by location</h2>
+      Proxy records that survived step 1 are now compared across datasets using:
+      <ul>
+        <li><strong>Spatial proximity</strong> — records within <strong>10 km</strong> of each other are candidates.</li>
+        <li><strong>Variable match</strong> — only records sharing the same proxy variable (e.g. <em>d18O</em>) are grouped.</li>
+        <li><strong>Compilation exclusion</strong> — records from the same named compilation are assumed to be intentionally distinct.</li>
+        <li><strong>Temporal overlap</strong> — records whose age ranges do not overlap are never grouped.</li>
+      </ul>
+      For each flagged group, expand it to load time series plots and similarity metrics
+      (Pearson <em>r</em>, DTW distance) and pick which record(s) to carry forward.
+    </div>
+
+    <!-- Section: Auto-selection filters (step 1 only) -->
+    <div class="panel-section" id="section-auto-filters" data-step="1">
+      <div class="panel-heading" onclick="togglePanel('auto-filters')">
+        <h3>Auto-selection filters <span class="badge" id="auto-filter-summary-badge"></span></h3>
+        <span class="chevron open" id="chevron-auto-filters">&#9660;</span>
+      </div>
+      <div class="panel-body" id="body-auto-filters">
+        <p style="font-size:0.85rem;color:#555;margin-bottom:8px;">
+          Per-dataset primary proxies are auto-selected by combining three filters
+          with AND logic. Records that pass all enabled filters are kept; the rest
+          are excluded. Tweak any filter to re-run selection live.
+        </p>
+
+        <div class="auto-filter-sub">
+          <h4 class="auto-filter-sub-head">Interpretation variables</h4>
+          <p class="auto-filter-sub-desc">
+            A record passes if any of its <code>interp_Vars</code> values is
+            checked. Unannotated records are grouped into <em>(no interpretation)</em>.
+          </p>
+          <div id="interp-filter-list" class="auto-filter-list"></div>
+        </div>
+
+        <div class="auto-filter-sub">
+          <h4 class="auto-filter-sub-head">Valid proxy variables (per archive)</h4>
+          <p class="auto-filter-sub-desc">
+            Variables from the default priority list are pre-checked. Expand any
+            archive to broaden or narrow.
+          </p>
+          <div id="variables-by-archive-list"></div>
+        </div>
+
+        <div class="auto-filter-sub">
+          <h4 class="auto-filter-sub-head">Compilation membership</h4>
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;cursor:pointer;">
+            <input type="checkbox" id="compilation-toggle">
+            <span>Require compilation membership (curator-vetted records only)</span>
+          </label>
+          <p class="auto-filter-sub-desc" style="margin-top:4px;">
+            Checked against <code>paleoData_mostRecentCompilations</code>. Off by
+            default; enabling it restricts selection to records that belong to at
+            least one compilation, useful for reconstructions that want to lean
+            on curator-vetted data only.
+          </p>
+        </div>
+
+        <div id="auto-filter-summary" class="variable-filter-footer"></div>
+      </div>
+    </div>
+
+    <!-- Section: Dataset-first primary-proxy selection (STEP 1) -->
+    <div class="panel-section" id="section-datasets" data-step="1">
+      <div class="panel-heading" onclick="togglePanel('datasets')">
+        <h3>Primary proxies by dataset <span class="badge" id="datasets-count">0</span></h3>
+        <span class="chevron open" id="chevron-datasets">&#9660;</span>
+      </div>
+      <div class="panel-body" id="body-datasets">
+        <p style="font-size:0.85rem;color:#555;margin-bottom:10px;">
+          Datasets are split into <em>Included</em> (at least one record passes the
+          current filters) and <em>Excluded by filters</em> (nothing passes). Expand any
+          card to see all candidates for that dataset and override the auto-selection.
+        </p>
+        <div id="datasets-needs-review">
+          <!-- multi-kept-series cards (likely review targets) injected by renderDatasetsPanel -->
+        </div>
+        <div id="datasets-excluded" style="margin-top:14px;">
+          <!-- excluded-by-filter cards injected by renderDatasetsPanel -->
+        </div>
+        <div id="datasets-auto-picked" style="margin-top:14px;">
+          <!-- auto-picked (single kept) cards injected by renderDatasetsPanel -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Automated review (STEP 2) -->
+    <div class="panel-section" id="section-automated-review" data-step="2" style="display:none">
       <div class="auto-review-card">
         <button class="btn-remove-exact btn-remove-exact-xl" id="btn-remove-exact" onclick="openRankDialog()" disabled>
           Automated review
@@ -852,26 +1368,8 @@
       </div>
     </div>
 
-    <!-- Section: Variable filter -->
-    <div class="panel-section" id="section-variable-filter">
-      <div class="panel-heading" onclick="togglePanel('variable-filter')">
-        <h3>Variable filter</h3>
-        <span class="chevron" id="chevron-variable-filter">&#9660;</span>
-      </div>
-      <div class="panel-body" id="body-variable-filter" style="display:none;">
-        <p style="font-size:0.85rem;color:#555;margin-bottom:8px;">
-          Uncheck any variableName to exclude all its records from the cleaning
-          session. Metadata and chronology-statistic columns are pre-excluded.
-          Annually-resolved varve <code>thickness</code> records are kept
-          automatically; non-annual <code>thickness</code> rows stay excluded.
-        </p>
-        <div id="variable-filter-list"></div>
-        <div id="variable-filter-summary" class="variable-filter-footer"></div>
-      </div>
-    </div>
-
-    <!-- Section 1: Duplicate Review -->
-    <div class="panel-section" id="section-duplicates">
+    <!-- Section: Duplicate Review (STEP 2) -->
+    <div class="panel-section" id="section-duplicates" data-step="2" style="display:none">
       <div class="panel-heading" onclick="togglePanel('duplicates')">
         <h3>Duplicate Review <span class="badge" id="dup-count">0</span></h3>
         <span class="chevron open" id="chevron-duplicates">&#9660;</span>
@@ -887,8 +1385,8 @@
       </div>
     </div>
 
-    <!-- Section: Temporal Coverage -->
-    <div class="panel-section" id="section-coverage">
+    <!-- Section: Temporal Coverage (STEP 2) -->
+    <div class="panel-section" id="section-coverage" data-step="2" style="display:none">
       <div class="panel-heading" onclick="togglePanel('coverage')">
         <h3>Temporal Coverage</h3>
         <span class="chevron open" id="chevron-coverage">&#9660;</span>
@@ -911,8 +1409,8 @@
       </div>
     </div>
 
-    <!-- Section 2: PCA Explorer -->
-    <div class="panel-section" id="section-pca">
+    <!-- Section: PCA Explorer (STEP 2) -->
+    <div class="panel-section" id="section-pca" data-step="2" style="display:none">
       <div class="panel-heading" onclick="togglePanel('pca')">
         <h3>PCA Explorer</h3>
         <span class="chevron open" id="chevron-pca">&#9660;</span>
@@ -926,8 +1424,8 @@
       </div>
     </div>
 
-    <!-- Section 3: All Records Table -->
-    <div class="panel-section" id="section-table">
+    <!-- Section: All Records Table (both steps) -->
+    <div class="panel-section" id="section-table" data-step="both">
       <div class="panel-heading" onclick="togglePanel('table')">
         <h3>All Records <span class="badge" id="table-count">0</span></h3>
         <span class="chevron open" id="chevron-table">&#9660;</span>
@@ -1108,8 +1606,8 @@
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer style="position:fixed;">
+  <!-- Footer — step 1 (default visible) -->
+  <footer id="footer-step-1" data-step="1" style="position:fixed;">
     <span class="count" id="footer-count">Loading…</span>
     <div id="review-progress" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;">
       <span id="review-progress-text" style="font-size:0.88rem;font-weight:600;color:#2a6496;white-space:nowrap;">0 / 0 duplicate groups reviewed</span>
@@ -1121,6 +1619,19 @@
       <button class="btn-save-progress" id="btn-save-progress" onclick="saveProgress()">Save progress</button>
       <span id="save-progress-status"></span>
       <button class="btn-skip" onclick="skipCleaning()">Skip — use all records</button>
+      <button class="btn-continue" id="btn-next-step-2" onclick="advanceToStep2()" disabled>
+        Next → location review
+      </button>
+    </div>
+  </footer>
+
+  <!-- Footer — step 2 (hidden by default) -->
+  <footer id="footer-step-2" data-step="2" style="position:fixed;display:none;">
+    <span class="count" id="footer-count-step-2">Loading…</span>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn-back" onclick="returnToStep1()">← Back to dataset review</button>
+      <button class="btn-save-progress" id="btn-save-progress-step-2" onclick="saveProgress()">Save progress</button>
+      <button class="btn-skip" onclick="skipCleaning()">Skip — use all records</button>
       <button class="btn-continue" id="btn-continue" onclick="confirmCleaning()" disabled>
         Continue with <span id="continue-count">0</span> selected records →
       </button>
@@ -1129,6 +1640,6 @@
 
 </div>
 
-<script src="/query/datacleaningApp.js?v=20260409f"></script>
+<script src="/query/datacleaningApp.js?v=20260424f"></script>
 </body>
 </html>

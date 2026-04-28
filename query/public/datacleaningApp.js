@@ -26,6 +26,47 @@ let allRecords = [];          // full list of record metadata objects
 let duplicateGroups = [];     // list of duplicate group objects
 let pcaCoords = [];           // per-tsid PCA coordinates
 let excludedTSIDs = new Set(); // TSIDs the user wants to remove
+// Session-wide display unit for every Age/Year axis in the app. Chosen by
+// the server at /analyze time from all input records' maxAge values — yr AD
+// when the majority of records stay within the last 2000 BP, else yr BP.
+let displayTimeUnit = 'yr BP';
+
+// Per-dataset auto-selection, recomputed client-side from filterState on
+// every toggle. Each entry: {dataSetName, archiveType, status,
+// autoKeptTsids, autoDroppedTsids, candidateTsids}. status ∈ {'auto-picked',
+// 'excluded'} — 'excluded' means the AND-filter knocked every candidate out
+// so the dataset contributes zero records.
+let datasetsInfo = [];
+let expandedDatasets = new Set();   // dataset names with manual-override list expanded
+
+// Client-side filter state — the AND-filter driving Step 1 auto-selection.
+// Populated once from the server's /analyze `filterOptions` event, then
+// mutated by the Auto-selection filters panel. Every mutation triggers
+// recomputeDatasets() + refreshAllViews().
+const INTERP_NO_VALUE = '(no interpretation)';
+let filterState = {
+  // interp_Vars buckets currently checked. Defaults to every bucket returned
+  // by the server (all on).
+  interpVars: new Set(),
+  // {archiveName: Set<variableName>} — checked proxy variables per archive.
+  // Seeded from server's `isDefault` flag: every variable present in the data
+  // starts checked. The panel is an opt-OUT tool for excluding unwanted
+  // proxies, not an opt-IN whitelist.
+  variablesByArchive: {},
+  // When true, a record must also be a member of at least one compilation
+  // (paleoData_mostRecentCompilations) to pass. Default off per user
+  // request — casts a wide net by default; curator-vetted-only is opt-in.
+  requireCompilation: false,
+};
+// Server-provided metadata for the filter panel UI. interpVarSummary is
+// [{value, count}]. variablesByArchive is {archive: [{name, count, isDefault}]}.
+let filterOptions = { interpVarSummary: [], variablesByArchive: {} };
+
+// Two-step wizard. currentStep ∈ {1, 2}. Step 1 == dataset-primary review,
+// step 2 == spatial duplicate review. Step 2 is hidden until step 1 is
+// resolved (all needs-review datasets have ≥ 1 picked candidate).
+let currentStep = 1;
+let step2EverEntered = false;  // lazy-render gate for renderDuplicates/Coverage/PCA
 
 // Sort state
 let sortKey = null;
@@ -34,8 +75,12 @@ let sortAsc = true;
 // Flagged TSIDs (members of duplicate groups)
 let flaggedTSIDs = new Set();
 
-// Free-text notes keyed by groupId
+// Free-text notes keyed by groupId (Step 2 duplicate groups)
 const groupNotes = {};
+// Free-text notes keyed by dataSetName (Step 1 dataset-level annotations).
+// Mirrors groupNotes so users can capture reasoning on auto-picks and
+// overrides alongside per-duplicate-group notes.
+const datasetNotes = {};
 
 // =============================================================================
 // Initialise
@@ -84,12 +129,13 @@ function formatCompilationToken(token) {
   return date ? `${name} v${version} (${date})` : `${name} v${version}`;
 }
 
-// Format a multi-compilation string. Records use both ";" and "," as
-// separators depending on the upstream source, so split on either.
+// Format a multi-compilation string. Upstream sources use "|" (the raw
+// `inCompilationBeta` separator written by lipdverseR), as well as ";" and
+// "," in places, so accept all three.
 function formatCompilationString(compStr) {
   if (!compStr) return '';
   return compStr
-    .split(/[;,]/)
+    .split(/[|;,]/)
     .map(s => s.trim())
     .filter(Boolean)
     .map(formatCompilationToken)
@@ -187,6 +233,10 @@ if ('scrollRestoration' in history) {
 
 window.addEventListener('DOMContentLoaded', async () => {
   window.scrollTo(0, 0);
+  // Apply initial step visibility so step-2 panels/footers are hidden from
+  // first paint (inline `style="display:none"` already handles this, but this
+  // keeps pill state + intros consistent if the inline attrs are ever dropped).
+  applyStepVisibility();
   // Fire-and-forget — compilation date annotations upgrade in place once
   // the metadata arrives; callers fall back to the raw string if not ready.
   loadCompilationMetadata();
@@ -273,7 +323,7 @@ function handleStreamEvent(event) {
 
   if (phase === 'records' && event.status === 'done') {
     allRecords = event.records || [];
-    renderVariableFilter();
+    if (event.displayTimeUnit) displayTimeUnit = event.displayTimeUnit;
     renderTable();
     renderCoverage();
     updateFooter();
@@ -281,6 +331,20 @@ function handleStreamEvent(event) {
     hideLoading();
     // Show inline progress for remaining phases
     showInlineProgress('Computing PCA and checking for duplicates…', 0);
+  }
+
+  if (phase === 'filterOptions' && event.status === 'done') {
+    filterOptions = {
+      interpVarSummary: event.interpVarSummary || [],
+      variablesByArchive: event.variablesByArchive || {},
+    };
+    initFilterStateFromServer();
+    renderAutoFilters();
+    recomputeDatasets();          // build datasetsInfo from filter state
+    applyAutoFilterToExclusions(); // seed excludedTSIDs from the filter
+    renderDatasetsPanel();
+    renderTable();
+    updateFooter();
   }
 
   if (phase === 'pca' && event.status === 'done') {
@@ -458,33 +522,6 @@ function renderDuplicates() {
       sharedParts.push(`${firstMeta.lat.toFixed(2)}°, ${firstMeta.lon.toFixed(2)}°`);
     const sharedInfo = sharedParts.join(' · ');
 
-    let recordsHtml = '';
-    group.records.forEach((tsid, idx) => {
-      const meta = allRecords.find(r => r.tsid === tsid) || {};
-
-      recordsHtml += `
-        <div class="dup-record" id="dup-rec-${group.groupId}-${idx}" data-tsid="${tsid}">
-          <div class="record-info">
-            <div class="record-name">${meta.dataSetName || tsid}</div>
-            <div class="record-meta"><code style="font-size:0.82em;color:#555;">${tsid}</code></div>
-            ${meta.compilation ? `<div class="record-meta"><em>${formatCompilationString(meta.compilation)}</em></div>` : ''}
-          </div>
-          <div class="keep-remove">
-            <label>
-              <input type="radio" name="dup-${group.groupId}-${tsid}" value="keep"
-                checked
-                onchange="onDupRadioChange('${tsid}', 'keep')" />
-              Keep
-            </label>
-            <label>
-              <input type="radio" name="dup-${group.groupId}-${tsid}" value="remove"
-                onchange="onDupRadioChange('${tsid}', 'remove')" />
-              Remove
-            </label>
-          </div>
-        </div>`;
-    });
-
     groupEl.innerHTML = `
       <div class="dup-group-header" id="header-${group.groupId}"
            onclick="toggleGroupDetails(${group.groupId})">
@@ -502,9 +539,10 @@ function renderDuplicates() {
         <div class="series-toggle" id="series-toggle-${group.groupId}" style="display:none"></div>
         <div class="dup-group-plot" id="plot-${group.groupId}" style="display:none"></div>
         <div class="detail-warning" id="detail-warning-${group.groupId}" style="display:none"></div>
+        <div id="dup-corr-matrix-${group.groupId}" style="display:none"></div>
+        <div id="dup-metadata-${group.groupId}"></div>
       </div>
       <div class="dup-records" id="dup-records-${group.groupId}" style="display:none">
-        ${recordsHtml}
         <div class="group-notes-row">
           <label class="group-notes-label" for="group-notes-${group.groupId}">Notes</label>
           <textarea id="group-notes-${group.groupId}" class="group-notes-textarea" rows="2"
@@ -632,7 +670,11 @@ function renderCoverage() {
 
   const NBINS = 80;
   const binWidth = (xHigh - xLow) / NBINS;
-  const binCenters = Array.from({ length: NBINS }, (_, i) => xLow + (i + 0.5) * binWidth);
+  // binCenters are in the CSV's native BP unit — convert to the session's
+  // display unit for the Plotly x-axis so the axis agrees with the rest of
+  // the app (main records table, per-dataset plots).
+  const binCenters = Array.from({ length: NBINS }, (_, i) =>
+    _convertTimeValue(xLow + (i + 0.5) * binWidth, 'yr BP', displayTimeUnit));
 
   // Tally counts per category per bin across the clipped window. Records
   // whose range extends past either edge still contribute to every bin
@@ -691,7 +733,14 @@ function renderCoverage() {
   const layout = {
     barmode: 'stack',
     bargap: 0,
-    xaxis: { title: 'Age (yr BP)', autorange: 'reversed' },
+    xaxis: {
+      title: `Age (${displayTimeUnit})`,
+      // Reverse the axis only when the unit is BP so older values sit on
+      // the left per paleoclimate convention. For yr AD, increasing = newer
+      // naturally places recent on the right without reversal.
+      ...(displayTimeUnit === 'yr BP' || displayTimeUnit === 'ka BP' || displayTimeUnit === 'Ma BP'
+        ? { autorange: 'reversed' } : {}),
+    },
     yaxis: { title: 'Proxy records' },
     legend: { orientation: 'h', y: -0.25, traceorder: 'normal' },
     margin: { l: 60, r: 20, t: 20, b: 70 },
@@ -772,6 +821,15 @@ function renderTable() {
   countBadge.textContent = validOnly.length;
   const datasetNote = document.getElementById('table-dataset-note');
   if (datasetNote) datasetNote.textContent = `${validOnly.length} proxy records from ${uniqueDatasets} datasets`;
+  // Dynamic column headers reflect the session's chosen display unit.
+  const thead = document.querySelector('#records-table thead tr');
+  if (thead) {
+    const minTh = thead.querySelector('th[onclick*="minAge"]');
+    const maxTh = thead.querySelector('th[onclick*="maxAge"]');
+    const label = displayTimeUnit === 'yr AD' ? 'yr AD' : 'yr BP';
+    if (minTh) minTh.innerHTML = `Min Age (${label}) <span class="sort-icon">&#8597;</span>`;
+    if (maxTh) maxTh.innerHTML = `Max Age (${label}) <span class="sort-icon">&#8597;</span>`;
+  }
 
   let records = [...validOnly];
 
@@ -810,8 +868,8 @@ function renderTable() {
       <td title="${rec.compilation || ''}">${rec.compilation || '—'}</td>
       <td>${rec.lat != null ? rec.lat.toFixed(2) : '—'}</td>
       <td>${rec.lon != null ? rec.lon.toFixed(2) : '—'}</td>
-      <td>${rec.minAge != null ? Math.round(rec.minAge) : '—'}</td>
-      <td>${rec.maxAge != null ? Math.round(rec.maxAge) : '—'}</td>
+      <td>${_formatAgeCell(rec.minAge)}</td>
+      <td>${_formatAgeCell(rec.maxAge)}</td>
       <td>${rec.resolution != null ? Math.round(rec.resolution) : '—'}</td>`;
 
     tbody.appendChild(tr);
@@ -880,10 +938,1318 @@ function sortTable(key) {
 // =============================================================================
 // Footer counter
 // =============================================================================
+// Two-step wizard — advance / return / visibility
+// =============================================================================
+// Show only the panel-sections (and intro copy) whose `data-step` matches
+// the current step, or is "both". Drives the by-dataset → by-location split.
+function applyStepVisibility() {
+  const targets = document.querySelectorAll('[data-step]');
+  for (const el of targets) {
+    const s = el.getAttribute('data-step');
+    const show = (s === 'both' || Number(s) === currentStep);
+    el.style.display = show ? '' : 'none';
+  }
+  const p1 = document.getElementById('pill-step-1');
+  const p2 = document.getElementById('pill-step-2');
+  if (p1) {
+    p1.classList.toggle('active', currentStep === 1);
+    p1.classList.toggle('done',   currentStep === 2);
+  }
+  if (p2) {
+    p2.classList.toggle('active', currentStep === 2);
+    p2.classList.toggle('done',   false);
+  }
+}
+
+function advanceToStep2() {
+  if (unresolvedReviewCount() > 0) return;
+  currentStep = 2;
+  applyStepVisibility();
+  // First entry: render the step-2 panels. Their DOM was hidden until now so
+  // we couldn't safely call Plotly earlier (it needs a visible container).
+  if (!step2EverEntered) {
+    step2EverEntered = true;
+    if (typeof renderDuplicates === 'function') renderDuplicates();
+    if (typeof renderCoverage   === 'function') renderCoverage();
+    if (typeof renderPCA        === 'function') renderPCA();
+  }
+  updateFooter();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function returnToStep1() {
+  currentStep = 1;
+  applyStepVisibility();
+  updateFooter();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =============================================================================
+// Dataset-first primary-proxy panel
+// =============================================================================
+// Legacy hook — Step 1 no longer forces a "≥ 1 primary per dataset" rule.
+// The AND-filter may leave some datasets with zero survivors (they move to
+// the "Excluded by filters" section), and Step 2's duplicate review handles
+// same-location correlation. Kept as a stub for backward compatibility.
+function unresolvedReviewCount() {
+  return 0;
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function _recordByTsid(tsid) {
+  return allRecords.find(r => r.tsid === tsid) || null;
+}
+
+function toggleDatasetCandidate(tsid) {
+  if (excludedTSIDs.has(tsid)) excludedTSIDs.delete(tsid);
+  else                         excludedTSIDs.add(tsid);
+  syncTableRow(tsid);
+  for (const g of duplicateGroups) {
+    if (g.records.includes(tsid)) {
+      const radioKeep   = document.querySelector(`input[name="dup-${g.groupId}-${tsid}"][value="keep"]`);
+      const radioRemove = document.querySelector(`input[name="dup-${g.groupId}-${tsid}"][value="remove"]`);
+      if (radioKeep)   radioKeep.checked   = !excludedTSIDs.has(tsid);
+      if (radioRemove) radioRemove.checked =  excludedTSIDs.has(tsid);
+    }
+  }
+  // Re-render any correlation matrix that includes this TSID: the Step 1
+  // dataset card it belongs to (if open) and every Step 2 duplicate group
+  // that contains it. Checked/unchecked matches the metadata table below.
+  const ds = datasetsInfo.find(d =>
+    (d.autoKeptTsids || []).includes(tsid) ||
+    (d.autoDroppedTsids || []).includes(tsid) ||
+    (d.candidateTsids  || []).includes(tsid)
+  );
+  if (ds && expandedDatasets.has(ds.dataSetName) && groupState[ds.dataSetName]) {
+    _renderDatasetCorrelationMatrix(ds.dataSetName);
+  }
+  // Step 2 groups containing this TSID: re-plot (refreshGroupViews updates
+  // chips + plot) and re-render the matrix (its row/col set depends on
+  // excludedTSIDs).
+  refreshGroupViews(tsid);
+  for (const g of duplicateGroups) {
+    if (g.records.includes(tsid) && groupState[g.groupId]) {
+      _renderCorrelationMatrix(g.groupId, {
+        containerId: `dup-corr-matrix-${g.groupId}`,
+        onCellClick: 'setGroupPair',
+      });
+    }
+  }
+  // updateFooter() → renderDatasetsPanel() rebuilds the dataset card DOM and
+  // re-renders the plot for any open card via its trailing rehydrate loop.
+  updateFooter();
+}
+
+// Expand / collapse a dataset card. We DO NOT call renderDatasetsPanel()
+// here — a full rebuild discards card DOM and jumps the scroll position
+// because every sibling card re-renders at a new vertical offset. Instead,
+// we toggle the details div's display in place and lazy-populate the
+// candidate table + plot the first time a card opens.
+function toggleDatasetDetails(dsName) {
+  const opening = !expandedDatasets.has(dsName);
+
+  if (opening) expandedDatasets.add(dsName);
+  else         expandedDatasets.delete(dsName);
+
+  const details    = document.getElementById(`ds-details-${dsName}`);
+  const expandIcon = document.getElementById(`ds-expand-${dsName}`);
+  if (details)    details.style.display = opening ? '' : 'none';
+  if (expandIcon) expandIcon.classList.toggle('open', opening);
+
+  if (!opening) return;
+
+  // Populate candidate table if it hasn't been rendered yet (closed cards
+  // ship with an empty #ds-table-${name} wrapper to keep initial HTML small).
+  const ds = datasetsInfo.find(d => d.dataSetName === dsName);
+  if (!ds) return;
+  const tableWrap = document.getElementById(`ds-table-${dsName}`);
+  if (tableWrap && !tableWrap.firstElementChild) {
+    const allTsids = [...(ds.autoKeptTsids || []), ...(ds.autoDroppedTsids || [])];
+    tableWrap.innerHTML = _renderCandidateTable(allTsids, { timeUnit: displayTimeUnit });
+  }
+
+  // Series: fetch if we haven't yet, else re-render the cached state.
+  const st = groupState[dsName];
+  if (!st || !st.series) {
+    _fetchAndRenderDatasetSeries(ds).catch(err =>
+      console.warn('[datacleaning] lazy series load failed:', err));
+  } else {
+    _renderDatasetReviewPlot(dsName);
+    _renderDatasetPairSelector(dsName);
+    _renderDatasetSeriesToggle(dsName);
+    _renderDatasetCorrelationMatrix(dsName);
+    renderDatasetMetrics(dsName);
+  }
+}
+
+// Loaded set for step-1 datasets (mirror of loadedGroups in step 2). A name
+// here means /correlate has been kicked off; we use groupState[name].series
+// to detect completion.
+const loadedDatasets = new Set();
+
+// Saved set for step-1 datasets (mirror of savedGroups in step 2). Clicking
+// "Save" on an expanded dataset card marks it saved — the card dims and
+// collapses. Saved state is visual only; excludedTSIDs already captured the
+// decision.
+const savedDatasets = new Set();
+
+// Save the current selection for a dataset and collapse the card.
+function saveDataset(dsName) {
+  savedDatasets.add(dsName);
+  expandedDatasets.delete(dsName);
+  renderDatasetsPanel();
+  updateFooter();
+}
+
+async function _fetchAndRenderDatasetSeries(ds) {
+  // Fetch the full dataset (kept + dropped) so the plot and table show every
+  // candidate the user could re-include — not just the current auto-pick set.
+  const tsids = [...(ds.autoKeptTsids || []), ...(ds.autoDroppedTsids || [])];
+  if (tsids.length === 0) return;
+  if (loadedDatasets.has(ds.dataSetName)) return;  // already in-flight / done
+  loadedDatasets.add(ds.dataSetName);
+  try {
+    const resp = await fetch('/datacleaning/correlate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tsids, display_unit: displayTimeUnit }),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const series = data.series || {};
+    const pairs  = data.pairs  || [];
+    const commonTimeUnit = data.commonTimeUnit || null;
+    const tsidOrder = Object.keys(series);
+    const tsidColors = {};
+    tsidOrder.forEach((t, i) => { tsidColors[t] = traceColor(i); });
+
+    // Effective non-NaN time range per TSid. Comes from each series' own
+    // time array (the server strips None pairs before returning), so this
+    // is the range where real data exists — not the shared age-axis range
+    // the CSV's minAge/maxAge was derived from. Bucketing uses these so
+    // records with partial coverage inside a shared axis split correctly.
+    const effectiveByTsid = {};
+    for (const tsid of tsidOrder) {
+      const s = series[tsid];
+      const t = s && Array.isArray(s.time) ? s.time.filter(Number.isFinite) : [];
+      if (t.length > 0) {
+        let mn = t[0], mx = t[0];
+        for (let i = 1; i < t.length; i++) {
+          if (t[i] < mn) mn = t[i];
+          if (t[i] > mx) mx = t[i];
+        }
+        // Server's time array is already in `commonTimeUnit`; convert back
+        // to yr BP for our bucketing (CSV's canonical unit).
+        if (commonTimeUnit && commonTimeUnit !== 'yr BP') {
+          mn = _convertTimeValue(mn, commonTimeUnit, 'yr BP');
+          mx = _convertTimeValue(mx, commonTimeUnit, 'yr BP');
+        }
+        // Normalize min/max after potential conversion
+        effectiveByTsid[tsid] = { min: Math.min(mn, mx), max: Math.max(mn, mx) };
+      }
+    }
+
+    groupState[ds.dataSetName] = {
+      series,
+      pairs,
+      tsidColors,
+      commonTimeUnit,
+      effectiveByTsid,
+      // Pre-select the two longest series so the metrics strip shows
+      // something meaningful on first expand.
+      selectedTsids: _pickInitialDatasetPair(tsidOrder, series),
+      seriesFilter: 'all',
+    };
+    // Auto-remove perfect duplicates before the first render so the user
+    // sees the cleaned selection straight away. Skipped if the user has
+    // already touched the dataset (saved / run before) — we don't want to
+    // override a manual decision.
+    const autoRemoved = savedDatasets.has(ds.dataSetName)
+      ? 0 : _autoRemovePerfectDuplicates(ds.dataSetName);
+
+    // Pairs are now loaded — the presumed-unique check in recomputeDatasets
+    // can read them. Always rerun so a dataset that starts needs-review can
+    // promote to auto-picked when all kept pairs have |r| <= 0.5.
+    if (autoRemoved > 0) {
+      // The removal may have moved this dataset out of 'needs-review' into
+      // 'auto-picked'. updateFooter rebuilds the panel, which re-renders the
+      // card (including the candidate table) with the new state.
+      updateFooter();
+    } else {
+      // No removals — rerun recompute in case the correlation-based
+      // promotion applies, then re-render in place.
+      const prevStatus = ds.status;
+      recomputeDatasets();
+      const newDs = datasetsInfo.find(d => d.dataSetName === ds.dataSetName);
+      if (newDs && newDs.status !== prevStatus) {
+        updateFooter();
+      } else {
+        _rerenderDatasetCandidateTable(ds.dataSetName);
+      }
+    }
+
+    _renderDatasetReviewPlot(ds.dataSetName);
+    _renderDatasetPairSelector(ds.dataSetName);
+    _renderDatasetSeriesToggle(ds.dataSetName);
+    _renderDatasetCorrelationMatrix(ds.dataSetName);
+    renderDatasetMetrics(ds.dataSetName);
+  } catch (err) {
+    loadedDatasets.delete(ds.dataSetName);  // allow retry on next expand
+    const el = document.getElementById(`ds-plot-${ds.dataSetName}`);
+    if (el) {
+      el.classList.remove('loading');
+      el.textContent = `Time-series load failed: ${err.message}`;
+      el.style.color = '#c66';
+    }
+  }
+}
+
+// Rebuild the candidate-table wrapper for one expanded dataset using the
+// current groupState context (effective ranges + common time unit). Called
+// after /correlate loads or any time those inputs change, so the expanded
+// table's bucketing and Age-column unit stay aligned with the plot above it.
+function _rerenderDatasetCandidateTable(dsName) {
+  const ds = datasetsInfo.find(d => d.dataSetName === dsName);
+  if (!ds) return;
+  const wrap = document.getElementById(`ds-table-${dsName}`);
+  if (!wrap) return;
+  const allTsids = [...(ds.autoKeptTsids || []), ...(ds.autoDroppedTsids || [])];
+  const st = groupState[dsName];
+  const ctx = {
+    effectiveByTsid: st && st.effectiveByTsid,
+    // Always use the session-wide display unit so every table in the app
+    // agrees — not the per-group commonTimeUnit.
+    timeUnit: displayTimeUnit,
+  };
+  wrap.innerHTML = _renderCandidateTable(allTsids, ctx);
+  _colorDatasetTableRows(dsName);
+}
+
+// Near-identical records are records whose effective time range matches
+// within this tolerance (in yr BP, the CSV's canonical unit). 1 yr or 1 %
+// of the shorter span — whichever is larger — keeps annual records strict
+// while tolerating minor edge differences on long paleoclimate records.
+const _PERFECT_DUP_PEARSON = 0.995;
+function _rangesEffectivelyEqual(a, b) {
+  if (!a || !b) return false;
+  const spanA = Math.abs(a.max - a.min);
+  const spanB = Math.abs(b.max - b.min);
+  const tol = Math.max(1, 0.01 * Math.min(spanA, spanB));
+  return Math.abs(a.min - b.min) <= tol && Math.abs(a.max - b.max) <= tol;
+}
+
+// Within each already-bucketed group of candidates, find clusters of
+// records that are perfect duplicates (Pearson r > 0.995 AND matching
+// effective temporal coverage) and deselect all but the LMR-preferred
+// record in each cluster. Appends a note to datasetNotes so the removal
+// is traceable. Returns the number of TSids auto-removed.
+function _autoRemovePerfectDuplicates(dsName) {
+  const st = groupState[dsName];
+  const ds = datasetsInfo.find(d => d.dataSetName === dsName);
+  if (!st || !ds || !Array.isArray(st.pairs)) return 0;
+
+  // Build fast Pearson lookup
+  const pMap = new Map();
+  for (const p of st.pairs) {
+    const key = [p.tsid1, p.tsid2].sort().join('\x00');
+    pMap.set(key, p.pearson);
+  }
+  const pearsonOf = (a, b) => pMap.get([a, b].sort().join('\x00'));
+
+  const effective = st.effectiveByTsid || {};
+  const allTsids = [...(ds.autoKeptTsids || []), ...(ds.autoDroppedTsids || [])];
+  // Bucket with current effective ranges (same key function the table uses)
+  const buckets = _bucketDatasetCandidates(allTsids, effective);
+
+  const removedTsids = [];
+
+  for (const bucket of buckets) {
+    if (bucket.records.length < 2) continue;
+    const memberTsids = bucket.records.map(r => r.tsid);
+
+    // Union-find over bucket members, linking pairs that are near-identical
+    const parent = {};
+    memberTsids.forEach(t => { parent[t] = t; });
+    const find = (x) => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+    const union = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; };
+
+    for (let i = 0; i < memberTsids.length; i++) {
+      for (let j = i + 1; j < memberTsids.length; j++) {
+        const ti = memberTsids[i], tj = memberTsids[j];
+        const r = pearsonOf(ti, tj);
+        if (r == null || !(r > _PERFECT_DUP_PEARSON)) continue;
+        if (!_rangesEffectivelyEqual(effective[ti], effective[tj])) continue;
+        union(ti, tj);
+      }
+    }
+
+    // Group by cluster root
+    const clusters = new Map();
+    for (const t of memberTsids) {
+      const root = find(t);
+      if (!clusters.has(root)) clusters.set(root, []);
+      clusters.get(root).push(t);
+    }
+    for (const cluster of clusters.values()) {
+      if (cluster.length < 2) continue;
+      // Preferred record — bucket records are already sorted by
+      // _comparePreference, so the first cluster member in bucket order wins.
+      const preferred = bucket.records.find(r => cluster.includes(r.tsid));
+      if (!preferred) continue;
+      for (const t of cluster) {
+        if (t === preferred.tsid) continue;
+        if (!excludedTSIDs.has(t)) {
+          excludedTSIDs.add(t);
+          removedTsids.push(t);
+        }
+      }
+    }
+  }
+
+  if (removedTsids.length === 0) return 0;
+
+  // Recompute datasetsInfo so the needs-review / auto-picked split reflects
+  // the new kept-count immediately.
+  recomputeDatasets();
+
+  const noteLine =
+    `Auto-removed ${removedTsids.length} perfect duplicate${removedTsids.length === 1 ? '' : 's'} ` +
+    `(Pearson r > ${_PERFECT_DUP_PEARSON}, matching temporal coverage): ${removedTsids.join(', ')}.`;
+  const existing = (datasetNotes[dsName] || '').trim();
+  datasetNotes[dsName] = existing && !existing.includes(noteLine)
+    ? `${existing}\n${noteLine}`
+    : (existing.includes(noteLine) ? existing : noteLine);
+
+  // Sync any matching Step 2 duplicate-group radios
+  for (const t of removedTsids) {
+    syncTableRow(t);
+    for (const g of duplicateGroups) {
+      if (!g.records.includes(t)) continue;
+      const keepRadio   = document.querySelector(`input[name="dup-${g.groupId}-${t}"][value="keep"]`);
+      const removeRadio = document.querySelector(`input[name="dup-${g.groupId}-${t}"][value="remove"]`);
+      if (keepRadio)   keepRadio.checked   = false;
+      if (removeRadio) removeRadio.checked = true;
+    }
+  }
+
+  return removedTsids.length;
+}
+
+function _pickInitialDatasetPair(tsidOrder, series) {
+  // Pre-select the two longest series on first expand. Lets the metrics
+  // strip show a non-trivial Pearson/DTW out of the box rather than
+  // requiring the user to click around. Falls back to first two if lengths
+  // are unknown.
+  const byLen = tsidOrder.slice().sort((a, b) => {
+    const la = (series[a] && series[a].values || []).length;
+    const lb = (series[b] && series[b].values || []).length;
+    return lb - la;
+  });
+  return byLen.slice(0, Math.min(2, tsidOrder.length));
+}
+
+// Correlation-matrix heat map. Gradient is white → presto-blue for positive r,
+// white → presto-red for negative. Strong (|r| > 0.6) cells flip text white
+// for legibility; NaN cells render neutral-grey with an em-dash.
+function _correlationColor(r) {
+  if (!Number.isFinite(r)) return '#f5f5f5';
+  const a = Math.min(1, Math.abs(r));
+  if (r >= 0) {
+    const R = Math.round(255 + a * (42 - 255));
+    const G = Math.round(255 + a * (100 - 255));
+    const B = Math.round(255 + a * (150 - 255));
+    return `rgb(${R},${G},${B})`;
+  }
+  const R = Math.round(255 + a * (178 - 255));
+  const G = Math.round(255 + a * (34 - 255));
+  const B = Math.round(255 + a * (68 - 255));
+  return `rgb(${R},${G},${B})`;
+}
+
+function _renderCorrelationMatrix(key, opts) {
+  // Generic renderer keyed by groupState[key]. opts.containerId selects the
+  // target DOM element; opts.onCellClick is the GLOBAL function name to
+  // invoke when a cell is clicked (signature: fn(key, tsidA, tsidB)).
+  // Only checked (non-excluded) records contribute rows/columns — the matrix
+  // follows the same keep/remove state as the metadata table beneath it.
+  // Threshold is on the ORIGINAL series count (>= 3) so a 3-record group
+  // that loses one via exclusion still shows a 2x2 matrix. A group that
+  // starts with only 2 records uses the metric chips instead.
+  const containerId = (opts && opts.containerId) || `ds-corr-matrix-${key}`;
+  const onCellClick = (opts && opts.onCellClick) || 'setDatasetPair';
+  const el = document.getElementById(containerId);
+  const st = groupState[key];
+  if (!el || !st || !st.pairs) return;
+  const allTsids = Object.keys(st.series);
+  if (allTsids.length < 3) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+  const tsids = allTsids.filter(t => !excludedTSIDs.has(t));
+  if (tsids.length < 2) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+
+  const pMap = new Map();
+  for (const p of st.pairs) {
+    const mk = [p.tsid1, p.tsid2].sort().join('\x00');
+    pMap.set(mk, p.pearson);
+  }
+  const rOf = (a, b) => (a === b ? 1 : pMap.get([a, b].sort().join('\x00')));
+
+  const safeKey = String(key).replace(/['"\\]/g, c => '\\' + c);
+  const headerCells = tsids.map(t => {
+    const color = st.tsidColors[t] || '#666';
+    const label = shortName((st.series[t] && st.series[t].label) || t, 10);
+    return `<th style="color:${color}" title="${escapeHtml(t)}">${escapeHtml(label)}</th>`;
+  }).join('');
+
+  const bodyRows = tsids.map(a => {
+    const color = st.tsidColors[a] || '#666';
+    const label = shortName((st.series[a] && st.series[a].label) || a, 18);
+    const cells = tsids.map(b => {
+      const r = rOf(a, b);
+      if (r == null || !Number.isFinite(r)) {
+        return `<td class="corr-cell na">—</td>`;
+      }
+      const bg = _correlationColor(r);
+      const fg = Math.abs(r) > 0.6 ? '#fff' : '#222';
+      if (a === b) {
+        return `<td class="corr-cell diag" style="background:${bg};color:${fg}">1.00</td>`;
+      }
+      const safeA = a.replace(/['"\\]/g, c => '\\' + c);
+      const safeB = b.replace(/['"\\]/g, c => '\\' + c);
+      return `<td class="corr-cell" style="background:${bg};color:${fg}" ` +
+        `title="${escapeHtml(a)} × ${escapeHtml(b)}: r=${r.toFixed(3)}" ` +
+        `onclick="${onCellClick}('${safeKey}', '${safeA}', '${safeB}')">` +
+        `${r.toFixed(2)}</td>`;
+    }).join('');
+    return `<tr><th class="corr-row-head" style="color:${color}" ` +
+      `title="${escapeHtml(a)}">${escapeHtml(label)}</th>${cells}</tr>`;
+  }).join('');
+
+  el.innerHTML =
+    `<details class="corr-matrix-wrap" open>` +
+      `<summary class="corr-matrix-summary">` +
+        `Correlation matrix (Pearson <em>r</em>, ${tsids.length}×${tsids.length}) — ` +
+        `<span style="color:#888;font-weight:400;">click any cell to load that pair</span>` +
+      `</summary>` +
+      `<div class="corr-matrix-scroll">` +
+        `<table class="corr-matrix">` +
+          `<thead><tr><th></th>${headerCells}</tr></thead>` +
+          `<tbody>${bodyRows}</tbody>` +
+        `</table>` +
+      `</div>` +
+    `</details>`;
+  el.style.display = '';
+}
+
+// Step 1 wrapper — keeps existing callers working.
+function _renderDatasetCorrelationMatrix(dsName) {
+  _renderCorrelationMatrix(dsName, {
+    containerId: `ds-corr-matrix-${dsName}`,
+    onCellClick: 'setDatasetPair',
+  });
+}
+
+// Step 2 counterparts of setDatasetPair / setAllDatasetCandidates — they
+// let the mirrored table + correlation matrix inside a duplicate-group
+// card operate on the group's state and member records.
+function setGroupPair(groupId, tsidA, tsidB) {
+  const gid = Number(groupId);
+  const st = groupState[gid];
+  if (!st) return;
+  for (const t of (st.selectedTsids || [])) setChipSelected(gid, t, false);
+  st.selectedTsids = [tsidA, tsidB];
+  const col = st.tsidColors || {};
+  for (const t of st.selectedTsids) setChipSelected(gid, t, true, col[t]);
+  renderGroupMetrics(gid);
+  // Clicking a matrix cell is an explicit "show me these two" gesture;
+  // switch the plot to pair-only so the two traces are actually visible.
+  st.seriesFilter = 'pair';
+  const allBtn  = document.getElementById(`toggle-all-${gid}`);
+  const pairBtn = document.getElementById(`toggle-pair-${gid}`);
+  if (allBtn)  allBtn.classList.remove('active');
+  if (pairBtn) pairBtn.classList.add('active');
+  const plotEl = document.getElementById(`plot-${gid}`);
+  if (plotEl) renderGroupPlot(gid, st.series, st.tsidColors, plotEl, st.selectedTsids);
+}
+
+function setAllGroupCandidates(groupId, selectAll) {
+  const gid = Number(groupId);
+  const group = duplicateGroups.find(g => g.groupId === gid);
+  if (!group) return;
+  const affectedDatasets = new Set();
+  for (const tsid of group.records) {
+    if (selectAll) excludedTSIDs.delete(tsid);
+    else           excludedTSIDs.add(tsid);
+    syncTableRow(tsid);
+    const keepRadio   = document.querySelector(`input[name="dup-${gid}-${tsid}"][value="keep"]`);
+    const removeRadio = document.querySelector(`input[name="dup-${gid}-${tsid}"][value="remove"]`);
+    if (keepRadio)   keepRadio.checked   = selectAll;
+    if (removeRadio) removeRadio.checked = !selectAll;
+    const ds = datasetsInfo.find(d =>
+      (d.autoKeptTsids || []).includes(tsid) ||
+      (d.autoDroppedTsids || []).includes(tsid) ||
+      (d.candidateTsids  || []).includes(tsid)
+    );
+    if (ds) affectedDatasets.add(ds.dataSetName);
+  }
+  if (groupState[gid]) {
+    // Refresh the plot for the bulk-toggled group. Calling refreshGroupViews
+    // on any member picks up the group's full kept/excluded state.
+    if (group.records.length > 0) refreshGroupViews(group.records[0]);
+    _renderCorrelationMatrix(gid, {
+      containerId: `dup-corr-matrix-${gid}`,
+      onCellClick: 'setGroupPair',
+    });
+  }
+  for (const dsName of affectedDatasets) {
+    if (expandedDatasets.has(dsName) && groupState[dsName]) {
+      _renderDatasetCorrelationMatrix(dsName);
+    }
+  }
+  updateFooter();
+}
+
+function setDatasetPair(dsName, tsidA, tsidB) {
+  const st = groupState[dsName];
+  if (!st) return;
+  for (const t of st.selectedTsids) _setDatasetChipSelected(dsName, t, false);
+  st.selectedTsids = [tsidA, tsidB];
+  for (const t of st.selectedTsids) _setDatasetChipSelected(dsName, t, true);
+  renderDatasetMetrics(dsName);
+  // Clicking a cell is an explicit "show me this pair" gesture — flip the
+  // plot to "Selected pair" mode so the two series are actually visible,
+  // not drowned in the full set of traces.
+  st.seriesFilter = 'pair';
+  _renderDatasetSeriesToggle(dsName);
+  _renderDatasetReviewPlot(dsName);
+}
+
+function _renderDatasetSeriesToggle(dsName) {
+  const el = document.getElementById(`ds-series-toggle-${dsName}`);
+  const st = groupState[dsName];
+  if (!el || !st) return;
+  // Only meaningful for 2+ series. Single-series datasets always render "all".
+  const tsidCount = Object.keys(st.series).length;
+  if (tsidCount < 2) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+  const safeName = dsName.replace(/['"\\]/g, c => '\\' + c);
+  const filter = st.seriesFilter || 'all';
+  el.innerHTML =
+    `<span class="series-toggle-label">Show:</span>` +
+    `<button class="toggle-btn${filter === 'all' ? ' active' : ''}" ` +
+      `onclick="setDatasetSeriesFilter('${safeName}', 'all')">All series</button>` +
+    `<button class="toggle-btn${filter === 'pair' ? ' active' : ''}" ` +
+      `onclick="setDatasetSeriesFilter('${safeName}', 'pair')">Selected pair</button>`;
+  el.style.display = '';
+}
+
+function setDatasetSeriesFilter(dsName, filter) {
+  const st = groupState[dsName];
+  if (!st) return;
+  st.seriesFilter = filter;
+  _renderDatasetSeriesToggle(dsName);
+  _renderDatasetReviewPlot(dsName);
+}
+
+function _renderDatasetPairSelector(dsName) {
+  const el = document.getElementById(`ds-pair-selector-${dsName}`);
+  const st = groupState[dsName];
+  if (!el || !st) return;
+  const tsidOrder = Object.keys(st.series);
+  // Only show the selector for 3+ series — with 2 there's a single pair and
+  // the metrics strip already reflects it unambiguously.
+  if (tsidOrder.length < 3) {
+    el.innerHTML = '';
+    el.style.display = 'none';
+    return;
+  }
+  const safeName = dsName.replace(/['"\\]/g, c => '\\' + c);
+  const chips = tsidOrder.map(tsid => {
+    const color = st.tsidColors[tsid];
+    const s = st.series[tsid] || {};
+    const name = shortName(s.label || tsid);
+    return `<button class="record-chip" id="ds-chip-${dsName}-${CSS.escape(tsid)}"
+              style="--chip-color:${color};border-color:${color}"
+              onclick="toggleDatasetRecordSelection('${safeName}', '${tsid}')"
+              title="${escapeHtml(s.label || tsid)}">
+              <span class="record-dot" style="background:${color}"></span>${escapeHtml(name)}</button>`;
+  }).join('');
+  el.innerHTML = `<span class="pair-selector-label">Select two:</span>${chips}`;
+  el.style.display = '';
+  for (const tsid of st.selectedTsids) _setDatasetChipSelected(dsName, tsid, true);
+  for (const tsid of tsidOrder) {
+    if (excludedTSIDs.has(tsid)) {
+      const chip = document.getElementById(`ds-chip-${dsName}-${CSS.escape(tsid)}`);
+      if (chip) chip.classList.add('excluded');
+    }
+  }
+}
+
+function _setDatasetChipSelected(dsName, tsid, selected) {
+  const chip = document.getElementById(`ds-chip-${dsName}-${CSS.escape(tsid)}`);
+  if (chip) chip.classList.toggle('selected', !!selected);
+}
+
+function toggleDatasetRecordSelection(dsName, tsid) {
+  const st = groupState[dsName];
+  if (!st) return;
+  const idx = st.selectedTsids.indexOf(tsid);
+  if (idx >= 0) {
+    st.selectedTsids.splice(idx, 1);
+    _setDatasetChipSelected(dsName, tsid, false);
+  } else {
+    if (st.selectedTsids.length >= 2) {
+      const dropped = st.selectedTsids.shift();
+      _setDatasetChipSelected(dsName, dropped, false);
+    }
+    st.selectedTsids.push(tsid);
+    _setDatasetChipSelected(dsName, tsid, true);
+  }
+  renderDatasetMetrics(dsName);
+  if (st.seriesFilter === 'pair') _renderDatasetReviewPlot(dsName);
+}
+
+function renderDatasetMetrics(dsName) {
+  const st = groupState[dsName];
+  const scoresEl = document.getElementById(`ds-detail-scores-${dsName}`);
+  if (!st || !scoresEl) return;
+
+  let pair = null;
+  if (st.selectedTsids.length === 2) {
+    const [t1, t2] = st.selectedTsids;
+    pair = (st.pairs || []).find(p =>
+      (p.tsid1 === t1 && p.tsid2 === t2) ||
+      (p.tsid1 === t2 && p.tsid2 === t1)
+    );
+  } else if ((st.pairs || []).length === 1) {
+    pair = st.pairs[0];
+  }
+
+  const TIPS = {
+    r:   'Pearson r on overlapping intervals. Range −1..1. ≥ 0.8 suggests the two records co-vary — a strong signal they are duplicates (e.g. a master composite and its constituent cores in the same dataset).',
+    dtw: 'DTW: shape-similarity score (0 identical, 1 opposite). < 0.03 ≈ near-identical series.',
+  };
+  const na = (label, title) => chip(label, '—', 'na', title);
+
+  if (!pair) {
+    const hint = st.selectedTsids.length === 1
+      ? '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select one more record</span>'
+      : '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select two records to compare</span>';
+    scoresEl.innerHTML = `<div class="metrics-strip">${na('Pearson r', TIPS.r)}${na('DTW', TIPS.dtw)}${hint}</div>`;
+  } else {
+    const rChip   = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > 0.8 ? '' : 'warn', TIPS.r);
+    const dtwChip = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < 0.03    ? '' : 'warn', TIPS.dtw);
+    scoresEl.innerHTML = `<div class="metrics-strip">${rChip}${dtwChip}</div>`;
+  }
+  scoresEl.style.display = '';
+}
+
+function _renderDatasetReviewPlot(dsName) {
+  const el = document.getElementById(`ds-plot-${dsName}`);
+  const st = groupState[dsName];
+  if (!el || !st) return;
+  el.classList.remove('loading');
+  el.textContent = '';
+  let filter;
+  if (st.seriesFilter === 'pair' && st.selectedTsids && st.selectedTsids.length > 0) {
+    filter = st.selectedTsids.slice();
+  } else {
+    // 'all' mode — every kept (non-excluded) series in the dataset.
+    filter = Object.keys(st.series).filter(t => !excludedTSIDs.has(t));
+  }
+  // renderGroupPlot doubles as the step-1 plotter — state keyed by dsName.
+  renderGroupPlot(dsName, st.series, st.tsidColors, el, filter);
+  // Color the Variable column cells to match the Plotly trace colors, so
+  // the user can visually link each row to its plotted line. Matches the
+  // pattern loadGroupDetails uses on .record-name in step 2.
+  _colorDatasetTableRows(dsName);
+}
+
+function _colorDatasetTableRows(dsName) {
+  const st = groupState[dsName];
+  if (!st || !st.tsidColors) return;
+  const wrapper = document.getElementById(`ds-table-${dsName}`);
+  if (!wrapper) return;
+  _colorCandidateTableRows(wrapper, st.tsidColors);
+}
+
+// Color the Variable column of a rendered candidate table so each row's
+// label matches its plotted trace color. Walks every `[data-tsid]` row
+// across all sub-tables (near-duplicate buckets each produce one).
+function _colorCandidateTableRows(wrapper, tsidColors) {
+  if (!wrapper || !tsidColors) return;
+  for (const tr of wrapper.querySelectorAll('tr[data-tsid]')) {
+    const tsid = tr.getAttribute('data-tsid');
+    const color = tsidColors[tsid];
+    if (!color) continue;
+    const varCell = tr.querySelector('td.ds-td-var');
+    if (varCell) varCell.style.color = color;
+  }
+}
+
+// Time-unit conversion. lipdverseR's `minAge` / `maxAge` are always in yr BP
+// (its derivedMetadata converts yr AD → BP before taking min/max), so that's
+// our canonical source unit. Targets we support are the canonical units the
+// server picks in `_pick_common_unit`.
+function _convertTimeValue(v, src, dst) {
+  if (!Number.isFinite(v) || !src || !dst || src === dst) return v;
+  // Normalize to yr BP as an intermediate
+  let bp;
+  if (src === 'yr BP')      bp = v;
+  else if (src === 'yr AD') bp = 1950 - v;
+  else if (src === 'ka BP') bp = v * 1000;
+  else if (src === 'Ma BP') bp = v * 1_000_000;
+  else return v;
+  if (dst === 'yr BP') return bp;
+  if (dst === 'yr AD') return 1950 - bp;
+  if (dst === 'ka BP') return bp / 1000;
+  if (dst === 'Ma BP') return bp / 1_000_000;
+  return v;
+}
+
+// Convert a CSV-native BP age value into the session's display unit and
+// return a pretty string for the main records table.
+function _formatAgeCell(bpValue) {
+  if (bpValue == null || !Number.isFinite(bpValue)) return '—';
+  const v = _convertTimeValue(bpValue, 'yr BP', displayTimeUnit);
+  return _formatAgeValue(v, displayTimeUnit);
+}
+
+function _formatAgeValue(v, unit) {
+  if (!Number.isFinite(v)) return '?';
+  if (unit === 'ka BP' || unit === 'Ma BP') return v.toFixed(2).replace(/\.?0+$/, '');
+  const abs = Math.abs(v);
+  if (abs >= 100) return Math.round(v).toString();
+  if (abs >= 1)   return v.toFixed(1).replace(/\.0$/, '');
+  return v.toFixed(2).replace(/\.?0+$/, '');
+}
+
+// Render the age range for a record in the chosen target unit. `effective`
+// is the optional non-NaN min/max from the loaded series; falls back to the
+// CSV minAge/maxAge. The CSV values are ALWAYS interpreted as yr BP.
+function _ageRangeStr(r, targetUnit, effective) {
+  const unit = targetUnit || 'yr BP';
+  const loSrc = effective && Number.isFinite(effective.min) ? effective.min : r.minAge;
+  const hiSrc = effective && Number.isFinite(effective.max) ? effective.max : r.maxAge;
+  const lo = Number.isFinite(loSrc) ? _convertTimeValue(loSrc, 'yr BP', unit) : null;
+  const hi = Number.isFinite(hiSrc) ? _convertTimeValue(hiSrc, 'yr BP', unit) : null;
+  if (lo == null && hi == null) return '';
+  // For AD, chronological order is (older, younger) = (smaller, larger).
+  // For BP, it's the reverse. Always print as "older–younger" based on unit.
+  let left, right;
+  if (unit === 'yr AD') {
+    left  = (lo != null && hi != null) ? Math.min(lo, hi) : (lo ?? hi);
+    right = (lo != null && hi != null) ? Math.max(lo, hi) : (lo ?? hi);
+  } else {
+    left  = (lo != null && hi != null) ? Math.max(lo, hi) : (lo ?? hi);
+    right = (lo != null && hi != null) ? Math.min(lo, hi) : (lo ?? hi);
+  }
+  return `${_formatAgeValue(left, unit)}–${_formatAgeValue(right, unit)}`;
+}
+
+function _resStr(r) {
+  if (r.resolution == null || !Number.isFinite(r.resolution)) return '';
+  return r.resolution < 1 ? r.resolution.toFixed(2) : String(Math.round(r.resolution));
+}
+
+function _td(value, cls) {
+  const safe = (value == null || value === '' || value === 'NA') ? '—' : escapeHtml(value);
+  return `<td${cls ? ` class="${cls}"` : ''}>${safe}</td>`;
+}
+
+// ── Near-duplicate bucketing ───────────────────────────────────────────────
+// Group a dataset's candidate records by metadata so near-duplicates sit
+// together for review. Key is (variableName, units, interp_Vars set,
+// seasonality, resTier, spanTier, ageMidTier). resTier + spanTier are log10-
+// order-of-magnitude buckets so "annual" / "sub-annual" / "centennial" end
+// up in distinct groups without being overly sensitive to floating-point
+// rounding in medianResolution.
+function _resTier(r) {
+  if (!Number.isFinite(r) || r <= 0) return 'unknown';
+  return Math.round(Math.log10(r)).toString();
+}
+function _spanTier(minAge, maxAge) {
+  if (!Number.isFinite(minAge) || !Number.isFinite(maxAge)) return 'unknown';
+  const span = Math.abs(maxAge - minAge);
+  if (span <= 0) return '0';
+  return Math.round(Math.log10(span)).toString();
+}
+function _ageMidTier(minAge, maxAge) {
+  // Mid-point rounded to the span tier so two records with slightly different
+  // starts but matching length end up in the same bucket. Prevents 01A
+  // (-43..56) and a hypothetical (−50..50) from landing apart.
+  if (!Number.isFinite(minAge) || !Number.isFinite(maxAge)) return 'unknown';
+  const mid = (minAge + maxAge) / 2;
+  const span = Math.abs(maxAge - minAge) || 1;
+  // Round mid to ~10% of span so minor offsets don't split the bucket.
+  const gran = Math.max(1, Math.pow(10, Math.floor(Math.log10(span)) - 1));
+  return (Math.round(mid / gran) * gran).toString();
+}
+function _interpKey(raw) {
+  return interpBucketsFor({ interp_Vars: raw }).slice().sort().join('|');
+}
+
+function _bucketKey(r, effective) {
+  // `effective` overrides minAge/maxAge from the CSV with the range actually
+  // covered by non-NaN values. The CSV values come from the shared age axis
+  // and collapse genuinely different coverage within one dataset into the
+  // same bucket.
+  const lo = effective && Number.isFinite(effective.min) ? effective.min : r.minAge;
+  const hi = effective && Number.isFinite(effective.max) ? effective.max : r.maxAge;
+  return [
+    (r.variableName || '').trim().toLowerCase(),
+    (r.units || '').trim().toLowerCase(),
+    _interpKey(r.interp_Vars),
+    (r.interp_Details || '').trim().toLowerCase(),
+    (r.seasonality || '').trim().toLowerCase(),
+    _resTier(r.resolution),
+    _spanTier(lo, hi),
+    _ageMidTier(lo, hi),
+  ].join(' | ');
+}
+
+// Recon-specific preference ranking. LMR is an annual reconstruction, so
+// annual resolution + any declared seasonality are the primary signals for
+// picking the best record within a near-duplicate bucket. Other recons fall
+// back to a neutral rank (longest span → finest resolution → tsid alpha)
+// since we don't know their target cadence.
+//
+// Returns a sort key tuple — lower sorts first. Fields that are "more is
+// better" (span, nComps) are negated.
+function _isLmrRecon() {
+  return typeof RECON === 'string' && RECON === 'LMR';
+}
+
+function _recordPreferenceKey(r) {
+  if (_isLmrRecon()) {
+    const res = Number.isFinite(r.resolution) ? r.resolution : NaN;
+    const annualDistance = Number.isFinite(res) && res > 0
+      ? Math.abs(Math.log10(res))
+      : 99;
+    const hasSeason = r.seasonality && String(r.seasonality).trim() &&
+                      String(r.seasonality).trim().toLowerCase() !== 'na' ? 0 : 1;
+    const span = Number.isFinite(r.minAge) && Number.isFinite(r.maxAge)
+      ? -Math.abs(r.maxAge - r.minAge) : 0;
+    const nComps = (r.compilation || '').split(/[|;,]/).filter(Boolean).length;
+    return [annualDistance, hasSeason, span, -nComps, r.tsid || ''];
+  }
+  // Neutral rank for non-LMR recons.
+  const span = Number.isFinite(r.minAge) && Number.isFinite(r.maxAge)
+    ? -Math.abs(r.maxAge - r.minAge) : 0;
+  const res = Number.isFinite(r.resolution) && r.resolution > 0
+    ? r.resolution : Infinity;
+  return [span, res, r.tsid || ''];
+}
+
+function _comparePreference(a, b) {
+  const ka = _recordPreferenceKey(a);
+  const kb = _recordPreferenceKey(b);
+  for (let i = 0; i < ka.length; i++) {
+    if (ka[i] < kb[i]) return -1;
+    if (ka[i] > kb[i]) return 1;
+  }
+  return 0;
+}
+
+function _bucketLabel(recs, effectiveByTsid) {
+  // Short human label summarising what makes a bucket distinct. Uses the
+  // effective time range (non-NaN values) when available, falling back to
+  // the CSV's shared-axis range otherwise.
+  const r = recs[0];
+  const eff = effectiveByTsid && effectiveByTsid[r.tsid];
+  const lo = eff && Number.isFinite(eff.min) ? eff.min : r.minAge;
+  const hi = eff && Number.isFinite(eff.max) ? eff.max : r.maxAge;
+
+  const res = Number.isFinite(r.resolution) ? r.resolution : null;
+  let resTxt;
+  if (res == null)      resTxt = 'unknown res';
+  else if (res < 0.5)   resTxt = `${res.toFixed(2)}-yr (sub-annual)`;
+  else if (res <= 1.5)  resTxt = 'annual';
+  else if (res < 10)    resTxt = `${res.toFixed(0)}-yr`;
+  else if (res < 100)   resTxt = `${Math.round(res)}-yr (decadal)`;
+  else                  resTxt = `${Math.round(res)}-yr (centennial+)`;
+
+  let spanTxt;
+  if (Number.isFinite(lo) && Number.isFinite(hi)) {
+    const span = Math.abs(hi - lo);
+    if (span < 500)            spanTxt = `${Math.round(span)}-yr span`;
+    else if (span < 10000)     spanTxt = `${(span / 1000).toFixed(1)}-kyr span`;
+    else                       spanTxt = `${Math.round(span / 1000)}-kyr span`;
+  } else {
+    spanTxt = 'unknown span';
+  }
+
+  const season = (r.seasonality || '').trim();
+  const seasonTxt = season && season.toLowerCase() !== 'na' ? ` · ${season}` : '';
+  return `${r.variableName || 'unknown'} · ${resTxt} · ${spanTxt}${seasonTxt}`;
+}
+
+// Split the TSids for one dataset into near-duplicate buckets. Each bucket
+// is ordered by LMR preference (annual + seasonality first). Returns an
+// ordered list of buckets, multi-record buckets first, then solo buckets,
+// each outer group sorted by the preference of its first record.
+//
+// `effectiveByTsid` (optional): {tsid: {min, max}} with the non-NaN time
+// range per TSid (populated after /correlate loads). When absent, bucketing
+// falls back to the CSV's shared-axis minAge/maxAge.
+function _bucketDatasetCandidates(tsids, effectiveByTsid) {
+  const byKey = new Map();
+  for (const tsid of tsids || []) {
+    const r = _recordByTsid(tsid);
+    if (!r) continue;
+    const eff = effectiveByTsid && effectiveByTsid[tsid];
+    const key = _bucketKey(r, eff);
+    if (!byKey.has(key)) byKey.set(key, { key, records: [] });
+    byKey.get(key).records.push(r);
+  }
+  const buckets = [];
+  for (const { records } of byKey.values()) {
+    records.sort(_comparePreference);
+    buckets.push({
+      label: _bucketLabel(records, effectiveByTsid),
+      records,
+    });
+  }
+  buckets.sort((a, b) => {
+    // Multi-record buckets first (they need review), then solo
+    const mA = a.records.length > 1 ? 0 : 1;
+    const mB = b.records.length > 1 ? 0 : 1;
+    if (mA !== mB) return mA - mB;
+    return _comparePreference(a.records[0], b.records[0]);
+  });
+  return buckets;
+}
+
+// Candidate rows as a side-by-side comparison table so users can visually
+// scan variableName / proxy / interp / detail / season / units / age / res /
+// compilation / tsid in aligned columns. Now grouped into near-duplicate
+// buckets — records that match on metadata-equivalent fields sit together
+// in a framed sub-table. The top record per multi-record bucket is marked
+// with a ★ to hint at the LMR-preferred choice (annual + seasonality
+// first); it is NOT auto-selected.
+//
+// `ctx` (optional): { effectiveByTsid, timeUnit }. When supplied, the
+// bucketing uses non-NaN time ranges from the loaded series and the Age
+// column renders in the plot's time unit — so the expanded table and the
+// plot above it agree on both grouping and labels.
+function _renderCandidateTable(tsids, ctx) {
+  const all = (tsids || []);
+  const total = all.length;
+  const effectiveByTsid = (ctx && ctx.effectiveByTsid) || null;
+  const timeUnit        = (ctx && ctx.timeUnit)        || 'yr BP';
+  const ageColLabel     = `Age (${timeUnit})`;
+  const selectedCount = all.filter(t => !excludedTSIDs.has(t)).length;
+  // Step 1 uses the dataset name as its bulk key; Step 2 passes its numeric
+  // groupId and a group-aware handler. Defaults preserve the Step 1 behavior.
+  const bulkHandler = (ctx && ctx.bulkHandler) || 'setAllDatasetCandidates';
+  const bulkKey     = (ctx && ctx.bulkKey != null)
+    ? String(ctx.bulkKey)
+    : (total > 0 ? ((_recordByTsid(all[0]) || {}).dataSetName || '') : '');
+  const bulkKeyAttr = bulkKey.replace(/['"\\]/g, c => '\\' + c);
+
+  const toolbar = (
+    `<div class="ds-table-toolbar">` +
+      `<span class="ds-table-count">${selectedCount} of ${total} selected</span>` +
+      `<button type="button" class="btn-ds-bulk" onclick="${bulkHandler}('${bulkKeyAttr}', true)">Select all</button>` +
+      `<button type="button" class="btn-ds-bulk" onclick="${bulkHandler}('${bulkKeyAttr}', false)">Deselect all</button>` +
+    `</div>`
+  );
+
+  const buckets = _bucketDatasetCandidates(all, effectiveByTsid);
+  const parts = [];
+  let multiIdx = 0;
+  for (const bucket of buckets) {
+    const multi = bucket.records.length > 1;
+    const bucketKept = bucket.records.filter(r => !excludedTSIDs.has(r.tsid)).length;
+    const topTsid = multi ? bucket.records[0].tsid : null;
+    // Only show the ★ "LMR-preferred" indicator when the top record is
+    // meaningfully better than the runner-up — i.e., the preference key
+    // differs on something other than the tsid alpha tiebreaker. Otherwise
+    // the star is just redundantly marking the alphabetically-first TSid.
+    const showPreference = _isLmrRecon() && multi && (() => {
+      if (bucket.records.length < 2) return false;
+      const k0 = _recordPreferenceKey(bucket.records[0]);
+      const k1 = _recordPreferenceKey(bucket.records[1]);
+      // Compare all fields except the last (tsid alpha tiebreaker)
+      for (let i = 0; i < k0.length - 1; i++) {
+        if (k0[i] !== k1[i]) return true;
+      }
+      return false;
+    })();
+    const rowsHtml = bucket.records.map((r, idx) => {
+      const tsid = r.tsid;
+      const checked = !excludedTSIDs.has(tsid);
+      const isPreferred = idx === 0 && showPreference;
+      const trCls = [
+        checked ? '' : 'excluded-row',
+        isPreferred ? 'preferred-row' : '',
+      ].filter(Boolean).join(' ');
+      const varCell = (isPreferred ? '<span class="preferred-star" title="LMR preferred: annual resolution + seasonality weighted first">★</span> ' : '') +
+                      (r.variableName ? escapeHtml(r.variableName) : '—');
+      return (
+        `<tr${trCls ? ` class="${trCls}"` : ''} data-tsid="${escapeHtml(tsid)}">` +
+          `<td><input type="checkbox" ${checked ? 'checked' : ''} ` +
+            `onchange="toggleDatasetCandidate('${escapeHtml(tsid)}')" /></td>` +
+          `<td class="ds-td-var">${varCell}</td>` +
+          _td(r.proxy) +
+          _td(r.interp_Vars) +
+          _td(r.interp_Details) +
+          _td(r.seasonality) +
+          _td(r.units) +
+          _td(_ageRangeStr(r, timeUnit, effectiveByTsid && effectiveByTsid[tsid])) +
+          _td(_resStr(r)) +
+          _td(formatCompilationString(r.compilation)) +
+          _td(r.tsid, 'ds-td-tsid') +
+        `</tr>`
+      );
+    }).join('');
+
+    let heading;
+    if (multi) {
+      multiIdx++;
+      heading =
+        `<div class="ds-bucket-heading multi">` +
+          `<strong>Near-duplicate group ${multiIdx}</strong>` +
+          `<span class="ds-bucket-label">${escapeHtml(bucket.label)}</span>` +
+          `<span class="ds-bucket-count">${bucketKept} / ${bucket.records.length} selected</span>` +
+        `</div>`;
+    } else {
+      heading =
+        `<div class="ds-bucket-heading solo">` +
+          `<span class="ds-bucket-label">Unique · ${escapeHtml(bucket.label)}</span>` +
+        `</div>`;
+    }
+
+    parts.push(
+      `<div class="ds-bucket${multi ? ' ds-bucket-multi' : ' ds-bucket-solo'}">` +
+        heading +
+        `<table class="ds-detail-table">` +
+          `<thead><tr>` +
+            `<th></th><th>Variable</th><th>Proxy</th><th>Interp</th>` +
+            `<th>Detail</th><th>Season</th><th>Units</th>` +
+            `<th>${escapeHtml(ageColLabel)}</th><th>Res (yr)</th><th>Compilation</th><th>TSID</th>` +
+          `</tr></thead>` +
+          `<tbody>${rowsHtml}</tbody>` +
+        `</table>` +
+      `</div>`
+    );
+  }
+
+  return toolbar + parts.join('');
+}
+
+function setAllDatasetCandidates(dsName, selectAll) {
+  if (!dsName) return;
+  const ds = datasetsInfo.find(d => d.dataSetName === dsName);
+  if (!ds) return;
+  const tsids = [...(ds.autoKeptTsids || []), ...(ds.autoDroppedTsids || [])];
+  const affectedGroups = new Set();
+  for (const tsid of tsids) {
+    if (selectAll) excludedTSIDs.delete(tsid);
+    else           excludedTSIDs.add(tsid);
+    // Keep the duplicate-group radios in sync if the TSID appears in step 2.
+    for (const g of duplicateGroups) {
+      if (!g.records.includes(tsid)) continue;
+      const keepRadio   = document.querySelector(`input[name="dup-${g.groupId}-${tsid}"][value="keep"]`);
+      const removeRadio = document.querySelector(`input[name="dup-${g.groupId}-${tsid}"][value="remove"]`);
+      if (keepRadio)   keepRadio.checked   = selectAll;
+      if (removeRadio) removeRadio.checked = !selectAll;
+      affectedGroups.add(g.groupId);
+    }
+    syncTableRow(tsid);
+  }
+  if (expandedDatasets.has(dsName) && groupState[dsName]) {
+    _renderDatasetCorrelationMatrix(dsName);
+  }
+  for (const gid of affectedGroups) {
+    if (groupState[gid]) {
+      const grp = duplicateGroups.find(g => g.groupId === gid);
+      if (grp && grp.records.length > 0) refreshGroupViews(grp.records[0]);
+      _renderCorrelationMatrix(gid, {
+        containerId: `dup-corr-matrix-${gid}`,
+        onCellClick: 'setGroupPair',
+      });
+    }
+  }
+  updateFooter();
+}
+
+// Render one dataset card. Two variants:
+//   - 'auto-picked' — ≥ 1 record in the dataset passed the AND-filter. Shows
+//     the picked variableName(s) in the hint.
+//   - 'excluded'    — the filter rejected every record in the dataset. Shows
+//     a greyed card so users can spot accidentally over-filtered datasets.
+// Both are expandable; the body (plot + comparison table) is identical.
+function _renderDatasetCard(ds) {
+  const allTsids = [...(ds.autoKeptTsids || []), ...(ds.autoDroppedTsids || [])];
+  const isOpen = expandedDatasets.has(ds.dataSetName);
+  const safeName = escapeHtml(ds.dataSetName);
+  const safeNameAttr = ds.dataSetName.replace(/['"\\]/g, c => '\\' + c);
+
+  const saved = savedDatasets.has(ds.dataSetName);
+
+  let cardClass, hintText, statusCls, statusText;
+  if (ds.status === 'excluded') {
+    cardClass = 'ds-review-card excluded-ds';
+    hintText  = `${allTsids.length} candidate${allTsids.length === 1 ? '' : 's'}, none match current filters — click to override`;
+    statusCls = 'ds-review-status pending';
+    statusText = 'Excluded';
+  } else if (ds.status === 'needs-review') {
+    const keptRecs = (ds.autoKeptTsids || []).map(_recordByTsid).filter(Boolean);
+    const names = keptRecs.map(r => r.variableName || '?').join(', ');
+    cardClass = 'ds-review-card needs-review';
+    hintText  = `${keptRecs.length} kept · ${names} — likely near-duplicates, review`;
+    statusCls = 'ds-review-status pending';
+    statusText = `${keptRecs.length} kept`;
+  } else {
+    const keptRecs = (ds.autoKeptTsids || []).map(_recordByTsid).filter(Boolean);
+    const names = keptRecs.map(r => r.variableName || '?').join(', ');
+    const prefCount = (ds.compilationPreferredTsids || []).length;
+    cardClass = 'ds-review-card auto';
+    if (ds.presumedUnique) {
+      hintText = `${keptRecs.length} kept · ${names} — uncorrelated (|r| ≤ 0.5), presumed distinct`;
+    } else if (prefCount > 0) {
+      hintText = `${keptRecs.length} kept · ${names} — ${prefCount} non-compilation record${prefCount === 1 ? '' : 's'} excluded`;
+    } else {
+      hintText = keptRecs.length > 0 ? `kept: ${names}` : 'click to expand';
+    }
+    statusCls = 'ds-confidence high';
+    statusText = `${keptRecs.length} kept`;
+  }
+  if (saved) {
+    cardClass += ' saved';
+    statusCls = 'ds-review-status done';
+    statusText = '✓ Saved';
+  }
+
+  const plotState = groupState[ds.dataSetName];
+  const tableCtx = {
+    effectiveByTsid: plotState && plotState.effectiveByTsid,
+    timeUnit: displayTimeUnit,
+  };
+  const table = isOpen ? _renderCandidateTable(allTsids, tableCtx) : '';
+  const plotLoading = !plotState || !plotState.series;
+  const plotContents = plotLoading ? 'Loading time series…' : '';
+
+  return (
+    `<div class="${cardClass}" id="ds-card-${safeName}">` +
+      `<div class="ds-review-header" onclick="toggleDatasetDetails('${safeNameAttr}')">` +
+        `<span class="expand-icon${isOpen ? ' open' : ''}" id="ds-expand-${safeName}">&#9654;</span>` +
+        `<span class="ds-review-title">${safeName}</span>` +
+        `<span class="ds-review-archive">${escapeHtml(ds.archiveType || '—')}</span>` +
+        `<span class="ds-review-hint">${escapeHtml(hintText)}</span>` +
+        `<span class="${statusCls}" style="margin-left:auto;">${statusText}</span>` +
+      `</div>` +
+      `<div class="ds-review-details" id="ds-details-${safeName}" style="display:${isOpen ? '' : 'none'}">` +
+        `<div class="pair-selector" id="ds-pair-selector-${safeName}" style="display:none"></div>` +
+        `<div class="series-toggle" id="ds-series-toggle-${safeName}" style="display:none"></div>` +
+        `<div id="ds-detail-scores-${safeName}" style="display:none"></div>` +
+        `<div class="ds-review-plot${plotLoading ? ' loading' : ''}" id="ds-plot-${safeName}">${plotContents}</div>` +
+        `<div id="ds-corr-matrix-${safeName}" style="display:none"></div>` +
+        `<div id="ds-table-${safeName}">${table}</div>` +
+        `<div class="group-notes-row">` +
+          `<label class="group-notes-label" for="ds-notes-${safeName}">Notes</label>` +
+          `<textarea id="ds-notes-${safeName}" class="group-notes-textarea" rows="2" ` +
+            `placeholder="Add notes about this dataset's primary-proxy selection…" ` +
+            `oninput="updateDatasetNotes('${safeNameAttr}', this.value)">` +
+            `${(datasetNotes[ds.dataSetName] || '').replace(/</g, '&lt;')}</textarea>` +
+        `</div>` +
+        `<div class="ds-save-row">` +
+          `<button class="btn-save-group" onclick="event.stopPropagation(); saveDataset('${safeNameAttr}')">Save</button>` +
+        `</div>` +
+      `</div>` +
+    `</div>`
+  );
+}
+
+function renderDatasetsPanel() {
+  const excludedDiv = document.getElementById('datasets-excluded');
+  const autoDiv     = document.getElementById('datasets-auto-picked');
+  const reviewDiv   = document.getElementById('datasets-needs-review');
+  const badge       = document.getElementById('datasets-count');
+  if (!excludedDiv || !autoDiv || !reviewDiv) return;
+
+  const review   = datasetsInfo.filter(d => d.status === 'needs-review');
+  const picked   = datasetsInfo.filter(d => d.status === 'auto-picked');
+  const excluded = datasetsInfo.filter(d => d.status === 'excluded');
+
+  if (badge) {
+    const parts = [];
+    if (review.length > 0)   parts.push(`${review.length} need review`);
+    parts.push(`${picked.length} auto-picked`);
+    if (excluded.length > 0) parts.push(`${excluded.length} excluded`);
+    badge.textContent = parts.join(' · ');
+  }
+
+  // "Needs review" section (top). Two or more series passed the filter for
+  // this dataset — worth a manual look to pick the primary or collapse
+  // near-duplicates before Step 2.
+  if (review.length === 0) {
+    reviewDiv.innerHTML = '';
+  } else {
+    reviewDiv.innerHTML =
+      `<div class="ds-section-heading">Needs review — ${review.length} dataset${review.length === 1 ? '' : 's'} with multiple kept series of the same proxy</div>` +
+      review.map(_renderDatasetCard).join('');
+  }
+
+  // "Excluded by filters" section. Dataset has candidates but none survived
+  // the AND-filter — user can expand to verify or override.
+  if (excluded.length === 0) {
+    excludedDiv.innerHTML = '';
+  } else {
+    excludedDiv.innerHTML =
+      `<div class="ds-section-heading">Excluded by filters (${excluded.length})</div>` +
+      excluded.map(_renderDatasetCard).join('');
+  }
+
+  // Auto-picked (exactly 1 kept) datasets — trivial case, no review needed.
+  if (picked.length === 0) {
+    autoDiv.innerHTML =
+      (review.length === 0 && excluded.length === 0)
+        ? '<div class="empty-state">No datasets to review.</div>'
+        : '';
+  } else {
+    autoDiv.innerHTML =
+      `<div class="ds-section-heading">Auto-picked (${picked.length}) — single kept series, or multiple kept with distinct proxies</div>` +
+      picked.map(_renderDatasetCard).join('');
+  }
+
+  // Rehydrate any open cards' plots + metrics with cached state.
+  for (const ds of datasetsInfo) {
+    if (!expandedDatasets.has(ds.dataSetName)) continue;
+    const st = groupState[ds.dataSetName];
+    if (st && st.series) {
+      _renderDatasetReviewPlot(ds.dataSetName);
+      _renderDatasetPairSelector(ds.dataSetName);
+      _renderDatasetSeriesToggle(ds.dataSetName);
+      _renderDatasetCorrelationMatrix(ds.dataSetName);
+      renderDatasetMetrics(ds.dataSetName);
+    }
+  }
+}
+
 function updateFooter() {
   // Temporal coverage reflects kept records, so re-render on every
   // selection change.
   renderCoverage();
+  // Datasets panel + auto-filter summary reflect the current excludedTSIDs
+  // state. Re-render on the same tick.
+  if (datasetsInfo.length > 0) renderDatasetsPanel();
+  renderAutoFilterSummary();
 
   // Only valid proxy records count toward the footer and Continue button.
   const validRecords = allRecords.filter(isValidProxyRecord);
@@ -891,18 +2257,28 @@ function updateFooter() {
   const keptCount    = validRecords.filter(r => !excludedTSIDs.has(r.tsid)).length;
 
   const footerEl = document.getElementById('footer-count');
+  const footerElStep2 = document.getElementById('footer-count-step-2');
   const continueCountEl = document.getElementById('continue-count');
   const btnContinue = document.getElementById('btn-continue');
+  const btnNextStep2 = document.getElementById('btn-next-step-2');
 
-  if (footerEl) {
-    const uniqueDatasets = new Set(validRecords.map(r => r.dataSetName).filter(Boolean)).size;
-    footerEl.textContent = `${keptCount} of ${totalValid} proxy records selected (from ${uniqueDatasets} datasets)`;
+  const uniqueDatasets = new Set(validRecords.filter(r => !excludedTSIDs.has(r.tsid))
+                                             .map(r => r.dataSetName).filter(Boolean)).size;
+  const footerText = `${keptCount} of ${totalValid} proxy records selected (from ${uniqueDatasets} datasets)`;
+
+  if (footerEl)      footerEl.textContent = footerText;
+  if (footerElStep2) footerElStep2.textContent = footerText;
+  if (continueCountEl) continueCountEl.textContent = keptCount;
+
+  // Step 1 footer: "Next → location review" only requires at least 1 record.
+  if (btnNextStep2) {
+    btnNextStep2.disabled = keptCount === 0;
+    btnNextStep2.title = keptCount === 0 ? 'No records selected' : '';
   }
-  if (continueCountEl) {
-    continueCountEl.textContent = keptCount;
-  }
+  // Step 2 footer: final Continue button gates on keptCount only.
   if (btnContinue) {
     btnContinue.disabled = keptCount === 0;
+    btnContinue.title = keptCount === 0 ? 'No records selected' : '';
   }
 
   // Center progress: "X / Y duplicate groups reviewed"
@@ -951,7 +2327,11 @@ async function saveProgress() {
         urlParams:     window.location.search,
         excludedTSIDs: [...excludedTSIDs],
         excludedVariableNames: [...excludedVariableNames],
+        filterState:   serializeFilterState(),
         groupNotes,
+        datasetNotes,
+        savedDatasets: [...savedDatasets],
+        savedGroups:   [...savedGroups],
       }),
     });
 
@@ -1062,7 +2442,22 @@ async function loadAndRestoreProgress() {
     const progress = await resp.json();
     if (!progress) return;
 
-    // Restore excluded TSIDs
+    // Restore filter state first — it will rebuild excludedTSIDs via the
+    // AND-filter. The explicit excludedTSIDs restore below then overlays any
+    // manual per-TSID overrides the user made on top of the filter.
+    if (progress.filterState && filterOptions.interpVarSummary.length > 0) {
+      try {
+        deserializeFilterState(progress.filterState);
+        renderAutoFilters();
+        recomputeDatasets();
+        applyAutoFilterToExclusions();
+      } catch (_) {
+        // Fall back to server defaults if the saved state is malformed.
+      }
+    }
+
+    // Restore excluded TSIDs — overlays the filter-derived exclusions so
+    // manual Keep/Remove decisions from Step 1/2 survive.
     if (Array.isArray(progress.excludedTSIDs)) {
       for (const t of progress.excludedTSIDs) excludedTSIDs.add(t);
     }
@@ -1086,9 +2481,26 @@ async function loadAndRestoreProgress() {
       excludedVariableNames = restored;
     }
 
-    // Restore notes
+    // Restore notes (Step 2 groups + Step 1 datasets)
     if (progress.groupNotes && typeof progress.groupNotes === 'object') {
       Object.assign(groupNotes, progress.groupNotes);
+    }
+    if (progress.datasetNotes && typeof progress.datasetNotes === 'object') {
+      Object.assign(datasetNotes, progress.datasetNotes);
+    }
+
+    // Restore Step 1 dataset review status + Step 2 group review status
+    if (Array.isArray(progress.savedDatasets)) {
+      for (const name of progress.savedDatasets) savedDatasets.add(name);
+    }
+    if (Array.isArray(progress.savedGroups)) {
+      for (const gid of progress.savedGroups) savedGroups.add(Number(gid));
+    }
+    // Reflect saved-group dimming in the Step 2 cards. Step 1 re-renders
+    // automatically on the upcoming updateFooter() call.
+    for (const gid of savedGroups) {
+      const groupEl = document.getElementById(`dup-group-${gid}`);
+      if (groupEl) groupEl.classList.add('saved');
     }
 
     // Sync radio buttons in the rendered DOM
@@ -1197,6 +2609,7 @@ async function confirmCleaning() {
         keptTSIDs,
         removedTSIDs: [...excludedTSIDs],
         groupNotes,
+        datasetNotes,
         cleaningGroups,
         variableFilterExcluded,
         excludedVariableKeys: [...excludedVariableNames],
@@ -1268,6 +2681,12 @@ function updateGroupNotes(groupId, text) {
   const modalEl  = document.getElementById(`m-notes-${groupId}`);
   if (inlineEl && inlineEl !== document.activeElement) inlineEl.value = text;
   if (modalEl  && modalEl  !== document.activeElement) modalEl.value  = text;
+}
+
+// Step 1 equivalent, keyed by dataSetName. Empty strings are preserved so
+// renderDatasetsPanel re-renders don't clobber them between keystrokes.
+function updateDatasetNotes(dsName, text) {
+  datasetNotes[dsName] = text;
 }
 
 function saveGroup(groupId) {
@@ -1349,7 +2768,7 @@ async function loadGroupDetails(groupId) {
     const resp = await fetch('/datacleaning/correlate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tsids: group.records })
+      body: JSON.stringify({ tsids: group.records, display_unit: displayTimeUnit })
     });
 
     if (!resp.ok) {
@@ -1387,10 +2806,32 @@ async function loadGroupDetails(groupId) {
     // For 2-record groups auto-select both; for 3+ start with nothing selected
     const initSelected = tsidOrder.slice(0, 2);  // always pre-select first two
 
+    // Effective non-NaN time range per TSid (BP) — same computation Step 1
+    // uses. Drives bucketing + the Age column in the metadata table so the
+    // mirrored table stays consistent with the plot above it.
+    const effectiveByTsid = {};
+    for (const tsid of tsidOrder) {
+      const s = series[tsid];
+      const t = s && Array.isArray(s.time) ? s.time.filter(Number.isFinite) : [];
+      if (t.length > 0) {
+        let mn = t[0], mx = t[0];
+        for (let i = 1; i < t.length; i++) {
+          if (t[i] < mn) mn = t[i];
+          if (t[i] > mx) mx = t[i];
+        }
+        if (commonTimeUnit && commonTimeUnit !== 'yr BP') {
+          mn = _convertTimeValue(mn, commonTimeUnit, 'yr BP');
+          mx = _convertTimeValue(mx, commonTimeUnit, 'yr BP');
+        }
+        effectiveByTsid[tsid] = { min: Math.min(mn, mx), max: Math.max(mn, mx) };
+      }
+    }
+
     groupState[groupId] = {
       pairs,
       series,
       tsidColors,
+      effectiveByTsid,
       selectedTsids: [...initSelected],
       seriesFilter: 'all',
       commonTimeUnit
@@ -1447,8 +2888,28 @@ async function loadGroupDetails(groupId) {
       warningEl.style.display = '';
     }
 
+    // ── Full metadata table + correlation matrix ──
+    // Mirror the Step 1 dataset review so users get the same information
+    // density when hand-reviewing spatial duplicates across datasets.
+    const metadataEl = document.getElementById(`dup-metadata-${groupId}`);
+    if (metadataEl) {
+      metadataEl.innerHTML = _renderCandidateTable(group.records, {
+        effectiveByTsid,
+        timeUnit: displayTimeUnit,
+        bulkHandler: 'setAllGroupCandidates',
+        bulkKey: String(groupId),
+      });
+      _colorCandidateTableRows(metadataEl, tsidColors);
+    }
+    _renderCorrelationMatrix(groupId, {
+      containerId: `dup-corr-matrix-${groupId}`,
+      onCellClick: 'setGroupPair',
+    });
+
     group.correlations = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, pearson: p.pearson, distKm: p.distKm }));
     group.dtwDistances = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, dtw: p.dtw }));
+
+    _maybeAutoResolveUncorrelatedGroup(groupId);
 
   } catch (err) {
     console.error('Group details error:', err);
@@ -1460,6 +2921,31 @@ async function loadGroupDetails(groupId) {
         `<a href="#" onclick="retryGroup(${groupId});return false;">try again</a>`;
     }
   }
+}
+
+// If every pairwise |r| in a duplicate group is at or below the uniqueness
+// threshold, the records measure independent signals and don't need manual
+// de-duplication review. Auto-mark the group as saved (keeping every record)
+// with a badge explaining why. Skipped if the user has already saved the
+// group or manually excluded any member record. Returns true iff the group
+// was auto-resolved in this call.
+function _maybeAutoResolveUncorrelatedGroup(groupId) {
+  if (savedGroups.has(groupId)) return false;
+  const group = duplicateGroups.find(g => g.groupId === groupId);
+  if (!group || !Array.isArray(group.correlations) || group.correlations.length === 0) return false;
+  if (group.records.some(t => excludedTSIDs.has(t))) return false;
+  for (const p of group.correlations) {
+    const r = Number(p.pearson);
+    if (!Number.isFinite(r) || Math.abs(r) > _UNIQUENESS_PEARSON) return false;
+  }
+  saveGroup(groupId);
+  const scoresEl = document.getElementById(`scores-${groupId}`);
+  if (scoresEl) {
+    scoresEl.innerHTML =
+      '<span style="color:#3a7a3a;font-weight:600;font-size:0.8rem;">✓ Auto-resolved</span>' +
+      '<span style="color:#888;font-size:0.75rem;margin-left:6px;">(|r| ≤ 0.5, presumed distinct)</span>';
+  }
+  return true;
 }
 
 function retryGroup(groupId) {
@@ -1629,6 +3115,23 @@ function renderGroupPlot(groupId, series, tsidColors, el, filterTsids) {
 
   const hasTime = entries.some(([, s]) => s.time && s.time.length > 0);
 
+  // Assign each trace to a y-axis group keyed by (variableName, units). A
+  // dataset with e.g. a temperature record (degC) alongside a d18O record
+  // (permil) will then get a left + right axis rather than squashing both
+  // onto one shared scale.
+  const axisGroupOrder = []; // preserves first-seen order for axis assignment
+  const axisGroups = new Map(); // key → { label, tsids: Set, traces: [] }
+  const _axisKey = (s, r) => {
+    const vn = (s && s.label) || (r && r.variableName) || '';
+    const u  = (r && r.units) || '';
+    return `${vn}|${u}`;
+  };
+  const _axisLabel = (key) => {
+    const [vn, u] = key.split('|');
+    if (!vn) return 'Value';
+    return u ? `${vn} (${u})` : vn;
+  };
+
   const traces = entries.map(([tsid, s]) => {
     let x = (hasTime && s.time.length > 0) ? s.time : s.values.map((_, i) => i);
     let y = s.values;
@@ -1650,6 +3153,12 @@ function renderGroupPlot(groupId, series, tsidColors, el, filterTsids) {
     }
     const baseName  = s.dataSetName || tsid;
     const traceName = s.compilation ? `${baseName} [${s.compilation}]` : baseName;
+    const rec = _recordByTsid(tsid);
+    const key = _axisKey(s, rec);
+    if (!axisGroups.has(key)) {
+      axisGroups.set(key, { label: _axisLabel(key) });
+      axisGroupOrder.push(key);
+    }
     return {
       type: 'scatter',
       mode: 'lines',
@@ -1657,9 +3166,25 @@ function renderGroupPlot(groupId, series, tsidColors, el, filterTsids) {
       x,
       y,
       line: { width: 1.5, color: tsidColors[tsid] },
-      hovertemplate: `<b>${traceName}</b><br>x: %{x:.1f}<br>y: %{y:.3f}<extra></extra>`
+      hovertemplate: `<b>${traceName}</b><br>x: %{x:.1f}<br>y: %{y:.3f}<extra></extra>`,
+      _axisKey: key,
     };
   });
+
+  // Bind each trace to its assigned Plotly y-axis. We support up to two
+  // side-by-side axes (left + right); a third+ axis group falls back onto
+  // the right axis so the chart stays readable. This matches the common
+  // paleoclimate pattern of "proxy (permil) vs calibrated variable (degC)".
+  const keyToAxis = new Map();
+  axisGroupOrder.forEach((key, i) => {
+    if (i === 0)      keyToAxis.set(key, 'y');
+    else              keyToAxis.set(key, 'y2');
+  });
+  for (const t of traces) {
+    const axis = keyToAxis.get(t._axisKey) || 'y';
+    if (axis !== 'y') t.yaxis = axis;
+    delete t._axisKey;
+  }
 
   // Detect overlapping traces and widen lower ones so they remain visible.
   // Plotly renders traces in array order (first = bottom, last = top), so a
@@ -1681,17 +3206,34 @@ function renderGroupPlot(groupId, series, tsidColors, el, filterTsids) {
     });
   });
 
+  const isBp = commonTimeUnit === 'yr BP' || commonTimeUnit === 'ka BP' || commonTimeUnit === 'Ma BP';
+  const primaryLabel  = axisGroupOrder[0] ? axisGroups.get(axisGroupOrder[0]).label : (entries[0][1].label || 'Value');
+  const secondaryKeys = axisGroupOrder.slice(1);
+  const secondaryLabel = secondaryKeys.length > 0
+    ? secondaryKeys.map(k => axisGroups.get(k).label).join(' / ')
+    : null;
   const layout = {
-    margin: { l: 44, r: 10, t: 6, b: 36 },
+    margin: { l: 52, r: secondaryLabel ? 52 : 10, t: 6, b: 36 },
     xaxis: {
-      title: hasTime ? (commonTimeUnit ? `Time (${commonTimeUnit})` : 'Age / Year') : 'Index',
-      titlefont: { size: 11 }
+      title: hasTime ? (commonTimeUnit ? `Age (${commonTimeUnit})` : 'Age / Year') : 'Index',
+      titlefont: { size: 11 },
+      // Paleoclimate convention: BP axes reversed so recent (0) sits on the
+      // right and older values extend leftward.
+      ...(isBp && hasTime ? { autorange: 'reversed' } : {}),
     },
-    yaxis: { title: entries[0][1].label || 'Value', titlefont: { size: 11 } },
+    yaxis: { title: primaryLabel, titlefont: { size: 11 } },
     showlegend: false,
     hovermode: 'x unified',
     font: { size: 10 }
   };
+  if (secondaryLabel) {
+    layout.yaxis2 = {
+      title: secondaryLabel,
+      titlefont: { size: 11 },
+      overlaying: 'y',
+      side: 'right',
+    };
+  }
 
   Plotly.newPlot(el, traces, layout, { responsive: true, displayModeBar: 'hover', scrollZoom: true });
 }
@@ -1985,7 +3527,7 @@ async function loadGroupDetailsModal(groupId) {
     const resp = await fetch('/datacleaning/correlate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tsids: group.records })
+      body: JSON.stringify({ tsids: group.records, display_unit: displayTimeUnit })
     });
 
     if (!resp.ok) {
@@ -2014,9 +3556,13 @@ async function loadGroupDetailsModal(groupId) {
     group.correlations = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, pearson: p.pearson, distKm: p.distKm }));
     group.dtwDistances = pairs.map(p => ({ tsid1: p.tsid1, tsid2: p.tsid2, dtw: p.dtw }));
 
-    // Populate inline detail elements so the inline expand panel works later
+    const autoResolved = _maybeAutoResolveUncorrelatedGroup(groupId);
+
+    // Populate inline detail elements so the inline expand panel works later.
+    // Keep the header scores visible if we auto-resolved — that badge IS the
+    // result the user should see.
     const headerScores = document.getElementById(`scores-${groupId}`);
-    if (headerScores) headerScores.style.display = 'none';
+    if (headerScores && !autoResolved) headerScores.style.display = 'none';
     const loadingInline = document.getElementById(`detail-loading-${groupId}`);
     if (loadingInline) loadingInline.style.display = 'none';
 
@@ -2773,86 +4319,399 @@ function _doApplyExactRemovals(removeTsids) {
 }
 
 // =============================================================================
-// Variable filter — lets the user override the default blacklist after load
+// Auto-selection filters — the AND-filter that drives Step 1 primary-proxy
+// selection. Three subsections:
+//   1. Interpretation variables (multi-select, defaults all on)
+//   2. Valid proxy variables, per archive (defaults = ARCHIVE_VARIABLE_PRIORITY)
+//   3. Compilation-membership toggle (default off) — uses
+//      paleoData_mostRecentCompilations, which already encodes "this record
+//      belongs to ≥ 1 curated compilation"; no separate field needed.
+// All three combine with AND. Recomputed entirely client-side on every toggle.
 // =============================================================================
 
-function computeVariableNameStats() {
-  // Walk allRecords once; produce one entry per unique filter-key. Thickness
-  // rows split into two keys (see filterKeyFor).
-  const byKey = new Map();
-  for (const r of allRecords) {
-    const key = filterKeyFor(r);
-    if (!key) continue;
-    let entry = byKey.get(key);
-    if (!entry) {
-      let display;
-      if (key === 'thickness:annual')         display = 'thickness (annually resolved)';
-      else if (key === 'thickness:nonannual') display = 'thickness (not annually resolved)';
-      else                                    display = (r.variableName || '').toString().trim();
-      entry = { key, display, count: 0 };
-      byKey.set(key, entry);
+function serializeFilterState() {
+  const variables = {};
+  for (const [archive, set] of Object.entries(filterState.variablesByArchive)) {
+    variables[archive] = [...set];
+  }
+  return {
+    interpVars: [...filterState.interpVars],
+    variablesByArchive: variables,
+    requireCompilation: !!filterState.requireCompilation,
+  };
+}
+
+function deserializeFilterState(raw) {
+  if (!raw || typeof raw !== 'object') return;
+  if (Array.isArray(raw.interpVars)) {
+    filterState.interpVars = new Set(raw.interpVars);
+  }
+  if (raw.variablesByArchive && typeof raw.variablesByArchive === 'object') {
+    const restored = {};
+    for (const [archive, list] of Object.entries(raw.variablesByArchive)) {
+      if (Array.isArray(list)) restored[archive] = new Set(list);
     }
-    entry.count += 1;
+    filterState.variablesByArchive = restored;
   }
-  const arr = Array.from(byKey.values());
-  arr.forEach(e => { e.excluded = excludedVariableNames.has(e.key); });
-  arr.sort((a, b) => b.count - a.count);
-  return arr;
+  // Accept the legacy `useCompilationBeta` key from progress files saved
+  // before this rename.
+  filterState.requireCompilation = !!(raw.requireCompilation ?? raw.useCompilationBeta);
 }
 
-function renderVariableFilter() {
-  const list = document.getElementById('variable-filter-list');
-  const summary = document.getElementById('variable-filter-summary');
-  if (!list) return;
-
-  const stats = computeVariableNameStats();
-  list.innerHTML = '';
-
-  for (const entry of stats) {
-    const row = document.createElement('label');
-    row.className = 'variable-filter-row';
-
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = !entry.excluded;
-    cb.addEventListener('change', () => onVariableToggle(entry.key, cb.checked));
-
-    const name = document.createElement('span');
-    name.className = 'variable-filter-name';
-    name.textContent = entry.display;
-
-    const badge = document.createElement('span');
-    badge.className = 'variable-filter-count';
-    badge.textContent = entry.count.toString();
-
-    row.appendChild(cb);
-    row.appendChild(name);
-    row.appendChild(badge);
-
-    list.appendChild(row);
+function initFilterStateFromServer() {
+  // Interp_Vars — default ALL checked so the filter is a no-op until the
+  // user narrows. This matches the user's mental model: they come in with
+  // whatever the query produced and trim from there.
+  filterState.interpVars = new Set();
+  for (const entry of filterOptions.interpVarSummary) {
+    filterState.interpVars.add(entry.value);
   }
+  // Per-archive variables — seeded from the server's isDefault flag. All
+  // variables present in the data start checked; the user opts out.
+  filterState.variablesByArchive = {};
+  for (const [archive, entries] of Object.entries(filterOptions.variablesByArchive)) {
+    const set = new Set();
+    for (const e of entries) if (e.isDefault) set.add(e.name);
+    filterState.variablesByArchive[archive] = set;
+  }
+  filterState.requireCompilation = false;
+}
 
-  if (summary) {
-    const totalNames = stats.length;
-    const includedNames = stats.filter(s => !s.excluded).length;
-    const excludedRecordCount = allRecords.filter(r => !isValidProxyRecord(r)).length;
-    summary.textContent = `${includedNames} of ${totalNames} variable names included — ${excludedRecordCount} records excluded`;
+function interpBucketsFor(record) {
+  // Mirror of server _interp_buckets. lipdverseR's queryCsv.R joins a
+  // single TS's interpretation columns with `|`; `;` and `,` are accepted
+  // defensively. Duplicates within one cell (e.g. "temperature|temperature")
+  // are deduped so each record contributes at most 1 to any bucket.
+  const raw = record && record.interp_Vars;
+  if (raw == null) return [INTERP_NO_VALUE];
+  const s = String(raw).trim();
+  if (!s || ['nan', 'none', 'null', 'na'].includes(s.toLowerCase())) {
+    return [INTERP_NO_VALUE];
+  }
+  const seen = new Set();
+  const out = [];
+  for (const p of s.split(/[|;,]/)) {
+    const v = p.trim();
+    if (v && !seen.has(v)) { seen.add(v); out.push(v); }
+  }
+  return out.length > 0 ? out : [INTERP_NO_VALUE];
+}
+
+function recordHasCompilation(record) {
+  // Compilation membership is already signaled by paleoData_mostRecentCompilations
+  // (exposed on the record as `compilation`). A populated value means at
+  // least one curated compilation includes this record.
+  const raw = record && record.compilation;
+  if (!raw) return false;
+  const s = String(raw).trim();
+  if (!s || ['nan', 'none', 'null', 'na'].includes(s.toLowerCase())) return false;
+  return s.split(/[|;,]/).some(t => t.trim().length > 0);
+}
+
+function recordPassesAutoFilter(r) {
+  // 1) Per-archive variable whitelist
+  const archive = (r.archiveType || '').trim() || '(unknown)';
+  const selectedVars = filterState.variablesByArchive[archive];
+  const varName = (r.variableName || '').trim();
+  if (!selectedVars || !varName || !selectedVars.has(varName)) return false;
+
+  // 2) At least one interp_Vars bucket is in the selected set
+  const buckets = interpBucketsFor(r);
+  let interpMatch = false;
+  for (const b of buckets) {
+    if (filterState.interpVars.has(b)) { interpMatch = true; break; }
+  }
+  if (!interpMatch) return false;
+
+  // 3) Optional compilation-membership requirement
+  if (filterState.requireCompilation && !recordHasCompilation(r)) return false;
+
+  return true;
+}
+
+// Within a dataset, when some records (sharing a proxy) are members of a
+// curated compilation and others are not, prefer the compilation members.
+// This handles the common pattern where a dataset has multiple candidate
+// versions but only one made it into the most recent compilation (e.g.
+// O2kLR_105 in Pages2kTemperature alongside O2kLR_107 which is not).
+// Returns a Set of TSids to auto-exclude.
+function _computeCompilationPreferenceExclusions() {
+  const proxyKey = (r) => {
+    const p = (r.proxy || '').toString().trim().toLowerCase();
+    if (p && !['na', 'null', 'none', ''].includes(p)) return p;
+    return (r.variableName || '').toString().trim().toLowerCase();
+  };
+  const byGroup = new Map();
+  for (const r of allRecords) {
+    if (!isValidProxyRecord(r) || !recordPassesAutoFilter(r)) continue;
+    const ds = r.dataSetName || '';
+    if (!ds) continue;
+    const key = ds + '\x00' + proxyKey(r);
+    if (!byGroup.has(key)) byGroup.set(key, []);
+    byGroup.get(key).push(r);
+  }
+  const excludes = new Set();
+  for (const recs of byGroup.values()) {
+    if (recs.length < 2) continue;
+    const withComp    = recs.filter(recordHasCompilation);
+    const withoutComp = recs.filter(r => !recordHasCompilation(r));
+    if (withComp.length > 0 && withoutComp.length > 0) {
+      for (const r of withoutComp) excludes.add(r.tsid);
+    }
+  }
+  return excludes;
+}
+
+// True iff every pairwise Pearson r between currently-kept records of this
+// dataset has |r| <= 0.5. Requires at least one loaded pair covering the
+// kept set — otherwise we can't conclude uniqueness and return false so the
+// dataset stays in needs-review until /correlate loads.
+const _UNIQUENESS_PEARSON = 0.5;
+function _keptPairsUncorrelated(ds) {
+  const st = groupState[ds.dataSetName];
+  if (!st || !Array.isArray(st.pairs) || st.pairs.length === 0) return false;
+  const kept = new Set(ds.autoKeptTsids || []);
+  if (kept.size < 2) return false;
+  let sawKeptPair = false;
+  for (const p of st.pairs) {
+    if (!kept.has(p.tsid1) || !kept.has(p.tsid2)) continue;
+    sawKeptPair = true;
+    const r = Number(p.pearson);
+    if (!Number.isFinite(r)) return false; // unresolved pair → can't conclude
+    if (Math.abs(r) > _UNIQUENESS_PEARSON) return false;
+  }
+  return sawKeptPair;
+}
+
+function recomputeDatasets() {
+  // Rebuild datasetsInfo from allRecords + filterState. Every dataset produces
+  // exactly one entry; candidateTsids is every record in the dataset (for the
+  // expand-to-override table) while autoKeptTsids is the subset passing the
+  // current filter. If all candidates fail the filter, status='excluded'.
+  const compPrefExcl = _computeCompilationPreferenceExclusions();
+  const byDataset = new Map();
+  for (const r of allRecords) {
+    if (!isValidProxyRecord(r)) continue;
+    const name = r.dataSetName;
+    if (!name) continue;
+    if (!byDataset.has(name)) {
+      byDataset.set(name, {
+        dataSetName: name,
+        archiveType: r.archiveType || null,
+        candidateTsids: [],
+        autoKeptTsids: [],
+        autoDroppedTsids: [],
+        compilationPreferredTsids: [],
+      });
+    }
+    const ds = byDataset.get(name);
+    ds.candidateTsids.push(r.tsid);
+    const passes = recordPassesAutoFilter(r);
+    if (passes && compPrefExcl.has(r.tsid)) {
+      ds.compilationPreferredTsids.push(r.tsid);
+      ds.autoDroppedTsids.push(r.tsid);
+    } else if (passes) {
+      ds.autoKeptTsids.push(r.tsid);
+    } else {
+      ds.autoDroppedTsids.push(r.tsid);
+    }
+  }
+  datasetsInfo = [];
+  for (const ds of byDataset.values()) {
+    // Three-way split:
+    //  - excluded      : no candidate survived the AND-filter
+    //  - needs-review  : 2+ kept AND any two share the same variableName
+    //                    (likely near-duplicates of the same proxy type)
+    //  - auto-picked   : 1 kept, OR 2+ kept where every record is a
+    //                    distinct variableName (legitimate multi-proxy
+    //                    dataset — e.g. d18O + Sr/Ca from one coral)
+    const kept = ds.autoKeptTsids.length;
+    if (kept === 0) {
+      ds.status = 'excluded';
+    } else if (kept === 1) {
+      ds.status = 'auto-picked';
+    } else {
+      // Use paleoData_proxy (record.proxy) as the distinctness signal —
+      // that's the generic proxy type (d18O, Sr/Ca, alkenone, …) rather
+      // than the variable name. When proxy is unset / 'NA', fall back to
+      // variableName so records with no proxy annotation still group.
+      const proxyKey = (t) => {
+        const r = _recordByTsid(t) || {};
+        const p = (r.proxy || '').toString().trim().toLowerCase();
+        if (p && !['na', 'null', 'none', ''].includes(p)) return p;
+        return (r.variableName || '').toString().trim().toLowerCase();
+      };
+      const proxies = new Set(ds.autoKeptTsids.map(proxyKey));
+      if (proxies.size === kept) {
+        ds.status = 'auto-picked';
+      } else if (_keptPairsUncorrelated(ds)) {
+        // Loaded pairwise |r| <= 0.5 for every kept pair — the records are
+        // presumed to measure distinct signals despite sharing a proxy name,
+        // so no duplicate review is needed.
+        ds.status = 'auto-picked';
+        ds.presumedUnique = true;
+      } else {
+        ds.status = 'needs-review';
+      }
+    }
+    datasetsInfo.push(ds);
+  }
+  // Sort by currently-selected count DESC so the datasets contributing the
+  // most records to the reconstruction surface first. Tiebreak by total
+  // candidate count DESC (surfaces large excluded-by-filter datasets) then
+  // by name ASC. Computed at filter-change time — individual manual toggles
+  // don't reorder, which would be disorienting.
+  datasetsInfo.sort((a, b) => {
+    const diff = b.autoKeptTsids.length - a.autoKeptTsids.length;
+    if (diff !== 0) return diff;
+    const candDiff = (b.candidateTsids.length) - (a.candidateTsids.length);
+    if (candDiff !== 0) return candDiff;
+    return a.dataSetName.localeCompare(b.dataSetName);
+  });
+}
+
+function applyAutoFilterToExclusions() {
+  // Rebuild excludedTSIDs from the current filter. Any manual per-TSID
+  // overrides the user made in the Step-1 table are intentionally dropped
+  // when filter state changes — the filter is the source of truth.
+  excludedTSIDs = new Set();
+  for (const r of allRecords) {
+    if (!isValidProxyRecord(r) || !recordPassesAutoFilter(r)) {
+      excludedTSIDs.add(r.tsid);
+    }
+  }
+  // Within-dataset compilation preference: drop non-compilation records
+  // when a same-proxy compilation counterpart is kept.
+  for (const tsid of _computeCompilationPreferenceExclusions()) {
+    excludedTSIDs.add(tsid);
   }
 }
 
-function onVariableToggle(key, checked) {
-  if (checked) {
-    excludedVariableNames.delete(key);
-  } else {
-    excludedVariableNames.add(key);
+// ---- UI -------------------------------------------------------------------
+
+function renderAutoFilters() {
+  renderInterpFilter();
+  renderVariablesByArchive();
+  renderCompilationBetaToggle();
+  renderAutoFilterSummary();
+}
+
+function _renderCheckRow(key, label, count, checked, onToggle) {
+  const row = document.createElement('label');
+  row.className = 'variable-filter-row';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = !!checked;
+  cb.addEventListener('change', () => onToggle(cb.checked));
+  const name = document.createElement('span');
+  name.className = 'variable-filter-name';
+  name.textContent = label;
+  const badge = document.createElement('span');
+  badge.className = 'variable-filter-count';
+  badge.textContent = String(count);
+  row.appendChild(cb);
+  row.appendChild(name);
+  row.appendChild(badge);
+  return row;
+}
+
+function renderInterpFilter() {
+  const container = document.getElementById('interp-filter-list');
+  if (!container) return;
+  container.innerHTML = '';
+  for (const entry of filterOptions.interpVarSummary) {
+    const checked = filterState.interpVars.has(entry.value);
+    const row = _renderCheckRow(entry.value, entry.value, entry.count, checked, (c) => {
+      if (c) filterState.interpVars.add(entry.value);
+      else   filterState.interpVars.delete(entry.value);
+      onAutoFilterChange();
+    });
+    container.appendChild(row);
   }
+}
+
+function renderVariablesByArchive() {
+  const container = document.getElementById('variables-by-archive-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const archives = Object.keys(filterOptions.variablesByArchive).sort((a, b) => a.localeCompare(b));
+  for (const archive of archives) {
+    const entries = filterOptions.variablesByArchive[archive];
+    const selected = filterState.variablesByArchive[archive] || new Set();
+
+    const section = document.createElement('details');
+    section.className = 'archive-var-section';
+    section.open = true;
+
+    const summary = document.createElement('summary');
+    const checkedCount = entries.filter(e => selected.has(e.name)).length;
+    const totalCount = entries.reduce((s, e) => s + e.count, 0);
+    summary.innerHTML =
+      `<strong>${escapeHtml(archive)}</strong> ` +
+      `<span style="color:#777;font-size:0.82rem;">` +
+      `${checkedCount} / ${entries.length} variable${entries.length === 1 ? '' : 's'} — ` +
+      `${totalCount} record${totalCount === 1 ? '' : 's'}</span>`;
+    section.appendChild(summary);
+
+    const list = document.createElement('div');
+    list.className = 'variable-filter-list-inner';
+    for (const e of entries) {
+      const checked = selected.has(e.name);
+      const row = _renderCheckRow(e.name, e.name, e.count, checked, (c) => {
+        if (!filterState.variablesByArchive[archive]) {
+          filterState.variablesByArchive[archive] = new Set();
+        }
+        if (c) filterState.variablesByArchive[archive].add(e.name);
+        else   filterState.variablesByArchive[archive].delete(e.name);
+        onAutoFilterChange();
+      });
+      if (!e.isDefault) {
+        const hint = document.createElement('span');
+        hint.className = 'variable-filter-hint';
+        hint.textContent = 'not in default priority list';
+        row.appendChild(hint);
+      }
+      list.appendChild(row);
+    }
+    section.appendChild(list);
+    container.appendChild(section);
+  }
+}
+
+function renderCompilationBetaToggle() {
+  const cb = document.getElementById('compilation-toggle');
+  if (!cb) return;
+  cb.checked = filterState.requireCompilation;
+  cb.onchange = () => {
+    filterState.requireCompilation = cb.checked;
+    onAutoFilterChange();
+  };
+}
+
+function renderAutoFilterSummary() {
+  const el = document.getElementById('auto-filter-summary');
+  if (!el) return;
+  const valid = allRecords.filter(isValidProxyRecord);
+  const kept = valid.filter(recordPassesAutoFilter);
+  const datasetsKept = new Set(kept.map(r => r.dataSetName).filter(Boolean)).size;
+  const datasetsTotal = new Set(valid.map(r => r.dataSetName).filter(Boolean)).size;
+  el.textContent =
+    `${kept.length} / ${valid.length} records kept · ` +
+    `${datasetsKept} / ${datasetsTotal} datasets contribute`;
+}
+
+function onAutoFilterChange() {
+  recomputeDatasets();
+  applyAutoFilterToExclusions();
+  renderAutoFilters();
   refreshAllViews();
 }
 
 function refreshAllViews() {
   // Run after any change that affects which records are valid. Touches every
   // view that reads through isValidProxyRecord.
-  renderVariableFilter();
+  renderAutoFilterSummary();
   renderTable();
   renderCoverage();
   if (typeof renderPCA === 'function') renderPCA();

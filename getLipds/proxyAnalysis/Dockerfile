@@ -10,10 +10,11 @@ RUN pip install --no-cache-dir \
     pandas \
     scipy \
     scikit-learn \
-    numpy
+    numpy \
+    mysql-connector-python
 
 COPY app.py .
 
 EXPOSE 8090
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8090"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8090", "--workers", "2"]
