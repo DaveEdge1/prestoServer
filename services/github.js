@@ -612,7 +612,9 @@ This repository contains a paleoclimate reconstruction generated using the PReSt
 1. **Configuration:** Your reconstruction parameters are stored in \`config/user_config.yml\`
 2. **Data Gathering:** The workflow downloads proxy data from the LiPDverse
 3. **Reconstruction:** Runs in a Docker container with R/Python scientific computing environment
-4. **Results:** NetCDF files and visualizations are committed to this repository
+4. **Results:** ${recon === 'holocene_da'
+  ? 'Plots and configs are committed to `results/`; the NetCDF output is published as a GitHub Release asset (too large to commit — see the Results section below)'
+  : 'NetCDF files and visualizations are committed to this repository'}
 5. **Deployment:** ${recon === 'holocene_da' ? 'Interactive visualizations are deployed to GitHub Pages' : 'Results are stored as artifacts'}
 
 ## Running the Reconstruction
@@ -633,7 +635,7 @@ Check the [Actions tab](../../actions) for workflow status and logs.
 ## Results
 
 ${recon === 'holocene_da'
-  ? '- **Visualizations:** [GitHub Pages](https://' + configData.user + '.github.io/' + generateRepoName(recon, uniqueID) + ')\n- **NetCDF Files:** \`results/*.nc\`\n- **Plots:** \`results/viz/\`'
+  ? '- **Visualizations:** [GitHub Pages](https://' + configData.user + '.github.io/' + generateRepoName(recon, uniqueID) + ')\n- **Validation report:** Published alongside the visualization on the same GitHub Pages site — GMST R + CE vs published Holocene reconstructions (Kaufman 2020 Temp12k, Marcott 2013 if available) plus a 6 ka spatial anomaly map\n- **Plots & config:** \`results/*.png\`, \`results/configs.yml\` (committed to this repo)\n- **NetCDF output:** [Releases tab](../../releases) — each run publishes a release tagged `results-<run_id>` with the `.nc` file as an asset (git\'s 100MB per-file push limit rules out committing it directly)\n- **Workflow artifact:** The full `results/` folder is also kept for 90 days on the [Actions run page](../../actions)'
   : '- **NetCDF Files:** \`results/*.nc\`\n- **Artifacts:** Available in Actions workflow runs (90-day retention)'}
 
 ## Configuration
