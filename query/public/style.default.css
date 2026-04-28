@@ -14063,7 +14063,7 @@ a.text-hover-dark:focus, a.text-hover-dark:hover {
 }
 
 .bg-pentagon {
-  background: url("../img/texture-bw.png") center center repeat;
+  background: url("/query/img/texture-bw.png") center center repeat;
 }
 
 .bg-fixed {

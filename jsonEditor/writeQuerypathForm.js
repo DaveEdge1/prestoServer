@@ -2,24 +2,28 @@ var fs = require('fs')
 var YAML = require('yaml')
 var bodyParser = require('body-parser')
 const prompt = require('prompt-sync')();
+const path = require('path');
+
+// Base directory - use __dirname for relative paths
+const baseDir = path.join(__dirname, '..');
 
 reconTitle = function(recon){
-	var reconTitles = fs.readFileSync("/root/presto/jsonEditor/reconTitles.json")
+	var reconTitles = fs.readFileSync(path.join(__dirname, "reconTitles.json"))
 	var titlesJSON = JSON.parse(reconTitles)
 	console.log(titlesJSON[recon])
 	console.log(titlesJSON, recon)
 	return(titlesJSON[recon])
 }
 
-var jsExt = fs.readFileSync("/root/presto/jsonEditor/public/slider.js", function (err, data) {   
-	    if (err) throw err;   console.log(data); 
+var jsExt = fs.readFileSync(path.join(__dirname, "public/slider.js"), function (err, data) {
+	    if (err) throw err;   console.log(data);
 	  });
 
-var htmlHeader = fs.readFileSync("/root/presto/jsonEditor/public/header.txt", function (err, data) {
+var htmlHeader = fs.readFileSync(path.join(__dirname, "public/header.txt"), function (err, data) {
 	            if (err) throw err;   console.log(data);
 	          });
 
-var htmlFooter = fs.readFileSync("/root/presto/jsonEditor/public/footer.txt", function (err, data) {
+var htmlFooter = fs.readFileSync(path.join(__dirname, "public/footer.txt"), function (err, data) {
 	            if (err) throw err;   console.log(data);
 	          });
 
@@ -66,12 +70,12 @@ buildJS3 = function(id) {
 // REMOVED: buildJS4 function (map-related functionality not used in holocene_da)
 
 const configs = function (recon) {
-    const s = fs.readFileSync('/root/presto/prestoForm/' + recon + '/querypathconfigs.yml','utf8');
+    const s = fs.readFileSync(path.join(baseDir, 'prestoForm', recon, 'querypathconfigs.yml'),'utf8');
     return YAML.parse(s)
 }
 
 const formIntro = function (recon) {
-	const z = fs.readFileSync('/root/presto/prestoForm/' + recon + '/formIntro.txt','utf8');
+	const z = fs.readFileSync(path.join(baseDir, 'prestoForm', recon, 'formIntro.txt'),'utf8');
 	return (z)
 }
 
@@ -262,8 +266,8 @@ function checkAll (configCat) {
 }
 
 const headings = function (key) {
-	        const s = fs.readFileSync('/root/presto/jsonEditor/headings.json','utf8');
-	        var keyval = JSON.parse(s)        
+	        const s = fs.readFileSync(path.join(__dirname, 'headings.json'),'utf8');
+	        var keyval = JSON.parse(s)
 	        return keyval[key]
 }
 
@@ -454,7 +458,7 @@ function buildHtml(configs, recon) {
        + 'document.getElementById("abstract2").src = "/slider.css";'
        + '}\n'
        + '</script>\n'
-       + '<script src="/slider' + recon + '.js"></script>\n'
+       + '<script src="/editor/slider' + recon + '.js"></script>\n'
        + '</div>\n'
        + '<br>\n'
        + '</body>\n'
@@ -463,12 +467,13 @@ function buildHtml(configs, recon) {
 
 };
 
-const recon = prompt('Which recon are we writing a form for?');
+// Accept recon name from command line argument or prompt
+const recon = process.argv[2] || prompt('Which recon are we writing a form for?');
 console.log(`Okay, writing new form for ${recon}`);
 
 var html = buildHtml(configs(recon), recon);
 
-fs.writeFile("/root/presto/jsonEditor/forms-query/" + recon  + ".html", html, function(err) {
+fs.writeFile(path.join(__dirname, "forms-query", recon + ".html"), html, function(err) {
 	    if(err) {
 		            return console.log(err);
 		        }
@@ -476,7 +481,7 @@ fs.writeFile("/root/presto/jsonEditor/forms-query/" + recon  + ".html", html, fu
 }); 
 
 // CHANGED: Removed jsExt4 (map-related JavaScript) from output
-fs.writeFile("/root/presto/jsonEditor/public/slider" + recon + ".js", jsExt + jsExt2 + jsExt3, function(err) {
+fs.writeFile(path.join(__dirname, "public", "slider" + recon + ".js"), jsExt + jsExt2 + jsExt3, function(err) {
 	            if(err) {
 			                                return console.log(err);
 			                            }

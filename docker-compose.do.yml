@@ -1,0 +1,126 @@
+# Production compose file for the Digital Ocean droplet (143.198.98.66).
+#
+# Differences from docker-compose.prod.yml (university Podman host):
+#   - Mounts the Docker socket at /var/run/docker.sock (not the rootless
+#     Podman socket under $XDG_RUNTIME_DIR).
+#   - Binds nginx to 0.0.0.0:80 directly (no upstream TLS proxy).
+#   - Drops the :z SELinux relabel suffixes on bind mounts (not used on
+#     Ubuntu / Debian droplets).
+#
+# All custom images are pulled from Docker Hub (not built on the droplet).
+# Build/push them from a dev machine with scripts/build-and-push.sh.
+#
+# Usage on the droplet (in ~/presto):
+#   docker compose -f docker-compose.do.yml pull
+#   docker compose -f docker-compose.do.yml up -d
+#
+# Requirements on the droplet (all under ~/presto/):
+#   - .env.production (chmod 600) next to this compose file
+#   - customTiles/ subdir populated via rsync (data only; not in any image)
+#   - Docker Engine + docker-compose-plugin installed
+#   - Deploy user in the docker group
+#
+# Traffic path:
+#   http://143.198.98.66:84/
+#     → nginx container :84 (published from :81 inside)
+#     → presto-orchestrator:3000  or  tile-server:8080 (for /tiles_*)
+
+services:
+  presto-orchestrator:
+    image: docker.io/davidedge/presto-orchestrator:latest
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MYSQL_HOST=mysql
+      - USER_RECONS_PATH=/root/presto/userRecons
+      - PRESTO_FORM_PATH=/root/presto/prestoForm
+      - PRESTO_BASE_PATH=/root/presto
+      - HOLOCENE_DA_PATH=/root/holocene_da
+      - TEMP12K_PATH=/root/temp12k-regional-composites
+    volumes:
+      # Docker socket — orchestrator spawns sibling reconstruction containers.
+      # Grants root-equivalent host access; acceptable single-tenant only.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - user-recons-data:/root/presto/userRecons
+    init: true
+    networks:
+      - presto-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  proxy-analysis:
+    image: docker.io/davidedge/presto-proxy-analysis:latest
+    env_file:
+      - .env.production
+    environment:
+      - LIPD_CACHE_DIR=/cache/lipd
+    volumes:
+      # Disk-backed LiPD series cache — keeps container RSS flat and
+      # survives restarts so previously-seen datasets stay warm.
+      - lipd-cache-data:/cache/lipd
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  tile-server:
+    image: docker.io/davidedge/presto-tile-server:latest
+    volumes:
+      - ./customTiles/blueMarble/tiles_mollweide:/usr/share/nginx/html/tiles_bluemarble:ro
+      - ./customTiles/blueMarble_3031/tiles:/usr/share/nginx/html/tiles_bluemarble_3031:ro
+      - ./customTiles/blueMarble_3995/tiles:/usr/share/nginx/html/tiles_bluemarble_3995:ro
+      - ./customTiles/blueMarble_3857/tiles:/usr/share/nginx/html/tiles_bluemarble_3857:ro
+      - ./customTiles/naturalEarth_3857/tiles:/usr/share/nginx/html/tiles_naturalearth_3857:ro
+      - ./customTiles/naturalEarth_mollweide/tiles:/usr/share/nginx/html/tiles_naturalearth_mollweide:ro
+      - ./customTiles/naturalEarth_3031/tiles:/usr/share/nginx/html/tiles_naturalearth_3031:ro
+      - ./customTiles/naturalEarth_3995/tiles:/usr/share/nginx/html/tiles_naturalearth_3995:ro
+    networks:
+      - presto-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mysql:
+    image: docker.io/library/mysql:8.0
+    command: ["--local-infile=1", "--innodb-buffer-pool-size=256M"]
+    env_file:
+      - .env.production
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - presto-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  nginx:
+    image: docker.io/davidedge/presto-nginx:latest
+    # Edge of the deployment — listens on droplet's public :84.
+    ports:
+      - "84:81"
+    depends_on:
+      - presto-orchestrator
+      - tile-server
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  user-recons-data:
+  lipd-cache-data:
+
+networks:
+  presto-network:
+    driver: bridge

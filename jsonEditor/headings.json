@@ -6,5 +6,7 @@
 	"geo": "Geospatial",
 	"model": "Model",
 	"uncertainty": "Uncertainty",
-	"calibration": "Calibration"
+	"calibration": "Calibration",
+	"data_selection": "Data Selection",
+	"psm": "Proxy System Model"
 }

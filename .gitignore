@@ -1,3 +1,11 @@
+# Environment files (contain secrets!)
+.env
+.env.local
+.env.*.local
+.env.production
+
+node_modules/
+package-lock.json
 userRecons/*
 debug.log
 userRecons/
@@ -12,3 +20,11 @@ getLipds/lipdverseQuery.zip
 getLipds/lipdverseQuery.md5
 getLipds/lipdverse_and_md5_update.txt
 getLipds.backup/
+
+# Runtime / scratch
+query/lipdverseQuery.md5
+temp/
+.claude/scheduled_tasks.lock
+__pycache__/
+*.pyc
+loadtest/runs/

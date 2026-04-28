@@ -1,3 +1,38 @@
+// Top 15 most common interpretation variables (shared across query pages)
+var top15InterpVars = [
+   "temperature",
+   "precipitation",
+   "effectivePrecipitation",
+   "temperature|precipitationIsotope",
+   "growingDegreeDays",
+   "temperature|temperature|seawaterIsotope",
+   "precipitation|precipitationIsotope",
+   "precipitationIsotope",
+   "seaIce",
+   "salinity|seawaterIsotope",
+   "streamflow",
+   "upwelling",
+   "effectivePrecipitation|effectivePrecipitation",
+   "temperature|seawaterIsotope",
+   "salinity"
+];
+
+// Autocomplete source for the Interpretation Variable filter.
+// LIKE '%value%' in buildQstring means combo entries (e.g. "temperature|precipitationIsotope")
+// also match when the user picks "temperature" or "precipitationIsotope".
+var interpVarList = [
+   "temperature",
+   "precipitation",
+   "effectivePrecipitation",
+   "precipitationIsotope",
+   "seawaterIsotope",
+   "growingDegreeDays",
+   "seaIce",
+   "salinity",
+   "streamflow",
+   "upwelling"
+].map(function (v) { return { value: v, label: v }; });
+
 var continentlist = [{"value":"Africa","label":"Africa"},{"value":"Antarctica","label":"Antarctica"},{"value":"Asia","label":"Asia"},{"value":"Australia","label":"Australia"},{"value":"Europe","label":"Europe"},{"value":"North America","label":"North America"},{"value":"South America","label":"South America"}]
 
 var countrylist = [{"value":"Afghanistan","label":"Afghanistan"},{"value":"Aland","label":"Aland"},{"value":"Albania","label":"Albania"},{"value":"Algeria","label":"Algeria"},{"value":"Antarctica","label":"Antarctica"},{"value":"Argentina","label":"Argentina"},{"value":"Armenia","label":"Armenia"},{"value":"Australia","label":"Australia"},{"value":"Austria","label":"Austria"},{"value":"Belarus","label":"Belarus"},{"value":"Belgium","label":"Belgium"},{"value":"Belize","label":"Belize"},{"value":"Bermuda","label":"Bermuda"},{"value":"Bhutan","label":"Bhutan"},{"value":"Bolivia","label":"Bolivia"},{"value":"Botswana","label":"Botswana"},{"value":"Brazil","label":"Brazil"},{"value":"Bulgaria","label":"Bulgaria"},{"value":"Burundi","label":"Burundi"},{"value":"Canada","label":"Canada"},{"value":"Cayman Islands","label":"Cayman Islands"},{"value":"Chad","label":"Chad"},{"value":"Chile","label":"Chile"},{"value":"China","label":"China"},{"value":"Colombia","label":"Colombia"},{"value":"Cook Islands","label":"Cook Islands"},{"value":"Costa Rica","label":"Costa Rica"},{"value":"Cuba","label":"Cuba"},{"value":"Czech Republic","label":"Czech Republic"},{"value":"Democratic Republic of the Congo","label":"Democratic Republic of the Congo"},{"value":"Denmark","label":"Denmark"},{"value":"Djibouti","label":"Djibouti"},{"value":"Dominican Republic","label":"Dominican Republic"},{"value":"Ecuador","label":"Ecuador"},{"value":"Egypt","label":"Egypt"},{"value":"Estonia","label":"Estonia"},{"value":"Ethiopia","label":"Ethiopia"},{"value":"Faroe Islands","label":"Faroe Islands"},{"value":"Finland","label":"Finland"},{"value":"France","label":"France"},{"value":"French Polynesia","label":"French Polynesia"},{"value":"Georgia","label":"Georgia"},{"value":"Germany","label":"Germany"},{"value":"Ghana","label":"Ghana"},{"value":"Greece","label":"Greece"},{"value":"Greenland","label":"Greenland"},{"value":"Guam","label":"Guam"},{"value":"Guatemala","label":"Guatemala"},{"value":"Haiti","label":"Haiti"},{"value":"Hungary","label":"Hungary"},{"value":"Iceland","label":"Iceland"},{"value":"India","label":"India"},{"value":"Indonesia","label":"Indonesia"},{"value":"Iran","label":"Iran"},{"value":"Ireland","label":"Ireland"},{"value":"Israel","label":"Israel"},{"value":"Italy","label":"Italy"},{"value":"Jamaica","label":"Jamaica"},{"value":"Japan","label":"Japan"},{"value":"Jordan","label":"Jordan"},{"value":"Kazakhstan","label":"Kazakhstan"},{"value":"Kenya","label":"Kenya"},{"value":"Kyrgyzstan","label":"Kyrgyzstan"},{"value":"Laos","label":"Laos"},{"value":"Lebanon","label":"Lebanon"},{"value":"Libya","label":"Libya"},{"value":"Lithuania","label":"Lithuania"},{"value":"Luxembourg","label":"Luxembourg"},{"value":"Macedonia","label":"Macedonia"},{"value":"Madagascar","label":"Madagascar"},{"value":"Malawi","label":"Malawi"},{"value":"Malaysia","label":"Malaysia"},{"value":"Mali","label":"Mali"},{"value":"Malta","label":"Malta"},{"value":"Mauritania","label":"Mauritania"},{"value":"Mexico","label":"Mexico"},{"value":"Mongolia","label":"Mongolia"},{"value":"Morocco","label":"Morocco"},{"value":"Namibia","label":"Namibia"},{"value":"Nauru","label":"Nauru"},{"value":"Nepal","label":"Nepal"},{"value":"Netherlands","label":"Netherlands"},{"value":"New Zealand","label":"New Zealand"},{"value":"Nicaragua","label":"Nicaragua"},{"value":"Niger","label":"Niger"},{"value":"Nigeria","label":"Nigeria"},{"value":"Norway","label":"Norway"},{"value":"Oman","label":"Oman"},{"value":"Pakistan","label":"Pakistan"},{"value":"Papua New Guinea","label":"Papua New Guinea"},{"value":"Peru","label":"Peru"},{"value":"Poland","label":"Poland"},{"value":"Portugal","label":"Portugal"},{"value":"Romania","label":"Romania"},{"value":"Russia","label":"Russia"},{"value":"Saudi Arabia","label":"Saudi Arabia"},{"value":"Senegal","label":"Senegal"},{"value":"Seychelles","label":"Seychelles"},{"value":"Slovakia","label":"Slovakia"},{"value":"Slovenia","label":"Slovenia"},{"value":"South Africa","label":"South Africa"},{"value":"South Korea","label":"South Korea"},{"value":"South Sudan","label":"South Sudan"},{"value":"Spain","label":"Spain"},{"value":"Sudan","label":"Sudan"},{"value":"Sweden","label":"Sweden"},{"value":"Switzerland","label":"Switzerland"},{"value":"Syria","label":"Syria"},{"value":"Taiwan","label":"Taiwan"},{"value":"Tajikistan","label":"Tajikistan"},{"value":"Thailand","label":"Thailand"},{"value":"The Bahamas","label":"The Bahamas"},{"value":"Togo","label":"Togo"},{"value":"Tunisia","label":"Tunisia"},{"value":"Turkey","label":"Turkey"},{"value":"Uganda","label":"Uganda"},{"value":"Ukraine","label":"Ukraine"},{"value":"United Kingdom","label":"United Kingdom"},{"value":"United Republic of Tanzania","label":"United Republic of Tanzania"},{"value":"United States of America","label":"United States of America"},{"value":"Uzbekistan","label":"Uzbekistan"},{"value":"Vanuatu","label":"Vanuatu"},{"value":"Venezuela","label":"Venezuela"},{"value":"Vietnam","label":"Vietnam"},{"value":"West Bank","label":"West Bank"},{"value":"Western Sahara","label":"Western Sahara"},{"value":"Yemen","label":"Yemen"},{"value":"Zambia","label":"Zambia"}]
@@ -106,7 +141,8 @@ $(function() {
     }
 
     function setupAutocomplete(selector, dataSource) {
-        $(selector)
+        if ($(selector).length === 0) return;
+        var widget = $(selector)
             .on("keydown", function(event) {
                 if (
                     event.keyCode === $.ui.keyCode.TAB &&
@@ -132,18 +168,236 @@ $(function() {
                     return false;
                 }
             });
+        // Render canonical LiPD term in bold, synonyms in light gray
+        widget.data("ui-autocomplete")._renderItem = function(ul, item) {
+            var canonical = item.value;
+            var synonyms = item.label.slice(canonical.length);
+            if (synonyms.charAt(0) === ',') synonyms = synonyms.slice(1);
+            var $a = $('<a>').append($('<strong>').text(canonical));
+            if (synonyms) {
+                $a.append($('<span>').css({ color: '#aaa', fontSize: '0.88em', marginLeft: '6px' }).text(synonyms));
+            }
+            return $('<li>').append($a).appendTo(ul);
+        };
     }
 
-    // Example usage for your elements
-    setupAutocomplete("#proxy", proxylist);
-    setupAutocomplete("#variableName", variablelist);
-    setupAutocomplete("#archiveTypeIn", archivelist);
-    setupAutocomplete("#countryIn", countrylist);
-    setupAutocomplete("#continentIn", continentlist);
-    setupAutocomplete("#compilationIn", latestCompilations);
-    setupAutocomplete("#seasonality1", seasonalitylist);
+    // Multi-select fields — rendered as chip/tag inputs.
+    // Pass lazy getters for any source that is populated asynchronously (so the autocomplete
+    // picks up the latest value at lookup time, not at setup time).
+    chipifyAutocomplete("#proxy", function() { return proxylist; });
+    chipifyAutocomplete("#variableName", function() { return variablelist; });
+    chipifyAutocomplete("#interpVar", function() { return interpVarList; });
+    chipifyAutocomplete("#archiveTypeIn", function() { return archivelist; });
+    chipifyAutocomplete("#countryIn", function() { return countrylist; });
+    chipifyAutocomplete("#continentIn", function() { return continentlist; });
+    chipifyAutocomplete("#compilationIn", function() { return latestCompilations; });
+    chipifyAutocomplete("#seasonality1", function() { return seasonalitylist; });
 
 });
+
+// After all chipify conversions have run, re-apply PAGE_CONFIG defaults onto the now-hidden
+// inputs and trigger a re-render. This is a safety net for cases where PAGE_CONFIG's inline
+// script set values on the pre-chipify <input> and those values somehow didn't carry through.
+$(function() {
+    var cfg = window.PAGE_CONFIG;
+    if (!cfg) return;
+    function apply(id, value) {
+        if (value == null || value === '') return;
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (!el.value) el.value = value;
+        $(el).trigger('chip:sync');
+    }
+    apply('compilationIn', cfg.compilationFilter);
+    apply('interpVar', cfg.interpVarDefault);
+});
+
+/**
+ * Runtime DOM rewrite: replace a plain <input> with a chip-style multi-select.
+ * The original id and name are preserved on a new hidden input so existing readers
+ * (`document.getElementById(id).value`) keep working without changes.
+ */
+function chipifyAutocomplete(selector, dataSource) {
+    var original = document.querySelector(selector);
+    if (!original) { console.warn('[chipify] no element found for', selector); return; }
+
+    var id = original.id;
+
+    // If the input is already a hidden mirror (server may have served pre-chipified HTML),
+    // just wire up the existing chip container/typing input instead of re-creating them.
+    if (original.type === 'hidden') {
+        var existingWrapper = document.getElementById(id + 'ChipContainer');
+        var existingTyping = document.getElementById(id + 'Typing');
+        if (existingWrapper && existingTyping) {
+            console.log('[chipify] wiring pre-existing chip widget for', selector, 'value:', JSON.stringify(original.value));
+            setupChipAutocomplete('#' + id, '#' + existingTyping.id, '#' + existingWrapper.id, dataSource);
+        } else {
+            console.warn('[chipify] hidden input with no chip container:', selector);
+        }
+        return;
+    }
+    console.log('[chipify]', selector, 'initial value:', JSON.stringify(original.value));
+
+    var parent = original.parentNode;
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'chip-input';
+    wrapper.id = id + 'ChipContainer';
+    if (original.style.width) wrapper.style.width = original.style.width;
+
+    var typing = document.createElement('input');
+    typing.type = 'text';
+    typing.id = id + 'Typing';
+    typing.className = 'chip-input-typing';
+    typing.setAttribute('autocomplete', 'off');
+    typing.placeholder = 'Begin typing for suggestions';
+    wrapper.appendChild(typing);
+
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.id = id;
+    if (original.name) hidden.name = original.name;
+    hidden.value = original.value || '';
+
+    parent.insertBefore(wrapper, original);
+    parent.insertBefore(hidden, wrapper.nextSibling);
+    parent.removeChild(original);
+
+    setupChipAutocomplete('#' + id, '#' + typing.id, '#' + wrapper.id, dataSource);
+}
+
+/**
+ * Chip-style multi-select autocomplete.
+ *   hiddenSelector:    the <input type="hidden"> holding the canonical comma-joined value
+ *   typingSelector:    the visible <input type="text"> inside the chip container
+ *   containerSelector: the .chip-input wrapper
+ *   dataSource:        jQuery-UI autocomplete source (array of strings or {label,value})
+ *
+ * Keeps the hidden input's value as a plain comma-joined list so existing readers
+ * (params(), queryParams) work unchanged. Chips render left-to-right before the typing input.
+ */
+function setupChipAutocomplete(hiddenSelector, typingSelector, containerSelector, dataSource) {
+    var $hidden = $(hiddenSelector);
+    var $typing = $(typingSelector);
+    var $container = $(containerSelector);
+    if ($hidden.length === 0 || $typing.length === 0 || $container.length === 0) return;
+
+    function readChips() {
+        var v = $hidden.val() || "";
+        return v.split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+    }
+    function commit(chips) {
+        var seen = {};
+        chips = chips.filter(function(c){ if (seen[c]) return false; seen[c] = 1; return true; });
+        $hidden.val(chips.join(","));
+        render(chips);
+        $hidden.trigger("change");
+    }
+    function render(chips) {
+        $container.find(".chip").remove();
+        chips.forEach(function(chip) {
+            var $chip = $('<span class="chip"></span>').text(chip);
+            var $x = $('<button type="button" class="chip-x" aria-label="Remove">&times;</button>');
+            $x.on("click", function(e) {
+                e.preventDefault();
+                var cur = readChips();
+                var idx = cur.indexOf(chip);
+                if (idx >= 0) {
+                    cur.splice(idx, 1);
+                    commit(cur);
+                }
+                $typing.focus();
+            });
+            $chip.append($x);
+            $typing.before($chip);
+        });
+    }
+    function addChip(value) {
+        value = (value || "").trim();
+        if (!value) return;
+        var cur = readChips();
+        if (cur.indexOf(value) !== -1) return;
+        cur.push(value);
+        commit(cur);
+    }
+    function removeLastChip() {
+        var cur = readChips();
+        if (cur.length === 0) return;
+        cur.pop();
+        commit(cur);
+    }
+
+    $container.on("mousedown", function(e) {
+        // Clicking empty space inside the wrapper focuses the typing input
+        if (e.target === $container[0]) {
+            e.preventDefault();
+            $typing.focus();
+        }
+    });
+
+    $typing
+        .on("keydown", function(event) {
+            if (event.keyCode === 8 && !$(this).val()) {
+                event.preventDefault();
+                removeLastChip();
+                return;
+            }
+            if (event.keyCode === 13) {
+                var inst = $(this).autocomplete("instance");
+                if (inst && inst.menu.active) {
+                    // Let the autocomplete select callback commit the highlighted suggestion.
+                    return;
+                }
+                event.preventDefault();
+                var val = $(this).val();
+                if (val) { addChip(val); $(this).val(""); }
+                return;
+            }
+            if (event.keyCode === $.ui.keyCode.TAB &&
+                $(this).autocomplete("instance") &&
+                $(this).autocomplete("instance").menu.active) {
+                event.preventDefault();
+            }
+        })
+        .on("blur", function() {
+            var val = $(this).val();
+            if (val) { addChip(val); $(this).val(""); }
+        })
+        .autocomplete({
+            minLength: 0,
+            source: function(request, response) {
+                var ds = (typeof dataSource === 'function') ? dataSource() : dataSource;
+                if (!ds || (!Array.isArray(ds) && typeof ds.length !== 'number')) ds = [];
+                response($.ui.autocomplete.filter(ds, request.term || ""));
+            },
+            focus: function() { return false; },
+            select: function(event, ui) {
+                addChip(ui.item.value);
+                $(this).val("");
+                return false;
+            }
+        });
+
+    var widget = $typing.data("ui-autocomplete");
+    if (widget) {
+        widget._renderItem = function(ul, item) {
+            var canonical = item.value;
+            var synonyms = (item.label || "").slice(canonical.length);
+            if (synonyms.charAt(0) === ',') synonyms = synonyms.slice(1);
+            var $a = $('<a>').append($('<strong>').text(canonical));
+            if (synonyms) {
+                $a.append($('<span>').css({ color: '#aaa', fontSize: '0.88em', marginLeft: '6px' }).text(synonyms));
+            }
+            return $('<li>').append($a).appendTo(ul);
+        };
+    }
+
+    // Re-render if some other code sets the hidden value programmatically (e.g. PAGE_CONFIG defaults).
+    $hidden.on("chip:sync", function() { render(readChips()); });
+
+    // Initial paint (picks up any default already assigned to the hidden input)
+    render(readChips());
+}
 function hideForm(){
 	if (document.getElementById("archivedCompilation").checked){
 		document.getElementById("queryForm").style.display = "none";
@@ -213,119 +467,82 @@ async function transformToLabelValueArray() {
       };
     });
   }
-  function updateBoundingBox(){
-    rect.editing.disable();
-    var latMin = +document.getElementById("lat_min").value
-    var latMax = +document.getElementById("lat_max").value
-    if (latMin > latMax){
-	if (latMin < 90){
-	    latMax = latMin + .001
-	    document.getElementById("lat_max").value = latMax
-	} else {
-	    latMin = latMax - .001
-	    document.getElementById("lat_min").value = latMin
-	}
-    }
-    var lonMin = +document.getElementById("lon_min").value
-    var lonMax = +document.getElementById("lon_max").value
-    if (lonMin > lonMax){
-	if (lonMin < 180){
-	    lonMax = lonMin + .001
-	    document.getElementById("lon_max").value = lonMax
-	} else {
-	    lonMin = lonMax - .001
-	    document.getElementById("lon_min").value = lonMin
-	}
-    }
-    rect.setBounds([[latMin, lonMin], [latMax, lonMax]]);
-    rect.editing.enable();
-    return {"South":latMin,"West":lonMin,"North":latMax,"East":lonMax}
-}
-function chooseColor(archiveType){
-    archiveType = archiveType.toString();
-    var color1 = colorPal[archiveType]
-    if (typeof color1 !== 'undefined'){
-	return color1
+function chooseColor(archiveType, interpVar, proxy){
+    // Check if we're in proxy legend mode (use window.legendMode for cross-script access)
+    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'proxy') {
+        var proxyValue = proxy;
+        if (Array.isArray(proxy)) {
+            proxyValue = proxy[0];
+        }
+        if (Array.isArray(proxyValue)) {
+            proxyValue = proxyValue[0];
+        }
+        proxyValue = proxyValue ? proxyValue.toString().trim() : '';
+
+        if (proxyValue && typeof proxyColorPal[proxyValue] !== 'undefined') {
+            return proxyColorPal[proxyValue];
+        } else {
+            return proxyColorPal["*Other*"] || "#808080";
+        }
+    } else if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+        // Convert interpVar from array to string (same as archiveType handling)
+        interpVar = interpVar ? interpVar.toString() : '';
+        console.log('chooseColor in interpVar mode, interpVar:', interpVar, 'in top15:', top15InterpVars.indexOf(interpVar) !== -1);
+        // Map interpVar to top 15 or "*Other*"
+        if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
+            var color1 = interpVarColorPal[interpVar];
+            return color1 || "#808080";
+        } else {
+            return interpVarColorPal["*Other*"] || "#808080";
+        }
     } else {
-	//console.log(archiveType)
-	return "black"
+        // Default: archiveType mode
+        archiveType = archiveType.toString();
+        var color1 = colorPal[archiveType]
+        if (typeof color1 !== 'undefined'){
+            return color1
+        } else {
+            return "black"
+        }
     }
 }
-function chooseShape(archiveType){
-    archiveType = archiveType.toString();
-    var shape1 = shapePal[archiveType]
-    if (typeof shape1 !== 'undefined'){
-	return shape1
+function chooseShape(archiveType, interpVar, proxy){
+    // Check if we're in proxy legend mode (use window.legendMode for cross-script access)
+    if (typeof window.legendMode !== 'undefined' && window.legendMode === 'proxy') {
+        var proxyValue = proxy;
+        if (Array.isArray(proxy)) {
+            proxyValue = proxy[0];
+        }
+        if (Array.isArray(proxyValue)) {
+            proxyValue = proxyValue[0];
+        }
+        proxyValue = proxyValue ? proxyValue.toString().trim() : '';
+
+        if (proxyValue && typeof proxyShapePal[proxyValue] !== 'undefined') {
+            return proxyShapePal[proxyValue];
+        } else {
+            return proxyShapePal["*Other*"] || "diamond";
+        }
+    } else if (typeof window.legendMode !== 'undefined' && window.legendMode === 'interpVar') {
+        // Convert interpVar from array to string (same as archiveType handling)
+        interpVar = interpVar ? interpVar.toString() : '';
+        // Map interpVar to top 15 or "*Other*"
+        if (interpVar && top15InterpVars.indexOf(interpVar) !== -1) {
+            var shape1 = interpVarShapePal[interpVar];
+            return shape1 || "diamond";
+        } else {
+            return interpVarShapePal["*Other*"] || "diamond";
+        }
     } else {
-	//console.log(archiveType)
-	return "diamond"
+        // Default: archiveType mode
+        archiveType = archiveType.toString();
+        var shape1 = shapePal[archiveType]
+        if (typeof shape1 !== 'undefined'){
+            return shape1
+        } else {
+            return "diamond"
+        }
     }
-}
-function chooseOpacity(coords, rect1){
-    //rectSW = regExp.exec(rect._bounds._southWest)[1]
-    //rect1 = changeBoxCoord()
-    var point = regExp.exec(coords)[1]
-    var pointLat = dec4(point.split(',')[0])
-    var pointLon = dec4(point.split(',')[1])
-
-    if (+pointLat > +rect1.South && +pointLat < +rect1.North && +pointLon > +rect1.West && +pointLon < +rect1.East){
-	inRectCount = inRectCount + 1
-	return 0.8
-    } else {
-	return 0.1
-    }
-}
-function changeBoxCoord(){
-    var SW = regExp.exec(rect._bounds._southWest)[1]
-    var South = dec4(SW.split(',')[0])
-    var West = dec4(SW.split(',')[1])
-    //var South = dec4(0)
-    //var West = dec4(-90)
-    var NE = regExp.exec(rect._bounds._northEast)[1]
-    var North = dec4(NE.split(',')[0])
-    var East = dec4(NE.split(',')[1])
-    //var North = dec4(45)
-    //var East = dec4(0)
-    //var newCoords = South + ', ' + West + ', ' + North + ', ' + East
-    var rectWidth = +(East-West)
-    rect.editing.disable();
-    if (North > 90){
-	    rect.setBounds([[South, West], [90, East]]);
-
-    }
-    if (South < -90){
-
-	    rect.setBounds([[-90, West], [North, East]]);
-	
-    }
-    if (West < -360){
-
-	    rect.setBounds([[South, -360], [North, East]]);
-
-    }
-    if (East > 360){
-
-	    rect.setBounds([[South, West], [North, 360]]);
-	
-    }
-    if (rectWidth > 360){
-	if (West < -360){
-	    var newWest = +(+East - 360)
-	    rect.setBounds([[South, newWest], [North, East]]);
-	} else {
-	    var newEast = +(+West + 360)
-	    rect.setBounds([[South, West], [North, newEast]]);
-	}
-	
-    }
-    
-	
-    document.getElementById("lat_min").value = South
-    document.getElementById("lat_max").value = North
-    document.getElementById("lon_min").value = West
-    document.getElementById("lon_max").value = East
-    rect.editing.enable();
-    return {"South":South,"West":West,"North":North,"East":East}
 }
 function loadLatLon (a1){
     console.log("loadLatLon received " + a1.length + " datasets");
@@ -364,7 +581,8 @@ var numPoints = +(numdata * 2)
     proxy1 = Object.values(x1)[ii].paleoData_proxy
     minAge = Object.values(x1)[ii].minAge
     maxAge = Object.values(x1)[ii].maxAge
-    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": []} });
+    interpVars = Object.values(x1)[ii].interp_Vars
+    geojson.features.push({ "type": "Feature","geometry": {"type": "Point","coordinates": []},"properties": {"archiveType": [], "dataSetName": [], "paleoData_proxy": [], "minAge": [], "maxAge": [], "datasetId": [], "interp_Vars": []} });
     geojson.features[i].geometry.coordinates.push(lon,lat);
     geojson.features[i].properties.archiveType.push(aType);
     geojson.features[i].properties.dataSetName.push(dName);
@@ -372,6 +590,7 @@ var numPoints = +(numdata * 2)
     geojson.features[i].properties.paleoData_proxy.push(proxy1);
     geojson.features[i].properties.minAge.push(minAge);
     geojson.features[i].properties.maxAge.push(maxAge);
+    geojson.features[i].properties.interp_Vars.push(interpVars);
   }
 
   return(geojson)
@@ -446,6 +665,12 @@ getAllMonths = function(startSpan,endSpan){
             part = qString(document.getElementById("proxy").value,document.getElementById("proxy").name,false);
             if (part) queryParts.push(part);
 
+            var interpVarEl = document.getElementById("interpVar");
+            if (interpVarEl) {
+                part = qString(interpVarEl.value, interpVarEl.name, false);
+                if (part) queryParts.push(part);
+            }
+
             part = qString(document.getElementById("countryIn").value,document.getElementById("countryIn").name,false);
             if (part) queryParts.push(part);
 
@@ -474,6 +699,14 @@ getAllMonths = function(startSpan,endSpan){
             }
             if (JSON.parse(filters1['resolution'])){
                 queryParts.push('medianResolution < ' + document.getElementById("resolutionInput").value);
+            }
+            if (filters1['minLength'] && JSON.parse(filters1['minLength'])){
+                // Avoid '=' in the expression: the server's querystring parser treats '='
+                // as the key/value separator. ">= N" is equivalent to "> N-1" for this filter.
+                var minLenVal = parseFloat(document.getElementById("minLengthInput").value);
+                if (!isNaN(minLenVal)) {
+                    queryParts.push('maxAge - minAge > ' + (minLenVal - 1));
+                }
             }
             if (JSON.parse(filters1['terrestrial'])){
                 queryParts.push('isTerrestrial=' + +document.getElementById("Terrestrial").checked);
@@ -526,7 +759,7 @@ getAllMonths = function(startSpan,endSpan){
                 xhr0.ontimeout = function (){
                     console.error("request timedout: ", xhr0);
                 }
-                xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);
+                xhr0.open("get", "/data/" + param1, /*async*/ true);
                 // xhr.responseType = "text";
                 xhr0.send();
             }
@@ -551,7 +784,7 @@ getAllMonths = function(startSpan,endSpan){
                         resolve();
                     }
                 };
-                xhr7.open("post", "http://143.198.98.66:92/", /*async*/ true);
+                xhr7.open("post", "/posttsids/", /*async*/ true);
                 xhr7.setRequestHeader("Content-type", "application/json");
                 xhr7.send(Body);
                 });
@@ -581,7 +814,7 @@ getAllMonths = function(startSpan,endSpan){
                                 resolve();
                             }
                         };
-                        var tsURL = "http://143.198.98.66:88/TS" + params(useCoords=true);
+                        var tsURL = "/data/TS" + params(useCoords=true);
                         console.log("getTSIDs requesting URL: " + tsURL);
                         xhr2.open("get", tsURL, /*async*/ true);
                         xhr2.send();
@@ -607,7 +840,7 @@ getAllMonths = function(startSpan,endSpan){
                         resolve(xhr3.status);
                     }
                 };
-                xhr3.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);
+                xhr3.open("post", "/sparql", /*async*/ true);
                 xhr3.setRequestHeader("Content-type", "application/json");
                 xhr3.send(TSIDs);
                 });
@@ -713,7 +946,7 @@ getAllMonths = function(startSpan,endSpan){
                     reject(new Error("XHR request timed out"));
                 };
         
-                xhr1.open("POST", "http://143.198.98.66:90/lipds", true);
+                xhr1.open("POST", "/lipds", true);
                 xhr1.setRequestHeader("Content-type", "application/json");
         
                 xhr1.timeout = 5000; // Set a timeout (optional)
@@ -726,6 +959,10 @@ getAllMonths = function(startSpan,endSpan){
                 //alert(params(useCoords=true))
                 getTSIDs().then(reso => {
                     if (lipdSource == 'TSIDs'){
+                        if (!reso) {
+                            alert('No proxy records found. Please uncheck "Use an archived compilation", update the map, then try again.');
+                            return; // leave the promise pending — user stays on the page
+                        }
                         var resoJSON = JSON.parse(reso);
 
                         // DEBUG: Check what /TS endpoint returned
@@ -747,17 +984,61 @@ getAllMonths = function(startSpan,endSpan){
                         console.log("Average TSIDs per dataset: " + (IDs.length / uniqueDatasetIds.length).toFixed(2));
                         console.log("First 5 unique datasetIds:", uniqueDatasetIds.slice(0, 5));
 
-                        var tsJSON = '{"TSIDs": ' + JSON.stringify(IDs) +
-                                     ',"datasetIds": ' + JSON.stringify(uniqueDatasetIds) +
-                                     ',"recon":"' + document.getElementById('recon').value +
-                                     '", "uniqueID":"' + document.getElementById('uniqueID').value + '"}'
-                        console.log("Sending POST with " + IDs.length + " TSIDs and " + uniqueDatasetIds.length + " datasetIds")
-                        console.log("All output formats will be generated (R, Python CFR, Python legacy, lipd_files.zip)")
-                        console.log("json body length: " + tsJSON.length + " characters")
-                        //postTSids(tsJSON);
-                        var TSIDsArray = JSON.parse(tsJSON).TSIDs
+                        // Collect query parameters from the filter UI for lipdGenerator
+                        // rmBlanks strips trailing ", " left by the autocomplete widget
+                        var queryParams = {
+                            archiveTypes: rmBlanks(document.getElementById('archiveTypeIn').value) || null,
+                            proxy: rmBlanks(document.getElementById('proxy').value) || null,
+                            variableName: rmBlanks(document.getElementById('variableName').value) || null,
+                            interpVars: (document.getElementById('interpVar') ? rmBlanks(document.getElementById('interpVar').value) : null) || null,
+                            country: rmBlanks(document.getElementById('countryIn').value) || null,
+                            continent: rmBlanks(document.getElementById('continentIn').value) || null,
+                            compilation: rmBlanks(document.getElementById('compilationIn').value) || null,
+                            seasonality: rmBlanks(document.getElementById('seasonality1').value) || null
+                        };
+                        if (document.getElementById('coordsOn').checked) {
+                            queryParams.coords = [
+                                parseFloat(document.getElementById('lat_min').value),
+                                parseFloat(document.getElementById('lat_max').value),
+                                parseFloat(document.getElementById('lon_min').value),
+                                parseFloat(document.getElementById('lon_max').value)
+                            ];
+                        }
+                        if (JSON.parse(filters1['ages'])) {
+                            queryParams.ages = [
+                                parseFloat(document.getElementById('time_range_to_reconstruct_fromInput').value),
+                                parseFloat(document.getElementById('time_range_to_reconstruct_toInput').value)
+                            ];
+                        }
+                        if (JSON.parse(filters1['resolution'])) {
+                            queryParams.resolution = parseFloat(document.getElementById('resolutionInput').value);
+                        }
+                        if (filters1['minLength'] && JSON.parse(filters1['minLength'])) {
+                            queryParams.minRecordLength = parseFloat(document.getElementById('minLengthInput').value);
+                        }
+                        if (JSON.parse(filters1['terrestrial'])) {
+                            queryParams.terrestrial = document.getElementById('Terrestrial').checked;
+                        }
+                        var postBody = {
+                            TSIDs: IDs,
+                            datasetIds: uniqueDatasetIds,
+                            recon: document.getElementById('recon').value,
+                            uniqueID: document.getElementById('uniqueID').value,
+                            queryParams: queryParams
+                        };
+                        var tsJSON = JSON.stringify(postBody);
+                        console.log("Sending POST with " + IDs.length + " TSIDs, " + uniqueDatasetIds.length + " datasetIds, queryParams:", queryParams)
+                        var TSIDsArray = postBody.TSIDs;
                         var numTSids = TSIDsArray.length
                     } else {
+                        // Short-circuit for lipdDownload archived path — no GitHub needed
+                        const reconVal = document.getElementById('recon').value;
+                        if (reconVal === 'lipdDownload') {
+                            const compilation = document.getElementById('archivedCompilationIn').value;
+                            const version = document.getElementById('archivedCompilationVersionIn').value;
+                            resolve(`https://lipdverse.org/${compilation}/${version}/`);
+                            return;
+                        }
                         const archivedCompURL = 'https://lipdverse.org/' + document.getElementById('archivedCompilationIn').value + '/' + document.getElementById('archivedCompilationVersionIn').value
                         var tsJSON = '{"compilation": "' + document.getElementById('archivedCompilationIn').value + '", "version": "' + document.getElementById('archivedCompilationVersionIn').value + '", "recon": "' + document.getElementById('recon').value + '", "uniqueID":"' + document.getElementById('uniqueID').value + '"}'
                         console.log("Sending POST for archived compilation (both R and Python formats will be downloaded): ", tsJSON)
@@ -765,13 +1046,20 @@ getAllMonths = function(startSpan,endSpan){
                     compileLipds(tsJSON)
                         .then(response => {
                             console.log("Success:", response);
-                        if (loc1 == "donwload"){
+                        if (loc1 == "download"){
                             resolve("https://www.google.com")
                         } else {
                             var queryParams = params(useCoords=true)
-                            queryParams = '&' + queryParams.substring(1);
+                            // Check if window.location.search already has query params
+                            if (window.location.search) {
+                                // Append with &
+                                queryParams = '&' + queryParams.substring(1);
+                            }
+                            // If no existing query params, queryParams already starts with ?
                             queryParams = queryParams.replace(/\s/g, '');
-                            resolve("http://143.198.98.66:85/querypath"+window.location.search+queryParams)
+                            // Filtered TSID queries go to data cleaning; archived compilations go directly to the editor
+                            var targetBase = (lipdSource === 'TSIDs') ? '/datacleaning' : '/editor/querypath';
+                            resolve(targetBase+window.location.search+queryParams)
                         }
                         })
                         .catch(error => {
@@ -779,26 +1067,43 @@ getAllMonths = function(startSpan,endSpan){
                         alert("Error: failed to write data selection to server. Please start over.");
                         resolve("https://paleopresto.com/custom.html");
                         });
+                }).catch(error => {
+                    console.error("getLipds outer error:", error);
+                    alert("Error: " + error.message + "\nPlease try again.");
                 });
             });
         }
 function updatePoints (coords){
     inRectCount = 0;
     layerGroup.clearLayers();
+
+    // Always read coordinate values from the form
+    var latMin = +document.getElementById("lat_min").value;
+    var latMax = +document.getElementById("lat_max").value;
+    var lonMin = +document.getElementById("lon_min").value;
+    var lonMax = +document.getElementById("lon_max").value;
+
+    console.log('updatePoints: Form values - latMin=' + latMin + ', latMax=' + latMax + ', lonMin=' + lonMin + ', lonMax=' + lonMax);
+    console.log('updatePoints: coordsOn checked =', document.getElementById("coordsOn").checked);
+
     if (!document.getElementById("coordsOn").checked) {
+	// Reset to global bounds when unchecked
 	document.getElementById("lat_min").value = -90
 	document.getElementById("lat_max").value = 90
 	document.getElementById("lon_min").value = -180
 	document.getElementById("lon_max").value = 180
-	//rect = L.rectangle([[-90, 90], [-360, 360]], {fillOpacity:0});
-	updateBoundingBox();
 	rectCoord = {"South":-90,"West":-180,"North":90,"East":180};
-	rect.editing.disable();
-	
     } else {
-	rect.editing.enable();
-	rectCoord = changeBoxCoord();
+	// Use the form values when checked
+	// Note: Use isNaN check instead of || because 0 is a valid coordinate
+	rectCoord = {
+	    "South": isNaN(latMin) ? -90 : latMin,
+	    "West": isNaN(lonMin) ? -180 : lonMin,
+	    "North": isNaN(latMax) ? 90 : latMax,
+	    "East": isNaN(lonMax) ? 180 : lonMax
+	};
     }
+    console.log('updatePoints: rectCoord =', rectCoord);
  L.geoJSON([loadLatLon(coords)], {
 
 		style : function(feature) {
@@ -806,56 +1111,60 @@ function updatePoints (coords){
 		},
 
 		onEachFeature: function (feature, layer) {
-	    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Mix/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="https://lipdverse.org/data/pnImKbqSb45N6vABnwoD/1_0_13/paleoPlots.html" height="200" width="600" title="paleoData Plot"></iframe>', {
+	    layer.bindPopup('<h1>'+feature.properties.dataSetName+'</h1><p><b>Archive Type: </b>'+feature.properties.archiveType+'<br><a href="https://lipdverse.org/data/'+feature.properties.datasetId+'" target="_blank">Dataset URL</a><br><b>Proxies: </b>'+feature.properties.paleoData_proxy+'<br><b>Min/Max Age: </b>'+feature.properties.minAge+' / '+feature.properties.maxAge+' yr BP</p><iframe src="/query/paleoPlots/'+feature.properties.datasetId+'" height="200" width="600" title="paleoData Plot"></iframe>', {
 		   maxWidth : 600
 	    });
 	},
-/*
-	    filter: function(feature, layer) {
-		 return feature.properties.archiveType == 'Wood';
-	    },
-*/
+
+	filter: function(feature, layer) {
+	    // Check if point is within coordinate bounds
+	    var lat = feature.geometry.coordinates[1];
+	    var lon = feature.geometry.coordinates[0];
+	    var isInBounds = lat >= rectCoord.South && lat <= rectCoord.North &&
+	                     lon >= rectCoord.West && lon <= rectCoord.East;
+	    if (isInBounds) {
+		inRectCount = inRectCount + 1;
+	    }
+	    // Debug: log first few filtered points
+	    if (inRectCount <= 3) {
+		console.log('Filter check: lat=' + lat + ', lon=' + lon + ', isInBounds=' + isInBounds, ', bounds=', rectCoord);
+	    }
+	    return isInBounds;
+	},
+
 		pointToLayer : function(feature, latlng) {
-	    var col1 = chooseColor(feature.properties.archiveType)
+	    var col1 = chooseColor(feature.properties.archiveType, feature.properties.interp_Vars, feature.properties.paleoData_proxy)
 	    var aType = feature.properties.archiveType
-	    var shape1 = chooseShape(feature.properties.archiveType)
-	    var Opac1 = +chooseOpacity(latlng, rectCoord)
+	    var shape1 = chooseShape(feature.properties.archiveType, feature.properties.interp_Vars, feature.properties.paleoData_proxy)
 	    var radius1 = 4
 	    if (aType == "Documents"){
 		radius1 = 6
 	    }
-	    if (aType == "GroundIce" && Opac1 == 0.8){
+	    // Only use special ice icons for archiveType mode
+	    var usingArchiveMode = (typeof window.legendMode === 'undefined' || window.legendMode === 'archiveType');
+	    if (aType == "GroundIce" && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: groundIce
 		});
-	    } else if (aType == "GlacierIce" && Opac1 == 0.8){
+	    } else if (aType == "GlacierIce" && usingArchiveMode){
 		return L.marker(latlng, {
 		    icon: glacierIce
 		});
-	    } else if (aType == "GroundIce" && Opac1 == 0.1){
-		return L.marker(latlng, {
-		    icon: groundIceOpac
-		});
-	    } else if (aType == "GlacierIce" && Opac1 == 0.1){
-		return L.marker(latlng, {
-		    icon: glacierIceOpac
-		});
 	    } else {
 			    return L.shapeMarker(latlng, {
-		    //icon: chooseIcon(feature.properties.archiveType)
-		    
+
 				radius : radius1,
 				fillColor : col1,
 				color : col1,
 				weight : 1,
-		    fillOpacity : Opac1,
+		    fillOpacity : 0.8,
 		    shape : shape1,
 		    opacity : 0.1
-		    
+
 			    });
 	    }
 		}
 	    }).addTo(layerGroup);
-    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + coords.length + " (" + inRectCount + " unique locations)"
+    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + coords.length + " (" + inRectCount + " unique locations) &mdash; datasets may contain multiple proxy time series"
     document.getElementById("my-css-spinner").style.display = "none";
 }

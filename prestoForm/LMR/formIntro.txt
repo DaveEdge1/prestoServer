@@ -1,0 +1,5 @@
+The Last Millennium Reanalysis (LMR) uses offline data assimilation with the PAGES 2k proxy database to reconstruct surface temperature over the past 2000 years. This reconstruction employs the Climate Field Reconstruction (CFR) framework to combine proxy observations with climate model simulations.
+
+Select your proxy data using the map and filters below, then customize reconstruction parameters. Your reconstruction will run in a GitHub Actions workflow, and results will be stored in your GitHub repository.
+
+For more information about the CFR method, visit: https://fzhu2e.github.io/cfr/

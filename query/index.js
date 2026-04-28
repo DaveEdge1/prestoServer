@@ -756,28 +756,28 @@
 + String.raw`let inRectCount = 0;` + `\n`
 + String.raw`` + `\n`
 + String.raw`var glacierIce = L.icon({` + `\n`
-+ String.raw`    iconUrl: 'http://143.198.98.66:86/glacierIce.png',` + `\n`
++ String.raw`    iconUrl: '/query/glacierIce.png',` + `\n`
 + String.raw`` + `\n`
 + String.raw`    iconSize:     [10, 10], // size of the icon` + `\n`
 + String.raw`    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location` + `\n`
 + String.raw`    popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor` + `\n`
 + String.raw`});` + `\n`
 + String.raw`var groundIce = L.icon({` + `\n`
-+ String.raw`    iconUrl: 'http://143.198.98.66:86//groundIce.png',` + `\n`
++ String.raw`    iconUrl: '/query/groundIce.png',` + `\n`
 + String.raw`` + `\n`
 + String.raw`    iconSize:     [10, 10], // size of the icon` + `\n`
 + String.raw`    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location` + `\n`
 + String.raw`    popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor` + `\n`
 + String.raw`});` + `\n`
 + String.raw`var glacierIceOpac = L.icon({` + `\n`
-+ String.raw`    iconUrl: 'http://143.198.98.66:86/glacierIceOpac.png',` + `\n`
++ String.raw`    iconUrl: '/query/glacierIceOpac.png',` + `\n`
 + String.raw`` + `\n`
 + String.raw`    iconSize:     [10, 10], // size of the icon` + `\n`
 + String.raw`    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location` + `\n`
 + String.raw`    popupAnchor:  [2, 2] // point from which the popup should open relative to the iconAnchor` + `\n`
 + String.raw`});` + `\n`
 + String.raw`var groundIceOpac = L.icon({` + `\n`
-+ String.raw`    iconUrl: 'http://143.198.98.66:86//groundIceOpac.png',` + `\n`
++ String.raw`    iconUrl: '/query/groundIceOpac.png',` + `\n`
 + String.raw`` + `\n`
 + String.raw`    iconSize:     [10, 10], // size of the icon` + `\n`
 + String.raw`    iconAnchor:   [2, 2], // point of the icon which will correspond to marker's location` + `\n`
@@ -1359,7 +1359,7 @@
 + String.raw`        xhr0.ontimeout = function (){` + `\n`
 + String.raw`            console.error("request timedout: ", xhr0);` + `\n`
 + String.raw`        }` + `\n`
-+ String.raw`        xhr0.open("get", "http://143.198.98.66:88/" + param1, /*async*/ true);` + `\n`
++ String.raw`        xhr0.open("get", "/data/" + param1, /*async*/ true);` + `\n`
 + String.raw`        // xhr.responseType = "text";` + `\n`
 + String.raw`        xhr0.send();` + `\n`
 + String.raw`    }` + `\n`
@@ -1382,7 +1382,7 @@
 + String.raw`				resolve();` + `\n`
 + String.raw`			}` + `\n`
 + String.raw`		};` + `\n`
-+ String.raw`		xhr1.open("post", "http://143.198.98.66:90/lipds", /*async*/ true);` + `\n`
++ String.raw`		xhr1.open("post", "/lipds", /*async*/ true);` + `\n`
 + String.raw`		xhr1.setRequestHeader("Content-type", "application/json");` + `\n`
 + String.raw`		xhr1.send(Body);` + `\n`
 + String.raw`		});` + `\n`
@@ -1406,7 +1406,7 @@
 + String.raw`				resolve();` + `\n`
 + String.raw`			}` + `\n`
 + String.raw`		};` + `\n`
-+ String.raw`		xhr7.open("post", "http://143.198.98.66:92/", /*async*/ true);` + `\n`
++ String.raw`		xhr7.open("post", "/posttsids/", /*async*/ true);` + `\n`
 + String.raw`		xhr7.setRequestHeader("Content-type", "application/json");` + `\n`
 + String.raw`		xhr7.send(Body);` + `\n`
 + String.raw`		});` + `\n`
@@ -1430,7 +1430,7 @@
 + String.raw`				resolve();` + `\n`
 + String.raw`			}` + `\n`
 + String.raw`		};` + `\n`
-+ String.raw`		xhr2.open("get", "http://143.198.98.66:88/TS" + params(useCoords=true), /*async*/ true);` + `\n`
++ String.raw`		xhr2.open("get", "/data/TS" + params(useCoords=true), /*async*/ true);` + `\n`
 + String.raw`		xhr2.send();` + `\n`
 + String.raw`		});` + `\n`
 + String.raw`}` + `\n`
@@ -1453,7 +1453,7 @@
 + String.raw`				resolve(xhr3.status);` + `\n`
 + String.raw`			}` + `\n`
 + String.raw`		};` + `\n`
-+ String.raw`		xhr3.open("post", "http://143.198.98.66:89/sparql", /*async*/ true);` + `\n`
++ String.raw`		xhr3.open("post", "/sparql", /*async*/ true);` + `\n`
 + String.raw`		xhr3.setRequestHeader("Content-type", "application/json");` + `\n`
 + String.raw`		xhr3.send(TSIDs);` + `\n`
 + String.raw`		});` + `\n`
@@ -1528,7 +1528,7 @@
 + String.raw`				var queryParams = params(useCoords=true)` + `\n`
 + String.raw`				queryParams = '&' + queryParams.substring(1);` + `\n`
 + String.raw`				queryParams = queryParams.replace(/\s/g, '');` + `\n`
-+ String.raw`				resolve("http://143.198.98.66:85/"+window.location.search+queryParams)` + `\n`
++ String.raw`				resolve("/editor/"+window.location.search+queryParams)` + `\n`
 + String.raw`			} else {` + `\n`
 + String.raw`				resolve("https://paleopresto.com/")` + `\n`
 + String.raw`			}` + `\n`

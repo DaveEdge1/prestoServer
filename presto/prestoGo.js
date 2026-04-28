@@ -1,6 +1,10 @@
 //Docker = require('dockerode');
 const fs = require('fs');
 var shelljs = require("shelljs");
+const config = require('../config');
+
+// Base URL for email links (set via environment variable)
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 //const util = require('util');
 var exec = require("child_process").exec;
 var execSync = require("child_process").execSync;
@@ -191,14 +195,14 @@ var translate = function (uniqueID, recon){
 }
 
 let transporter = nodemailer.createTransport({
-    host: 'smtp.zoho.com',
-	    port: 465,
-	    name: 'zoho.com',
-	    auth: {
-		    user: "no-reply@paleopresto.com",
-		    pass: "5-KBS%*YsTneRs4"
-	    },
-	from: 'no-reply@paleopresto.com'
+    host: process.env.SMTP_HOST || 'smtp.zoho.com',
+    port: parseInt(process.env.SMTP_PORT) || 465,
+    name: 'zoho.com',
+    auth: {
+        user: process.env.SMTP_USER || 'no-reply@paleopresto.com',
+        pass: process.env.SMTP_PASSWORD  // Required - set via environment variable
+    },
+    from: process.env.SMTP_FROM || 'no-reply@paleopresto.com'
 });
 
 updateParams = function (uniqueID, recon){
@@ -244,10 +248,10 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
 	   if (configLoc == true || recon == 'temp12k') {
 		   return ''
 	   } else {
-		   return '<a href="' + 'http://143.198.98.66:91/'+ uniqueID + '" download>Click here to VISUALIZE your results</a><br>'
+		   return '<a href="' + BASE_URL + '/viz/'+ uniqueID + '" download>Click here to VISUALIZE your results</a><br>'
 	   }
    };
-   var indexURL = "http://143.198.98.66:83/customRecons/"+ uniqueID + "/"
+   var indexURL = BASE_URL + "/downloads/browse/"+ uniqueID + "/"
    var configFileTxt = function (configFileLoc) {
 	   if (configFileLoc == true){
 		   return "";
@@ -301,7 +305,7 @@ emailHTML = function (uniqueID, destURL, configLoc, recon) {
   sendEmail = function (user, domain, uniqueID, configLoc, recon) {
     console.log('attempting to send email')
     console.log('recon within sendEmail(): ' + recon);
-    var destURL = 'http://143.198.98.66:83/downloads/' + uniqueID
+    var destURL = BASE_URL + '/downloads/zip/' + uniqueID
     var mailOptions = {
       from: 'no-reply@paleopresto.com',
       to: user + '@' + domain,
@@ -429,9 +433,9 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 	var configLoc = updateParams(uniqueID, recon)
 
 	if (recon == 'holocene_da'){
-		var launchText = 'docker run --rm --name ' + uniqueID + ' -v /root/presto/userRecons/'+uniqueID+'/lipd.pkl:/proxies/temp12k/Temp12k1_0_2.pkl ' + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v /root/holocene_da/da_load_proxies.py:/da_load_proxies.py -v /root/holocene_da/da_main_code.py:/da_main_code.py -v /root/holocene_da/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + uniqueID + ' -v /root/presto/userRecons/'+uniqueID+'/lipd.pkl:/proxies/temp12k/Temp12k1_0_2.pkl ' + ' -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' -v ' + config.paths.holoceneDa + '/da_load_proxies.py:/da_load_proxies.py -v ' + config.paths.holoceneDa + '/da_main_code.py:/da_main_code.py -v ' + config.paths.holoceneDa + '/make_basic_figures.py:/make_basic_figures.py ' + reconParams(recon).conTag
 	} else if (recon == 'temp12k'){
-		var launchText = 'docker run --rm --name ' + uniqueID + ' -v /root/presto/userRecons/'+uniqueID+'/lipd_tts.rds:/lipd_tts.rds ' + '-v /root/temp12k-regional-composites/regional_composites.R:/regional_composites.R -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
+		var launchText = 'docker run --rm --name ' + uniqueID + ' -v /root/presto/userRecons/'+uniqueID+'/lipd_tts.rds:/lipd_tts.rds ' + '-v ' + config.paths.temp12k + '/regional_composites.R:/regional_composites.R -v ' + dirname + ':' + reconParams(recon).resultsDir + ' -v ' + configLoc + ':' + reconParams(recon).paramsCon + ' ' + reconParams(recon).conTag
 	} else {
 		var launchText = 'console.log("lipd download only")'
 	}
@@ -534,7 +538,7 @@ runRecon = async function(uniqueID, user, domain, recon, language) {
 			console.log('/root/presto/userRecons/' + uniqueID  + '/request-status.txt has been initiated!');
 		});
 	}
-	if (recon != "download"){
+	if (recon != "download" && recon != "LMR"){
 		await startContainer(launchText)
 		if (recon != "temp12k"){
 			await writeViz(uniqueID, dirname, recon)

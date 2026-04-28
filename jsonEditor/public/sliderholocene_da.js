@@ -72,11 +72,12 @@ function fillSlider(from, to, sliderColor, rangeColor, controlSlider) {
 
 function fillSingleSlider(controlSlider) {
 	            const rangeDistance = controlSlider.max-controlSlider.min
+	            const pct = (controlSlider.value - controlSlider.min) / rangeDistance * 100;
 	            controlSlider.style.background = `linear-gradient(
 			    to right,
 			    ${color1} 0%,
-			    ${color1} ${(controlSlider.value)/(rangeDistance)*100}%,
-		            ${color2} ${(controlSlider.value)/(rangeDistance)*100}%,
+			    ${color1} ${pct}%,
+		            ${color2} ${pct}%,
 		            ${color2} 100%)`;
 }								      
 
@@ -104,20 +105,17 @@ const advAll = document.querySelectorAll('.form-group-advanced');
 var val1 = 0;
 
 function showAdv() {
-	//document.getElementById("advCheck").value = 0;
-	//document.getElementById("advancedShow").innerHTML = val1
+	 var hints = document.querySelectorAll('.advanced-hint');
          if (Boolean(document.getElementById("advCheck").checked)) {
-             //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
-	     //document.getElementById("advancedShow").innerHTML = "TRUE"
 	     advAll.forEach(adv1 => {
 	        adv1.style.display = 'block';
 	        })
+	     hints.forEach(h => { h.style.display = 'none'; })
 	 } else {
-	     //document.getElementById("advancedShow").innerHTML = document.getElementById("advCheck").checked
-	     //document.getElementById("advancedShow").innerHTML = "FALSE"
 	     advAll.forEach(adv1 => {
 	        adv1.style.display = 'none';
 	     })
+	     hints.forEach(h => { h.style.display = 'block'; })
 	 }
 }
 
@@ -386,11 +384,7 @@ prior_model_interval_fromSilder.oninput = () => controlFromSlider(prior_model_in
 prior_model_interval_toSilder.oninput = () => controlToSlider(prior_model_interval_fromSilder, prior_model_interval_toSilder, prior_model_interval_toInput);
 prior_model_interval_fromInput.onchange = () => controlFromInput(prior_model_interval_fromSilder, prior_model_interval_fromInput, prior_model_interval_toInput, prior_model_interval_toSilder);
 prior_model_interval_toInput.onchange = () => controlToInput(prior_model_interval_toSilder, prior_model_interval_fromInput, prior_model_interval_toInput, prior_model_interval_toSilder);
-const time_resolutionSilder = document.getElementById("time_resolutionSilder");
-const time_resolutionInput = document.getElementById("time_resolutionInput");
-time_resolutionSilder.oninput = () => changeInput(time_resolutionSilder, time_resolutionInput);
-time_resolutionInput.onchange = () => changeSlider(time_resolutionInput, time_resolutionSilder);
-fillSingleSlider(time_resolutionSilder)
+// time_resolution is now radio buttons, no slider initialization needed
 const prior_time_windowSilder = document.getElementById("prior_time_windowSilder");
 const prior_time_windowInput = document.getElementById("prior_time_windowInput");
 prior_time_windowSilder.oninput = () => changeInput(prior_time_windowSilder, prior_time_windowInput);

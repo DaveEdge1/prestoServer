@@ -63,10 +63,10 @@ function buildQstring(qs){
 app.get('/', function (req, res, next) {
    var con = mysql.createPool({
 	  connectionLimit : 100,
-	  host: "localhost",
-	  user: "dave",
-	  password: "peb0pk0q",
-	  database: "lipdverse"
+	  host: process.env.MYSQL_HOST || "localhost",
+	  user: process.env.MYSQL_USER || "dave",
+	  password: process.env.MYSQL_PASSWORD,
+	  database: process.env.MYSQL_DATABASE || "lipdverse"
 });
    con.getConnection(function(err) {
 	  if (err) throw err;
@@ -82,10 +82,10 @@ app.get('/', function (req, res, next) {
 app.get('/TS', function (req, res, next) {
    var con = mysql.createPool({
 	  connectionLimit : 100,
-	  host: "localhost",
-	  user: "dave",
-	  password: "peb0pk0q",
-	  database: "lipdverse"
+	  host: process.env.MYSQL_HOST || "localhost",
+	  user: process.env.MYSQL_USER || "dave",
+	  password: process.env.MYSQL_PASSWORD,
+	  database: process.env.MYSQL_DATABASE || "lipdverse"
 });
    con.getConnection(function(err) {
 	  if (err) throw err;

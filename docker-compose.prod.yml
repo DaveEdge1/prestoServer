@@ -1,0 +1,124 @@
+# Production compose file for the university Podman host.
+#
+# All custom images are pulled from Docker Hub (not built on the server).
+# Build/push them from a dev machine with scripts/build-and-push.sh.
+#
+# Usage on the server (as cefns_lipd, in ~/presto):
+#   cd ~/presto
+#   podman-compose -f docker-compose.prod.yml pull
+#   podman-compose -f docker-compose.prod.yml up -d
+#
+# Requirements on the server (all under ~/presto/):
+#   - .env.production (chmod 600) next to this compose file
+#   - customTiles/ subdir populated via rsync (data only; not in any image)
+#   - Rootless podman socket active: systemctl --user enable --now podman.socket
+#   - XDG_RUNTIME_DIR exported (typically /run/user/$UID)
+#
+# Traffic path:
+#   https://custom.paleopresto.com/
+#     → (paleopresto.com nginx terminates TLS, proxies HTTP)
+#     → 127.0.0.1:9025 on this host (port assigned by IT)
+#     → nginx container :81
+#     → presto-orchestrator:3000  or  tile-server:8080 (for /tiles_*)
+
+services:
+  presto-orchestrator:
+    image: docker.io/davidedge/presto-orchestrator:latest
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MYSQL_HOST=mysql
+      - USER_RECONS_PATH=/root/presto/userRecons
+      - PRESTO_FORM_PATH=/root/presto/prestoForm
+      - PRESTO_BASE_PATH=/root/presto
+      - HOLOCENE_DA_PATH=/root/holocene_da
+      - TEMP12K_PATH=/root/temp12k-regional-composites
+    volumes:
+      # Rootless Podman API socket — Docker API compatible.
+      - ${XDG_RUNTIME_DIR}/podman/podman.sock:/var/run/docker.sock:z
+      - user-recons-data:/root/presto/userRecons
+    init: true
+    mem_limit: 400m
+    networks:
+      - presto-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  proxy-analysis:
+    image: docker.io/davidedge/presto-proxy-analysis:latest
+    env_file:
+      - .env.production
+    environment:
+      - LIPD_CACHE_DIR=/cache/lipd
+    volumes:
+      # Disk-backed LiPD series cache — keeps container RSS flat and
+      # survives restarts so previously-seen datasets stay warm.
+      - lipd-cache-data:/cache/lipd:z
+    mem_limit: 1400m
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  tile-server:
+    image: docker.io/davidedge/presto-tile-server:latest
+    volumes:
+      - ./customTiles/blueMarble/tiles_mollweide:/usr/share/nginx/html/tiles_bluemarble:ro,z
+      - ./customTiles/blueMarble_3031/tiles:/usr/share/nginx/html/tiles_bluemarble_3031:ro,z
+      - ./customTiles/blueMarble_3995/tiles:/usr/share/nginx/html/tiles_bluemarble_3995:ro,z
+      - ./customTiles/blueMarble_3857/tiles:/usr/share/nginx/html/tiles_bluemarble_3857:ro,z
+      - ./customTiles/naturalEarth_3857/tiles:/usr/share/nginx/html/tiles_naturalearth_3857:ro,z
+      - ./customTiles/naturalEarth_mollweide/tiles:/usr/share/nginx/html/tiles_naturalearth_mollweide:ro,z
+      - ./customTiles/naturalEarth_3031/tiles:/usr/share/nginx/html/tiles_naturalearth_3031:ro,z
+      - ./customTiles/naturalEarth_3995/tiles:/usr/share/nginx/html/tiles_naturalearth_3995:ro,z
+    networks:
+      - presto-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mysql:
+    image: docker.io/library/mysql:8.0
+    command: ["--local-infile=1", "--innodb-buffer-pool-size=256M"]
+    env_file:
+      - .env.production
+    volumes:
+      - mysql-data:/var/lib/mysql
+    mem_limit: 700m
+    networks:
+      - presto-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  nginx:
+    image: docker.io/davidedge/presto-nginx:latest
+    # Single loopback port. Upstream paleopresto.com proxy reaches us on 9025.
+    ports:
+      - "127.0.0.1:9025:81"
+    depends_on:
+      - presto-orchestrator
+      - tile-server
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  user-recons-data:
+  lipd-cache-data:
+
+networks:
+  presto-network:
+    driver: bridge
