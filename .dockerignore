@@ -5,9 +5,10 @@
 # Node modules (already handled by package.json)
 node_modules
 
-# Local development files
+# Local development files — broad pattern so .env.example / .env.production /
+# anything with committed or leaked secrets never ends up in a published image.
 .env
-.env.local
+.env.*
 
 # IDE files
 .vscode

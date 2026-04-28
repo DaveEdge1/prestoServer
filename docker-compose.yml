@@ -55,6 +55,7 @@ services:
       # Source code mounts - changes take effect on container restart (no rebuild needed)
       - ./routes:/root/presto/routes
       - ./services:/root/presto/services
+      - ./scripts:/root/presto/scripts
       - ./prestoForm:/root/presto/prestoForm
       - ./jsonEditor:/root/presto/jsonEditor
       - ./templates:/root/presto/templates
@@ -86,6 +87,21 @@ services:
       context: ./getLipds/proxyAnalysis
     environment:
       - GRAPHDB_URL=${GRAPHDB_URL:-https://linkedearth.graphdb.mint.isi.edu}
+      # Hardcoded to the mysql service hostname — .env's MYSQL_HOST is set to
+      # "localhost" for host-side tools; inside the Docker network we always
+      # reach MySQL via the compose service name.
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
+      - LIPD_CACHE_DIR=/cache/lipd
+    volumes:
+      # Disk-backed LiPD series cache — keeps container RSS flat and
+      # survives restarts so previously-seen datasets stay warm.
+      - lipd-cache-data:/cache/lipd
+    depends_on:
+      mysql:
+        condition: service_healthy
     networks:
       - presto-network
     restart: unless-stopped
@@ -123,6 +139,7 @@ services:
   # ===========================================
   mysql:
     image: mysql:8.0
+    command: ["--local-infile=1", "--innodb-buffer-pool-size=256M"]
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-lipdverse}
@@ -163,6 +180,7 @@ services:
 volumes:
   mysql-data:
   user-recons-data:
+  lipd-cache-data:
 
 networks:
   presto-network:
