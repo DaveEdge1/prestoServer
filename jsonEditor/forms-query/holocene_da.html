@@ -103,6 +103,23 @@ For more information about each of the options, mouse over the question mark ico
 <p>
 <br>
 <br>
+<!-- Reuse a previous reconstruction's configs.yml -->
+<div id="reuse-config-panel" style="max-width: 95%; margin: 0 auto 24px; padding: 16px 20px; border: 1px solid #b5cce3; border-radius: 8px; background: #f7faff; font-family: 'Roboto', sans-serif;">
+  <h2 style="margin: 0 0 8px; font-size: 18px; color:#1a3a5c;">Start from a previous reconstruction <span style="font-weight: 400; color:#666; font-size: 13px;">(optional)</span></h2>
+  <p style="font-size: 13px; color: #444; margin: 0 0 10px;">
+    Paste a GitHub URL (blob or raw) to a <code>configs.yml</code> from a previous run, or upload one. Validated and applied to the form below.
+  </p>
+  <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+    <input type="text" id="reuse-cfg-url" placeholder="https://github.com/owner/repo/blob/main/configs.yml"
+           style="flex:1 1 auto; padding:6px 8px; font-size:13px; border:1px solid #a8a8a8; border-radius:4px;">
+    <button type="button" id="reuse-cfg-load-url" style="padding:6px 14px; font-size:13px; background:#2a6496; color:#fff; border:0; border-radius:4px; cursor:pointer;">Load</button>
+  </div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <span style="font-size:13px; color:#555;">…or upload:</span>
+    <input type="file" id="reuse-cfg-file" accept=".yml,.yaml,application/x-yaml,text/yaml" style="font-size:13px;">
+  </div>
+  <div id="reuse-cfg-status" style="font-size:13px; min-height:1.4em; margin-top:10px; color:#444;"></div>
+</div>
 <form style="width:90%" id="formAd" name="formAd" onclick = "showAdv()" align="right">
 <input style="margin-right:5px;" type="checkbox" name="display" id="advCheck" value=1>
 <label for="advcheck">Show advanced options</label><br>
@@ -469,6 +486,12 @@ document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
       </svg>
       Login with GitHub
     </a>
+    <details style="margin-top:12px; font-size:13px; color:#555; max-width:600px;">
+      <summary style="cursor:pointer; color:#0969da; font-weight:500;">Why does PReSto need this permission?</summary>
+      <div style="margin-top:8px; padding:10px 12px; background:#f6f8fa; border:1px solid #e1e4e8; border-radius:4px; line-height:1.5;">
+        PReSto creates your reconstruction in a new repository in your GitHub account. To do that, GitHub requires the <code>public_repo</code> permission, which technically grants read/write access to all of your public repositories &mdash; GitHub's OAuth does not allow scoping access to a single repo. <strong>Your private repositories remain inaccessible.</strong> PReSto only reads and writes the new repository it creates for you. You can revoke access at any time at <a href="https://github.com/settings/applications" target="_blank" rel="noopener">github.com/settings/applications</a>.
+      </div>
+    </details>
   </div>
 
   <!-- Logged in -->
@@ -626,5 +649,6 @@ function val() {document.getElementById("abstract2").src = "/editor/slider.css";
         </div>
       </footer>
 
+<script src="/editor/reuseConfig.js" defer></script>
 </body>
 </html>

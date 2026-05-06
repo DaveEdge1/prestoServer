@@ -102,6 +102,9 @@ app.use('/lipds', require('./routes/lipds'));
 // Data cleaning (between query and editor for filtered TSID path)
 app.use('/datacleaning', require('./routes/datacleaning'));
 
+// Reuse a previous reconstruction's artifacts (query_params, cleaned TSIDs, recon config)
+app.use('/reuse', require('./routes/reuse'));
+
 // LiPD file download (confirmation + GitHub repo creation)
 app.use('/lipd-download', require('./routes/lipdDownload'));
 

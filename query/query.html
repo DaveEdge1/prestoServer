@@ -33,6 +33,7 @@
       <script src="/query/leaflet.legend.js"></script>
       <script src="/query/compilationMetadata.js"></script>
       <script src="/query/queryHelpers.js"></script>
+      <script src="/query/reuseDataset.js" defer></script>
       <script src="/query/archiveLegend.js"></script>
       <script language="javascript" type="text/javascript" src="/query/data_forge.js"></script>
       <script src="/query/mapExport.js"></script>
@@ -109,6 +110,11 @@
          #mode-toggle button:first-child {
             border-radius: 4px 0 0 4px;
             border-right: 1px solid #2a6496;
+         }
+         #mode-toggle button:not(:first-child):not(:last-child) {
+            border-left: 1px solid #2a6496;
+            border-right: 1px solid #2a6496;
+            border-radius: 0;
          }
          #mode-toggle button:last-child {
             border-radius: 0 4px 4px 0;
@@ -217,13 +223,106 @@
       <div class="pce-main">
          <br><br>
          <h1 style="text-align: center; font-size:40px"><img src="/query/img/lipdverse_logo_text.png" alt="LiPDverse Logo" width="200" height="45"> Query</h1>
-         <!-- Mode toggle: persistent at top-left, visible in both modes -->
+         <!-- Mode toggle: persistent at top-left, visible in all modes -->
          <div id="mode-toggle">
             <button id="btn-query" type="button" onclick="setMode('query')">Query Across LiPDverse</button>
             <button id="btn-archive" type="button" onclick="setMode('archive')">Use Archived Compilation</button>
+            <button id="btn-reuse" type="button" onclick="setMode('reuse')">Reuse Custom Dataset</button>
          </div>
          <!-- Hidden checkbox keeps existing JS logic (hideForm / getTSIDs) unchanged -->
          <input type="checkbox" id="archivedCompilation" style="display:none;">
+
+         <!-- Reuse Custom Dataset panel — visible only in 'reuse' mode -->
+         <div id="reuse-panel" style="display:none; max-width: 90%; margin: 10px auto 20px; padding: 18px 22px; border: 1px solid #b5cce3; border-radius: 8px; background: #f7faff; font-family: 'Roboto', sans-serif;">
+            <h2 style="margin-top:0; font-size:22px; color:#1a3a5c;">Reuse Custom Dataset</h2>
+            <p style="font-size:14px; color:#333; margin-top:0;">
+               Start from a previous reconstruction's curated inputs. Paste a GitHub
+               URL (blob or raw) or upload a local file. Files are validated before
+               being applied.
+            </p>
+
+            <fieldset style="border:1px solid #cfd8e3; border-radius:6px; padding:10px 14px; margin-bottom:14px;">
+               <legend style="font-size:14px; font-weight:600; color:#1a3a5c; padding:0 6px;">Filter parameters (query_params.json)</legend>
+               <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+                  <input type="text" id="reuse-qp-url" placeholder="https://github.com/owner/repo/blob/main/query_params.json"
+                         style="flex:1 1 auto; padding:6px 8px; font-size:13px; border:1px solid #a8a8a8; border-radius:4px;">
+                  <button type="button" id="reuse-qp-load-url" style="padding:6px 14px; font-size:13px; background:#2a6496; color:#fff; border:0; border-radius:4px; cursor:pointer;">Load</button>
+               </div>
+               <div style="display:flex; gap:6px; align-items:center;">
+                  <span style="font-size:13px; color:#555;">…or upload:</span>
+                  <input type="file" id="reuse-qp-file" accept=".json,application/json" style="font-size:13px;">
+               </div>
+               <!-- Shown only when the loaded query_params.json has an embedded tsids list -->
+               <div id="reuse-qp-tsids-choice" style="display:none; margin-top:10px; padding:8px 10px; background:#fffbe6; border:1px solid #f0d676; border-radius:4px; font-size:13px;">
+                  <div style="margin-bottom:6px;">
+                     <strong>This file contains an embedded curated TSIDs list</strong>
+                     (<span id="reuse-qp-tsids-count">0</span> TSIDs<span id="reuse-qp-removed-count-wrap" style="display:none">, <span id="reuse-qp-removed-count">0</span> removed</span>).
+                  </div>
+                  <label style="display:block; margin-bottom:4px; cursor:pointer;">
+                     <input type="radio" name="reuse-tsids-source" id="reuse-tsids-params-only" value="params-only" checked
+                            style="margin-right:6px; vertical-align:middle;">
+                     Use only the query parameters
+                  </label>
+                  <label style="display:block; cursor:pointer;">
+                     <input type="radio" name="reuse-tsids-source" id="reuse-tsids-embedded" value="embedded"
+                            style="margin-right:6px; vertical-align:middle;">
+                     Use the curated TSIDs from this file
+                  </label>
+               </div>
+            </fieldset>
+
+            <fieldset id="reuse-ts-fieldset" style="border:1px solid #cfd8e3; border-radius:6px; padding:10px 14px; margin-bottom:14px;">
+               <legend style="font-size:14px; font-weight:600; color:#1a3a5c; padding:0 6px;">Curated TSIDs (cleaned_TSIDs.json) — optional</legend>
+               <div id="reuse-ts-content">
+                  <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+                     <input type="text" id="reuse-ts-url" placeholder="https://github.com/owner/repo/blob/main/cleaned_TSIDs.json"
+                            style="flex:1 1 auto; padding:6px 8px; font-size:13px; border:1px solid #a8a8a8; border-radius:4px;">
+                     <button type="button" id="reuse-ts-load-url" style="padding:6px 14px; font-size:13px; background:#2a6496; color:#fff; border:0; border-radius:4px; cursor:pointer;">Load</button>
+                  </div>
+                  <div style="display:flex; gap:6px; align-items:center;">
+                     <span style="font-size:13px; color:#555;">…or upload:</span>
+                     <input type="file" id="reuse-ts-file" accept=".json,application/json" style="font-size:13px;">
+                  </div>
+               </div>
+            </fieldset>
+
+            <fieldset style="border:1px solid #cfd8e3; border-radius:6px; padding:10px 14px; margin-bottom:14px;">
+               <legend style="font-size:14px; font-weight:600; color:#1a3a5c; padding:0 6px;">Cleaning report (cleaning_report.json) — optional but recommended</legend>
+               <p style="font-size:13px; color:#444; margin:2px 0 8px;">
+                  When reusing a curated TSIDs list, also load this file to carry over per-group decisions and notes from the original cleaning session.
+                  Without it, your new repo will publish the curated TSIDs without the rationale that produced them.
+               </p>
+               <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+                  <input type="text" id="reuse-cr-url" placeholder="https://github.com/owner/repo/blob/main/cleaning_report.json"
+                         style="flex:1 1 auto; padding:6px 8px; font-size:13px; border:1px solid #a8a8a8; border-radius:4px;">
+                  <button type="button" id="reuse-cr-load-url" style="padding:6px 14px; font-size:13px; background:#2a6496; color:#fff; border:0; border-radius:4px; cursor:pointer;">Load</button>
+               </div>
+               <div style="display:flex; gap:6px; align-items:center;">
+                  <span style="font-size:13px; color:#555;">…or upload:</span>
+                  <input type="file" id="reuse-cr-file" accept=".json,application/json" style="font-size:13px;">
+               </div>
+            </fieldset>
+
+            <div id="reuse-status" style="font-size:13px; min-height:1.4em; margin:8px 0 14px; color:#444;"></div>
+
+            <label id="reuse-skip-label" style="font-size:13px; color:#999; display:block; margin-bottom:14px; cursor:not-allowed;">
+               <input type="checkbox" id="reuse-skip-cleaning" checked disabled style="margin-right:6px; vertical-align:middle;">
+               Skip the data-cleaning step (continue directly to the editor)
+            </label>
+
+            <div style="display:flex; gap:10px;">
+               <button type="button" id="reuse-apply-stay"
+                       style="padding:8px 18px; font-size:14px; background:#fff; color:#2a6496; border:2px solid #2a6496; border-radius:4px; cursor:pointer;"
+                       title="Apply loaded query_params to the filter form so you can review/tweak before submitting.">
+                  Apply to filters &amp; review
+               </button>
+               <button type="button" id="reuse-apply-continue"
+                       style="padding:8px 18px; font-size:14px; background:#5cb85c; color:#fff; border:1px solid #4cae4c; border-radius:4px; cursor:pointer;"
+                       title="Save the loaded files for this reconstruction and continue (skips data cleaning if both files are loaded and the box above is checked).">
+                  Continue &rarr;
+               </button>
+            </div>
+         </div>
          <div class="css-spinner" id="my-css-spinner"></div>
          <div class="leaflet-container" id="map" style="height: 90vh; width: 90vw;"></div>
          <br>
@@ -385,30 +484,6 @@
             <hr class="solid">
             <hr class="solid">
             <br>
-            <div style="width: 10%; vertical-align: middle; float: left;">
-               <br><br><br>
-               <label id="isTerrestrialOn_label" for="isTerrestrialOn">Filter by Land/Sea</label>
-               <br>
-               <input class="form-check-input" type="checkbox" id="isTerrestrialOn" value="TRUE" onclick='updateFilters();' >
-               <br><br><br>
-            </div>
-            <div id="isTerrestrialDiv" style= "vertical-align: middle; height: 50px; visibility: hidden; display: inline-block;" class="form-group">
-               <label style="font-size:20px; padding-right:10px; color:black" id="isTerrestrial_label">Terrestrial or Marine (based on <a href="https://jakubnowosad.com/spData/reference/world.html" target="_blank">these polygons</a>)</label>
-               <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-               <span class="tooltip-text">Select only terrestrial/marine data</span>
-            </div>
-            <div class="radio_container">
-               <div class="radio_control">
-                  <input type="radio" id="Terrestrial" name="isTerrestrial" value="1" checked>
-                  <label for="Terrestrial">Terrestrial</label><br>
-                  <input type="radio" id="Marine" name="isTerrestrial" value="0" >
-                  <label for="Marine">Marine</label><br>
-               </div>
-            </div>
-         </div>
-         <br><br><br><br><br><br><br>
-         <hr class="solid">
-         <hr class="solid">
          <br>
          </div>
          <button type="button" class="collapsible">Material Filters
@@ -429,7 +504,7 @@
             <br>
             <div style="width: 10%; vertical-align: middle; float: left;">
                <br><br><br>
-               <label id="ageSliderOn_label" for="seasonMonthsOn">Filter by range of months</label>
+               <label id="seasonMonthsOn_label" for="seasonMonthsOn">Filter by range of months</label>
                <br>
                <input class="form-check-input" type="checkbox" id="seasonMonthsOn" value="TRUE" onclick='updateFilters();' >
                <br><br><br>
@@ -509,31 +584,48 @@
             <br>
             <div style="width: 10%; vertical-align: middle; float: left;">
                <br><br><br>
-               <label id="ageSliderOn_label" for="ageSliderOn">Filter by time interval</label>
+               <label id="extendBackOn_label" for="extendBackOn">Filter by minimum extent back in time</label>
                <br>
-               <input class="form-check-input" type="checkbox" id="ageSliderOn" value="TRUE" onclick='updateFilters();'>
+               <input class="form-check-input" type="checkbox" id="extendBackOn" value="TRUE" onclick='updateFilters();'>
                <br><br><br>
             </div>
-            <div id="timeSliderDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
-               <label style="font-size:20px; padding-right:10px; color:black" id="time_range_to_reconstruct_label" for="time_range_to_reconstruct">Time interval of data coverage</label>
-               <div style= "vertical-align: middle; height: 20px;" class="hover-text">?
-                  <span class="tooltip-text">Choose the time period for which data will be required (years BP)</span>
+            <div id="extendBackDiv" style="vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="extendBack_label" for="extendBackInput">Record must extend back to at least (yr BP)</label>
+               <div style="vertical-align: middle; height: 50px;" class="hover-text">?
+                  <span class="tooltip-text">Keep only records whose oldest data point is at least this many years BP (years before 1950). Larger values are stricter. Use to require records that reach a given age in the past.</span>
                </div>
                <div class="range_container">
                   <div class="sliders_control">
-                     <input id="time_range_to_reconstruct_fromSlider" type="range" value="0" min="0" max="2000" step="100"/>
-                     <input id="time_range_to_reconstruct_toSlider" type="range" value="2000" min="0" max="2000" step="100"/>
+                     <input id="extendBackSlider" type="range" value="-70" min="-70" max="9950" step="10"/>
+                     <br>
+                     <input type="number" id="extendBackInput" name="extendBack" value="-70" min="-70" max="9950" step="10"/>
+                     <span id="extendBackADReadout" style="margin-left: 8px; color: #666; font-size: 14px;"></span>
                   </div>
-                  <br>
-                  <div class="form_control">
-                     <div class="form_control_container">
-                        <div class="form_control_container__time">Min</div>
-                        <input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_fromInput" value="0" min="0" max="2000" step="1"/>
-                     </div>
-                     <div class="form_control_container">
-                        <div class="form_control_container__time">Max</div>
-                        <input class="form_control_container__time__input" name="time_range_to_reconstruct" type="number" id="time_range_to_reconstruct_toInput" value="2000" min="0" max="2000" step="1"/>
-                     </div>
+               </div>
+            </div>
+            <br><br><br><br><br><br><br>
+            <hr class="solid">
+            <hr class="solid">
+            <br>
+            <br>
+            <div style="width: 10%; vertical-align: middle; float: left;">
+               <br><br><br>
+               <label id="extendForwardOn_label" for="extendForwardOn">Filter by minimum extent forward in time</label>
+               <br>
+               <input class="form-check-input" type="checkbox" id="extendForwardOn" value="TRUE" onclick='updateFilters();'>
+               <br><br><br>
+            </div>
+            <div id="extendForwardDiv" style="vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
+               <label style="font-size:20px; padding-right:10px; color:black" id="extendForward_label" for="extendForwardInput">Record must extend forward to within (yr BP)</label>
+               <div style="vertical-align: middle; height: 50px;" class="hover-text">?
+                  <span class="tooltip-text">Keep only records whose youngest data point is no older than this many years BP (years before 1950). Smaller values are stricter — 0 requires the record to reach the present. Use to require records that include the recent past.</span>
+               </div>
+               <div class="range_container">
+                  <div class="sliders_control">
+                     <input id="extendForwardSlider" type="range" value="9950" min="-70" max="9950" step="10"/>
+                     <br>
+                     <input type="number" id="extendForwardInput" name="extendForward" value="9950" min="-70" max="9950" step="10"/>
+                     <span id="extendForwardADReadout" style="margin-left: 8px; color: #666; font-size: 14px;"></span>
                   </div>
                </div>
             </div>
@@ -550,15 +642,19 @@
                <br><br><br>
             </div>
             <div id="resolutionDiv" style= "vertical-align: middle; height: 50px; visibility: visible; display: inline-block;" class="form-group">
-               <label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution</label>
-               <div style: "vertical-align: middle; height: 50px;" class="hover-text">?
-               <span class="tooltip-text">Time series resolution must be better than this value (median value, in years)</span>
+               <label style="font-size:20px; padding-right:10px; color:black" id="resolution_label" for="resolution">Resolution (yr)</label>
+               <div style="vertical-align: middle; height: 50px;" class="hover-text">?
+               <span class="tooltip-text">Keep records whose median time-step is at most this value (in years). Smaller values are stricter — values below 1 select sub-annual records (e.g., 0.083 ≈ monthly).</span>
             </div>
             <div class="range_container">
                <div class="sliders_control">
-                  <input id="resolutionSlider" type="range" value="200" min="1" max="1000" step="1"/>
+                  <input id="resolutionSlider" type="range" value="200" min="0.01" max="1000" step="0.01"/>
                   <br>
-                  <input type="number" id="resolutionInput" name="resolution" value="200" min="1" max="1000" step="1"/>
+                  <input type="number" id="resolutionInput" name="resolution" value="200" min="0.01" max="1000" step="0.01"/>
+               </div>
+               <div style="margin-top: 6px;">
+                  <input type="checkbox" id="subannualOnly" onclick="updateSubannualState();" style="margin-right: 5px;"/>
+                  <label for="subannualOnly" style="font-size: 14px;">Subannual only (&lt; 1 yr — overrides slider)</label>
                </div>
             </div>
          </div>
@@ -613,15 +709,23 @@
    <script>
       document.getElementById("my-css-spinner").style.display = "block";
 
-      let filters1 = JSON.parse('{"ages":"' + document.getElementById("ageSliderOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "terrestrial":"' + document.getElementById("isTerrestrialOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '", "minLength":"' + document.getElementById("minLengthOn").checked + '"}')
+      let filters1 = JSON.parse('{"extendBack":"' + document.getElementById("extendBackOn").checked + '", "extendForward":"' + document.getElementById("extendForwardOn").checked + '", "coords":"' + document.getElementById("coordsOn").checked + '", "seasonality":"' + document.getElementById("seasonMonthsOn").checked + '", "resolution":"' + document.getElementById("resolutionOn").checked + '", "minLength":"' + document.getElementById("minLengthOn").checked + '"}')
       function updateFilters(){
-      	if (document.getElementById("ageSliderOn").checked){
-      		document.getElementById("timeSliderDiv").style.visibility = "visible";
-      		filters1['ages'] = 'true'
+      	if (document.getElementById("extendBackOn").checked){
+      		document.getElementById("extendBackDiv").style.visibility = "visible";
+      		filters1['extendBack'] = 'true'
       	}
-      	if (!document.getElementById("ageSliderOn").checked) {
-      		document.getElementById("timeSliderDiv").style.visibility = "hidden";
-      		filters1['ages'] = 'false'
+      	if (!document.getElementById("extendBackOn").checked) {
+      		document.getElementById("extendBackDiv").style.visibility = "hidden";
+      		filters1['extendBack'] = 'false'
+      	}
+      	if (document.getElementById("extendForwardOn").checked){
+      		document.getElementById("extendForwardDiv").style.visibility = "visible";
+      		filters1['extendForward'] = 'true'
+      	}
+      	if (!document.getElementById("extendForwardOn").checked) {
+      		document.getElementById("extendForwardDiv").style.visibility = "hidden";
+      		filters1['extendForward'] = 'false'
       	}
       	if (document.getElementById("coordsOn").checked){
       		document.getElementById("coordsDiv").style.visibility = "visible";
@@ -649,14 +753,6 @@
       		document.getElementById("minLengthDiv").style.visibility = "hidden";
       		filters1['minLength'] = 'false'
       	}
-      	if (document.getElementById("isTerrestrialOn").checked){
-      		document.getElementById("isTerrestrialDiv").style.visibility = "visible";
-      		filters1['terrestrial'] = 'true'
-      	}
-      	if (!document.getElementById("isTerrestrialOn").checked) {
-      		document.getElementById("isTerrestrialDiv").style.visibility = "hidden";
-      		filters1['terrestrial'] = 'false'
-      	}
       	if (document.getElementById("seasonMonthsOn").checked){
       		document.getElementById("monthSliderDiv").style.visibility = "visible";
       		filters1['seasonality'] = 'true'
@@ -667,6 +763,13 @@
       	}
       	sendQuery();
       	return(filters1)
+      }
+
+      function updateSubannualState(){
+      	var checked = document.getElementById('subannualOnly').checked;
+      	document.getElementById('resolutionSlider').disabled = checked;
+      	document.getElementById('resolutionInput').disabled  = checked;
+      	sendQuery();
       }
 
       // Global variables for backward compatibility (maintained by MapManager)
@@ -709,13 +812,34 @@
       document.getElementById('proceedButton').onclick = function () { getLipds('reconstruct', 'TSIDs').then(reso1 => location.href = reso1)};
       }
 
-      // Switch between the two data-source modes
+      // Switch between the three data-source modes: 'query', 'archive', 'reuse'.
+      // 'reuse' shows the reuse panel and hides both the filter and archived-comp
+      // forms; switching back to query/archive hides the reuse panel and falls
+      // through to the existing hideForm() logic.
       function setMode(mode) {
          var isArchived = (mode === 'archive');
+         var isReuse    = (mode === 'reuse');
          document.getElementById('archivedCompilation').checked = isArchived;
          document.getElementById('btn-archive').classList.toggle('active', isArchived);
-         document.getElementById('btn-query').classList.toggle('active', !isArchived);
-         hideForm();
+         document.getElementById('btn-query').classList.toggle('active', !isArchived && !isReuse);
+         var btnReuse = document.getElementById('btn-reuse');
+         if (btnReuse) btnReuse.classList.toggle('active', isReuse);
+
+         var reusePanel = document.getElementById('reuse-panel');
+         if (reusePanel) reusePanel.style.display = isReuse ? 'block' : 'none';
+
+         // Hide both legacy forms while in reuse mode; otherwise let hideForm()
+         // pick the right one based on the archivedCompilation checkbox.
+         if (isReuse) {
+            var qf = document.getElementById('queryForm');
+            var cf = document.getElementById('compilationForm');
+            if (qf) qf.style.display = 'none';
+            if (cf) cf.style.display = 'none';
+            var bd = document.getElementById('buttonDiv');
+            if (bd) bd.style.display = 'none';
+         } else {
+            hideForm();
+         }
       }
 
       // Apply page-specific configuration from server-injected PAGE_CONFIG
@@ -743,16 +867,37 @@
             updateFilters();
          }
 
-         // Time slider configuration
-         var ids = ['fromSlider', 'toSlider', 'fromInput', 'toInput'];
-         for (var i = 0; i < ids.length; i++) {
-            var el = document.getElementById('time_range_to_reconstruct_' + ids[i]);
+         // Temporal-extent slider configuration. Range is in yr BP (negative = post-1950 AD).
+         // Lenient defaults pass all records when the filter is toggled on:
+         //   extendBack initial   = timeSlider.min  (record.maxAge >= min ⇒ trivially true)
+         //   extendForward initial = timeSlider.max  (record.minAge <= max ⇒ trivially true)
+         // If cfg.extendBackDefault is set, override the back slider and turn the filter on.
+         var extendBackInitial    = (cfg.extendBackDefault != null) ? cfg.extendBackDefault : cfg.timeSlider.min;
+         var extendForwardInitial = cfg.timeSlider.max;
+         var extentSliders = [
+            { id: 'extendBackSlider',    initialValue: extendBackInitial },
+            { id: 'extendBackInput',     initialValue: extendBackInitial },
+            { id: 'extendForwardSlider', initialValue: extendForwardInitial },
+            { id: 'extendForwardInput',  initialValue: extendForwardInitial }
+         ];
+         for (var i = 0; i < extentSliders.length; i++) {
+            var el = document.getElementById(extentSliders[i].id);
             if (el) {
-               el.max = cfg.timeSlider.max;
-               if (ids[i].indexOf('Slider') !== -1) el.step = cfg.timeSlider.step;
-               if (ids[i].indexOf('to') !== -1) el.value = cfg.timeSlider.max;
+               // Order matters: set bounds before value so the browser doesn't clamp.
+               el.min  = cfg.timeSlider.min;
+               el.max  = cfg.timeSlider.max;
+               el.step = cfg.timeSlider.step;
+               el.value = extentSliders[i].initialValue;
             }
          }
+         // Turn the extendBack filter on if a config-level default was set.
+         if (cfg.extendBackDefault != null) {
+            document.getElementById('extendBackOn').checked = true;
+            updateFilters();
+         }
+         // Refresh the BP→AD readouts after PAGE_CONFIG overwrote the slider values.
+         if (typeof updateExtendBackReadout === 'function')    updateExtendBackReadout();
+         if (typeof updateExtendForwardReadout === 'function') updateExtendForwardReadout();
 
          // Initialize mode and load map
          setMode(cfg.defaultMode);
