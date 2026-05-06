@@ -43,7 +43,7 @@ Your GitHub OAuth app needs to be configured with the correct callback URL:
 
 ### Step 1: Open the form
 ```
-http://localhost:81/editor/?recon=holocene_da&user=test&domain=example.com&uniqueID=test-123
+http://localhost:81/editor/querypath?recon=holocene_da&user=test&domain=example.com&uniqueID=test-123
 ```
 
 ### Step 2: You should see three options:
