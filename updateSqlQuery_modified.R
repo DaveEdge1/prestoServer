@@ -24,8 +24,13 @@ updateSqlQuery <- function(queryTable){
     points <- data.frame(df1$geo_longitude, df1$geo_latitude)
     pts <- sf::st_as_sf(points, coords=1:2, crs=4326)
 
-    ## Find which points fall over land
-    ii <- !is.na(as.numeric(sf::st_intersects(pts, spData::world)))
+    ## Find which points fall over land.
+    ## sf::st_intersects() returns an sgbp object (list of integer vectors,
+    ## one per point, listing polygon indices the point intersects with).
+    ## lengths(sgbp) > 0 is the idiomatic test for "intersects at least one
+    ## polygon". The previous as.numeric()/is.na() approach silently produced
+    ## NA for every point, marking the entire isTerrestrial column 0.
+    ii <- lengths(sf::st_intersects(pts, spData::world)) > 0
 
     ##Add column for isTerrestrial
     df1 <- cbind.data.frame(df1, isTerrestrial=ii)

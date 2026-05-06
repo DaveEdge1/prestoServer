@@ -29,6 +29,25 @@ npm-debug.log*
 *.temp
 nul
 
+# Scratch / dev-only directories — not needed at runtime, otherwise bloat
+# the build context (temp/ alone has been 3+ GB of cloned templates).
+temp/
+viz/
+userRecons/
+loadtest/
+query/csv_cache/
+query/verification_output/
+
+# Local SQL dump kept in-repo for reference / inspection. Hundreds of MB,
+# not used by the running orchestrator.
+lipdverse_dump.sql/
+
+# Cached CSV exports — runtime fetches a fresh copy from lipdverse.org as needed
+getLipds/lipdverseQuery.csv
+getLipds/lipdverseQuery.zip
+getLipds/lipdverseQuery.md5
+query/lipdverseQuery.md5
+
 # Documentation
 *.md
 !README.md
