@@ -31,7 +31,7 @@ router.get('/github', (req, res) => {
   const params = new URLSearchParams({
     client_id: config.github.clientId,
     redirect_uri: config.github.callbackUrl,
-    scope: 'repo,user:email',
+    scope: 'public_repo,user:email',
     state: state
   });
 

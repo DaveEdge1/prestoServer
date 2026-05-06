@@ -168,6 +168,12 @@ function popQueryVariable(){
       </svg>
       Login with GitHub
     </a>
+    <details style="margin-top:12px; font-size:13px; color:#555; max-width:600px;">
+      <summary style="cursor:pointer; color:#0969da; font-weight:500;">Why does PReSto need this permission?</summary>
+      <div style="margin-top:8px; padding:10px 12px; background:#f6f8fa; border:1px solid #e1e4e8; border-radius:4px; line-height:1.5;">
+        PReSto creates your reconstruction in a new repository in your GitHub account. To do that, GitHub requires the <code>public_repo</code> permission, which technically grants read/write access to all of your public repositories &mdash; GitHub's OAuth does not allow scoping access to a single repo. <strong>Your private repositories remain inaccessible.</strong> PReSto only reads and writes the new repository it creates for you. You can revoke access at any time at <a href="https://github.com/settings/applications" target="_blank" rel="noopener">github.com/settings/applications</a>.
+      </div>
+    </details>
   </div>
 
   <!-- Logged in -->
