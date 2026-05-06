@@ -96,43 +96,6 @@ router.get('/configDownload', (req, res) => {
   }
 });
 
-// POST /manualORdefault - Choose manual or default config
-router.post('/manualORdefault', (req, res) => {
-  // Build editor path using BASE_URL
-  const editorpath = () => {
-    return (
-      `${config.baseUrl}/editor/?recon=${req.query.recon}` +
-      `&user=${req.query.email.split('@')[0]}` +
-      `&domain=${req.query.email.split('@')[1]}` +
-      `&uniqueID=${req.query.uniqueID}`
-    );
-  };
-
-  const whichRecon = (reconPickerVal) => {
-    let hrefConfig = '';
-    let titleHeading = '';
-
-    if (reconPickerVal === 'temp12k') {
-      titleHeading = 'Configure Temperature 12k Paramaters';
-      hrefConfig = 'https://github.com/paleopresto/temp12k-regional-composites';
-    } else if (reconPickerVal === 'holocene_da') {
-      titleHeading = 'Configure Holocene DA Paramaters';
-      hrefConfig = 'https://github.com/Holocene-Reconstruction/Holocene-code/blob/main/config_default.yml';
-    }
-
-    return { hrefConfig, titleHeading };
-  };
-
-  if (req.query.parampath === 'on') {
-    res.writeHead(302, {
-      Location: editorpath()
-    });
-    res.end();
-  } else {
-    res.render('Signup', whichRecon(req.query.recon));
-  }
-});
-
 // POST /uploadConfigs - Upload configuration file
 router.post('/uploadConfigs', (req, res, next) => {
   upload(req, res, (err) => {

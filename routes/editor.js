@@ -132,23 +132,10 @@ function writeConfigs(recon, user, domain, jsonBody, uniqueID, language) {
   return downloadPath;
 }
 
-// Form location helper
-function formLocate(recon1) {
-  return path.join(editorDir, 'forms', recon1 + '.html');
-}
-
-function formLocate2(recon1) {
-  return path.join(editorDir, 'forms-query', recon1 + '.html');
-}
-
-// GET / - Main editor form (recon-specific)
-router.get('/', (req, res) => {
-  res.sendFile(formLocate(req.query.recon));
-});
-
-// GET /querypath - Query path form
+// GET /querypath - Query path form (the live editor; users always reach
+// this via /query/:recon → optional /datacleaning → /editor/querypath)
 router.get('/querypath', (req, res) => {
-  res.sendFile(formLocate2(req.query.recon));
+  res.sendFile(path.join(editorDir, 'forms-query', req.query.recon + '.html'));
 });
 
 // POST /sendReconRequest - Submit reconstruction request
