@@ -87,7 +87,7 @@ cfr subtracts the time-mean over `prior_anom_period` from the prior fields, per 
 | 13 | `nens > NENS_BATCH` with `len(recon_seeds) > max(recon_seeds)` | Auto-batch seed expansion `[s + b * max_seed]` produces duplicate seeds. Duplicates are wasted compute and slightly under-represent the realization spread in the final mean. Example: `recon_seeds=[0,1,2]`, `nens=200` ⇒ effective seeds `[0,1,2,2,3,4]`. | Code bug (silent) |
 | 14 | `recon_loc_rad` ≤ 0 | cfr treats this as a degenerate Gaspari–Cohn radius. Behavior depends on the exact value: `0` typically disables localization (full coupling), negative values may raise. | Hard fail or silent |
 | 15 | `recon_loc_rad` smaller than the prior grid spacing (~300–500 km for CCSM4 regrid) | Each grid cell sees only its closest proxies; most of the network has zero weight. Reconstruction is very noisy and resembles a kriging interpolation more than DA. | Quality |
-| 16 | `recon_loc_rad` ≫ Earth half-circumference (≈ 20,000 km) | Localization is effectively disabled. Distant proxies pull on every grid cell. Spurious long-range correlations propagate. (Default 25,000 km is already in this regime.) | Quality / methodological |
+| 16 | `recon_loc_rad` very large (≳ 40,000 km, ~Earth circumference) | Gaspari–Cohn taper never reaches zero within real distances ⇒ localization is effectively disabled. This is a *valid operating mode*, not corruption — but distant proxies pull on every grid cell, increasing spurious long-range covariance. (The LMR v2.1 default of 25,000 km already places significant weight on globally distributed proxies.) | Quality / methodological |
 | 17 | `filter_proxydb_kwargs.keys` empty or no intersection with the loaded ptypes | All records dropped ⇒ `run_da` with zero observations ⇒ cfr raises during DA setup. | Hard fail |
 | 18 | `min_proxies_for_recon` higher than the maximum yearly proxy count | Auto-trim's "no year qualifies" branch fires (`cfr_main_code.py:117–119`) and the full configured `recon_period` is kept. Early years still run with too-few proxies and produce flat output for that span. | Quality / interpretability |
 | 19 | `prior_anom_period` not contained in `recon_period` | Anomalies defined relative to a period the user cannot inspect in their output time series. Same pattern as Holocene failure 7. | UX / interpretability |
@@ -106,9 +106,7 @@ These produce silent NaN output, cryptic crashes, or no-output runs — they sho
 - `prior_annualize_months` non-empty and every element in `[-12..-1] ∪ [1..12]`.
 - `filter_proxydb_kwargs.keys` non-empty (already enforced upstream by the data-cleaning app, but worth a final check).
 - `nens >= 10` (below this the EnKF is essentially unusable; the slider already enforces this).
-- `0 < recon_loc_rad <= 40000` (positive and physically meaningful; the slider's 1000–100000 range is fine for the upper bound but a 1000 km lower bound is generous).
-- `assim_frac >= 0.05` (or similar) — `assim_frac=0` produces a prior-only "reconstruction".
-- `assim_frac <= 0.95` — leave at least some records for held-out validation.
+- `recon_loc_rad > 0` (zero/negative is degenerate; the slider's 1000 km lower bound is generous and fine).
 
 ### Soft constraints (warn, allow override)
 
@@ -116,16 +114,16 @@ These produce silent NaN output, cryptic crashes, or no-output runs — they sho
 - `recon_period` does not overlap `[1880, 2000]` ⇒ "The validation page's GMST CE/R metrics require overlap with GISTEMP/HadCRUT5 (1880–2000). Without it, the validation block will be empty."
 - `prior_anom_period` overlaps `[1880, 2000]` heavily ⇒ "Prior anomaly baseline overlaps the validation window; reconstructed anomalies in 1880–2000 will be biased toward zero relative to the instrumental record, depressing CE."
 - `prior_anom_period` not contained in `recon_period` ⇒ "Anomalies are defined relative to a period outside your reconstruction window." (Same as Holocene's recommendation.)
-- `recon_loc_rad < 5000` km ⇒ "Localization radius is shorter than typical synoptic correlation scales (~5000 km); many grid cells will see only their nearest proxies."
-- `recon_loc_rad > 20000` km ⇒ "Localization is effectively global; distant proxies will pull on every grid cell. The standard LMR v2.1 default is 25,000 km; values above this are unconventional."
+- `recon_loc_rad < 5000` km ⇒ "Localization radius is shorter than typical synoptic atmospheric correlation scales (~3000–6000 km); many grid cells will see only their nearest proxies." *(See Confidence appendix — heuristic, not LMR-specific.)*
+- `recon_loc_rad > 40000` km (≈ Earth's circumference) ⇒ "Localization is effectively disabled. This is a valid operating mode but distant proxies will pull on every grid cell, increasing spurious long-range covariance. Note: LMR v2.1 uses 25,000 km, which already places significant weight on globally distributed proxies."
+- `assim_frac == 0` ⇒ "No proxies will be assimilated; the reconstruction reduces to the prior mean at every year."
+- `assim_frac == 1` ⇒ "All proxies will be assimilated, leaving none held out. The validation page's held-out CE/R metrics will not be computed; this is methodologically defensible only if you are validating against an external set."
 - `nens < 50` ⇒ "Small ensembles produce poorly conditioned EnKF analyses; LMR v2.1 used 100."
-- `nens * len(recon_seeds) * (recon_period_span)` × per-year runtime estimate > 240 min ⇒ "Estimated runtime exceeds the 4-hour runner cap; consider reducing seeds or `nens`."
-- `recon_seeds` count > 20 with `nens > 100` ⇒ "Auto-batching will multiply your seed count further; total realization count may be much larger than expected." (And: fix the underlying duplicate-seed bug; see code bug below.)
+- `recon_seeds` count > 20 with `nens > 100` ⇒ "Auto-batching multiplies your seed count further; total realization count may be much larger than expected."
 
 ### Live diagnostics (recompute on every change)
 
 - **Estimated total ensemble size**: `nens × n_realizations`, where `n_realizations` is `len(recon_seeds)` if `nens <= NENS_BATCH`, else `len(recon_seeds) * ceil(nens / NENS_BATCH)`. Show this prominently — users routinely want a "1000-member" recon.
-- **Estimated runtime**: rough heuristic `~ 0.05 × nens × len(seeds) × (end - start) / 60` minutes on the free runner. Flag red above 200 min.
 - **Prior pool coverage hint**: if `recon_period` extends beyond `[850, 1850]`, show a small inline note "*N* of the *M* requested years are outside the CCSM4 prior coverage — those will be reconstructed against the same 850–1850 pool".
 - **Validation overlap**: number of years in `recon_period ∩ [1880, 2000]`. Flag if zero.
 - **Anomaly baseline check**: visually highlight where `prior_anom_period` falls inside `[850, 1850]` (allowed) vs outside (will silently produce NaN — should be a hard fail).
@@ -144,3 +142,22 @@ Failure mode **1** (`prior_anom_period` outside CCSM4 coverage) is the highest p
 Failure mode **5** (recon outside prior coverage) is the second priority because it is the LMR analogue of Holocene's static-prior failure: the user thinks they have a time-varying prior over the full recon window, but in fact every year is conditioned on the same fixed 850–1850 ensemble pool. This is methodologically defensible (it *is* how offline LMR works) but it should be surfaced — especially for recons that extend deep into the Holocene or far past 1850.
 
 Failure mode **13** (auto-batch seed collisions) is the highest-priority *code* fix even though it is invisible to the GUI: it silently degrades realizations whenever `nens > 100` with multiple seeds. Easy to fix, no user-facing cost.
+
+## Confidence appendix
+
+Not every threshold in this document is equally well-grounded. The empirical anchors come from `lmr_configs.yml` (the running default config) and the LMR v2.1 papers (Tardif et al. 2019; Hakim et al. 2016). Anything else is a heuristic I picked while writing the audit and should be regarded as a starting point for discussion rather than a load-bearing recommendation.
+
+| Item | Confidence | Basis |
+|---|---|---|
+| `recon_loc_rad` default 25,000 km | High | Direct from `lmr_configs.yml`; matches LMR v2.1 |
+| `assim_frac` default 0.75 | High | Direct from `lmr_configs.yml`; matches LMR v2.1 |
+| `nens` default 100 | High | Direct from `lmr_configs.yml`; matches LMR v2.1 |
+| Prior coverage 850–1850 CE (CCSM4 LM) | High | Documented in template README + cfr defaults |
+| GISTEMP/HadCRUT5 calibration window 1880–2000 | High | Standard validation period in `validate_recon.py` |
+| `recon_loc_rad < 5000 km` warn threshold | Medium | Synoptic Rossby radius scale (~3000–6000 km); not LMR-specific |
+| `recon_loc_rad > 40000 km` warn threshold | Medium | Earth-circumference geometry argument; not from a specific paper |
+| `nens < 50` warn threshold | Medium | Convention from EnKF literature on minimum-useful ensemble size |
+| `assim_frac == 0` and `== 1` warns | Medium | Methodological reasoning, not from a specific LMR study |
+| `recon_period` outside prior coverage warn | High (effect) / Medium (text) | The methodological consequence is documented in LMR papers; the user-facing wording is mine |
+
+Items marked **Medium** are scientifically reasonable but lack a specific citation; revisit if the GUI surfaces them prominently to users. Items marked **High** are reproducible from this codebase or the LMR v2.1 literature.
