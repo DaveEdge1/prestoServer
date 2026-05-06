@@ -31,6 +31,7 @@
     <!-- Custom stylesheet - for your changes-->
     <link rel="stylesheet" href="/editor/slider.css">
     <link rel="stylesheet" href="/editor/css/custom.css">
+    <link rel="stylesheet" href="/editor/holocene_da_constraints.css">
     <!-- Favicon and apple touch icons-->
     <link rel="shortcut icon" href="/editor/img/favicon.png" type="image/x-icon">
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -482,6 +483,7 @@ document.getElementById("uniqueID").value = getQueryVariable("uniqueID");
   </div>
 </div>
 
+<div id="hda-diagnostics" class="hda-diagnostics" aria-live="polite"></div>
 <div class="button-submit">
 <button id="submit-button" style="height:50px; width:100px; font-size:20px" type="submit" class="btn btn-primary" disabled>Submit</button>
 <p id="login-required-msg" style="color: #dc3545; font-size: 14px; margin-top: 10px; display:none;">Please login with GitHub to submit</p>
@@ -590,6 +592,7 @@ function logoutGitHub() {
 }
 
 function buildURL(){
+  if (window.HDAConstraints && !window.HDAConstraints.passOrReport()) { return false; }
   if (!isUserAuthenticated) {
     // Save form state and redirect to OAuth. The returnTo URL brings the user
     // back here, where DOMContentLoaded will restore the snapshot.
@@ -612,6 +615,7 @@ function buildURL(){
 function val() {document.getElementById("abstract2").src = "/editor/slider.css";}
 </script>
 <script src="/editor/sliderholocene_da.js"></script>
+<script src="/editor/holocene_da_constraints.js" defer></script>
 </div>
 <br>
 
