@@ -1,0 +1,56 @@
+# Base image for the Presto orchestrator. Holds heavy system-level deps
+# that rarely change: R 4.2 + tidyverse, the spatial stack used by sf
+# (libgdal/libgeos/libproj), and the Docker CLI used by prestoGo.js to
+# spawn sibling reconstruction containers.
+#
+# Rebuild this only when an R or system-lib dep needs bumping. The
+# orchestrator's Dockerfile FROMs a date-stamped tag of this image, so
+# app-level rebuilds skip the ~30-min R-package compile and finish in
+# 1-2 min.
+#
+# Build + push:
+#   docker build -f Dockerfile.orchestrator-base \
+#     -t davidedge/presto-orchestrator-base:r-2026-05-06 \
+#     -t davidedge/presto-orchestrator-base:latest .
+#   docker push davidedge/presto-orchestrator-base:r-2026-05-06
+#   docker push davidedge/presto-orchestrator-base:latest
+#
+# After bumping the date tag here, also bump the FROM line in
+# Dockerfile.orchestrator and commit them together.
+
+FROM node:20-bookworm
+
+# Install R and the system libs required by sf and friends.
+# Debian Bookworm provides R 4.2+, compatible with modern tidyverse.
+RUN apt-get update && apt-get install -y \
+    r-base \
+    r-base-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    curl \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    cmake \
+    libudunits2-dev \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Docker CLI (prestoGo.js spawns reconstruction containers).
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli \
+    && rm -rf /var/lib/apt/lists/*
+
+# R packages used by the getLipds / R update pipeline. tidyverse pulls
+# in sf which compiles against the libgdal/libgeos/libproj installed
+# above; furrr is for parallel dplyr; lipdR comes from GitHub.
+RUN R -e "install.packages(c('jsonlite', 'magrittr', 'remotes', 'tidyverse', 'furrr'), repos='https://cran.r-project.org')" \
+    && R -e "remotes::install_github('nickmckay/lipdR')"
+
+WORKDIR /root/presto

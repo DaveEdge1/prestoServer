@@ -1,46 +1,21 @@
-FROM node:20-bookworm
+# App layer for the Presto orchestrator. Builds on
+# davidedge/presto-orchestrator-base, which has R + tidyverse + lipdR +
+# sf-stack system libs + Docker CLI baked in. This file only handles
+# npm deps and app code, so rebuilds take 1-2 min instead of 30+.
+#
+# To bump the R/system-deps base, see Dockerfile.orchestrator-base — and
+# update the FROM tag below in the same commit so the two stay in sync.
 
-# Install R and dependencies for downloadLipds.js which runs R scripts, plus Docker CLI for prestoGo.js
-# Also install spatial libraries required by sf package and its dependencies
-# Debian Bookworm provides R 4.2+ which is compatible with modern tidyverse packages
-RUN apt-get update && apt-get install -y \
-    r-base \
-    r-base-dev \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    curl \
-    ca-certificates \
-    gnupg \
-    lsb-release \
-    cmake \
-    libudunits2-dev \
-    libgdal-dev \
-    libgeos-dev \
-    libproj-dev \
-    && rm -rf /var/lib/apt/lists/*
+FROM davidedge/presto-orchestrator-base:r-2026-05-06
 
-# Install Docker CLI (required by prestoGo.js to spawn reconstruction containers)
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
-    && apt-get update \
-    && apt-get install -y docker-ce-cli \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install R packages required by the getLipds scripts
-# Install base packages, tidyverse (for stringr, dplyr, purrr, tidyr), furrr, then lipdR from GitHub
-RUN R -e "install.packages(c('jsonlite', 'magrittr', 'remotes', 'tidyverse', 'furrr'), repos='https://cran.r-project.org')" \
-    && R -e "remotes::install_github('nickmckay/lipdR')"
-
-# Set working directory to match host path structure (same-path mounting)
 WORKDIR /root/presto
 
-# Copy package.json and install dependencies for consolidated server
+# Copy package manifests first so npm install caches independently of
+# application source.
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# Copy all application code
+# Application source. .dockerignore excludes scratch dirs.
 COPY . .
 
 ENV NODE_ENV=production
