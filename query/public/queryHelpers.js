@@ -693,12 +693,28 @@ getAllMonths = function(startSpan,endSpan){
                     queryParts.push('geo_longitude > ' + document.getElementById("lon_min").value);
                 }
             }
-            if (JSON.parse(filters1['ages'])){
-                queryParts.push('minAge < ' + document.getElementById("time_range_to_reconstruct_fromInput").value);
-                queryParts.push('maxAge > ' + document.getElementById("time_range_to_reconstruct_toInput").value);
+            // Independent temporal-extent filters. Express's querystring parser
+            // treats '=' as the key/value separator, so encode '>=' as '> N-1'
+            // and '<=' as '< N+1'.
+            if (filters1['extendBack'] && JSON.parse(filters1['extendBack'])){
+                // Record's oldest data point must be at least extendBack yr BP.
+                var extendBackVal = parseFloat(document.getElementById("extendBackInput").value);
+                if (!isNaN(extendBackVal)) queryParts.push('maxAge > ' + (extendBackVal - 1));
+            }
+            if (filters1['extendForward'] && JSON.parse(filters1['extendForward'])){
+                // Record's youngest data point must be no older than extendForward yr BP.
+                var extendForwardVal = parseFloat(document.getElementById("extendForwardInput").value);
+                if (!isNaN(extendForwardVal)) queryParts.push('minAge < ' + (extendForwardVal + 1));
             }
             if (JSON.parse(filters1['resolution'])){
-                queryParts.push('medianResolution < ' + document.getElementById("resolutionInput").value);
+                var subannualEl = document.getElementById('subannualOnly');
+                if (subannualEl && subannualEl.checked) {
+                    queryParts.push('medianResolution < 1');
+                } else {
+                    // "<= N" encoded as "< N+1" to avoid '=' in the URL key.
+                    var resVal = parseFloat(document.getElementById("resolutionInput").value);
+                    if (!isNaN(resVal)) queryParts.push('medianResolution < ' + (resVal + 1));
+                }
             }
             if (filters1['minLength'] && JSON.parse(filters1['minLength'])){
                 // Avoid '=' in the expression: the server's querystring parser treats '='
@@ -707,9 +723,6 @@ getAllMonths = function(startSpan,endSpan){
                 if (!isNaN(minLenVal)) {
                     queryParts.push('maxAge - minAge > ' + (minLenVal - 1));
                 }
-            }
-            if (JSON.parse(filters1['terrestrial'])){
-                queryParts.push('isTerrestrial=' + +document.getElementById("Terrestrial").checked);
             }
             if (JSON.parse(filters1['seasonality'])){
                 queryParts.push(document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value)));
@@ -1004,20 +1017,22 @@ getAllMonths = function(startSpan,endSpan){
                                 parseFloat(document.getElementById('lon_max').value)
                             ];
                         }
-                        if (JSON.parse(filters1['ages'])) {
-                            queryParams.ages = [
-                                parseFloat(document.getElementById('time_range_to_reconstruct_fromInput').value),
-                                parseFloat(document.getElementById('time_range_to_reconstruct_toInput').value)
-                            ];
+                        if (filters1['extendBack'] && JSON.parse(filters1['extendBack'])) {
+                            queryParams.extendBack = parseFloat(document.getElementById('extendBackInput').value);
+                        }
+                        if (filters1['extendForward'] && JSON.parse(filters1['extendForward'])) {
+                            queryParams.extendForward = parseFloat(document.getElementById('extendForwardInput').value);
                         }
                         if (JSON.parse(filters1['resolution'])) {
-                            queryParams.resolution = parseFloat(document.getElementById('resolutionInput').value);
+                            var subannualEl2 = document.getElementById('subannualOnly');
+                            if (subannualEl2 && subannualEl2.checked) {
+                                queryParams.subannualOnly = true;
+                            } else {
+                                queryParams.resolution = parseFloat(document.getElementById('resolutionInput').value);
+                            }
                         }
                         if (filters1['minLength'] && JSON.parse(filters1['minLength'])) {
                             queryParams.minRecordLength = parseFloat(document.getElementById('minLengthInput').value);
-                        }
-                        if (JSON.parse(filters1['terrestrial'])) {
-                            queryParams.terrestrial = document.getElementById('Terrestrial').checked;
                         }
                         var postBody = {
                             TSIDs: IDs,

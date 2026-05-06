@@ -11,14 +11,18 @@ const fs = require('fs');
 const queryDir = path.join(__dirname, '..', 'query');
 
 // Page-specific configuration injected into the unified query.html template
+// timeSlider range is in yr BP (BP = years before 1950 AD).
+//   min: -70  ⇒ year 2020 AD  (allows recent records past 1950)
+//   max: 1950 ⇒ year   0 AD   (= 1 BCE) for LMR
+//   max: 9950 ⇒ year 8000 BCE for Holocene DA / Downloads
 const PAGE_CONFIGS = {
   LMR: {
     defaultMode: 'archive',
     archivedCompilation: { name: 'Pages2kTemperature', version: '2_2_0' },
     compilationFilter: 'Pages2k',
     interpVarDefault: 'temperature',
-    minRecordLength: 100,
-    timeSlider: { max: 2000, step: 100 },
+    extendBackDefault: 100,
+    timeSlider: { min: -70, max: 1950, step: 10 },
   },
   holocene_da: {
     defaultMode: 'archive',
@@ -26,19 +30,19 @@ const PAGE_CONFIGS = {
     compilationFilter: 'Temp12k-1_2_0',
     interpVarDefault: 'temperature',
     minRecordLength: 100,
-    timeSlider: { max: 12000, step: 100 },
+    timeSlider: { min: -70, max: 9950, step: 10 },
   },
   download: {
     defaultMode: 'query',
     archivedCompilation: { name: '', version: '' },
     compilationFilter: '',
-    timeSlider: { max: 12000, step: 100 },
+    timeSlider: { min: -70, max: 9950, step: 10 },
   },
   downloadNew: {
     defaultMode: 'query',
     archivedCompilation: { name: '', version: '' },
     compilationFilter: '',
-    timeSlider: { max: 12000, step: 100 },
+    timeSlider: { min: -70, max: 9950, step: 10 },
   }
 };
 

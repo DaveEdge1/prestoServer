@@ -224,16 +224,17 @@ function generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJso
   if (qp.coords && Array.isArray(qp.coords) && qp.coords.length === 4) {
     filters.push(`- **Coordinates:** lat ${qp.coords[0]}° to ${qp.coords[1]}°, lon ${qp.coords[2]}° to ${qp.coords[3]}°`);
   }
-  if (qp.ages && Array.isArray(qp.ages) && qp.ages.length === 2) {
-    filters.push(`- **Age range:** ${qp.ages[0]} – ${qp.ages[1]}`);
+  if (qp.extendBack != null) {
+    filters.push(`- **Extends back to:** ≥ ${qp.extendBack} yr BP`);
   }
-  if (qp.resolution != null) {
-    filters.push(`- **Max median resolution:** ${qp.resolution}`);
+  if (qp.extendForward != null) {
+    filters.push(`- **Extends forward to:** ≤ ${qp.extendForward} yr BP`);
   }
-  if (qp.terrestrial != null) {
-    filters.push(`- **Terrestrial only:** ${qp.terrestrial ? 'yes' : 'no'}`);
+  if (qp.subannualOnly) {
+    filters.push(`- **Resolution:** subannual only (< 1 yr)`);
+  } else if (qp.resolution != null) {
+    filters.push(`- **Max median resolution:** ${qp.resolution} yr`);
   }
-
   if (filters.length > 0) {
     lines.push(...filters);
   } else {

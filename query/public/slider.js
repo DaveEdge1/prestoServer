@@ -187,16 +187,37 @@ setToggleAccessible(months_range_toSlider);
 months_range_fromSlider.oninput = () => seasonalityFromSlider(months_range_fromSlider, months_range_toSlider, months_range_fromInput);
 months_range_toSlider.oninput = () => seasonalityToSlider(months_range_fromSlider, months_range_toSlider, months_range_toInput);
 
-const time_range_to_reconstruct_fromSlider = document.getElementById("time_range_to_reconstruct_fromSlider");
-const time_range_to_reconstruct_toSlider = document.getElementById("time_range_to_reconstruct_toSlider");
-const time_range_to_reconstruct_fromInput = document.getElementById("time_range_to_reconstruct_fromInput");
-const time_range_to_reconstruct_toInput = document.getElementById("time_range_to_reconstruct_toInput");
-fillSlider(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_toSlider, "#C6C6C6", "#896A67", time_range_to_reconstruct_toSlider);
-setToggleAccessible(time_range_to_reconstruct_toSlider);
-time_range_to_reconstruct_fromSlider.oninput = () => controlFromSlider(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_toSlider, time_range_to_reconstruct_fromInput);
-time_range_to_reconstruct_toSlider.oninput = () => controlToSlider(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_toSlider, time_range_to_reconstruct_toInput);
-time_range_to_reconstruct_fromInput.onchange = () => controlFromInput(time_range_to_reconstruct_fromSlider, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSlider);
-time_range_to_reconstruct_toInput.onchange = () => controlToInput(time_range_to_reconstruct_toSlider, time_range_to_reconstruct_fromInput, time_range_to_reconstruct_toInput, time_range_to_reconstruct_toSlider);
+// BP-to-calendar-year readout for the temporal-extent filters.
+// BP convention: "present" = 1950 AD, so AD = 1950 - BP. There is no year 0,
+// so AD <= 0 is rendered as BCE (year 1 BCE = AD 0 = BP 1950).
+function bpToCalendarLabel(bp) {
+  if (isNaN(bp)) return '';
+  var ad = 1950 - bp;
+  if (ad >= 1)  return '(= ' + ad + ' AD)';
+  return '(= ' + (1 - ad) + ' BCE)';
+}
+
+const extendBackSlider   = document.getElementById("extendBackSlider");
+const extendBackInput    = document.getElementById("extendBackInput");
+const extendBackReadout  = document.getElementById("extendBackADReadout");
+function updateExtendBackReadout() {
+  if (extendBackReadout) extendBackReadout.textContent = bpToCalendarLabel(parseFloat(extendBackInput.value));
+}
+extendBackSlider.oninput = () => { changeInput(extendBackSlider, extendBackInput); updateExtendBackReadout(); };
+extendBackInput.onchange = () => { changeSlider(extendBackInput, extendBackSlider); updateExtendBackReadout(); };
+fillSingleSlider(extendBackSlider);
+updateExtendBackReadout();
+
+const extendForwardSlider  = document.getElementById("extendForwardSlider");
+const extendForwardInput   = document.getElementById("extendForwardInput");
+const extendForwardReadout = document.getElementById("extendForwardADReadout");
+function updateExtendForwardReadout() {
+  if (extendForwardReadout) extendForwardReadout.textContent = bpToCalendarLabel(parseFloat(extendForwardInput.value));
+}
+extendForwardSlider.oninput = () => { changeInput(extendForwardSlider, extendForwardInput); updateExtendForwardReadout(); };
+extendForwardInput.onchange = () => { changeSlider(extendForwardInput, extendForwardSlider); updateExtendForwardReadout(); };
+fillSingleSlider(extendForwardSlider);
+updateExtendForwardReadout();
 const resolutionmaxSlider = document.getElementById("resolutionSlider");
 const resolutionmaxInput = document.getElementById("resolutionInput");
 resolutionmaxSlider.oninput = () => changeInput(resolutionmaxSlider, resolutionmaxInput);

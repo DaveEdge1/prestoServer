@@ -40,18 +40,22 @@ var MapExport = (function () {
           ', Lon: ' + document.getElementById('lon_min').value +
           ' to ' + document.getElementById('lon_max').value);
       }
-      if (JSON.parse(filters1['ages'])) {
-        lines.push('Time: ' + document.getElementById('time_range_to_reconstruct_fromInput').value +
-          ' \u2013 ' + document.getElementById('time_range_to_reconstruct_toInput').value + ' yr BP');
+      if (filters1['extendBack'] && JSON.parse(filters1['extendBack'])) {
+        lines.push('Extends back to \u2265 ' + document.getElementById('extendBackInput').value + ' yr BP');
+      }
+      if (filters1['extendForward'] && JSON.parse(filters1['extendForward'])) {
+        lines.push('Extends forward to \u2264 ' + document.getElementById('extendForwardInput').value + ' yr BP');
       }
       if (JSON.parse(filters1['resolution'])) {
-        lines.push('Resolution < ' + document.getElementById('resolutionInput').value + ' yr');
+        var subannualEl3 = document.getElementById('subannualOnly');
+        if (subannualEl3 && subannualEl3.checked) {
+          lines.push('Resolution: subannual only (< 1 yr)');
+        } else {
+          lines.push('Resolution ≤ ' + document.getElementById('resolutionInput').value + ' yr');
+        }
       }
       if (filters1['minLength'] && JSON.parse(filters1['minLength'])) {
         lines.push('Min record length ≥ ' + document.getElementById('minLengthInput').value + ' yr');
-      }
-      if (JSON.parse(filters1['terrestrial'])) {
-        lines.push(document.getElementById('Terrestrial').checked ? 'Terrestrial only' : 'Marine only');
       }
       if (JSON.parse(filters1['seasonality'])) {
         lines.push('Months: ' + document.getElementById('months_range_fromInput_text').value +
