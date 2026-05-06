@@ -196,6 +196,11 @@
       return;
     }
     var summary = applyReconConfigToForm(r.data, r.shape || 'nested');
+    // Setting .value/.checked directly doesn't fire input/change, so the
+    // editor's constraint module won't recompute on its own. Poke whichever
+    // module is loaded for this form.
+    if (window.LMRConstraints && typeof window.LMRConstraints.updateUI === 'function') window.LMRConstraints.updateUI();
+    if (window.HDAConstraints && typeof window.HDAConstraints.updateUI === 'function') window.HDAConstraints.updateUI();
     var msg = 'Applied ' + summary.applied + ' field' + (summary.applied === 1 ? '' : 's') + ' to the form.';
     if (summary.skipped.length) {
       // Some fields legitimately have no counterpart in this view of the

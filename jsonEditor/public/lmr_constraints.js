@@ -5,13 +5,10 @@
 
   const PRIOR_COVERAGE = [850, 1850];      // CCSM4 LM coverage
   const VALIDATION_WINDOW = [1880, 2000];  // GISTEMP/HadCRUT5 overlap
-  const LOC_RAD_MAX = 40000;               // km, hard cap (failure 16)
   const LOC_RAD_LOW = 5000;                // km, soft floor (failure 15)
-  const LOC_RAD_HIGH = 20000;              // km, soft ceiling
+  const LOC_RAD_HIGH = 40000;              // km, ~Earth circumference (failure 16)
   const NENS_BATCH = 100;                  // matches cfr_main_code.py
   const NENS_SOFT_MIN = 50;
-  const ASSIM_FRAC_MIN = 0.05;
-  const ASSIM_FRAC_MAX = 0.95;
   const VALID_MONTHS = new Set([
     -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1,
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
@@ -81,16 +78,6 @@
     }
     if (!Number.isFinite(s.reconLocRad) || s.reconLocRad <= 0) {
       errors.push('Localization radius must be positive.');
-    } else if (s.reconLocRad > LOC_RAD_MAX) {
-      errors.push('Localization radius (' + s.reconLocRad + ' km) exceeds ' + LOC_RAD_MAX +
-        ' km; localization is effectively disabled and distant proxies will pull on every grid cell.');
-    }
-    if (!Number.isFinite(s.assimFrac) || s.assimFrac < ASSIM_FRAC_MIN) {
-      errors.push('Fraction of proxies to assimilate must be ≥ ' + ASSIM_FRAC_MIN +
-        '; below this the reconstruction is effectively the prior mean.');
-    } else if (s.assimFrac > ASSIM_FRAC_MAX) {
-      errors.push('Fraction of proxies to assimilate must be ≤ ' + ASSIM_FRAC_MAX +
-        '; leave at least some records for held-out validation.');
     }
 
     // ─── Soft warnings ───────────────────────────────────────────────────
@@ -120,11 +107,15 @@
       warnings.push('Prior anomaly period is not fully contained in the reconstruction period; anomalies will be defined relative to a baseline outside your output.');
     }
     if (Number.isFinite(s.reconLocRad) && s.reconLocRad > 0 && s.reconLocRad < LOC_RAD_LOW) {
-      warnings.push('Localization radius (' + s.reconLocRad + ' km) is shorter than typical synoptic scales (~' +
-        LOC_RAD_LOW + ' km); many grid cells will see only their nearest proxies.');
-    } else if (Number.isFinite(s.reconLocRad) && s.reconLocRad > LOC_RAD_HIGH && s.reconLocRad <= LOC_RAD_MAX) {
-      warnings.push('Localization radius (' + s.reconLocRad + ' km) is above ' + LOC_RAD_HIGH +
-        ' km; LMR v2.1 used 25,000 km — values beyond this approach global coupling.');
+      warnings.push('Localization radius (' + s.reconLocRad + ' km) is shorter than typical synoptic atmospheric correlation scales (~3000–6000 km); many grid cells will see only their nearest proxies.');
+    } else if (Number.isFinite(s.reconLocRad) && s.reconLocRad > LOC_RAD_HIGH) {
+      warnings.push('Localization radius (' + s.reconLocRad + ' km) exceeds ~Earth circumference (' + LOC_RAD_HIGH +
+        ' km); localization is effectively disabled. Valid operating mode, but distant proxies will pull on every grid cell. LMR v2.1 uses 25,000 km.');
+    }
+    if (s.assimFrac === 0) {
+      warnings.push('No proxies will be assimilated (assim_frac = 0); the reconstruction reduces to the prior mean at every year.');
+    } else if (s.assimFrac === 1) {
+      warnings.push('All proxies will be assimilated (assim_frac = 1), leaving none held out. The validation page\'s held-out CE/R metrics will not be computed.');
     }
     if (Number.isFinite(s.nens) && s.nens < NENS_SOFT_MIN) {
       warnings.push('Ensemble size (' + s.nens + ') is below ' + NENS_SOFT_MIN +
