@@ -905,5 +905,113 @@
       })();
 
    </script>
+   <script>
+   // ============================================================================
+   // Filter-form persistence — survives Back navigation from /datacleaning or
+   // /editor. Without this, hitting Back resets every filter to its default and
+   // a re-submit of the query then silently overwrites the prior server-side
+   // query_params.json + TSIDs.json with whatever the defaults produce.
+   // Keyed by uniqueID so distinct reconstructions don't collide.
+   // ============================================================================
+   (function () {
+      var qs = new URLSearchParams(window.location.search);
+      var uniqueID = qs.get('uniqueID') || '';
+      if (!uniqueID) return;
+      var STORAGE_KEY = 'query_form_state_' + uniqueID;
+
+      // The full set of inputs `getLipds` reads when building queryParams /
+      // archivedComp. Mirrors query/public/queryHelpers.js around line 1002.
+      var FIELDS = [
+         'archiveTypeIn', 'proxy', 'variableName', 'interpVar',
+         'countryIn', 'continentIn', 'compilationIn', 'seasonality1',
+         'lat_min', 'lat_max', 'lon_min', 'lon_max',
+         'extendBackInput', 'extendForwardInput',
+         'resolutionInput', 'minLengthInput',
+         'archivedCompilationIn', 'archivedCompilationVersionIn',
+      ];
+      var BOOL_FIELDS = ['coordsOn', 'subannualOnly', 'archivedCompilation'];
+
+      function snapshot() {
+         var out = { v: 1, fields: {}, bools: {}, mode: null };
+         for (var i = 0; i < FIELDS.length; i++) {
+            var el = document.getElementById(FIELDS[i]);
+            if (el) out.fields[FIELDS[i]] = el.value;
+         }
+         for (var j = 0; j < BOOL_FIELDS.length; j++) {
+            var bel = document.getElementById(BOOL_FIELDS[j]);
+            if (bel) out.bools[BOOL_FIELDS[j]] = !!bel.checked;
+         }
+         // Track which mode button is active so the page restores the right tab.
+         var btnQ = document.getElementById('btn-query');
+         var btnA = document.getElementById('btn-archive');
+         var btnR = document.getElementById('btn-reuse');
+         out.mode = (btnA && btnA.classList.contains('active')) ? 'archive'
+                  : (btnR && btnR.classList.contains('active')) ? 'reuse'
+                  : 'query';
+         return out;
+      }
+
+      function restore(state) {
+         if (!state || typeof state !== 'object') return false;
+         var fields = state.fields || {};
+         for (var k in fields) {
+            if (!Object.prototype.hasOwnProperty.call(fields, k)) continue;
+            var el = document.getElementById(k);
+            if (el && fields[k] != null) el.value = fields[k];
+         }
+         var bools = state.bools || {};
+         for (var b in bools) {
+            if (!Object.prototype.hasOwnProperty.call(bools, b)) continue;
+            var bel = document.getElementById(b);
+            if (bel) bel.checked = !!bools[b];
+         }
+         if (typeof setMode === 'function' && state.mode) {
+            try { setMode(state.mode); } catch (_) {}
+         }
+         return true;
+      }
+
+      // Save on any change. Fires often; sessionStorage is cheap.
+      function attachAutoSave() {
+         var ids = FIELDS.concat(BOOL_FIELDS);
+         for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (!el) continue;
+            el.addEventListener('change', persist);
+            el.addEventListener('input',  persist);
+         }
+      }
+      function persist() {
+         try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot())); } catch (_) {}
+      }
+
+      // Restore on Back / bfcache. The IIFE above schedules its own setMode
+      // and sendQuery on initial load; our restore needs to run after that
+      // populates the inputs. queueMicrotask runs after the IIFE.
+      function tryRestore() {
+         try {
+            var raw = sessionStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            restore(JSON.parse(raw));
+            // Re-run anything that depends on the inputs we just changed.
+            if (typeof updateFilters === 'function') updateFilters();
+            if (typeof sendQuery === 'function')     sendQuery();
+         } catch (_) { /* non-fatal */ }
+      }
+
+      window.addEventListener('pageshow', function (e) {
+         var navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+         var isBackForward = e.persisted ||
+            (navEntries && navEntries[0] && navEntries[0].type === 'back_forward');
+         if (isBackForward) tryRestore();
+      });
+
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+         attachAutoSave();
+      } else {
+         document.addEventListener('DOMContentLoaded', attachAutoSave);
+      }
+   })();
+   </script>
    </body>
 </html>

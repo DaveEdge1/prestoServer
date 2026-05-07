@@ -154,6 +154,20 @@ router.post('/sendReconRequest', async (req, res) => {
       const mysql = require('mysql2/promise');
       const db = await mysql.createPool(config.mysql);
 
+      // ── Idempotency guard ─────────────────────────────────────────────────
+      // If a row already exists for this uniqueID, the user has already
+      // submitted (most likely they hit Back from /status and re-clicked
+      // Submit). Don't redo the file writes or the GitHub work — just send
+      // them back to /status, which will show the in-flight or completed job.
+      const [existing] = await db.query(
+        'SELECT workflow_status FROM reconstruction_jobs WHERE unique_id = ? LIMIT 1',
+        [uniqueID]
+      );
+      if (existing.length > 0) {
+        console.log(`Re-submission for ${uniqueID} — existing status=${existing[0].workflow_status}; redirecting to /status without re-running setup.`);
+        return res.redirect(`/status/${uniqueID}?already=1`);
+      }
+
       // ── Fast synchronous work (before redirect) ───────────────────────────
 
       // Save configuration to prestoForm directory
@@ -339,9 +353,36 @@ router.post('/sendReconRequest', async (req, res) => {
 
     } catch (error) {
       console.error('GitHub Actions error:', error);
+
+      // Map known failures to friendlier messages. The defaults still get the
+      // raw message because operators benefit from it during local development;
+      // production surfaces should keep this list tight.
+      let title = 'Reconstruction submission failed';
+      let body = 'An unexpected error prevented your reconstruction from being created.';
+      let extra = '';
+      const code = (error && error.code) || '';
+      const msg  = (error && error.message) || '';
+
+      if (code === 'ER_DUP_ENTRY' || /Duplicate entry/i.test(msg)) {
+        // Should be unreachable now that the idempotency guard above redirects
+        // re-submits to /status, but keep this branch as a safety net.
+        return res.redirect(`/status/${uniqueID}?already=1`);
+      }
+      if (/GitHub token not found/i.test(msg)) {
+        title = 'GitHub login expired';
+        body  = 'Your GitHub session is no longer valid. Please log in again and re-submit.';
+        extra = `<p><a href="/oauth/github?returnTo=${encodeURIComponent(req.get('referer') || '/forms/')}">Log in with GitHub</a></p>`;
+      } else if (/Anonymous reconstructions are not available/i.test(msg)) {
+        title = 'Login required';
+        body  = 'This server is not configured to run anonymous reconstructions. Please log in with GitHub before submitting.';
+      } else {
+        body = msg || body;
+      }
+
       res.status(500).send(`
-        <h2>Reconstruction submission failed</h2>
-        <p>${error.message}</p>
+        <h2>${title}</h2>
+        <p>${body}</p>
+        ${extra}
         <p><a href="javascript:history.back()">Go back</a></p>
       `);
     }

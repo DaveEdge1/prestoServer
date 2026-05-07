@@ -246,8 +246,33 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  setLoadingMsg('Downloading lipdverse metadata…');
+  // If the user already curated this query (e.g. they hit Back from the
+  // editor, or arrived via /reuse), don't blow away their selection by
+  // re-running analysis from scratch. Show them what's there and let them
+  // pick: continue to the editor with the saved set, or re-curate.
+  let priorState = null;
+  try {
+    const r = await fetch(
+      '/datacleaning/state?uniqueID=' + encodeURIComponent(UNIQUE_ID) +
+      '&recon=' + encodeURIComponent(RECON),
+      { cache: 'no-store' }
+    );
+    if (r.ok) priorState = await r.json();
+  } catch (_) { /* non-fatal — fall through to fresh analysis */ }
 
+  if (priorState && priorState.hasCleaned) {
+    showPriorCurationBanner(priorState);
+    hideLoading();
+    return; // user picks an action; analysis only runs if they choose Re-curate
+  }
+
+  await runFreshAnalysis();
+});
+
+// Run the SSE analysis pipeline. Extracted so showPriorCurationBanner can
+// trigger it from a "Re-curate" click after first wiping prior artifacts.
+async function runFreshAnalysis() {
+  setLoadingMsg('Downloading lipdverse metadata…');
   try {
     await analyzeWithStreaming();
   } catch (err) {
@@ -256,7 +281,76 @@ window.addEventListener('DOMContentLoaded', async () => {
     hideInlineProgress();
     updateFooter();
   }
-});
+}
+
+// =============================================================================
+// "You already curated this" banner — shown when /state reports cleaned_TSIDs
+// already exists. Without this, hitting Back from the editor used to silently
+// re-run a multi-minute analysis and lose every selection the user made.
+// =============================================================================
+function showPriorCurationBanner(state) {
+  const host = document.querySelector('main') || document.body;
+  if (!host || document.getElementById('prior-curation-banner')) return;
+
+  const when = state.cleanedAt ? new Date(state.cleanedAt) : null;
+  const whenText = when && !isNaN(when.getTime())
+    ? when.toLocaleString()
+    : 'earlier';
+  const kept    = state.keptCount || 0;
+  const removed = state.removedCount || 0;
+  const total   = kept + removed;
+
+  const banner = document.createElement('div');
+  banner.id = 'prior-curation-banner';
+  banner.style.cssText =
+    'background:#e2f0ff;border:1px solid #b6daff;color:#08518f;' +
+    'padding:18px 22px;margin:24px auto;max-width:900px;border-radius:8px;' +
+    'font-size:1rem;line-height:1.5;';
+  banner.innerHTML =
+    '<h3 style="margin:0 0 8px 0;color:#08518f;font-size:1.15rem;">You already curated this query</h3>' +
+    '<p style="margin:0 0 12px 0;">Saved ' + whenText + ' &mdash; <strong>' +
+      kept + '</strong> kept' +
+      (removed > 0 ? ', <strong>' + removed + '</strong> removed' : '') +
+      (total  > 0 ? ' (' + total + ' total)' : '') +
+    '. Continue to the editor with this selection, or start over to re-run the duplicate analysis.</p>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+      '<button type="button" id="prior-continue" ' +
+        'style="background:#0969da;color:#fff;border:none;padding:9px 18px;' +
+        'border-radius:4px;font-weight:600;cursor:pointer;">' +
+        'Continue to editor →' +
+      '</button>' +
+      '<button type="button" id="prior-recurate" ' +
+        'style="background:#fff;color:#08518f;border:1px solid #b6daff;padding:9px 18px;' +
+        'border-radius:4px;font-weight:600;cursor:pointer;">' +
+        'Re-curate from scratch' +
+      '</button>' +
+    '</div>';
+
+  // Insert at the very top of the main content area.
+  if (host.firstChild) host.insertBefore(banner, host.firstChild);
+  else host.appendChild(banner);
+
+  document.getElementById('prior-continue').addEventListener('click', () => {
+    suppressUnloadWarning();
+    const next = (RECON === 'lipdDownload') ? '/lipd-download/confirm' : '/editor/querypath';
+    window.location.href = next + window.location.search;
+  });
+
+  document.getElementById('prior-recurate').addEventListener('click', async () => {
+    const btn = document.getElementById('prior-recurate');
+    if (btn) { btn.disabled = true; btn.textContent = 'Clearing…'; }
+    try {
+      await fetch('/datacleaning/skip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uniqueID: UNIQUE_ID, recon: RECON }),
+      });
+    } catch (_) { /* best-effort — we'll overwrite on Continue anyway */ }
+    banner.remove();
+    showLoading();
+    await runFreshAnalysis();
+  });
+}
 
 // =============================================================================
 // SSE streaming analysis
@@ -405,6 +499,11 @@ function hideInlineProgress() {
 function hideLoading() {
   const el = document.getElementById('loading-overlay');
   if (el) el.style.display = 'none';
+}
+
+function showLoading() {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.style.display = 'flex';
 }
 
 function setLoadingMsg(msg) {
@@ -2303,7 +2402,17 @@ function updateFooter() {
 // =============================================================================
 // Skip — navigate to editor with all original TSIDs (no cleaned_TSIDs.json written)
 // =============================================================================
-function skipCleaning() {
+async function skipCleaning() {
+  // Drop any prior cleaning artifacts on the server first; otherwise a
+  // previous Continue's cleaned_TSIDs.json would silently reapply.
+  try {
+    await fetch('/datacleaning/skip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uniqueID: UNIQUE_ID, recon: RECON }),
+    });
+  } catch (_) { /* non-fatal */ }
+  suppressUnloadWarning();
   const nextPage = (RECON === 'lipdDownload') ? '/lipd-download/confirm' : '/editor/querypath';
   window.location.href = nextPage + window.location.search;
 }
@@ -2311,6 +2420,89 @@ function skipCleaning() {
 // =============================================================================
 // Save progress — persists state server-side then opens share dialog
 // =============================================================================
+// Auto-save: a quiet, debounced /save-progress call wired into every state
+// change. Without this, hitting Back from the editor used to lose every
+// keep/remove/notes decision the user made (loadAndRestoreProgress only
+// reads progress.json, which only existed if the user clicked "Save
+// progress" manually). The throttle keeps us from posting per-keystroke.
+let _autoSaveTimer    = null;
+let _autoSaveInFlight = false;
+let _autoSavePending  = false;
+let _autoSaveEnabled  = false;     // flipped to true once the user has any state worth saving
+const AUTO_SAVE_DELAY_MS = 1500;
+
+function _autoSavePayload() {
+  return {
+    uniqueID:      UNIQUE_ID,
+    recon:         RECON,
+    urlParams:     window.location.search,
+    excludedTSIDs: [...excludedTSIDs],
+    excludedVariableNames: [...excludedVariableNames],
+    filterState:   typeof serializeFilterState === 'function' ? serializeFilterState() : null,
+    groupNotes,
+    datasetNotes,
+    savedDatasets: [...savedDatasets],
+    savedGroups:   [...savedGroups],
+  };
+}
+
+async function _autoSaveNow() {
+  if (_autoSaveInFlight) { _autoSavePending = true; return; }
+  _autoSaveInFlight = true;
+  try {
+    await fetch('/datacleaning/save-progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(_autoSavePayload()),
+      keepalive: true, // try to deliver even if the page is unloading
+    });
+  } catch (_) { /* non-fatal — the user can still click Save progress */ }
+  finally {
+    _autoSaveInFlight = false;
+    if (_autoSavePending) { _autoSavePending = false; _autoSaveNow(); }
+  }
+}
+
+function scheduleAutoSave() {
+  if (!UNIQUE_ID || !RECON) return;
+  _autoSaveEnabled = true;
+  if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(_autoSaveNow, AUTO_SAVE_DELAY_MS);
+}
+
+// Best-effort flush before the page goes away — pagehide is the modern
+// equivalent of unload that doesn't disable bfcache. keepalive: true above
+// lets the request survive even if the navigation completes first.
+window.addEventListener('pagehide', () => {
+  if (!_autoSaveEnabled) return;
+  if (_autoSaveTimer) { clearTimeout(_autoSaveTimer); _autoSaveTimer = null; }
+  _autoSaveNow();
+});
+
+// Warn when leaving with selections that haven't reached the editor yet.
+// Suppressed during the "Continue" / "Skip" / "Re-curate" navigations and
+// when a flush is already in flight — those are intentional exits.
+let _suppressUnloadWarning = false;
+function suppressUnloadWarning() { _suppressUnloadWarning = true; }
+window.addEventListener('beforeunload', (e) => {
+  if (_suppressUnloadWarning) return;
+  if (!_autoSaveEnabled) return;
+  // Only warn if there's at least one manual decision the user could lose.
+  // (excludedTSIDs from the AND-filter is auto-derived; we only block exit
+  // for things the user typed or clicked on.)
+  const hasManualState =
+    savedGroups.size   > 0 ||
+    savedDatasets.size > 0 ||
+    Object.values(groupNotes  || {}).some(v => typeof v === 'string' && v.trim()) ||
+    Object.values(datasetNotes|| {}).some(v => typeof v === 'string' && v.trim());
+  if (!hasManualState) return;
+  e.preventDefault();
+  // Modern browsers ignore the message and show a generic prompt. The string
+  // assignment is required for older browsers / Safari.
+  e.returnValue = 'You have unsaved data-cleaning decisions. Leave without saving?';
+  return e.returnValue;
+});
+
 async function saveProgress() {
   const btn    = document.getElementById('btn-save-progress');
   const status = document.getElementById('save-progress-status');
@@ -2623,6 +2815,7 @@ async function confirmCleaning() {
     }
 
     // Redirect to next page — lipdDownload goes to confirmation page; all others go to editor
+    suppressUnloadWarning();
     const nextPage = (RECON === 'lipdDownload') ? '/lipd-download/confirm' : '/editor/querypath';
     window.location.href = nextPage + window.location.search;
   } catch (err) {
@@ -2681,12 +2874,14 @@ function updateGroupNotes(groupId, text) {
   const modalEl  = document.getElementById(`m-notes-${groupId}`);
   if (inlineEl && inlineEl !== document.activeElement) inlineEl.value = text;
   if (modalEl  && modalEl  !== document.activeElement) modalEl.value  = text;
+  scheduleAutoSave();
 }
 
 // Step 1 equivalent, keyed by dataSetName. Empty strings are preserved so
 // renderDatasetsPanel re-renders don't clobber them between keystrokes.
 function updateDatasetNotes(dsName, text) {
   datasetNotes[dsName] = text;
+  scheduleAutoSave();
 }
 
 function saveGroup(groupId) {
@@ -4717,4 +4912,7 @@ function refreshAllViews() {
   if (typeof renderPCA === 'function') renderPCA();
   updateFooter();
   if (typeof renderDuplicates === 'function') renderDuplicates();
+  // Persist the user's selections so a Back navigation (or refresh) restores
+  // them via loadAndRestoreProgress instead of dropping everything.
+  scheduleAutoSave();
 }

@@ -103,10 +103,18 @@
         <div id="events-list"></div>
       </div>
 
+      <div id="already-banner" style="display:none; margin-top:20px; padding:12px 16px; background:#e2f0ff; border:1px solid #b6daff; border-radius:6px; color:#08518f;">
+        We already received this submission &mdash; showing its status.
+      </div>
+
       <div id="auto-refresh" style="margin-top: 20px; text-align: center;">
         <p class="text-muted">
           <small id="redirect-text">Redirecting to GitHub Actions in <span id="countdown">10</span>s...</small>
         </p>
+        <button id="cancel-redirect" type="button"
+                style="display:none; margin-top:8px; padding:6px 14px; font-size:13px; background:#6c757d; color:white; border:none; border-radius:4px; cursor:pointer;">
+          Stay on this page
+        </button>
       </div>
     </div>
   </div>
@@ -116,6 +124,19 @@
     let countdownInterval;
     let countdown = 10;
     let redirectUrl = null;
+    // The user can disable the auto-redirect on this page (either by clicking
+    // "Stay on this page" or by hitting Back from GitHub Actions). Once
+    // disabled, we never start the countdown again for this page lifetime.
+    let autoRedirectDisabled = false;
+
+    // If the URL says ?already=1 we got here via the editor's idempotency
+    // guard — flag the banner so the user understands why the form wasn't
+    // re-processed.
+    const _qs = new URLSearchParams(window.location.search);
+    if (_qs.get('already') === '1') {
+      const b = document.getElementById('already-banner');
+      if (b) b.style.display = 'block';
+    }
 
     function formatDate(dateString) {
       if (!dateString) return 'N/A';
@@ -236,10 +257,13 @@
     }
 
     function startCountdown() {
+      if (autoRedirectDisabled) return;
       countdown = 10;
       document.getElementById('auto-refresh').style.display = 'block';
       document.getElementById('redirect-text').innerHTML =
         'Redirecting to GitHub Actions in <span id="countdown">10</span>s...';
+      const cancelBtn = document.getElementById('cancel-redirect');
+      if (cancelBtn) cancelBtn.style.display = 'inline-block';
       countdownInterval = setInterval(() => {
         countdown--;
         const countdownEl = document.getElementById('countdown');
@@ -248,13 +272,65 @@
         }
         if (countdown <= 0 && redirectUrl) {
           clearInterval(countdownInterval);
-          window.location.href = redirectUrl;
+          // Use replace() instead of href= so this page does not stay in
+          // browser history. Hitting Back from GitHub Actions then skips
+          // /status entirely (going to /editor/querypath) instead of landing
+          // here and re-triggering the redirect — the loop the old code had.
+          window.location.replace(redirectUrl);
         }
       }, 1000);
     }
 
+    function cancelAutoRedirect() {
+      autoRedirectDisabled = true;
+      if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+      stopPolling();
+      const txt = document.getElementById('redirect-text');
+      if (txt) {
+        if (redirectUrl) {
+          txt.innerHTML = 'Auto-redirect cancelled. <a href="' + redirectUrl + '">Open GitHub Actions in this tab</a> ' +
+                          '· <a href="' + redirectUrl + '" target="_blank" rel="noopener">in a new tab</a>.';
+        } else {
+          txt.textContent = 'Auto-redirect cancelled.';
+        }
+      }
+      const btn = document.getElementById('cancel-redirect');
+      if (btn) btn.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cancelBtn = document.getElementById('cancel-redirect');
+      if (cancelBtn) cancelBtn.addEventListener('click', cancelAutoRedirect);
+    });
+
+    // If the user gets here via Back (e.g., from GitHub Actions), don't
+    // immediately re-redirect them — that's the loop we used to have. Disable
+    // the auto-redirect on bfcache restore and on any Back navigation marked
+    // by the browser as such.
+    window.addEventListener('pageshow', (e) => {
+      const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+      const isBackForward = e.persisted ||
+        (navEntries && navEntries[0] && navEntries[0].type === 'back_forward');
+      if (isBackForward) {
+        autoRedirectDisabled = true;
+        if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+        stopPolling();
+        // Surface the cancel state if the page is still showing the countdown.
+        const txt = document.getElementById('redirect-text');
+        if (txt && redirectUrl) {
+          txt.innerHTML = 'Auto-redirect paused (you returned to this page). ' +
+                          '<a href="' + redirectUrl + '">Open GitHub Actions</a>.';
+        } else if (txt) {
+          txt.textContent = 'Auto-redirect paused (you returned to this page).';
+        }
+        const btn = document.getElementById('cancel-redirect');
+        if (btn) btn.style.display = 'none';
+      }
+    });
+
     // Initial fetch — if repo URL is already available, start countdown; otherwise poll
     fetchStatus().then(() => {
+      if (autoRedirectDisabled) return;
       if (redirectUrl) {
         startCountdown();
       } else {

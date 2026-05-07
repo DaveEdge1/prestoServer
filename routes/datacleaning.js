@@ -335,6 +335,68 @@ router.post('/email-progress', async (req, res) => {
   }
 });
 
+// GET /state - Report whether prior cleaning artifacts already exist for this
+// uniqueID. The page uses this on load to decide whether to re-run the SSE
+// analysis or surface a "you already curated this" banner (the user got here
+// via Back, or via /reuse).
+router.get('/state', (req, res) => {
+  const { uniqueID, recon } = req.query;
+  if (!uniqueID || !recon) {
+    return res.status(400).json({ error: 'uniqueID and recon required' });
+  }
+
+  const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_${recon}`);
+  const cleanedPath  = path.join(userReconDir, 'cleaned_TSIDs.json');
+  const progressPath = path.join(userReconDir, 'progress.json');
+
+  let hasCleaned = false;
+  let hasProgress = false;
+  let keptCount = 0;
+  let removedCount = 0;
+  let cleanedAt = null;
+
+  try {
+    if (fs.existsSync(cleanedPath)) {
+      const stat = fs.statSync(cleanedPath);
+      const data = JSON.parse(fs.readFileSync(cleanedPath, 'utf8'));
+      hasCleaned = true;
+      keptCount    = Array.isArray(data.TSIDs) ? data.TSIDs.length : 0;
+      removedCount = Array.isArray(data.removedTSIDs) ? data.removedTSIDs.length : 0;
+      cleanedAt = stat.mtime.toISOString();
+    }
+    if (fs.existsSync(progressPath)) hasProgress = true;
+  } catch (err) {
+    console.warn('GET /datacleaning/state read error:', err.message);
+  }
+
+  res.json({ hasCleaned, hasProgress, keptCount, removedCount, cleanedAt });
+});
+
+// POST /skip - Drop any prior cleaning artifacts (so the editor doesn't pick
+// them up) and tell the client where to redirect. The client used to just
+// navigate away, which silently re-applied the previous selection.
+router.post('/skip', (req, res) => {
+  const { uniqueID, recon } = req.body || {};
+  if (!uniqueID || !recon) {
+    return res.status(400).json({ error: 'uniqueID and recon required' });
+  }
+
+  const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_${recon}`);
+  for (const name of ['cleaned_TSIDs.json', 'cleaning_report.json', 'variable_filter.yaml']) {
+    const p = path.join(userReconDir, name);
+    try {
+      fs.unlinkSync(p);
+      console.log(`Skip: removed ${name} for ${uniqueID}_${recon}`);
+    } catch (err) {
+      if (err && err.code !== 'ENOENT') {
+        console.warn(`Skip: failed to remove ${p}:`, err.message);
+      }
+    }
+  }
+
+  res.json({ ok: true });
+});
+
 // POST /confirm - Save cleaned TSID selection, return redirect URL
 router.post('/confirm', (req, res) => {
   const {

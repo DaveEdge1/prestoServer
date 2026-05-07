@@ -9,6 +9,31 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../config');
 
+// Files written by a downstream step (/datacleaning) that become stale the
+// moment the user re-submits the query. Removing them here keeps
+// routes/editor.js from silently mixing the new query with the previous
+// curation.
+const DOWNSTREAM_ARTIFACTS = [
+  'cleaned_TSIDs.json',
+  'cleaning_report.json',
+  'variable_filter.yaml',
+  'progress.json',
+];
+
+function clearDownstreamArtifacts(dirPath) {
+  for (const name of DOWNSTREAM_ARTIFACTS) {
+    const p = path.join(dirPath, name);
+    try {
+      fs.unlinkSync(p);
+      console.log(`Cleared stale ${name} for ${path.basename(dirPath)}`);
+    } catch (err) {
+      if (err && err.code !== 'ENOENT') {
+        console.warn(`Failed to clear ${p}:`, err.message);
+      }
+    }
+  }
+}
+
 // Create directory with error handling
 async function createDirectory(dirPath) {
   try {
@@ -51,6 +76,10 @@ router.post('/', (req, res) => {
       console.log('Final status:', status);
       res.sendStatus(status);
       if (status == 200) {
+        // The user just ran a fresh query — any prior data-cleaning artifacts
+        // (cleaned_TSIDs.json, etc.) reference TSIDs from the old query and
+        // would be silently re-used by routes/editor.js. Drop them.
+        clearDownstreamArtifacts(dir1);
         const path0 = path.join(dir1, 'TSIDs.json');
         const fullJSON = `{"TSIDs":` + JSON.stringify(req.body.TSIDs) + `}`;
         fs.writeFile(path0, fullJSON, (err) => {
@@ -95,6 +124,9 @@ router.post('/', (req, res) => {
       console.log('Final status:', status);
       res.sendStatus(status);
       if (status == 200) {
+        // Same rationale as above: switching to an archived compilation
+        // invalidates any prior data-cleaning state.
+        clearDownstreamArtifacts(dir1);
         const path0 = path.join(dir1, 'archivedComp.json');
         fs.writeFile(path0, archivedCompJSON, (err) => {
           if (err) console.log(err);
