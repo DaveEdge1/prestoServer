@@ -602,8 +602,17 @@ function renderDuplicates() {
 
   if (duplicateGroups.length === 0) {
     container.innerHTML = '<div class="empty-state">No likely duplicate groups detected in this selection.</div>';
+    // Surface the empty-state banner and hide the now-useless automated-review
+    // and duplicates panels (handled in applyStep2EmptyState — keeping the
+    // call here means the banner appears the moment renderDuplicates first
+    // runs, even if it's before the user has clicked into Step 2).
+    applyStep2EmptyState();
     return;
   }
+  // Non-empty: make sure the empty-state banner / hidden panels are reset
+  // (covers the case where a prior empty render hid them and a recompute
+  // later produced groups).
+  applyStep2EmptyState();
 
   container.innerHTML = '';
 
@@ -1072,8 +1081,27 @@ function advanceToStep2() {
     if (typeof renderCoverage   === 'function') renderCoverage();
     if (typeof renderPCA        === 'function') renderPCA();
   }
+  // Every entry: applyStepVisibility() unconditionally re-shows every
+  // data-step="2" element, which would un-hide the automated-review and
+  // duplicates panels we suppressed for the empty-state banner. Re-apply.
+  applyStep2EmptyState();
   updateFooter();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Toggle the Step-2 empty-state banner. When the duplicate scan returned zero
+// candidate groups, the automated-review and duplicates panels have nothing
+// to do — surface a clear "no duplicates" banner at the top instead and hide
+// those two panels so the page no longer looks blank/abandoned. Coverage and
+// PCA stay visible because they're still informative for the selection.
+function applyStep2EmptyState() {
+  const banner    = document.getElementById('step2-empty-banner');
+  const automated = document.getElementById('section-automated-review');
+  const duplicatesPanel = document.getElementById('section-duplicates');
+  const isEmpty = !duplicateGroups || duplicateGroups.length === 0;
+  if (banner)          banner.style.display          = isEmpty ? '' : 'none';
+  if (automated)       automated.style.display       = isEmpty ? 'none' : '';
+  if (duplicatesPanel) duplicatesPanel.style.display = isEmpty ? 'none' : '';
 }
 
 function returnToStep1() {
@@ -4122,8 +4150,11 @@ async function submitRanking() {
     .filter(arr => arr.length >= 2);
 
   if (groups.length === 0) {
-    setExactDupStatus('No active duplicate groups to scan.', true);
     closeRankDialog();
+    showEmptyExactPreview(
+      'No duplicates to scan',
+      'All candidate duplicate groups have already been excluded — nothing left for the automated scan to evaluate.'
+    );
     return;
   }
 
@@ -4159,7 +4190,10 @@ async function submitRanking() {
     try {
       closeRankDialog();
       if (olderVersionClusters.length === 0) {
-        setExactDupStatus('No exact duplicates found.');
+        showEmptyExactPreview(
+          'No duplicates found',
+          'The automated scan finished without identifying any duplicate records to remove.'
+        );
       } else {
         rankClusters([], opts.lengthPolicy); // reset pendingExactRemovals
         appendOlderVersionClusters(olderVersionClusters);
@@ -4240,9 +4274,12 @@ async function submitRanking() {
     closeRankDialog();
 
     if (clusters.length === 0 && olderVersionClusters.length === 0) {
-      setExactDupStatus(opts.include_near
-        ? 'No exact or near duplicates found.'
-        : 'No exact duplicates found.');
+      showEmptyExactPreview(
+        'No duplicates found',
+        opts.include_near
+          ? 'The scan finished without identifying any exact or near-duplicate records to remove.'
+          : 'The scan finished without identifying any exact duplicate records to remove.'
+      );
       return;
     }
     rankClusters(clusters, opts.lengthPolicy);
@@ -4359,6 +4396,29 @@ function appendOlderVersionClusters(versionClusters) {
   }
 }
 
+// Open the exact-duplicate preview overlay in an empty-state mode: no cluster
+// list, no Apply button, just a clear "nothing to remove" message that the
+// user must dismiss. Used by every code path that reaches "no duplicates" so
+// the user gets unambiguous closure instead of a fading inline status.
+function showEmptyExactPreview(title, message) {
+  const overlay = document.getElementById('exact-dup-preview-overlay');
+  if (!overlay) return;
+  const titleEl   = document.getElementById('exact-preview-title');
+  const summaryEl = document.getElementById('exact-preview-summary');
+  const hintEl    = document.getElementById('exact-preview-hint');
+  const listEl    = document.getElementById('exact-cluster-list');
+  const applyBtn  = document.getElementById('btn-apply-exact');
+  const cancelBtn = document.getElementById('btn-exact-cancel');
+  if (titleEl)   titleEl.textContent = title || 'No duplicates found';
+  if (summaryEl) summaryEl.textContent = message || '';
+  if (hintEl)    hintEl.style.display = 'none';
+  if (listEl)    listEl.style.display = 'none';
+  if (applyBtn)  applyBtn.style.display = 'none';
+  if (cancelBtn) cancelBtn.textContent = 'Close';
+  pendingExactRemovals = null; // empty-state: nothing to apply
+  overlay.style.display = 'flex';
+}
+
 function renderExactPreview() {
   if (!pendingExactRemovals) return;
   const { removeTsids, clusters } = pendingExactRemovals;
@@ -4367,10 +4427,23 @@ function renderExactPreview() {
   if (!summary || !list) return;
 
   if (clusters.length === 0 || removeTsids.size === 0) {
-    setExactDupStatus('No duplicates found.');
-    closeExactPreview();
+    showEmptyExactPreview(
+      'No duplicates found',
+      'The automated scan finished without identifying any duplicate records to remove.'
+    );
     return;
   }
+
+  // Restore normal-state visibility (in case a prior empty-state run hid these).
+  const titleEl   = document.getElementById('exact-preview-title');
+  const hintEl    = document.getElementById('exact-preview-hint');
+  const applyBtn  = document.getElementById('btn-apply-exact');
+  const cancelBtn = document.getElementById('btn-exact-cancel');
+  if (titleEl)   titleEl.textContent = 'Exact duplicates found';
+  if (hintEl)    hintEl.style.display = '';
+  if (list)      list.style.display = '';
+  if (applyBtn)  applyBtn.style.display = '';
+  if (cancelBtn) cancelBtn.textContent = 'Cancel';
 
   const exactCount   = clusters.filter(c => c.kind === 'exact' || (!c.kind)).length;
   const nearCount    = clusters.filter(c => c.kind === 'near').length;

@@ -46,6 +46,33 @@
     }
     .intro-card ul li { margin-bottom: 3px; }
 
+    /* Banner shown at the top of Step 2 when there are no duplicate candidates
+       to review (e.g. only one compilation in the selection). Mirrors
+       .intro-card but with a green accent so it reads as "all clear" rather
+       than instructional. */
+    .step2-empty-banner {
+      background: #f4faf4;
+      border: 1px solid #cbe6cb;
+      border-left: 4px solid #3a7a3a;
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 0.88rem;
+      color: #2f4f2f;
+      line-height: 1.55;
+    }
+    .step2-empty-banner h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      color: #2a5e2a;
+    }
+    .step2-empty-banner ul {
+      margin: 6px 0 8px 20px;
+      padding: 0;
+    }
+    .step2-empty-banner ul li { margin-bottom: 3px; }
+
     main { flex: 1; padding: 20px 24px 100px; max-width: 1200px; margin: 0 auto; width: 100%; }
 
     footer {
@@ -1280,6 +1307,28 @@
       (Pearson <em>r</em>, DTW distance) and pick which record(s) to carry forward.
     </div>
 
+    <!-- Empty-state banner: shown only when the duplicate scan returned zero
+         candidate groups. Visibility managed by applyStep2EmptyState() in
+         datacleaningApp.js (no data-step attr — managed manually so it stays
+         hidden when groups exist regardless of step transitions). -->
+    <div class="step2-empty-banner" id="step2-empty-banner" style="display:none">
+      <h3>No duplicate candidates to review</h3>
+      <p style="margin:0 0 6px;">
+        Presto did not find any pairs of records that meet the duplicate-candidate
+        criteria. This commonly happens when:
+      </p>
+      <ul>
+        <li>your selection draws from a single compilation (records inside one compilation are assumed to be intentionally distinct);</li>
+        <li>your records are spatially well-separated (no two within 10 km share the same variable);</li>
+        <li>your filters narrowed the selection to a small set with no overlapping age ranges.</li>
+      </ul>
+      <p style="margin:0;">
+        There is nothing to hand-review on this step — the temporal coverage and PCA panels
+        below remain useful for sanity-checking the selection. You can <strong>Continue</strong>
+        directly to the editor.
+      </p>
+    </div>
+
     <!-- Section: Auto-selection filters (step 1 only) -->
     <div class="panel-section" id="section-auto-filters" data-step="1">
       <div class="panel-heading" onclick="togglePanel('auto-filters')">
@@ -1595,12 +1644,12 @@
   <!-- Exact-duplicate preview dialog -->
   <div id="exact-dup-preview-overlay" style="display:none" onclick="closeExactPreview()">
     <div id="exact-dup-preview-box" onclick="event.stopPropagation()">
-      <h3>Exact duplicates found</h3>
+      <h3 id="exact-preview-title">Exact duplicates found</h3>
       <p class="exact-preview-summary" id="exact-preview-summary"></p>
-      <p class="exact-preview-hint">You can still expand any group afterward to override these choices.</p>
+      <p class="exact-preview-hint" id="exact-preview-hint">You can still expand any group afterward to override these choices.</p>
       <div class="exact-cluster-list" id="exact-cluster-list"></div>
       <div class="exact-preview-footer">
-        <button class="btn-dialog-cancel" onclick="closeExactPreview()">Cancel</button>
+        <button class="btn-dialog-cancel" id="btn-exact-cancel" onclick="closeExactPreview()">Cancel</button>
         <button class="btn-dialog-primary danger" id="btn-apply-exact" onclick="applyExactRemovals()">Apply</button>
       </div>
     </div>

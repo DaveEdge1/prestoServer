@@ -1380,8 +1380,11 @@ _lipd_index: Dict[Tuple[str, str], Set[str]] = {}
 _lipd_column_meta_cache: Dict[str, Dict[str, Optional[str]]] = {}
 
 
+_CACHE_SCHEMA_VERSION = 2  # bump when LiPD extraction widens (e.g. summaryTable support)
+
+
 def _cache_path(dsid: str, dsver: str) -> str:
-    key_bytes = f"{dsid}|{dsver}".encode("utf-8")
+    key_bytes = f"v{_CACHE_SCHEMA_VERSION}|{dsid}|{dsver}".encode("utf-8")
     return os.path.join(_CACHE_DIR, hashlib.sha256(key_bytes).hexdigest() + ".pkl")
 
 
@@ -1590,21 +1593,33 @@ def _fetch_one_lipd(dsid: str, dsver: str) -> Dict[str, List]:
 
         tsid_to_col: Dict[str, tuple] = {}
         local_meta: Dict[str, Dict[str, Optional[str]]] = {}
+
+        def _index_table(table: Dict[str, Any]) -> None:
+            fname = table.get("filename", "")
+            for col in table.get("columns", []):
+                t = str(col.get("TSid", ""))
+                n = col.get("number")
+                if t and n is not None and fname:
+                    tsid_to_col[t] = (fname, int(n))
+                    # Per-column metadata (units / variableName). Used
+                    # later to determine the native unit of a time axis
+                    # so we can normalize all series to a common frame.
+                    local_meta[t] = {
+                        "units":        _safe_str(col.get("units")),
+                        "variableName": _safe_str(col.get("variableName")),
+                    }
+
+        # Tree-ring datasets store the standardized chronology indices
+        # (trsgi, trmxdsgi, RBAR, EPS, …) on `paleoData[].model[].summaryTable[]`,
+        # not in `measurementTable`. Walk both so those TSids are resolvable.
         for paleo in meta_json.get("paleoData", []):
             for table in paleo.get("measurementTable", []):
-                fname = table.get("filename", "")
-                for col in table.get("columns", []):
-                    t = str(col.get("TSid", ""))
-                    n = col.get("number")
-                    if t and n is not None and fname:
-                        tsid_to_col[t] = (fname, int(n))
-                        # Per-column metadata (units / variableName). Used
-                        # later to determine the native unit of a time axis
-                        # so we can normalize all series to a common frame.
-                        local_meta[t] = {
-                            "units":        _safe_str(col.get("units")),
-                            "variableName": _safe_str(col.get("variableName")),
-                        }
+                _index_table(table)
+            for model in paleo.get("model", []):
+                for table in model.get("summaryTable", []):
+                    _index_table(table)
+                for table in model.get("ensembleTable", []):
+                    _index_table(table)
 
         # Extract every column and cache the full dataset.
         # Store None for missing/non-finite values to preserve row alignment
