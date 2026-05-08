@@ -125,8 +125,11 @@ jobs:
         with:
           name: holocene-da-proxy-data-${{ github.run_id }}
 
-      - name: Pull Docker image
-        run: docker pull davidedge/lipd_webapps:holocene_da
+      - name: Build patched container image
+        # Layers scripts/ over davidedge/lipd_webapps:holocene_da via the
+        # Dockerfile at repo root. The FROM layer is cached on the runner
+        # so only the COPY step rebuilds (≪ 1 sec).
+        run: docker build -t presto-holocene_da:local .
 
       - name: Create results directory
         run: mkdir -p ./results
@@ -178,21 +181,12 @@ jobs:
           echo "Config file:"
           cat config/user_config.yml
           echo ""
-          # If the repo ships a patched da_main_code.py at the root, mount
-          # it over the container's copy. Lets us deploy memory/perf fixes
-          # without rebuilding davidedge/lipd_webapps:holocene_da.
-          DA_PATCH_MOUNT=""
-          if [ -f da_main_code.py ]; then
-            echo "Mounting patched da_main_code.py from repo root"
-            DA_PATCH_MOUNT="-v $(pwd)/da_main_code.py:/app/da_main_code.py:ro"
-          fi
           docker run --rm \
             -v $(pwd)/lipd_legacy.pkl:/proxies/temp12k/Temp12k1_0_2.pkl:ro \
             -v $(pwd)/config/user_config.yml:/config_default.yml:ro \
             -v $(pwd)/models:/models \
             -v $(pwd)/results:/results \
-            ${DA_PATCH_MOUNT} \
-            davidedge/lipd_webapps:holocene_da
+            presto-holocene_da:local
 
       - name: Verify reconstruction results
         run: |
