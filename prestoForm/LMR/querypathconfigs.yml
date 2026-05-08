@@ -42,13 +42,13 @@ recon:
     URL: null
 
   seeds:
-    value: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    default: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    value: [1, 2, 3]
+    default: [1, 2, 3]
     limits: null
     options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     precision: null
     long_name: Monte Carlo Random Seeds
-    description: Random seeds for Monte Carlo iterations. More iterations provide better uncertainty estimates (10 is a good default).
+    description: Random seeds for Monte Carlo iterations. The default of 3 is for quick test runs; 10+ is recommended for a valid Monte Carlo spread.
     data_type: list
     complexity: standard
     URL: null

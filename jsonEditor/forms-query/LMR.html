@@ -195,10 +195,13 @@ popQueryVariable()
 </div>
 <div class="range_container">
 <div class="sliders_control">
-<input id="recon_seedsSilder" type="range" value="10" min="1" max="51" step="1"/>
+<input id="recon_seedsSilder" type="range" value="3" min="1" max="51" step="1"/>
 <br>
-<input type="number" id="recon_seedsInput" name="recon_seeds" value="10" min="1" max="51" step="1"/>
+<input type="number" id="recon_seedsInput" name="recon_seeds" value="3" min="1" max="51" step="1"/>
 </div>
+</div>
+<div style="font-size:14px; font-style:italic; color:#555; margin-top:6px;">
+3 seeds is a good starting point: it runs quickly and lets you inspect the initial results. After reviewing the output, you can change this setting directly in your GitHub repo (lmr_configs.yml) and re-run the workflow. A minimum of 10 seeds is recommended to obtain a valid Monte Carlo spread for uncertainty quantification.
 </div>
 <br>
 <br>
