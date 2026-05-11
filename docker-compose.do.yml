@@ -116,10 +116,118 @@ services:
       - presto-network
     restart: unless-stopped
 
+  # ===========================================
+  # MONITORING STACK (DO droplet variant)
+  # ===========================================
+  # Standard Docker on Ubuntu, so cadvisor + node-exporter both work
+  # (unlike the rootless Podman variant in docker-compose.prod.yml).
+  #
+  # Bindings: Grafana 127.0.0.1:3001, Prometheus 127.0.0.1:9090. The
+  # droplet is internet-facing (nginx on :84), so the monitoring UIs
+  # MUST stay on loopback only. Reach them via SSH tunnel:
+  #
+  #   ssh -L 3001:localhost:3001 -L 9090:localhost:9090 root@143.198.98.66
+  #
+  # Memory footprint: ~1.5 GB total for the four core services + ~400 MB
+  # for cadvisor/node-exporter. Check `free -h` on the droplet before
+  # bringing this stack up.
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    env_file:
+      - .env.production
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    privileged: true
+    command:
+      - '--housekeeping_interval=10s'
+      - '--docker_only=true'
+      - '--store_container_labels=false'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    command:
+      - '--path.rootfs=/host'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/.+)($$|/)'
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.2.1
+    command: ['-config.file=/etc/loki/loki-config.yml']
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    networks:
+      - presto-network
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    command: ['-config.file=/etc/promtail/promtail-config.yml']
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    networks:
+      - presto-network
+    restart: unless-stopped
+
 volumes:
   mysql-data:
   user-recons-data:
   lipd-cache-data:
+  prometheus-data:
+  grafana-data:
+  loki-data:
 
 networks:
   presto-network:
