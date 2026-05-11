@@ -49,6 +49,15 @@ const PAGE_CONFIGS = {
 // Read the unified template once at startup
 const queryTemplate = fs.readFileSync(path.join(queryDir, 'query.html'), 'utf8');
 
+// Index PAGE_CONFIGS by lowercased recon name so URLs like /query/lmr,
+// /query/LMR, and /query/Lmr all resolve to the same config. Without this,
+// the bare {recon} param lookup is case-sensitive and only the exact-case
+// keys (LMR, holocene_da, ...) work — anything else falls through to the
+// static-file fallback, which 500s when no matching .html exists.
+const PAGE_CONFIG_BY_LOWER = Object.fromEntries(
+  Object.entries(PAGE_CONFIGS).map(([k, v]) => [k.toLowerCase(), v])
+);
+
 // Serve static files from query/public
 router.use('/', express.static(path.join(queryDir, 'public')));
 
@@ -60,7 +69,7 @@ router.get('/', (req, res) => {
 // GET /:recon - Reconstruction-specific query page (unified template)
 router.get('/:recon', (req, res) => {
   const recon = req.params.recon;
-  const config = PAGE_CONFIGS[recon];
+  const config = PAGE_CONFIG_BY_LOWER[recon.toLowerCase()];
 
   if (config) {
     // Serve unified template with injected config

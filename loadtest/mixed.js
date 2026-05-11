@@ -78,12 +78,14 @@ export function browse() {
   check(r, { 'forms ok': (res) => res.status < 400 });
   sleep(1 + Math.random() * 3);
 
-  http.get(`${TARGET}/query/lmr`, { tags: { scenario: 'browsers' } });
+  http.get(`${TARGET}/query/LMR`, { tags: { scenario: 'browsers' } });
   sleep(2 + Math.random() * 4);
 }
 
 export function dataReads() {
-  http.get(`${TARGET}/data/compilations`, { tags: { scenario: 'data' } });
+  // /data returns the dataset summary (~1.8 MB cached). Heavier than /forms;
+  // exercises the in-memory cache layer and the response-serialization path.
+  http.get(`${TARGET}/data`, { tags: { scenario: 'data' } });
   sleep(2 + Math.random() * 3);
 }
 

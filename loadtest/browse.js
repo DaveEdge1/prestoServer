@@ -6,7 +6,7 @@
 // What it hits:
 //   GET /forms                         (EJS-rendered home)
 //   GET /forms/<form>                  (any registered form)
-//   GET /query/lmr                     (cached query template)
+//   GET /query/LMR                     (cached query template)
 //   GET /data/<sample-endpoint>        (DB-backed JSON)
 //   GET /health                        (sanity-check baseline)
 //
@@ -63,7 +63,7 @@ export default function () {
   sleep(1 + Math.random() * 2);
 
   // Query UI — served from cached HTML at startup, should be very fast.
-  r = http.get(`${TARGET}/query/lmr`, { tags: { endpoint: 'query_lmr' } });
+  r = http.get(`${TARGET}/query/LMR`, { tags: { endpoint: 'query_lmr' } });
   queryLatency.add(r.timings.duration);
   check(r, { 'query 2xx': (res) => res.status === 200 });
 
