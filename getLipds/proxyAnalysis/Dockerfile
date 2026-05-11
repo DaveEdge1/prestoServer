@@ -11,7 +11,8 @@ RUN pip install --no-cache-dir \
     scipy \
     scikit-learn \
     numpy \
-    mysql-connector-python
+    mysql-connector-python \
+    prometheus-fastapi-instrumentator
 
 COPY app.py .
 

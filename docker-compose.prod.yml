@@ -41,6 +41,11 @@ services:
       - user-recons-data:/root/presto/userRecons
     init: true
     mem_limit: 400m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
     networks:
       - presto-network
     depends_on:
@@ -59,6 +64,11 @@ services:
       # survives restarts so previously-seen datasets stay warm.
       - lipd-cache-data:/cache/lipd:z
     mem_limit: 1400m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
     networks:
       - presto-network
     restart: unless-stopped
@@ -74,6 +84,12 @@ services:
       - ./customTiles/naturalEarth_mollweide/tiles:/usr/share/nginx/html/tiles_naturalearth_mollweide:ro,z
       - ./customTiles/naturalEarth_3031/tiles:/usr/share/nginx/html/tiles_naturalearth_3031:ro,z
       - ./customTiles/naturalEarth_3995/tiles:/usr/share/nginx/html/tiles_naturalearth_3995:ro,z
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
     networks:
       - presto-network
     restart: unless-stopped
@@ -92,6 +108,11 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     mem_limit: 700m
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
     networks:
       - presto-network
     restart: unless-stopped
@@ -113,11 +134,130 @@ services:
     networks:
       - presto-network
     restart: unless-stopped
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  # ===========================================
+  # MONITORING STACK (prod variant)
+  # ===========================================
+  # Differences from docker-compose.yml:
+  #   • cadvisor + node-exporter are intentionally OMITTED — both need
+  #     privileged + host bind mounts that don't work cleanly under
+  #     rootless Podman on this host. Per-container memory still comes
+  #     from the orchestrator/proxy-analysis app metrics (RSS, heap).
+  #     If we ever need full container metrics on prod, plumb
+  #     podman.io/prometheus-podman-exporter instead.
+  #   • All volume mounts use the :z SELinux label, matching the
+  #     pattern used by the rest of this compose file.
+  #   • Grafana / Prometheus bind to 127.0.0.1 only. Operator reaches
+  #     them via `ssh -L 3001:localhost:3001 -L 9090:localhost:9090`.
+  #   • Promtail mounts the rootless Podman socket as /var/run/docker.sock
+  #     (same trick the orchestrator uses) — Promtail's docker_sd_configs
+  #     speaks the Docker API, which Podman implements.
+  #
+  # Combined memory footprint of this stack: ~1.5 GB. Confirm the host
+  # has headroom before `up -d`.
+
+  prometheus:
+    image: docker.io/prom/prometheus:v2.55.1
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro,z
+      - prometheus-data:/prometheus:z
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks:
+      - presto-network
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  grafana:
+    image: docker.io/grafana/grafana:11.3.0
+    env_file:
+      - .env.production
+    environment:
+      # Map our env names (GRAFANA_*) to the GF_* names Grafana actually
+      # reads. The values themselves come from .env.production via env_file.
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+    volumes:
+      - grafana-data:/var/lib/grafana:z
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro,z
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro,z
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - presto-network
+    restart: unless-stopped
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  loki:
+    image: docker.io/grafana/loki:3.2.1
+    command: ['-config.file=/etc/loki/loki-config.yml']
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/loki-config.yml:ro,z
+      - loki-data:/loki:z
+    networks:
+      - presto-network
+    restart: unless-stopped
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  promtail:
+    image: docker.io/grafana/promtail:3.2.1
+    command: ['-config.file=/etc/promtail/promtail-config.yml']
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/promtail-config.yml:ro,z
+      # Same rootless Podman socket the orchestrator uses — gives
+      # Promtail the Docker-compatible API for container discovery and
+      # log streaming.
+      - ${XDG_RUNTIME_DIR}/podman/podman.sock:/var/run/docker.sock:z
+    depends_on:
+      - loki
+    networks:
+      - presto-network
+    restart: unless-stopped
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
 
 volumes:
   mysql-data:
   user-recons-data:
   lipd-cache-data:
+  prometheus-data:
+  grafana-data:
+  loki-data:
 
 networks:
   presto-network:

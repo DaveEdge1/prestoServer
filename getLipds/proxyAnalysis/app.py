@@ -30,7 +30,9 @@ import math
 import os
 import pickle
 import re
+import sys
 import time
+import traceback
 import zipfile
 from collections import defaultdict, deque
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -39,16 +41,97 @@ import numpy as np
 import pandas as pd
 import requests
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 from scipy.stats import pearsonr
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-logging.basicConfig(level=logging.INFO)
+
+# =============================================================================
+# Logging — emit one JSON object per record so docker's json-file driver
+# captures structured data that promtail can ship to Loki without parsing.
+# =============================================================================
+class _JsonLogFormatter(logging.Formatter):
+    """Minimal JSON formatter — keeps deps light (no python-json-logger)."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        payload = {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(record.created))
+            + f".{int(record.msecs):03d}Z",
+            "level": record.levelname.lower(),
+            "logger": record.name,
+            "service": "proxy-analysis",
+            "msg": record.getMessage(),
+        }
+        # Attach any extras passed via logger.info("...", extra={"key": val}).
+        for key, value in record.__dict__.items():
+            if key in payload or key.startswith("_") or key in (
+                "args", "msg", "levelname", "levelno", "pathname", "filename",
+                "module", "exc_info", "exc_text", "stack_info", "lineno",
+                "funcName", "created", "msecs", "relativeCreated", "thread",
+                "threadName", "processName", "process", "name", "taskName",
+            ):
+                continue
+            try:
+                json.dumps(value)
+                payload[key] = value
+            except (TypeError, ValueError):
+                payload[key] = repr(value)
+        if record.exc_info:
+            payload["exception"] = "".join(traceback.format_exception(*record.exc_info)).rstrip()
+        return json.dumps(payload, default=str)
+
+
+_handler = logging.StreamHandler(stream=sys.stdout)
+_handler.setFormatter(_JsonLogFormatter())
+_root = logging.getLogger()
+_root.handlers.clear()
+_root.addHandler(_handler)
+_root.setLevel(os.environ.get("LOG_LEVEL", "INFO").upper())
+# Quiet uvicorn's duplicate access log line — we get the same info from
+# prometheus + our own structured logging.
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Proxy Analysis Service")
+
+# Prometheus /metrics — request count/latency histogram by handler+status,
+# plus default Python process metrics (RSS, GC, FDs). expose() is called
+# inside startup so the /metrics route is registered before the app serves.
+_instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    should_ignore_untemplated=True,
+    excluded_handlers=["/health", "/metrics"],
+).instrument(app)
+
+
+@app.on_event("startup")
+async def _startup_metrics():
+    _instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
+
+
+# Catch-all exception handler — logs the full traceback with request
+# context so a 500 always leaves a forensic trail. Without this, FastAPI
+# returns a bare 500 and the traceback only goes to uvicorn's stderr,
+# which doesn't include path/payload context.
+@app.exception_handler(Exception)
+async def _unhandled_exception_handler(request: Request, exc: Exception):
+    logger.error(
+        "unhandled exception in handler",
+        extra={
+            "method": request.method,
+            "path": request.url.path,
+            "client": request.client.host if request.client else None,
+        },
+        exc_info=exc,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "detail": str(exc)},
+    )
 
 
 @app.on_event("startup")

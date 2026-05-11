@@ -1,0 +1,44 @@
+# Prometheus scrape config for the Presto stack.
+#
+# Scrape interval is 10s — fast enough to catch a 30s OOM event in the
+# orchestrator, slow enough that retention on a tiny disk (default 15 d)
+# isn't a concern at this cardinality.
+
+global:
+  scrape_interval: 10s
+  scrape_timeout: 8s
+  external_labels:
+    stack: presto
+
+scrape_configs:
+  # Prometheus self-scrape, useful baseline.
+  - job_name: prometheus
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # cAdvisor — per-container CPU, memory (RSS, working set), network, fs.
+  # This is what tells us whether a container hit its mem_limit.
+  - job_name: cadvisor
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # node-exporter — host-level CPU, memory, disk, network. Use this to
+  # see whether the host itself is under pressure when the orchestrator
+  # crashes (e.g., another tenant filling RAM on the shared Podman host).
+  - job_name: node
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Express orchestrator. Default-Node metrics include heap_used/heap_total
+  # plus event-loop lag — both signal an impending crash before OOM.
+  - job_name: orchestrator
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['presto-orchestrator:3000']
+
+  # FastAPI proxy-analysis. Gives us request rate and p95 for the
+  # /analyze endpoint that the load test stampedes.
+  - job_name: proxy-analysis
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['proxy-analysis:8090']

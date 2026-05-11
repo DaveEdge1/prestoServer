@@ -1,0 +1,49 @@
+# Promtail discovers containers via the docker socket and tails their
+# json-file logs. Each log line gets `container`, `compose_service`, and
+# `compose_project` labels so Grafana queries can filter by service.
+#
+# Note for prod (Podman): mount the rootless podman socket at
+# /var/run/docker.sock — same Docker API, same config works.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: warn
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+    relabel_configs:
+      # Friendly container name (strip the leading "/")
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      # Compose project + service labels (Promtail reads these from the
+      # docker labels that compose sets on every container).
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: 'compose_project'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'compose_service'
+      # Image, useful for filtering between custom and 3rd-party images.
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+    pipeline_stages:
+      # If a line is JSON (our orchestrator + proxy-analysis emit JSON
+      # via pino / _JsonLogFormatter), promote level/service/msg to labels
+      # for fast filtering. Non-JSON lines pass through untouched.
+      - json:
+          expressions:
+            level: level
+            service: service
+            msg: msg
+      - labels:
+          level:
+          service:

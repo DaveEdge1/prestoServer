@@ -20,9 +20,48 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
+const pinoHttp = require('pino-http');
 const config = require('./config');
+const logger = require('./services/logger');
+const { register: metricsRegister, metricsMiddleware } = require('./services/metrics');
+
+// Crash handlers — install before any route work so an early throw still
+// gets recorded. Without these, an unhandled rejection can silently kill
+// Node and leave docker-compose with no exit reason. Logging then exiting
+// lets the restart policy bring us back cleanly with a recorded cause.
+process.on('unhandledRejection', (reason, promise) => {
+  logger.fatal({ err: reason, type: 'unhandledRejection' }, 'unhandled promise rejection');
+  // Give the logger a tick to flush, then exit so docker restarts us.
+  setTimeout(() => process.exit(1), 100).unref();
+});
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err, type: 'uncaughtException' }, 'uncaught exception');
+  setTimeout(() => process.exit(1), 100).unref();
+});
 
 const app = express();
+
+// ===========================================
+// OBSERVABILITY (must come before routes so it sees every request)
+// ===========================================
+
+// Structured request log: one JSON line per request with method, url,
+// status, duration. pino-http auto-attaches `req.log` so handlers can
+// log additional context against the request.
+app.use(pinoHttp({
+  logger,
+  // Demote successful health checks and metrics scrapes to debug so the
+  // signal-to-noise stays sane during load tests.
+  customLogLevel(req, res, err) {
+    if (err || res.statusCode >= 500) return 'error';
+    if (res.statusCode >= 400) return 'warn';
+    if (req.url === '/health' || req.url === '/metrics') return 'debug';
+    return 'info';
+  },
+}));
+
+// Prometheus request histograms / counters / in-flight gauge.
+app.use(metricsMiddleware);
 
 // ===========================================
 // MIDDLEWARE
@@ -126,6 +165,18 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Prometheus scrape target. Internal-only — nginx doesn't proxy it, so
+// only containers on presto-network (e.g. prometheus) can reach it.
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', metricsRegister.contentType);
+    res.end(await metricsRegister.metrics());
+  } catch (err) {
+    req.log.error({ err }, 'failed to render /metrics');
+    res.status(500).end();
+  }
+});
+
 // Root redirect to forms
 app.get('/', (req, res) => {
   res.redirect('/forms');
@@ -136,7 +187,9 @@ app.get('/', (req, res) => {
 // ===========================================
 
 app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
+  // pino-http attached req.log; use it so the error is correlated with
+  // the request line via the same reqId.
+  (req.log || logger).error({ err }, 'unhandled error in route');
   res.status(500).json({ error: 'Internal server error' });
 });
 
@@ -148,9 +201,11 @@ require('./services/cleanup').startCleanupScheduler();
 require('./services/compilationUpdater').startCompilationUpdater();
 
 app.listen(config.port, () => {
-  console.log(`Presto server listening on port ${config.port}`);
-  console.log(`Environment: ${config.nodeEnv}`);
-  console.log(`Base URL: ${config.baseUrl}`);
+  logger.info({
+    port: config.port,
+    env: config.nodeEnv,
+    baseUrl: config.baseUrl,
+  }, 'presto orchestrator listening');
 });
 
 module.exports = app;
