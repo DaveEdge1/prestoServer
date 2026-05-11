@@ -255,7 +255,7 @@
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "loki" },
-          "expr": "{compose_project=\"prestoserver\"} |~ \"(?i)(error|fatal|exception|traceback|oom)\"",
+          "expr": "{compose_project=~\".+\"} |~ \"(?i)(error|fatal|exception|traceback|oom)\"",
           "refId": "A"
         }
       ]
