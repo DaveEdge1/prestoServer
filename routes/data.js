@@ -27,50 +27,92 @@ const pool = mysql.createPool({
   database: config.mysql.database,
 });
 
-// Build WHERE clause from query parameters
+// Columns the query UI is allowed to filter on. The previous implementation
+// interpolated raw user input from query-string keys directly into SQL, so
+// a request like `?DROP TABLE foo;--` would land verbatim in the statement.
+// The whitelist below + parameterized values together close that hole while
+// preserving the UI's existing call patterns (see query/public/queryHelpers.js).
+const ALLOWED_COLUMNS = new Set([
+  // LIKE / equality filters
+  'archiveType',
+  'compilation',
+  'continent',
+  'country',
+  'dataSetName',
+  'datasetId',
+  'interp_Vars',
+  'paleoData_mostRecentCompilations',
+  'paleoData_proxy',
+  'paleoData_TSid',
+  'paleoData_variableName',
+  'seasonality',
+  // Numeric / range filters (used in `<col> <op> <num>` expressions)
+  'geo_latitude',
+  'geo_longitude',
+  'maxAge',
+  'medianResolution',
+  'minAge',
+]);
+
+// Bare column name (LIKE-filter key, value carries the match terms)
+const COL_RE = /^([a-zA-Z_][a-zA-Z0-9_]*)$/;
+// Comparison expression with no '=' sign — the UI encodes these as a
+// querystring key with empty value:
+//   ?maxAge > 99
+//   ?maxAge - minAge > 99
+//   ?geo_latitude < 30
+// Only '<' and '>' are accepted; the UI rewrites >= and <= to > N-1 / < N+1
+// to avoid putting '=' into a URL key (which the querystring parser would
+// treat as the key/value separator).
+const CMP_RE = /^([a-zA-Z_][a-zA-Z0-9_]*)(?:\s*([+\-])\s*([a-zA-Z_][a-zA-Z0-9_]*))?\s*([<>])\s*(-?\d+(?:\.\d+)?)$/;
+
+/**
+ * Build a parameterized WHERE clause from the request's query string.
+ *
+ * Returns `{ sql, params }`. `sql` is either '' (no clause) or begins
+ * with ' WHERE '. `params` are the values to bind into '?' placeholders
+ * via pool.query(sql, params, cb).
+ *
+ * Any key/value pair that doesn't match a whitelisted shape is silently
+ * dropped — a strict regex + column whitelist gives us two redundant
+ * checks against injection.
+ */
 function buildQstring(qs) {
-  let countA = 0;
-  console.log(qs);
-  console.log('key length: ' + Object.keys(qs).length);
+  const clauses = [];
+  const params = [];
 
-  if (Object.keys(qs).length === 0) {
-    console.log('mySQL string is empty');
-    return '';
+  for (const [key, rawValue] of Object.entries(qs)) {
+    // Reject array / nested-object values (?col[]=x or ?col[sub]=x).
+    // The UI never sends these; they only show up from attackers
+    // probing for buggy parsers.
+    const value = typeof rawValue === 'string' ? rawValue : '';
+
+    if (value.length > 0) {
+      // ── LIKE filter: ?col=val1,val2 → (col LIKE ? OR col LIKE ?) ──
+      const m = key.match(COL_RE);
+      if (!m || !ALLOWED_COLUMNS.has(m[1])) continue;
+      const col = m[1];
+      const vals = value.split(',').map(v => v.trim()).filter(Boolean);
+      if (vals.length === 0) continue;
+      clauses.push('(' + vals.map(() => `${col} LIKE ?`).join(' OR ') + ')');
+      vals.forEach(v => params.push('%' + v + '%'));
+    } else {
+      // ── Comparison expression: ?col [+-] col <op> num ──
+      const m = key.match(CMP_RE);
+      if (!m) continue;
+      const [, col1, op2, col2, cmp, numStr] = m;
+      if (!ALLOWED_COLUMNS.has(col1)) continue;
+      if (col2 && !ALLOWED_COLUMNS.has(col2)) continue;
+      const num = parseFloat(numStr);
+      if (!Number.isFinite(num)) continue;
+      const lhs = col2 ? `${col1} ${op2} ${col2}` : col1;
+      clauses.push(`(${lhs} ${cmp} ?)`);
+      params.push(num);
+    }
   }
 
-  let outString = '';
-  for (const [key, value] of Object.entries(qs)) {
-    const words = value.split(',');
-    console.log('words: ' + words);
-    const totalWordLen = words.reduce((a, obj) => a + Object.keys(obj).length, 0);
-    console.log(totalWordLen);
-
-    if (countA > 0) {
-      console.log('index > 0');
-      outString = outString + ' AND (';
-    } else {
-      outString = '(';
-    }
-
-    if (totalWordLen == 0) {
-      outString = outString + key;
-    } else {
-      for (let i = 0; i < words.length; i++) {
-        outString = outString + key + ' LIKE' + ' "%' + words[i] + '%"';
-        if (i < words.length - 1) {
-          outString = outString + ' OR ';
-        }
-      }
-    }
-
-    outString = outString + ')';
-    console.log('outString: ' + outString);
-    countA = countA + 1;
-  }
-
-  outString = ' WHERE ' + outString;
-  console.log('mySQL string: ' + outString);
-  return outString;
+  if (clauses.length === 0) return { sql: '', params: [] };
+  return { sql: ' WHERE ' + clauses.join(' AND '), params };
 }
 
 // GET / - Query dataset summary
@@ -89,8 +131,9 @@ router.get('/', (req, res) => {
     }
   }
 
-  const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId, interp_Vars FROM dataSetQuery' + buildQstring(req.query) + ';';
-  pool.query(query, (err, result) => {
+  const { sql, params } = buildQstring(req.query);
+  const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId, interp_Vars FROM dataSetQuery' + sql + ';';
+  pool.query(query, params, (err, result) => {
     if (err) {
       console.error('Query error:', err);
       return res.status(500).json({ error: 'Query failed' });
@@ -110,8 +153,9 @@ router.get('/', (req, res) => {
 
 // GET /TS - Query time series
 router.get('/TS', (req, res) => {
-  const query = 'SELECT paleoData_TSid, datasetId FROM query' + buildQstring(req.query) + ';';
-  pool.query(query, (err, result) => {
+  const { sql, params } = buildQstring(req.query);
+  const query = 'SELECT paleoData_TSid, datasetId FROM query' + sql + ';';
+  pool.query(query, params, (err, result) => {
     if (err) {
       console.error('Query error:', err);
       return res.status(500).json({ error: 'Query failed' });
