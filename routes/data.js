@@ -15,6 +15,18 @@ let datasetCache = {
   ttl: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 };
 
+// Single shared connection pool. Created once at module load. The old
+// per-request `getPool()` exhausted MySQL's max_connections under load —
+// each /data hit was creating a brand-new pool with its own backlog of
+// idle connections that never returned to MySQL until pool GC'd.
+const pool = mysql.createPool({
+  connectionLimit: config.mysql.connectionLimit,
+  host: config.mysql.host,
+  user: config.mysql.user,
+  password: config.mysql.password,
+  database: config.mysql.database,
+});
+
 // Build WHERE clause from query parameters
 function buildQstring(qs) {
   let countA = 0;
@@ -61,17 +73,6 @@ function buildQstring(qs) {
   return outString;
 }
 
-// Create connection pool
-function getPool() {
-  return mysql.createPool({
-    connectionLimit: config.mysql.connectionLimit,
-    host: config.mysql.host,
-    user: config.mysql.user,
-    password: config.mysql.password,
-    database: config.mysql.database
-  });
-}
-
 // GET / - Query dataset summary
 router.get('/', (req, res) => {
   const hasQueryParams = Object.keys(req.query).length > 0;
@@ -88,51 +89,35 @@ router.get('/', (req, res) => {
     }
   }
 
-  const con = getPool();
-  con.getConnection((err) => {
+  const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId, interp_Vars FROM dataSetQuery' + buildQstring(req.query) + ';';
+  pool.query(query, (err, result) => {
     if (err) {
-      console.error('MySQL connection error:', err);
-      return res.status(500).json({ error: 'Database connection failed' });
+      console.error('Query error:', err);
+      return res.status(500).json({ error: 'Query failed' });
     }
-    console.log('Connected!');
-    const query = 'SELECT dataSetName, archiveType, geo_latitude, geo_longitude, paleoData_proxy, minAge, maxAge, datasetId, interp_Vars FROM dataSetQuery' + buildQstring(req.query) + ';';
-    con.query(query, (err, result) => {
-      if (err) {
-        console.error('Query error:', err);
-        return res.status(500).json({ error: 'Query failed' });
-      }
-      console.log('Total records returned: ' + result.length);
+    console.log('Total records returned: ' + result.length);
 
-      // Cache the full dataset query (no filters)
-      if (!hasQueryParams) {
-        datasetCache.data = result;
-        datasetCache.timestamp = now;
-        console.log('Dataset cached for 24 hours');
-      }
+    // Cache the full dataset query (no filters)
+    if (!hasQueryParams) {
+      datasetCache.data = result;
+      datasetCache.timestamp = now;
+      console.log('Dataset cached for 24 hours');
+    }
 
-      res.status(200).json(result);
-    });
+    res.status(200).json(result);
   });
 });
 
 // GET /TS - Query time series
 router.get('/TS', (req, res) => {
-  const con = getPool();
-  con.getConnection((err) => {
+  const query = 'SELECT paleoData_TSid, datasetId FROM query' + buildQstring(req.query) + ';';
+  pool.query(query, (err, result) => {
     if (err) {
-      console.error('MySQL connection error:', err);
-      return res.status(500).json({ error: 'Database connection failed' });
+      console.error('Query error:', err);
+      return res.status(500).json({ error: 'Query failed' });
     }
-    console.log('Connected!');
-    const query = 'SELECT paleoData_TSid, datasetId FROM query' + buildQstring(req.query) + ';';
-    con.query(query, (err, result) => {
-      if (err) {
-        console.error('Query error:', err);
-        return res.status(500).json({ error: 'Query failed' });
-      }
-      console.log('Total records returned: ' + result.length);
-      res.status(200).json(result);
-    });
+    console.log('Total records returned: ' + result.length);
+    res.status(200).json(result);
   });
 });
 

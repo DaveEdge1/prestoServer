@@ -8,9 +8,15 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const YAML = require('yaml');
+const mysql = require('mysql2/promise');
 const config = require('../config');
 
 const editorDir = path.join(__dirname, '..', 'jsonEditor');
+
+// Single shared connection pool — created at module load, not per request.
+// The previous in-handler createPool was a connection leak that exhausted
+// MySQL's max_connections under sustained submission traffic.
+const db = mysql.createPool(config.mysql);
 
 // Serve static files from jsonEditor/public
 router.use('/', express.static(path.join(editorDir, 'public')));
@@ -151,9 +157,6 @@ router.post('/sendReconRequest', async (req, res) => {
   // GitHub Actions workflow (OAuth or App)
   if (useGitHubActions) {
     try {
-      const mysql = require('mysql2/promise');
-      const db = await mysql.createPool(config.mysql);
-
       // ── Idempotency guard ─────────────────────────────────────────────────
       // If a row already exists for this uniqueID, the user has already
       // submitted (most likely they hit Back from /status and re-clicked
