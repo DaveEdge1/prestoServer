@@ -267,11 +267,14 @@ updateSqlQuery <- function(queryTable){
                      interpretation1_seasonality = datasetIDcollapse(interpretation1_seasonality),
                      country = datasetIDcollapse(country),
                      continent = datasetIDcollapse(continent),
-                     medianResolution = max(medianResolution,na.rm = TRUE),
+                     # Union (envelope) of per-TSID age and resolution, not
+                     # the intersection. See updateSqlQuery_modified.R for
+                     # the full rationale.
+                     medianResolution = min(medianResolution,na.rm = TRUE),
                      interp_Vars = datasetIDcollapse(interp_Vars),
                      paleoData_variableName = datasetIDcollapse(paleoData_variableName),
-                     minAge = max(minAge,na.rm = TRUE),
-                     maxAge = min(maxAge,na.rm = TRUE),
+                     minAge = min(minAge,na.rm = TRUE),
+                     maxAge = max(maxAge,na.rm = TRUE),
                      geo_latitude = mean(as.numeric(geo_latitude),na.rm = TRUE),
                      geo_longitude = mean(as.numeric(geo_longitude),na.rm = TRUE),
                      paleoData_proxy = datasetIDcollapse(paleoData_proxy),

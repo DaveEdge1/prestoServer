@@ -10,11 +10,24 @@ updateSqlQuery <- function(queryTable){
                      interpretation1_seasonality = datasetIDcollapse(interpretation1_seasonality),
                      country = datasetIDcollapse(country),
                      continent = datasetIDcollapse(continent),
-                     medianResolution = max(medianResolution,na.rm = TRUE),
+                     # Aggregate age and resolution as the UNION (envelope)
+                     # of per-TSID values, not the intersection. The previous
+                     # max(minAge) / min(maxAge) / max(medianResolution)
+                     # stored the time range where *every* TSID had data and
+                     # the coarsest per-TSID resolution, which made the
+                     # dataset-level filter on /data stricter than the
+                     # per-TSID filter on /data/TS used by data cleaning.
+                     # Result: the query map under-counted datasets (e.g.
+                     # 231 vs 236 for the same filter). With min(minAge) /
+                     # max(maxAge) / min(medianResolution), a dataset's
+                     # stored span is the full envelope of its TSIDs and its
+                     # stored resolution is the finest available, matching
+                     # union semantics.
+                     medianResolution = min(medianResolution,na.rm = TRUE),
                      interp_Vars = datasetIDcollapse(interp_Vars),
                      paleoData_variableName = datasetIDcollapse(paleoData_variableName),
-                     minAge = max(minAge,na.rm = TRUE),
-                     maxAge = min(maxAge,na.rm = TRUE),
+                     minAge = min(minAge,na.rm = TRUE),
+                     maxAge = max(maxAge,na.rm = TRUE),
                      geo_latitude = mean(as.numeric(geo_latitude),na.rm = TRUE),
                      geo_longitude = mean(as.numeric(geo_longitude),na.rm = TRUE),
                      paleoData_proxy = datasetIDcollapse(paleoData_proxy),
