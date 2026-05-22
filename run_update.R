@@ -37,15 +37,30 @@ suppressPackageStartupMessages({
     install.packages(missing, repos = "https://cloud.r-project.org")
   }
 
+  # geoChronR is used by lipdverseR's createQueryCsv() (R/queryCsv.R calls
+  # geoChronR::convertAD2BP), but lipdverseR's DESCRIPTION does not declare
+  # it under Imports, so install_github won't pull it. Install it from
+  # GitHub explicitly here, before lipdverseR — otherwise the lipdverseR
+  # install's lazy-load step fails with "there is no package called
+  # 'geoChronR'" and removes the partial install.
+  if (!requireNamespace("geoChronR", quietly = TRUE)) {
+    cat("Installing geoChronR from nickmckay/GeoChronR...\n")
+    remotes::install_github(
+      "nickmckay/GeoChronR",
+      upgrade = "never"
+    )
+  }
+
   # Install the patched lipdverseR from the combined fork branch. This
   # branch carries both upstream PRs (#7 isTerrestrial fix and #8
-  # parameterized connections). Once those merge, switch the ref below
-  # to "master" and remove the @ref tag.
+  # parameterized connections) and a union-of-TSIDs rollup change. The
+  # fork was renamed from DaveEdge1/lipdverseR to DaveEdge1/lipdverseR-union
+  # in 2026-05; the new name is canonical.
   if (!requireNamespace("lipdverseR", quietly = TRUE) ||
       !"connections" %in% names(formals(lipdverseR::updateSqlQuery))) {
-    cat("Installing patched lipdverseR from DaveEdge1/lipdverseR@prod-update-combined...\n")
+    cat("Installing patched lipdverseR from DaveEdge1/lipdverseR-union@prod-update-combined...\n")
     remotes::install_github(
-      "DaveEdge1/lipdverseR",
+      "DaveEdge1/lipdverseR-union",
       ref = "prod-update-combined",
       upgrade = "never"
     )
@@ -67,10 +82,15 @@ cat("  loaded", nrow(qt), "time-series rows\n\n")
 # --- 2. Pre-flight: confirm the land-detection fix is producing both
 #        TRUE and FALSE values before we let it write to production.
 cat("Pre-flight: testing land detection on a 500-row sample...\n")
-samp <- qt |>
+# Build the sampling pool first so we can call nrow() on it. dplyr::n()
+# in slice_sample(n = ...) is a data-masking helper and dplyr >= 1.1.0
+# errors with "`n` must be a constant" when it's evaluated outside a
+# data-masking verb like mutate/filter.
+samp_pool <- qt |>
   dplyr::filter(!is.na(geo_longitude), !is.na(geo_latitude)) |>
-  dplyr::distinct(datasetId, geo_longitude, geo_latitude) |>
-  dplyr::slice_sample(n = min(500, dplyr::n()))
+  dplyr::distinct(datasetId, geo_longitude, geo_latitude)
+samp <- samp_pool |>
+  dplyr::slice_sample(n = min(500, nrow(samp_pool)))
 
 samp_pts <- sf::st_as_sf(
   data.frame(samp$geo_longitude, samp$geo_latitude),
