@@ -36,22 +36,31 @@ L.Map.TouchExtend = L.Handler.extend({
 
 	// @method removeHooks(): void
 	// Removes dom listener events from the map container
+	// NOTE: `this` context must be passed to L.DomEvent.off to match the key
+	// used by addHooks; otherwise listeners leak across map.remove() and pile
+	// up on the container as projections are switched.
 	removeHooks: function () {
-		L.DomEvent.off(this._container, 'touchstart', this._onTouchStart);
-		L.DomEvent.off(this._container, 'touchend', this._onTouchEnd);
-		L.DomEvent.off(this._container, 'touchmove', this._onTouchMove);
+		L.DomEvent.off(this._container, 'touchstart', this._onTouchStart, this);
+		L.DomEvent.off(this._container, 'touchend', this._onTouchEnd, this);
+		L.DomEvent.off(this._container, 'touchmove', this._onTouchMove, this);
 		if (this._detectIE()) {
-			L.DomEvent.off(this._container, 'MSPointerDowm', this._onTouchStart);
-			L.DomEvent.off(this._container, 'MSPointerUp', this._onTouchEnd);
-			L.DomEvent.off(this._container, 'MSPointerMove', this._onTouchMove);
-			L.DomEvent.off(this._container, 'MSPointerCancel', this._onTouchCancel);
+			L.DomEvent.off(this._container, 'MSPointerDown', this._onTouchStart, this);
+			L.DomEvent.off(this._container, 'MSPointerUp', this._onTouchEnd, this);
+			L.DomEvent.off(this._container, 'MSPointerMove', this._onTouchMove, this);
+			L.DomEvent.off(this._container, 'MSPointerCancel', this._onTouchCancel, this);
 		} else {
-			L.DomEvent.off(this._container, 'touchcancel', this._onTouchCancel);
-			L.DomEvent.off(this._container, 'touchleave', this._onTouchLeave);
+			L.DomEvent.off(this._container, 'touchcancel', this._onTouchCancel, this);
+			L.DomEvent.off(this._container, 'touchleave', this._onTouchLeave, this);
 		}
 	},
 
 	_touchEvent: function (e, type) {
+		// Bail if the map was removed: Leaflet's map.remove() deletes _mapPane
+		// but never resets _loaded, so the outer `if (!this._map._loaded)` guard
+		// in _onTouch* is not sufficient on its own.
+		if (!this._map || !this._map._mapPane) {
+			return;
+		}
 		// #TODO: fix the pageX error that is do a bug in Android where a single touch triggers two click events
 		// _filterClick is what leaflet uses as a workaround.
 		// This is a problem with more things than just android. Another problem is touchEnd has no touches in
