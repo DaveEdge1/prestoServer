@@ -1147,10 +1147,6 @@ function updatePoints (coords){
 	    if (isInBounds) {
 		inRectCount = inRectCount + 1;
 	    }
-	    // Debug: log first few filtered points
-	    if (inRectCount <= 3) {
-		console.log('Filter check: lat=' + lat + ', lon=' + lon + ', isInBounds=' + isInBounds, ', bounds=', rectCoord);
-	    }
 	    return isInBounds;
 	},
 

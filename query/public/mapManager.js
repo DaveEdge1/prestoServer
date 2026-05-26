@@ -1190,11 +1190,20 @@
                var lonMin = +(document.getElementById('lon_min') ? document.getElementById('lon_min').value : -180);
                var lonMax = +(document.getElementById('lon_max') ? document.getElementById('lon_max').value : 180);
 
-               // Count datasets within bounds
+               // Count datasets within bounds. Mirror loadLatLon's dateline
+               // wrap (each rendered point gets a ghost at lon ± 360) so that
+               // antimeridian-crossing query boxes — e.g. lon ∈ [-260, -100]
+               // for the tropical Pacific — match points stored in the raw
+               // -180..180 range via their wrapped equivalent. Without this
+               // the count reads 0 while queryHelpers' filter (which already
+               // operates on wrapped feature geometry) reports 80+ in-bounds.
                var inBoundsCount = coords.filter(function(point) {
                   var lat = +point.geo_latitude;
                   var lon = +point.geo_longitude;
-                  return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax;
+                  if (lat < latMin || lat > latMax) return false;
+                  if (lon >= lonMin && lon <= lonMax) return true;
+                  var wlon = lon < 0 ? lon + 360 : lon - 360;
+                  return wlon >= lonMin && wlon <= lonMax;
                }).length;
 
                // Update the display to show correct count
