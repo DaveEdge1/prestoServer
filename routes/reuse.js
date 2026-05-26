@@ -134,15 +134,39 @@ function validateQueryParams(obj) {
 // cleaning_report.json is an array of groups, each: { groupId, records:
 // [{tsid, dataSetName, decision}], notes }. Format is loose; we only check
 // the outer shape so future additions don't break reuse.
-function validateCleaningReport(arr) {
+// cleaning_report.json has two accepted shapes:
+//   legacy : [ { groupId, records:[...], notes }, ... ]
+//   current: { groups: [ ... same as above ... ], datasetNotes?: { name: "text" } }
+// The current shape is what datacleaning.js writes today; legacy is what older
+// committed repos may carry. We normalize to the wrapper form in `data` so
+// downstream consumers don't branch.
+function validateCleaningReport(input) {
   const errors = [];
   const warnings = [];
-  if (!Array.isArray(arr)) {
-    return { ok: false, errors: ['Top-level must be a JSON array of groups'] };
+
+  let groups, datasetNotes;
+  if (Array.isArray(input)) {
+    groups = input;
+    datasetNotes = null;
+  } else if (input && typeof input === 'object') {
+    if (!Array.isArray(input.groups)) {
+      return { ok: false, errors: ['Top-level object must have a "groups" array'] };
+    }
+    groups = input.groups;
+    if ('datasetNotes' in input && input.datasetNotes !== null) {
+      if (typeof input.datasetNotes !== 'object' || Array.isArray(input.datasetNotes)) {
+        errors.push('datasetNotes must be an object keyed by dataset name');
+      } else {
+        datasetNotes = input.datasetNotes;
+      }
+    }
+  } else {
+    return { ok: false, errors: ['Top-level must be a JSON array of groups or an object with a "groups" array'] };
   }
+
   let recordCount = 0;
-  for (let i = 0; i < arr.length; i++) {
-    const g = arr[i];
+  for (let i = 0; i < groups.length; i++) {
+    const g = groups[i];
     if (!g || typeof g !== 'object' || Array.isArray(g)) {
       errors.push(`Group [${i}] must be an object`);
       continue;
@@ -153,10 +177,12 @@ function validateCleaningReport(arr) {
     }
     recordCount += g.records.length;
   }
-  if (errors.length === 0 && arr.length === 0) {
-    warnings.push('Report is empty (no groups)');
+  if (errors.length === 0 && groups.length === 0 && !datasetNotes) {
+    warnings.push('Report is empty (no groups and no dataset notes)');
   }
-  return { ok: errors.length === 0, errors, warnings, data: arr, recordCount };
+
+  const data = datasetNotes ? { groups, datasetNotes } : { groups };
+  return { ok: errors.length === 0, errors, warnings, data, recordCount };
 }
 
 function validateCleanedTSIDs(obj) {
@@ -436,9 +462,11 @@ router.post('/commit', (req, res) => {
     const v = validateCleanedTSIDs(cleanedTSIDs);
     if (!v.ok) return res.status(400).json({ ok: false, errors: v.errors });
   }
+  let cleaningReportNormalized = null;
   if (cleaningReport) {
     const v = validateCleaningReport(cleaningReport);
     if (!v.ok) return res.status(400).json({ ok: false, errors: v.errors });
+    cleaningReportNormalized = v.data;
   }
 
   const dir = path.join(config.paths.userRecons, `${uniqueID}_${recon}`);
@@ -463,8 +491,8 @@ router.post('/commit', (req, res) => {
     for (const t of removed) { if (!seen.has(t)) { seen.add(t); union.push(t); } }
     fs.writeFileSync(path.join(dir, 'TSIDs.json'), JSON.stringify({ TSIDs: union }));
   }
-  if (cleaningReport) {
-    fs.writeFileSync(path.join(dir, 'cleaning_report.json'), JSON.stringify(cleaningReport, null, 2));
+  if (cleaningReportNormalized) {
+    fs.writeFileSync(path.join(dir, 'cleaning_report.json'), JSON.stringify(cleaningReportNormalized, null, 2));
   }
 
   // Routing: same rule the existing flow uses (filtered TSIDs → datacleaning;

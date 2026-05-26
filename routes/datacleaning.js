@@ -441,11 +441,25 @@ router.post('/confirm', (req, res) => {
     fs.writeFileSync(cleanedPath, JSON.stringify(payload, null, 2));
     console.log(`Saved cleaned_TSIDs.json: ${keptTSIDs.length} TSIDs for ${uniqueID}_${recon} (${vfTsids.length} excluded by variable filter)`);
 
-    // Save per-group cleaning report (for inclusion in the repo)
-    if (Array.isArray(cleaningGroups) && cleaningGroups.length > 0) {
+    // Save the cleaning report (for inclusion in the repo). Schema:
+    //   { groups: [...], datasetNotes?: { dataSetName: "note" } }
+    // datasetNotes carries both user-typed dataset-level commentary and
+    // auto-generated audit lines (e.g. perfect-duplicate auto-removals from
+    // datacleaningApp.js). Older repos may have just the bare groups array;
+    // readers (generate_readme.py, routes/reuse.js validator) accept both.
+    const hasGroups = Array.isArray(cleaningGroups) && cleaningGroups.length > 0;
+    const dsNotesForReport = (datasetNotes && typeof datasetNotes === 'object')
+      ? Object.fromEntries(
+          Object.entries(datasetNotes).filter(([, v]) => typeof v === 'string' && v.trim())
+        )
+      : {};
+    const hasDsNotes = Object.keys(dsNotesForReport).length > 0;
+    if (hasGroups || hasDsNotes) {
+      const report = { groups: hasGroups ? cleaningGroups : [] };
+      if (hasDsNotes) report.datasetNotes = dsNotesForReport;
       const reportPath = path.join(userReconDir, 'cleaning_report.json');
-      fs.writeFileSync(reportPath, JSON.stringify(cleaningGroups, null, 2));
-      console.log(`Saved cleaning_report.json: ${cleaningGroups.length} groups for ${uniqueID}_${recon}`);
+      fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+      console.log(`Saved cleaning_report.json: ${report.groups.length} groups, ${Object.keys(dsNotesForReport).length} dataset notes for ${uniqueID}_${recon}`);
     }
 
     // Write variable_filter.yaml describing the variable-filter decision so

@@ -198,8 +198,24 @@ function generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJso
   let qp = {};
   try { qp = JSON.parse(queryParamsJson); } catch (e) { /* ignore */ }
 
+  // cleaning_report.json accepts two shapes: legacy bare array of groups, or
+  // current { groups: [...], datasetNotes?: {...} } wrapper. Normalize here so
+  // the downstream rendering code doesn't care which one it got.
   let cleaningGroups = [];
-  try { if (cleaningReportJson) cleaningGroups = JSON.parse(cleaningReportJson); } catch (e) { /* ignore */ }
+  let datasetNotes = null;
+  if (cleaningReportJson) {
+    try {
+      const parsed = JSON.parse(cleaningReportJson);
+      if (Array.isArray(parsed)) {
+        cleaningGroups = parsed;
+      } else if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.groups)) cleaningGroups = parsed.groups;
+        if (parsed.datasetNotes && typeof parsed.datasetNotes === 'object') {
+          datasetNotes = parsed.datasetNotes;
+        }
+      }
+    } catch (e) { /* ignore */ }
+  }
 
   const lines = [
     '# LiPD Download',
@@ -265,6 +281,25 @@ function generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJso
       '> but LiPD files are downloaded at the dataset level and may still contain time series',
       '> from removed TSIDs. Use the TSID list in `query_params.json` to filter if needed.'
     );
+  }
+
+  if (datasetNotes && Object.keys(datasetNotes).length > 0) {
+    lines.push('', '### Dataset-level notes', '');
+    lines.push(
+      'Captured during the data-cleaning step — a mix of user-typed ' +
+      'commentary on individual datasets and automated audit lines ' +
+      'from the duplicate-detection auto-picker.'
+    );
+    lines.push('');
+    const names = Object.keys(datasetNotes).sort();
+    for (const name of names) {
+      const text = (datasetNotes[name] || '').trim();
+      if (!text) continue;
+      lines.push(`- **${name}**`);
+      for (const line of text.split('\n')) {
+        lines.push(line.trim() ? `  > ${line}` : '  >');
+      }
+    }
   }
 
   lines.push(

@@ -7,16 +7,17 @@
  *                                'query' mode, refresh the map. Lets the user
  *                                tweak before the normal Submit.
  *   Continue →                  → POST to /reuse/commit which writes
- *                                query_params.json (and cleaned_TSIDs.json
- *                                if loaded) into userRecons/, then redirects
- *                                to /datacleaning or /editor/querypath.
+ *                                query_params.json into userRecons/, then
+ *                                redirects to /datacleaning or
+ *                                /editor/querypath. Curated TSIDs are read
+ *                                from the embedded `tsids` array in
+ *                                query_params.json itself when present.
  */
 (function () {
   'use strict';
 
   var loaded = {
     queryParams: null,    // validated object from /reuse/{fetch,upload}
-    cleanedTSIDs: null,   // from a separate cleaned_TSIDs.json upload (not the embedded-in-query_params case)
     cleaningReport: null  // per-group decisions + notes from the original cleaning session
   };
 
@@ -91,9 +92,6 @@
       var groups = (result.data && result.data.length) || 0;
       var records = (typeof result.recordCount === 'number') ? result.recordCount : 0;
       detail = groups + ' group' + (groups === 1 ? '' : 's') + ', ' + records + ' record' + (records === 1 ? '' : 's');
-    } else if (kind === 'cleaned_TSIDs') {
-      label = 'cleaned_TSIDs.json';
-      detail = (result.data.TSIDs ? result.data.TSIDs.length + ' TSIDs' : '');
     } else {
       label = 'query_params.json';
       // Count only "real" filter fields, not the enriched extras.
@@ -122,8 +120,6 @@
     var rmWrap    = $('reuse-qp-removed-count-wrap');
     var paramsOnly = $('reuse-tsids-params-only');
     var embedded   = $('reuse-tsids-embedded');
-    var tsContent = $('reuse-ts-content');
-    var tsFieldset = $('reuse-ts-fieldset');
     var skipBox   = $('reuse-skip-cleaning');
     var skipLabel = $('reuse-skip-label');
 
@@ -141,28 +137,8 @@
       if (embedded)   embedded.checked = false;
     }
 
-    // Grey out the cleaned_TSIDs.json upload section when "use embedded" is chosen.
-    var disableCleanedUpload = useEmbeddedSelected();
-    if (tsContent) {
-      tsContent.style.opacity = disableCleanedUpload ? '0.45' : '1';
-      tsContent.style.pointerEvents = disableCleanedUpload ? 'none' : 'auto';
-    }
-    if (tsFieldset) {
-      tsFieldset.title = disableCleanedUpload
-        ? 'Disabled because the curated TSIDs from query_params.json are being used.'
-        : '';
-    }
-    // If "use embedded" is selected, drop any prior separate upload so the
-    // commit payload reflects the user's current intent.
-    if (disableCleanedUpload && loaded.cleanedTSIDs) {
-      loaded.cleanedTSIDs = null;
-      var url = $('reuse-ts-url');  if (url)  url.value = '';
-      var file = $('reuse-ts-file'); if (file) file.value = '';
-    }
-
-    // Skip-cleaning checkbox is enabled iff a TSID list will actually be
-    // committed (either from a separate upload or from the embedded radio).
-    var willHaveTSIDs = !!loaded.cleanedTSIDs || (hasEmbeddedTSIDs() && useEmbeddedSelected());
+    // Skip-cleaning checkbox is enabled iff the embedded TSID list will be committed.
+    var willHaveTSIDs = hasEmbeddedTSIDs() && useEmbeddedSelected();
     if (skipBox)   skipBox.disabled = !willHaveTSIDs;
     if (skipLabel) {
       skipLabel.style.color = willHaveTSIDs ? '#333' : '#999';
@@ -180,7 +156,7 @@
       continueBtn.style.cursor = willHaveTSIDs ? 'pointer' : 'not-allowed';
       continueBtn.title = willHaveTSIDs
         ? 'Save the loaded files for this reconstruction and continue.'
-        : 'No curated TSIDs loaded. Use "Apply to filters & review" to populate the form, then click Submit to run the normal query → data-cleaning → editor flow.';
+        : 'No curated TSIDs in the loaded query_params.json. Use "Apply to filters & review" to populate the form, then click Submit to run the normal query → data-cleaning → editor flow.';
     }
   }
 
@@ -282,29 +258,6 @@
     }
     refreshTSIDsControls();
   }
-  async function onLoadTsUrl() {
-    var url = ($('reuse-ts-url').value || '').trim();
-    if (!url) { setStatus('Paste a GitHub URL first.', 'error'); return; }
-    setStatus('Fetching…');
-    try {
-      var r = await fetchFromUrl(url, 'cleaned_TSIDs');
-      if (describeResult('cleaned_TSIDs', r)) loaded.cleanedTSIDs = r.data;
-    } catch (e) {
-      setStatus('Network error: ' + e.message, 'error');
-    }
-    refreshTSIDsControls();
-  }
-  async function onLoadTsFile(ev) {
-    var f = ev.target.files && ev.target.files[0]; if (!f) return;
-    setStatus('Uploading…');
-    try {
-      var r = await uploadFile(f, 'cleaned_TSIDs');
-      if (describeResult('cleaned_TSIDs', r)) loaded.cleanedTSIDs = r.data;
-    } catch (e) {
-      setStatus('Network error: ' + e.message, 'error');
-    }
-    refreshTSIDsControls();
-  }
   async function onLoadCrUrl() {
     var url = ($('reuse-cr-url').value || '').trim();
     if (!url) { setStatus('Paste a GitHub URL first.', 'error'); return; }
@@ -339,8 +292,8 @@
   }
 
   async function onApplyAndContinue() {
-    if (!loaded.queryParams && !loaded.cleanedTSIDs) {
-      setStatus('Load at least one file first.', 'error');
+    if (!loaded.queryParams) {
+      setStatus('Load a query_params.json first.', 'error');
       return;
     }
     var uniqueID = ($('uniqueID') && $('uniqueID').value) || '';
@@ -352,13 +305,10 @@
     var skipBox = $('reuse-skip-cleaning');
     var skip = !!(skipBox && !skipBox.disabled && skipBox.checked);
 
-    // Source the cleanedTSIDs payload: a separate upload wins; otherwise pull
-    // from the embedded list when the user opted in. Without one of these the
-    // server has no TSID list, so the skip checkbox is moot.
-    var cleanedToSend = loaded.cleanedTSIDs;
-    if (!cleanedToSend && useEmbeddedSelected()) {
-      cleanedToSend = embeddedAsCleaned();
-    }
+    // Source the curated TSID payload from the embedded `tsids` array in
+    // query_params.json when the user opted in via the radio. Without it the
+    // server has no TSID list and the skip checkbox is moot.
+    var cleanedToSend = useEmbeddedSelected() ? embeddedAsCleaned() : null;
 
     setStatus('Saving…');
     try {
@@ -398,9 +348,7 @@
   function init() {
     var byId = [
       ['reuse-qp-load-url', 'click', onLoadQpUrl],
-      ['reuse-ts-load-url', 'click', onLoadTsUrl],
       ['reuse-qp-file',     'change', onLoadQpFile],
-      ['reuse-ts-file',     'change', onLoadTsFile],
       ['reuse-apply-stay',     'click', onApplyAndStay],
       ['reuse-apply-continue', 'click', onApplyAndContinue],
       ['reuse-tsids-params-only', 'change', refreshTSIDsControls],
