@@ -27,6 +27,15 @@ const pool = mysql.createPool({
   database: config.mysql.database,
 });
 
+// Per-recon predicate defining what counts as a "real" proxy in the
+// reconstruction loader's eyes. Used by computeTsidComplement to find
+// sibling TSIDs that would otherwise ride along inside the parent .lpd
+// files. Missing key → no complement is computed (legacy behavior).
+const RECON_PREDICATES = {
+  holocene_da: { unitsEq: 'degC' },
+  // LMR / lipd-downloads: wire when ready.
+};
+
 // Columns the query UI is allowed to filter on. The previous implementation
 // interpolated raw user input from query-string keys directly into SQL, so
 // a request like `?DROP TABLE foo;--` would land verbatim in the statement.
@@ -44,6 +53,7 @@ const ALLOWED_COLUMNS = new Set([
   'paleoData_mostRecentCompilations',
   'paleoData_proxy',
   'paleoData_TSid',
+  'paleoData_units',
   'paleoData_variableName',
   'seasonality',
   // Numeric / range filters (used in `<col> <op> <num>` expressions)
@@ -94,8 +104,20 @@ function buildQstring(qs) {
       const col = m[1];
       const vals = value.split(',').map(v => v.trim()).filter(Boolean);
       if (vals.length === 0) continue;
-      clauses.push('(' + vals.map(() => `${col} LIKE ?`).join(' OR ') + ')');
-      vals.forEach(v => params.push('%' + v + '%'));
+      // The upstream lipdverseQuery.csv started storing multi-word
+      // continents with a space ("North America") where they used to
+      // be camelCase ("NorthAmerica"). The frontend autocomplete and
+      // existing bookmarks still send the camelCase form, so strip
+      // spaces on both sides of the LIKE comparison for `continent`
+      // to keep both formats matching. Other text columns don't
+      // have this collision, so the unconditional path stays.
+      if (col === 'continent') {
+        clauses.push('(' + vals.map(() => `REPLACE(${col}, ' ', '') LIKE ?`).join(' OR ') + ')');
+        vals.forEach(v => params.push('%' + v.replace(/ /g, '') + '%'));
+      } else {
+        clauses.push('(' + vals.map(() => `${col} LIKE ?`).join(' OR ') + ')');
+        vals.forEach(v => params.push('%' + v + '%'));
+      }
     } else {
       // ── Comparison expression: ?col [+-] col <op> num ──
       const m = key.match(CMP_RE);
@@ -165,4 +187,54 @@ router.get('/TS', (req, res) => {
   });
 });
 
-module.exports = router;
+/**
+ * Given a set of selected TSIDs and a recon type, return the TSIDs that share
+ * a parent dataset with the selection, match the recon's "is a proxy"
+ * predicate, and are not themselves in the selection. These are the TSIDs
+ * that would ride along inside the .lpd files lipdGenerator downloads and
+ * need stripping via removedTsids before pickle generation.
+ *
+ * Resolves to { complement: [], stats: null } if the recon has no predicate
+ * registered, so callers don't need to special-case unconfigured recons.
+ */
+async function computeTsidComplement(tsids, recon) {
+  const pred = RECON_PREDICATES[recon];
+  if (!pred || !Array.isArray(tsids) || tsids.length === 0) {
+    return { complement: [], stats: null };
+  }
+  const placeholders = tsids.map(() => '?').join(',');
+  // COLLATE utf8mb4_bin: the query table's text columns default to a
+  // case-insensitive collation; force a binary match so TSIDs that differ
+  // only in case don't silently widen the IN-set.
+  const sql =
+    `SELECT DISTINCT q2.paleoData_TSid AS tsid, q1.paleoData_TSid AS seed
+       FROM query q1
+       JOIN query q2 ON q1.datasetId = q2.datasetId
+      WHERE q1.paleoData_TSid COLLATE utf8mb4_bin IN (${placeholders})
+        AND q2.paleoData_units = ?`;
+  const params = [...tsids, pred.unitsEq];
+  const [rows] = await pool.promise().query(sql, params);
+
+  const seeds = new Set(rows.map(r => r.seed));
+  const keptSet = new Set(tsids);
+  const universeSet = new Set(rows.map(r => r.tsid));
+  const complement = [...universeSet].filter(t => !keptSet.has(t));
+
+  if (seeds.size < tsids.length) {
+    console.warn(
+      `computeTsidComplement: ${tsids.length - seeds.size} of ${tsids.length} ` +
+      `selected TSIDs not found in query table (recon=${recon}); their ` +
+      `parent datasets cannot contribute to the complement.`
+    );
+  }
+  return {
+    complement,
+    stats: {
+      matched: seeds.size,
+      universe: universeSet.size,
+      complement: complement.length,
+    },
+  };
+}
+
+module.exports = { router, computeTsidComplement, RECON_PREDICATES };
