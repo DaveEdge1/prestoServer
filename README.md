@@ -1,77 +1,93 @@
 # Paleo Presto Server
 
-This repo contains the four node.js apps that constitude the Paleo Presto Custom Reconstruction Engine. These apps live on the Presto2 droplet on Digital Ocean at 143.198.98.66
+Web platform for running paleoclimate reconstructions (LMR, Holocene DA, temp12k, …) against [lipdverse](https://lipdverse.org/) data. Users configure a reconstruction in the browser, the orchestrator forks a per-recon template repo into the user's GitHub account, and the reconstruction runs as a GitHub Actions workflow there. Results are committed back to the user's fork and published via GitHub Pages.
 
-In addition to the four node apps, the nginx config files are also present. On a linux server, these files live at /etc/nginx/sites-enabled/
+**Live:** http://143.198.98.66:84/forms/
 
-Note that several of the node apps have hard-coded references to paths on the current server
+## Architecture
 
-## Notes for adding a new reconstruction
+```
+┌──────────────┐    ┌──────────────────────────────────────────────┐
+│   Browser    │ ─► │  nginx ─► presto-orchestrator (Express)      │
+└──────────────┘    │            │                                  │
+                    │            ├─ MySQL (lipdverse cache, tokens) │
+                    │            ├─ proxy-analysis (FastAPI)        │
+                    │            ├─ tile-server (Blue Marble)       │
+                    │            └─ lipdGenerator (one-shot worker) │
+                    └─────────────────┬────────────────────────────┘
+                                      │ fork + dispatch
+                                      ▼
+                    ┌──────────────────────────────────────────────┐
+                    │  GitHub Actions in user's fork of            │
+                    │  DaveEdge1/<template> (LMR2, presto-…, …)    │
+                    │  → runs reconstruction container             │
+                    │  → commits results + publishes Pages         │
+                    └──────────────────────────────────────────────┘
+```
 
-### Container
+The orchestrator (`app.js`) consolidates what used to be 9 separate Node services into one Express app, with route modules under `routes/`. It does not run reconstructions itself — its job is to serve the form/query/editor UIs, fork the template repo via the GitHub API, write user inputs into the fork, and dispatch the workflow.
 
-Reconstruction algorithms should run when a container is launched based on a paramters file - ideally a yaml file following the [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md)
+## Quickstart (local dev)
 
-The container should be pulled onto the server
+Prereqs: Docker Desktop, Node 18+, a GitHub OAuth app (for login flow).
 
-### formServer
+```bash
+git clone <this repo>
+cd prestoServer
+cp .env.example .env        # fill in GitHub OAuth + DB creds
+docker-compose up -d
+```
 
-The new reconstruction will need its own directory added under prestoForm with the following elements:
-* introductory text (formIntro.txt) [see example](https://github.com/DaveEdge1/prestoServer/blob/master/prestoForm/temp12k/formIntro.txt)
-* standardized configuration file (configs.yml) [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md)
-* if the reconstruction is not strucured to run with the standardized config file
-	* the working configs file (ideally params.json or params.yml)
-	* dictionary of variable synonyms [example](https://github.com/DaveEdge1/prestoServer/blob/master/prestoForm/holocene_da/lookup.json)
-	* translation function from standard configs (edited by user) to 'working configs' for algorithm ingestion [example](https://github.com/DaveEdge1/prestoServer/blob/master/prestoForm/holocene_da/translate.js)
+Open http://localhost/forms — the orchestrator is behind nginx on port 80.
 
-Basic recon info added to prestoForm/index.html:
-* Title
-* Duration
-* name(s) and URL(s) of proxy database(s)
-* name(s) and URL(s) of model(s)
-* name of methodology
-* publication doi
+Code reloads: source dirs (`routes/`, `services/`, `prestoForm/`, `jsonEditor/`, `templates/`, `getLipds/`, `query/`, `app.js`) are bind-mounted, so:
 
-### queryServer
+```bash
+docker-compose restart presto-orchestrator
+docker-compose logs -f presto-orchestrator
+```
 
-GUI for interaction with lipdverse data
-* utilizes a SQL server, which contains 21 variables for each time series on the lipdverse
-* pulls time series for downlaod from the graphDB
-* Filter lipdverse data for use in reconstruction
-* download data directly as csv
-* (coming soon) download data as zipped .lpd files, .rds file, or as .pkl
-* Filters preset based on reconstruction configs.yml (via jsoon intermediary)
+## Repo layout
 
-### editorServer
+```
+app.js                  Express entry point
+routes/                 Route modules: oauth, forms, query, datacleaning,
+                        editor, reconstruct, downloads, viz, …
+services/               github.js (fork + dispatch), lipdDataService.js,
+                        cleanup.js, compilationUpdater.js, logger, metrics
+config/                 Central config (port, baseUrl, MySQL, paths)
+prestoForm/             Per-recon UI + translation logic (one dir per recon)
+query/                  Shared query UI (one template, multiple recons)
+jsonEditor/             Parameter editor generator (writeForm.js → HTML/JS)
+getLipds/               Worker containers used by the orchestrator
+                          lipdGenerator/   download + filter lipdverse data
+                          lipdPickler/     (legacy, filtered path)
+                          proxyAnalysis/   PCA + spatial dedup service
+templates/workflows/    GitHub Actions workflow templates (per recon)
+nginx/                  Reverse proxy config
+monitoring/             Prometheus, Grafana, Loki, Promtail configs
+docs/                   Deeper docs
+```
 
-Build web form for interactive parameter editing:
-* add reconstruction title to jsonEditor/reconTitles.json
-* run "node jsonEditor/writeForm.js"
-* custom html and js will be generated
+Worker containers published as `davidedge/lipd_webapps:<tag>` (lipdGenerator, lipdPickler, holocene_da) and `davidedge/lmr2:latest`.
 
-### prestoServer
+## Adding a new reconstruction
 
-Launch the recon algorithm:
-* handle (holocene_da)
-* full title (Holocene DA Reconstruction)
-* params location in container (':/config_default.yml')
-* results directory (':/resultsl')
-* github URL (https://github.com/Holocene-Reconstruction/Holocene-code)
-* container tag (lipd_webapps:holocene_da)
-* path to params file to use in container ('/root/presto/userRecons/' + uniqueID  + '/configsTranslated.yml')
-* path to working config file ('/root/presto/prestoForm/holocene_da/config_default.yml')  
-* paths to standardized configs and lookup.json are standardized by recon handle
+1. **Build a reconstruction container** that runs against the [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md). It should read a params file (yaml or json) and write results to a known directory.
 
-Produce visualizations:
-* await removal of docker container
-* launch shell script which runs 3 sequential python scripts
+2. **Create a public GitHub template repo** containing:
+   - `.github/workflows/<recon>.yml` that checks out the repo, pulls the container, mounts the params/results dirs, and (optionally) publishes results to GitHub Pages.
+   - Default `configs.yml` and any expected input files.
+   - See existing templates: [`DaveEdge1/LMR2`](https://github.com/DaveEdge1/LMR2), [`DaveEdge1/presto-holocene_da`](https://github.com/DaveEdge1/presto-holocene_da), [`DaveEdge1/lipd-downloads`](https://github.com/DaveEdge1/lipd-downloads).
 
-Send email to user:
-* await creation of viz products
-* send email with links to access products
+3. **Register the recon in this repo:**
+   - Add `prestoForm/<handle>/` with:
+     - `formIntro.txt` — intro text shown to users ([example](prestoForm/holocene_da/formIntro.txt))
+     - `configs.yml` — the standardized PReSto config users will edit
+     - `lookup.json` + `translate.js` — if your container expects a non-standard config format, these map between the standard form and your format ([example](prestoForm/holocene_da/translate.js))
+   - Add an entry in `prestoForm/index.html` with title, duration, proxy DB(s), model(s), method name, and DOI.
+   - Add the template-repo mapping in `services/github.js` (search for `templates = {`).
+   - Add the recon title to `jsonEditor/reconTitles.json` and run `node jsonEditor/writeForm.js` to regenerate the parameter editor.
 
-### downloadServer
-Access processed data, visualizations, and logs
-* download all files (zipped)
-* view vizualiations on the web
-* browse files created and download individually
+4. **Test the end-to-end flow** with a real GitHub account: log in, fill the form, watch the fork get created in your account, watch the workflow run.
+
