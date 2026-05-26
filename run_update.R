@@ -51,20 +51,20 @@ suppressPackageStartupMessages({
     )
   }
 
-  # Install the patched lipdverseR from the combined fork branch. This
-  # branch carries both upstream PRs (#7 isTerrestrial fix and #8
-  # parameterized connections) and a union-of-TSIDs rollup change. The
-  # fork was renamed from DaveEdge1/lipdverseR to DaveEdge1/lipdverseR-union
-  # in 2026-05; the new name is canonical.
-  if (!requireNamespace("lipdverseR", quietly = TRUE) ||
-      !"connections" %in% names(formals(lipdverseR::updateSqlQuery))) {
-    cat("Installing patched lipdverseR from DaveEdge1/lipdverseR-union@prod-update-combined...\n")
-    remotes::install_github(
-      "DaveEdge1/lipdverseR-union",
-      ref = "prod-update-combined",
-      upgrade = "never"
-    )
-  }
+  # Always reinstall lipdverseR from the union fork's prod-update-combined
+  # branch. The previous conditional (only install if missing OR missing the
+  # `connections` parameter) silently kept stale installs across pushes to
+  # the branch — fine when the package was idempotent, but it caused two
+  # hard-to-diagnose failures in a row when the branch advanced. The runtime
+  # cost is ~30-60s per run, which is acceptable for a manually-invoked
+  # refresh script.
+  cat("Installing patched lipdverseR from DaveEdge1/lipdverseR-union@prod-update-combined...\n")
+  remotes::install_github(
+    "DaveEdge1/lipdverseR-union",
+    ref = "prod-update-combined",
+    upgrade = "never",
+    force = TRUE
+  )
 
   library(dplyr)
 })
