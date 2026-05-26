@@ -10,3 +10,4 @@ dependencies:
       - cloudpickle==2.2.1
       - pandas
       - requests
+      - pyyaml
