@@ -333,6 +333,7 @@
          <br>
          <div>
             <p style="text-align: center; font-size:16px;" id="datasetCount"></p>
+            <p style="text-align: center; font-size:13px; color:#666; margin-top:-4px; display:none;" id="unitsFilterNote"></p>
          </div>
          <br>
          <input id="recon" name="recon" type="hidden" value="">
@@ -865,6 +866,17 @@
             document.getElementById('minLengthInput').value = cfg.minRecordLength;
             document.getElementById('minLengthOn').checked = true;
             updateFilters();
+         }
+
+         // Always-on units filter banner (e.g. Holocene_DA → degC). Surfaces
+         // the hidden URL param paleoData_units=<value> applied in params().
+         if (cfg.unitsFilter) {
+            var note = document.getElementById('unitsFilterNote');
+            if (note) {
+               note.textContent = 'Only datasets containing at least one ' +
+                  cfg.unitsFilter + ' record are shown.';
+               note.style.display = '';
+            }
          }
 
          // Temporal-extent slider configuration. Range is in yr BP (negative = post-1950 AD).

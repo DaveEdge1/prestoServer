@@ -30,6 +30,10 @@ const PAGE_CONFIGS = {
     compilationFilter: 'Temp12k-1_2_0',
     interpVarDefault: 'temperature',
     minRecordLength: 100,
+    // Always-on units filter. Holocene_DA assimilates only degC proxies;
+    // surfacing other units in the query page guarantees user picks the
+    // orchestrator + loader would silently drop downstream.
+    unitsFilter: 'degC',
     timeSlider: { min: -70, max: 9950, step: 10 },
   },
   download: {
