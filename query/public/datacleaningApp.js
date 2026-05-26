@@ -4703,7 +4703,13 @@ function recordPassesAutoFilter(r) {
 // versions but only one made it into the most recent compilation (e.g.
 // O2kLR_105 in Pages2kTemperature alongside O2kLR_107 which is not).
 // Returns a Set of TSids to auto-exclude.
+//
+// Gated on filterState.requireCompilation: when the user hasn't asked for
+// compilation-aware filtering, dropping non-compilation siblings silently
+// makes the toggle look like a no-op in the footer count. Off → empty set;
+// duplicate siblings then surface in needs-review for manual picking.
 function _computeCompilationPreferenceExclusions() {
+  if (!filterState.requireCompilation) return new Set();
   const proxyKey = (r) => {
     const p = (r.proxy || '').toString().trim().toLowerCase();
     if (p && !['na', 'null', 'none', ''].includes(p)) return p;
