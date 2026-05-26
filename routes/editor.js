@@ -10,6 +10,7 @@ const path = require('path');
 const YAML = require('yaml');
 const mysql = require('mysql2/promise');
 const config = require('../config');
+const { computeTsidComplement } = require('./data');
 
 const editorDir = path.join(__dirname, '..', 'jsonEditor');
 
@@ -263,11 +264,38 @@ router.post('/sendReconRequest', async (req, res) => {
             ? fs.readFileSync(variableFilterPath, 'utf8')
             : null;
 
+          // Fold the per-dataset degC complement into removedTsids so
+          // lipdGenerator strips ride-along proxies before pickle generation.
+          // Without this, the parent .lpd files carry all sibling Temp12k+degC
+          // TSIDs through to the loader, which assimilates a superset of the
+          // user's selection.
+          let implicitRemoves = [];
+          if (cleanedTSIDs && cleanedTSIDs.length > 0) {
+            try {
+              const { complement, stats } = await computeTsidComplement(cleanedTSIDs, recon);
+              implicitRemoves = complement;
+              if (stats) {
+                console.log(
+                  `TSID complement (${recon}): kept=${cleanedTSIDs.length}, ` +
+                  `universe=${stats.universe}, implicit-removes=${stats.complement}, ` +
+                  `seeds-matched=${stats.matched}/${cleanedTSIDs.length}`
+                );
+              }
+            } catch (err) {
+              console.warn(
+                `computeTsidComplement failed for ${uniqueID}; ` +
+                `falling back to explicit removedTSIDs only:`, err.message
+              );
+            }
+          }
+          const allRemoved = [...(removedTSIDs || []), ...implicitRemoves];
+          const finalRemovedTsids = allRemoved.length > 0 ? [...new Set(allRemoved)] : null;
+
           lipdQueryJson = JSON.stringify({
             mode: 'filtered',
             ...queryParams,
             ...(cleanedTSIDs ? { tsids: cleanedTSIDs } : {}),
-            ...(removedTSIDs ? { removedTsids: removedTSIDs } : {})
+            ...(finalRemovedTsids ? { removedTsids: finalRemovedTsids } : {})
           });
           console.log('Using filtered query with parameters:', queryParams);
         }

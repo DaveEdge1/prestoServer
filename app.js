@@ -130,7 +130,7 @@ app.use('/editor', require('./routes/editor'));
 app.use('/query', require('./routes/query'));
 
 // Database queries (was queryDB:3007)
-app.use('/data', require('./routes/data'));
+app.use('/data', require('./routes/data').router);
 
 // SPARQL queries (was sparqlServer:3009)
 app.use('/sparql', require('./routes/sparql'));
