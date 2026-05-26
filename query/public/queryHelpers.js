@@ -728,6 +728,13 @@ getAllMonths = function(startSpan,endSpan){
                 queryParts.push(document.getElementById("seasonality1").name + "=" + rmBlanks(document.getElementById("seasonality1").value + "," + getAllMonths(document.getElementById("months_range_fromSlider").value,document.getElementById("months_range_toSlider").value)));
             }
 
+            // Always-on, server-injected unit filter (e.g. Holocene_DA → degC).
+            // Not driven by a UI input — the user can't toggle it off — so it's
+            // appended after the user-driven parts.
+            if (window.PAGE_CONFIG && window.PAGE_CONFIG.unitsFilter) {
+                queryParts.push('paleoData_units=' + window.PAGE_CONFIG.unitsFilter);
+            }
+
             // Join with & and prepend with ?
             var qstring = queryParts.length > 0 ? '?' + queryParts.join('&') : '';
             console.log("qstring from params(): " + qstring)
@@ -1180,6 +1187,12 @@ function updatePoints (coords){
 	    }
 		}
 	    }).addTo(layerGroup);
-    document.getElementById("datasetCount").innerHTML = "Total datasets in query: " + coords.length + " (" + inRectCount + " unique locations) &mdash; datasets may contain multiple proxy time series"
+    document.getElementById("datasetCount").innerHTML =
+        "Up to " + coords.length + " datasets with data fitting these criteria " +
+        "(" + inRectCount + " unique locations)" +
+        "<br><span style=\"font-size:12px; color:#666;\">" +
+        "Filtering on dataset-level metadata; a more precise filter at the " +
+        "level of individual climate proxies will follow." +
+        "</span>";
     document.getElementById("my-css-spinner").style.display = "none";
 }
