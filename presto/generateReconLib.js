@@ -3,10 +3,12 @@
  *
  * presto/reconRegistry.json is the single source of truth. A few older consumers
  * still read the pre-consolidation files by their original paths/shapes:
- *   - presto/reconLib.json            → presto/prestoGo.js, presto/prestoServer.js
  *   - prestoForm/public/reconsTable.json → prestoForm/index2.html (language lookup)
  *   - jsonEditor/reconTitles.json     → jsonEditor/writeForm.js, query/writeQueryForm.js,
  *                                        jsonEditor/writeQuerypathForm.js
+ *
+ * reconLib.json is still emitted for backward compatibility but no longer has a
+ * live reader (the prestoGo/prestoServer execution path was removed).
  *
  * Rather than edit each consumer, we regenerate these files from the registry so
  * they never drift. Run after editing the registry:

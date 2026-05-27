@@ -114,9 +114,6 @@ app.use('/status', require('./routes/status'));
 // Serve static files from public directory
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Reconstruction trigger (was prestoServer:3000)
-app.use('/reconstruct', require('./routes/reconstruct'));
-
 // File downloads (was downloadServer:3001)
 app.use('/downloads', require('./routes/downloads'));
 
