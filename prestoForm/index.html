@@ -312,8 +312,7 @@
 		<div style="text-align:center;">
 		<form id="tableForm" style="padding-right:50px; font-size:24px" onSubmit="EvaluateForm()" method="POST">
       <select id="select_id" name="select_id" style="font-size:24px">
-          <!-- Options populated from /forms/recons.json (recon registry) -->
-          <optgroup id="reconOptGroup" label="Select Reconstruction" style="font-size:24px"></optgroup>
+          <!-- <optgroup>s populated per ui.category from /forms/recons.json (recon registry) -->
       </select>
       <br><br>
               <div class="button-submit" style="text-align:center">
@@ -350,7 +349,22 @@
 	        .then(function (res) { return res.json(); })
 	        .then(function (recons) {
 	            var tbody = document.getElementById('reconTableBody');
-	            var optGroup = document.getElementById('reconOptGroup');
+	            var select = document.getElementById('select_id');
+	            // One <optgroup> per ui.category, created on first appearance so
+	            // groups follow the registry's `order` (Data Only → Reconstructions
+	            // → New methods, in testing).
+	            var optGroups = {};
+	            function groupFor(category) {
+	                var label = category || 'Reconstructions';
+	                if (!optGroups[label]) {
+	                    var g = document.createElement('optgroup');
+	                    g.label = label;
+	                    g.style.fontSize = '24px';
+	                    select.appendChild(g);
+	                    optGroups[label] = g;
+	                }
+	                return optGroups[label];
+	            }
 	            recons.forEach(function (r) {
 	                // Comparison table: only methods flagged showInTable.
 	                if (r.showInTable) {
@@ -370,11 +384,11 @@
 	                    tbody.appendChild(tr);
 	                }
 
-	                // Picker: every enabled method.
+	                // Picker: every enabled method, grouped by ui.category.
 	                var opt = document.createElement('option');
 	                opt.value = r.handle;
 	                opt.textContent = r.dropdownLabel || r.title || r.handle;
-	                optGroup.appendChild(opt);
+	                groupFor(r.category).appendChild(opt);
 	            });
 	        })
 	        .catch(function (err) { console.error('Failed to load recons.json', err); });

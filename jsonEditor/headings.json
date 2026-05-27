@@ -8,5 +8,9 @@
 	"uncertainty": "Uncertainty",
 	"calibration": "Calibration",
 	"data_selection": "Data Selection",
-	"psm": "Proxy System Model"
+	"psm": "Proxy System Model",
+	"stan": "Stan Sampler",
+	"partition": "Reconstruction Window",
+	"co2": "CO2 Forcing",
+	"vol": "Volcanic Forcing"
 }

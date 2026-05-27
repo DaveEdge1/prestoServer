@@ -383,6 +383,43 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
       // Hardcode data_dir so paths resolve to /proxies/... and /models/...
       defaults.data_dir = '/';
       effectiveConfigData = defaults;
+    } else if (entry.configStrategy === 'nested') {
+      // General nested-config translation: lookup.json maps each standardized
+      // form key to a `path` array into config_default.yml; set each leaf,
+      // coercing to the type of the existing default. Reusable by any recon
+      // whose container reads a nested config (e.g. BayGMST's user_config.yml).
+      const lookup = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'lookup.json'), 'utf8'));
+      const defaults = yaml.load(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'config_default.yml'), 'utf8'));
+
+      for (const [formKey, mapping] of Object.entries(lookup)) {
+        const pathArr = mapping && mapping.path;
+        if (!Array.isArray(pathArr) || pathArr.length === 0) continue;
+        if (configData[formKey] === undefined) continue;
+
+        let val = configData[formKey];
+        if (val && typeof val === 'object' && 'value' in val) val = val.value;
+
+        // Walk to the parent node, creating intermediate objects if needed.
+        let node = defaults;
+        for (let i = 0; i < pathArr.length - 1; i++) {
+          if (node[pathArr[i]] == null || typeof node[pathArr[i]] !== 'object') {
+            node[pathArr[i]] = {};
+          }
+          node = node[pathArr[i]];
+        }
+        const leaf = pathArr[pathArr.length - 1];
+
+        // Coerce the form string to match the existing default's type.
+        const cur = node[leaf];
+        if (typeof cur === 'number') val = Number(val);
+        else if (typeof cur === 'boolean') val = (val === true || val === 'true');
+        if (val === 'null' || val === 'None') val = null;
+
+        node[leaf] = val;
+      }
+      effectiveConfigData = defaults;
     } else {
       effectiveConfigData = configData;
     }

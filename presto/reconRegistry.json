@@ -6,6 +6,7 @@
     "order": 10,
     "ui": {
       "dropdownLabel": "LiPD Download",
+      "category": "Data Only",
       "title": "Download LiPDs",
       "time": "NA",
       "proxies": "NA",
@@ -52,6 +53,7 @@
     "order": 20,
     "ui": {
       "dropdownLabel": "Holocene DA",
+      "category": "Reconstructions",
       "title": "Holocene DA",
       "time": "0-12,000 years",
       "proxies": "Temperature 12k proxy database",
@@ -106,6 +108,7 @@
     "order": 30,
     "ui": {
       "dropdownLabel": "LMR (Last Millennium Reanalysis)",
+      "category": "Reconstructions",
       "title": "LMR (Last Millennium Reanalysis)",
       "time": "0-2,000 years BP",
       "proxies": "PAGES 2k proxy database",
@@ -151,6 +154,58 @@
     "configStrategy": "lmr",
     "runtimeKeyStrategy": "lmr"
   },
+  "BayGMST": {
+    "handle": "BayGMST",
+    "aliases": [],
+    "enabled": true,
+    "order": 35,
+    "ui": {
+      "dropdownLabel": "BayGMST",
+      "category": "New methods, in testing",
+      "title": "BayGMST",
+      "time": "1,001-2,000 CE",
+      "proxies": "PAGES 2k proxy database",
+      "models": "NA (Bayesian hierarchical model)",
+      "methods": "Bayesian global mean surface temperature (STAN)",
+      "doi": "",
+      "language": "R",
+      "showInTable": true,
+      "proxiesHtml": "<a href=\"https://lipdverse.org/project/pages2k/\" target=\"_blank\">PAGES 2k proxy database</a>",
+      "publicationHtml": "Bagwell et al., 2026 (In review)"
+    },
+    "lib": {
+      "title": "Bayesian GMST (BayGMST) reconstruction",
+      "paramsCon": "/app/config/user_config.yml",
+      "resultsDir": "/recons",
+      "github": "https://github.com/DaveEdge1/presto-BayGMST",
+      "conTag": "davidedge/lipd_webapps:baygmst",
+      "translate": false,
+      "workingParams": ""
+    },
+    "editorTitle": "Bayesian GMST Reconstruction",
+    "template": { "owner": "DaveEdge1", "name": "presto-BayGMST" },
+    "pageConfig": {
+      "defaultMode": "archive",
+      "archivedCompilation": { "name": "Pages2kTemperature", "version": "2_2_0" },
+      "compilationFilter": "Pages2k",
+      "interpVarDefault": "temperature",
+      "extendBackDefault": 100,
+      "timeSlider": { "min": -70, "max": 1950, "step": 10 }
+    },
+    "behavior": {
+      "publishesPages": true,
+      "dispatch": "push",
+      "lipdProcessing": true,
+      "commitsQueryParams": true,
+      "commitsVariableFilter": true,
+      "reconPredicate": null,
+      "runtimeHiddenKeys": [],
+      "configPath": "config/user_config.yml"
+    },
+    "dedupStrategy": "lmr",
+    "configStrategy": "nested",
+    "runtimeKeyStrategy": "none"
+  },
   "temp12k": {
     "handle": "temp12k",
     "aliases": [],
@@ -158,6 +213,7 @@
     "order": 40,
     "ui": {
       "dropdownLabel": "Temperature 12k Composites",
+      "category": "Reconstructions",
       "title": "Temperature 12k Composites",
       "time": "0-12,000 years",
       "proxies": "Temperature 12k proxy database",
@@ -199,6 +255,7 @@
     "order": 50,
     "ui": {
       "dropdownLabel": "GraphEM",
+      "category": "Reconstructions",
       "title": "GraphEM",
       "time": "0-2,000 years",
       "proxies": "Pages 2k proxy database",

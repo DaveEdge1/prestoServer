@@ -120,6 +120,9 @@ method needs **no server code changes**.
 - `handle` — canonical id; must equal the `prestoForm/<handle>/` folder name.
 - `aliases` — alternate spellings that resolve to this entry (case-insensitive).
 - `enabled` — show in the method picker. `order` — sort position.
+- `ui.category` — which `<optgroup>` the method falls under in the homepage
+  picker (e.g. `"Data Only"`, `"Reconstructions"`, `"New methods, in testing"`).
+  Groups appear in `order`; a new category value simply creates a new group.
 - `ui.*` — picker label + comparison-table row (`/forms/recons.json`). Set
   `ui.showInTable: true` to include the method in the homepage comparison table.
   Optional rich fields `proxiesHtml` / `modelsHtml` / `methodsHtml` /
@@ -147,9 +150,16 @@ method needs **no server code changes**.
 
 | Key | Default | Other values | Where the code lives |
 |-----|---------|--------------|----------------------|
-| `configStrategy` | `passthrough` | `none` (commit no config), `lmr`, `holocene_da` | `services/github.js` `updateRepositoryConfig` |
+| `configStrategy` | `passthrough` | `none` (commit no config), `nested`, `lmr`, `holocene_da` | `services/github.js` `updateRepositoryConfig` |
 | `dedupStrategy` | `neutral` | `lmr` (annual-resolution ranking) | `query/public/datacleaningApp.js` |
 | `runtimeKeyStrategy` | `none` | `lookupInverse` (invert your `lookup.json`), `lmr` | `routes/reuse.js` |
+
+`nested` is the general path for a container that reads a **nested** YAML config
+(sections like `stan_params:` / `partition_years:`): provide a `config_default.yml`
+holding the nested defaults and a `lookup.json` mapping each form key to a `path`
+array, e.g. `"stan_iter_warmup": { "path": ["stan_params", "iter_warmup"] }`. The
+server walks each path, sets the leaf, and coerces to the default's type — no code
+change needed. (BayGMST uses this.)
 
 `passthrough`/`lookupInverse` are reusable by handle — a Holocene-DA-style
 method just sets `configStrategy: "holocene_da"` + `runtimeKeyStrategy:

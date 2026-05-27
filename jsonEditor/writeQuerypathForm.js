@@ -445,7 +445,7 @@ function buildHtml(configs, recon) {
        + 'var urlParams = new URLSearchParams(window.location.search);\n'
        + 'document.getElementById("paramsForm").method = "POST"\n'
        // CHANGED: Added language parameter to match actual HTML output
-       + 'document.getElementById("paramsForm").action = "/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")\n'
+       + 'document.getElementById("paramsForm").action = "/editor/sendReconRequest?recon=" + urlParams.get("recon") + "&uniqueID=" + urlParams.get("uniqueID") + "&user=" + urlParams.get("user") + "&domain=" + urlParams.get("domain") + "&language=" + urlParams.get("language")\n'
        + 'return true;\n'
        + '} else {\n'
        + 'document.getElementById("paramsForm").action = ""\n'

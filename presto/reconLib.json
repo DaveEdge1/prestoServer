@@ -44,6 +44,15 @@
     "translate": false,
     "workingParams": ""
   },
+  "BayGMST": {
+    "title": "Bayesian GMST (BayGMST) reconstruction",
+    "paramsCon": "/app/config/user_config.yml",
+    "resultsDir": "/recons",
+    "github": "https://github.com/DaveEdge1/presto-BayGMST",
+    "conTag": "davidedge/lipd_webapps:baygmst",
+    "translate": false,
+    "workingParams": ""
+  },
   "temp12k": {
     "title": "Temperature 12k Standard Calibrated Composite reconstruction",
     "paramsCon": "/params.json",

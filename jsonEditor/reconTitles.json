@@ -2,6 +2,7 @@
   "query": "Gather Proxy Data from the LiPDverse",
   "holocene_da": "Holocene Data Assimilation",
   "LMR": "Last Millennium Reanalysis",
+  "BayGMST": "Bayesian GMST Reconstruction",
   "temp12k": "Temp 12k Regional Composites",
   "graph_em": "Graphical Expectation-Maximization"
 }

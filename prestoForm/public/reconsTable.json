@@ -44,6 +44,15 @@
     "doi": "https://doi.org/10.5194/cp-15-1251-2019",
     "language": "Python"
   },
+  "BayGMST": {
+    "title": "BayGMST",
+    "time": "1,001-2,000 CE",
+    "proxies": "PAGES 2k proxy database",
+    "models": "NA (Bayesian hierarchical model)",
+    "methods": "Bayesian global mean surface temperature (STAN)",
+    "doi": "",
+    "language": "R"
+  },
   "temp12k": {
     "title": "Temperature 12k Composites",
     "time": "0-12,000 years",
