@@ -33,14 +33,23 @@ It must read a params file (yaml or json) and write results to a known
 directory, per the
 [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md).
 
-### 2. Create a public GitHub template repo
+### 2. Start from the canonical template repo
 
-Containing `.github/workflows/<handle>.yml` that checks out the repo, pulls your
-container, mounts the params/results dirs, and (optionally) publishes results to
-GitHub Pages. Working examples:
+Create your method's repo from
+**[`DaveEdge1/presto-template`](https://github.com/DaveEdge1/presto-template)**
+(GitHub → "Use this template") and follow its `ADAPTING.md`. It already ships
+everything the platform expects:
+
+- `.github/workflows/reconstruct.yml` — push-triggered on `query_params.json`
+  (plus `release-recon.yml`, `update-readme.yml`, `visualize.yml`).
+- `config/user_config.yml`, `scripts/lipd_to_input.py`, `scripts/reconstruct.py`,
+  a `Dockerfile` + `environment.yml`, and a `results/` layout.
+
+You mostly swap in your container/algorithm; the PReSto wiring is already there.
+Existing live examples to crib from:
 [`DaveEdge1/LMR2`](https://github.com/DaveEdge1/LMR2),
 [`DaveEdge1/presto-holocene_da`](https://github.com/DaveEdge1/presto-holocene_da),
-[`DaveEdge1/lipd-downloads`](https://github.com/DaveEdge1/lipd-downloads).
+[`DaveEdge1/presto-BayGMST`](https://github.com/DaveEdge1/presto-BayGMST).
 
 The server commits these files into a copy of your template before the workflow
 runs (which ones depends on the behavior flags below):
@@ -121,8 +130,11 @@ method needs **no server code changes**.
 - `aliases` — alternate spellings that resolve to this entry (case-insensitive).
 - `enabled` — show in the method picker. `order` — sort position.
 - `ui.category` — which `<optgroup>` the method falls under in the homepage
-  picker (e.g. `"Data Only"`, `"Reconstructions"`, `"New methods, in testing"`).
-  Groups appear in `order`; a new category value simply creates a new group.
+  picker. **A new method MUST use `"New methods, in testing"`.** Moving it to
+  `"Reconstructions"` is a separate, reviewed promotion PR (see
+  [Promotion](#promotion-to-reconstructions-approval-pr)). If omitted, the picker
+  defaults the method into the testing group. (`"Data Only"` is for download-only
+  entries.) Groups appear in registry `order`.
 - `ui.*` — picker label + comparison-table row (`/forms/recons.json`). Set
   `ui.showInTable: true` to include the method in the homepage comparison table.
   Optional rich fields `proxiesHtml` / `modelsHtml` / `methodsHtml` /
@@ -174,10 +186,42 @@ node presto/generateReconLib.js     # refresh reconLib/reconsTable/reconTitles
 node jsonEditor/writeForm.js        # regenerate the parameter editor (if changed)
 ```
 
-The `reconstruction_jobs.recon_type` column is a `VARCHAR`, so a new method needs
-**no schema change**. (On a database created before migration 005, run
-`node setup-db.js` once to apply pending migrations.)
+The `reconstruction_jobs.recon_type` column is a `VARCHAR` and the orchestrator
+auto-applies pending migrations at startup, so a new method needs **no manual DB
+step**.
 
 Then test end-to-end with a real GitHub account: log in, confirm your method
-appears in the picker, fill the form, and watch the workflow run in the repo
-created in your account.
+appears in the picker **under "New methods, in testing"**, fill the form, and
+watch the workflow run in the repo created in your account.
+
+## Promotion to Reconstructions (approval PR)
+
+Every new method ships in the **New methods, in testing** group. Moving it into
+the main **Reconstructions** group is a deliberate, maintainer-approved step —
+**not** something a contributor does in the same PR that adds the method.
+
+When testing is complete, open a small, separate **promotion PR** that changes a
+single field — the method's `ui.category` in `presto/reconRegistry.json`:
+
+```diff
+   "ui": {
+     "dropdownLabel": "My Method",
+-    "category": "New methods, in testing",
++    "category": "Reconstructions",
+```
+
+…then run `node presto/generateReconLib.js` and commit the regenerated artifacts.
+
+**Promotion checklist (maintainers review against this):**
+
+- [ ] At least one real end-to-end run has completed successfully (repo created,
+      workflow green, results + visualization published).
+- [ ] Outputs were spot-checked for scientific sanity by a maintainer.
+- [ ] The method has been live in "New methods, in testing" long enough to catch
+      issues (suggested: ≥ 2 weeks or an agreed number of successful runs).
+- [ ] No open bug reports against the method.
+- [ ] Template repo + container are stable (pinned image tag, no WIP branches).
+- [ ] Title/abstract/DOI/citation in the registry `ui` block are final.
+
+Only `ui.category` (and the regenerated artifacts) should change in a promotion
+PR — keep it reviewable at a glance.

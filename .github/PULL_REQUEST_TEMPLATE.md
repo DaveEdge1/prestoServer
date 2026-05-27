@@ -15,32 +15,40 @@ just fill in Summary.
 ## New reconstruction? (delete this section if not)
 
 - **Handle** (canonical id, matches `prestoForm/<handle>/`):
-- **Template repo URL** (your public GitHub template):
+- **Template repo URL** (your repo started from
+  [`DaveEdge1/presto-template`](https://github.com/DaveEdge1/presto-template)):
 - **Data-only PR?** (yes if `configStrategy: passthrough`, `dedupStrategy: neutral`,
   `runtimeKeyStrategy: none` — i.e. no code edits): yes / no
 
 ### Checklist
 
-- [ ] Built/published a reconstruction container that reads the
+- [ ] Started from the canonical template
+      [`DaveEdge1/presto-template`](https://github.com/DaveEdge1/presto-template)
+      and followed its `ADAPTING.md` (it already ships the push-triggered
+      `reconstruct.yml`, `config/user_config.yml`, and the LiPD→input scripts).
+      Your container reads the
       [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md).
-- [ ] Created a **public** GitHub template repo with `.github/workflows/<handle>.yml`
-      (see `DaveEdge1/LMR2`, `DaveEdge1/presto-holocene_da`, `DaveEdge1/lipd-downloads`).
-- [ ] Added `prestoForm/<handle>/` with at least `formIntro.txt` and `configs.yml`
-      (plus `config_default.yml` + `lookup.json` + `translate.js` if the container
-      expects a non-standard config format).
+- [ ] Added `prestoForm/<handle>/` with at least `formIntro.txt`, `configs.yml`,
+      and `querypathconfigs.yml` (plus `config_default.yml` + `lookup.json` +
+      `translate.js` if the container expects a non-standard config format).
 - [ ] Added **one entry** to `presto/reconRegistry.json` (the single source of
       truth — see the field reference in `docs/adding-a-reconstruction.md`).
+- [ ] **`ui.category` is `"New methods, in testing"`.** All new methods land
+      there; moving to `"Reconstructions"` is a separate, reviewed promotion PR
+      (see the Promotion section in `docs/adding-a-reconstruction.md`).
 - [ ] Set the three strategy keys. Defaults `configStrategy: "passthrough"`,
       `dedupStrategy: "neutral"`, `runtimeKeyStrategy: "none"` mean **no code edits**.
       If you need a custom value, you also added the matching code branch
       (the only code change a new method should require).
 - [ ] Ran `node presto/generateReconLib.js` and committed the regenerated
       `reconLib.json` / `reconsTable.json` / `reconTitles.json`.
-- [ ] Regenerated the parameter editor if needed (`node jsonEditor/writeForm.js`).
-- [ ] `recon_type` is a `VARCHAR` column — **no DB migration needed**. (If the
-      target DB predates migration 005, run `node setup-db.js`.)
+- [ ] Generated the parameter-editor form
+      (`node jsonEditor/writeQuerypathForm.js <handle>`).
+- [ ] `recon_type` is a `VARCHAR` column and the orchestrator auto-migrates on
+      startup — **no manual DB step needed**.
 - [ ] Tested the end-to-end flow with a real GitHub login: the method appears in
-      the picker, `/query/<handle>` renders, and a run completes.
+      the picker under **New methods, in testing**, `/query/<handle>` renders, and
+      a run completes.
 
 ## Screenshots / notes
 

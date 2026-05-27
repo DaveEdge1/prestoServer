@@ -355,7 +355,9 @@
 	            // → New methods, in testing).
 	            var optGroups = {};
 	            function groupFor(category) {
-	                var label = category || 'Reconstructions';
+	                // Safe default: a method that omits ui.category lands in testing,
+                // never silently in "Reconstructions" (promotion is a reviewed PR).
+                var label = category || 'New methods, in testing';
 	                if (!optGroups[label]) {
 	                    var g = document.createElement('optgroup');
 	                    g.label = label;
