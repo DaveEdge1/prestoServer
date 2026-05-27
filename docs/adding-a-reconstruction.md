@@ -31,7 +31,7 @@ registry and regenerate.
 
 It must read a params file (yaml or json) and write results to a known
 directory, per the
-[PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md).
+[PReSto input standard](./presto_input_standards.md).
 
 ### 2. Start from the canonical template repo
 
