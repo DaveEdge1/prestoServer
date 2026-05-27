@@ -21,6 +21,7 @@ const path = require('path');
 const YAML = require('yaml');
 const multer = require('multer');
 const config = require('../config');
+const reconRegistry = require('../presto/reconRegistry');
 
 const MAX_FILE_BYTES = 1024 * 1024; // 1 MB
 const upload = multer({
@@ -211,45 +212,50 @@ function validateCleanedTSIDs(obj) {
 // Runtime keys that are never user-facing — they're set server-side in
 // services/github.js (data_dir, proxydb_path, save_dirpath) before the
 // workflow runs. Drop them before returning so the user doesn't see them
-// in the "skipped" list.
-const RUNTIME_KEYS_HIDDEN = {
-  LMR: new Set(['proxydb_path', 'save_dirpath']),
-  holocene_da: new Set(['data_dir'])
-};
+// in the "skipped" list. Sourced from behavior.runtimeHiddenKeys in the
+// recon registry.
+function hiddenKeysFor(recon) {
+  const e = reconRegistry.get(recon);
+  return new Set((e && e.behavior && e.behavior.runtimeHiddenKeys) || []);
+}
 
-// Per-recon mapping from runtime-config (flat YAML) keys → form-id prefixes.
-// LMR has only a couple of renames; holocene_da has a full lookup table that
-// we invert from prestoForm/holocene_da/lookup.json. Anything not in the map
-// is tried as-is (covers cases where runtime key == form prefix).
-let _runtimeKeyMaps = null;
-function loadRuntimeKeyMaps() {
-  if (_runtimeKeyMaps) return _runtimeKeyMaps;
-  const maps = {
-    LMR: { assim_frac: 'proxy_assim_frac', nens: 'proxy_nens' }
-  };
-  try {
-    const lookupPath = path.join(config.paths.prestoForm, 'holocene_da', 'lookup.json');
-    const lookup = JSON.parse(fs.readFileSync(lookupPath, 'utf8'));
-    const inv = {};
-    for (const formKey of Object.keys(lookup)) {
-      const orig = lookup[formKey] && lookup[formKey].orig;
-      if (orig) inv[orig] = formKey;
+// Per-recon mapping from runtime-config (flat YAML) keys → form-id prefixes,
+// chosen by the recon's runtimeKeyStrategy:
+//   'lmr'           → a couple of fixed renames.
+//   'lookupInverse' → invert prestoForm/<handle>/lookup.json.
+//   'none'/other    → identity (runtime key == form prefix).
+// Anything not in the resulting map is tried as-is.
+const _runtimeKeyMaps = {};
+function loadRuntimeKeyMap(recon) {
+  const handle = reconRegistry.canonical(recon) || recon;
+  if (_runtimeKeyMaps[handle]) return _runtimeKeyMaps[handle];
+  const strat = reconRegistry.get(handle) && reconRegistry.get(handle).runtimeKeyStrategy;
+  let map = {};
+  if (strat === 'lmr') {
+    map = { assim_frac: 'proxy_assim_frac', nens: 'proxy_nens' };
+  } else if (strat === 'lookupInverse') {
+    try {
+      const lookupPath = path.join(config.paths.prestoForm, handle, 'lookup.json');
+      const lookup = JSON.parse(fs.readFileSync(lookupPath, 'utf8'));
+      for (const formKey of Object.keys(lookup)) {
+        const orig = lookup[formKey] && lookup[formKey].orig;
+        if (orig) map[orig] = formKey;
+      }
+    } catch (e) {
+      console.warn(`[reuse] could not load ${handle} lookup.json:`, e.message);
     }
-    maps.holocene_da = inv;
-  } catch (e) {
-    console.warn('[reuse] could not load holocene_da lookup.json:', e.message);
-    maps.holocene_da = {};
   }
-  _runtimeKeyMaps = maps;
-  return maps;
+  _runtimeKeyMaps[handle] = map;
+  return map;
 }
 
 // Translate a flat runtime YAML object to a {form_prefix: value} object.
 // Returns { translated, unmapped } so the caller can surface unmapped keys
 // as warnings.
 function translateFlatConfig(parsed, recon) {
-  const map = loadRuntimeKeyMaps()[recon] || {};
-  const hidden = RUNTIME_KEYS_HIDDEN[recon] || new Set();
+  const map = loadRuntimeKeyMap(recon);
+  const hidden = hiddenKeysFor(recon);
+  const strat = reconRegistry.get(recon) && reconRegistry.get(recon).runtimeKeyStrategy;
   const translated = {};
   const unmapped = [];
   for (const key of Object.keys(parsed)) {
@@ -258,7 +264,7 @@ function translateFlatConfig(parsed, recon) {
     // LMR special case: recon_seeds is committed as the array [1..N]; the
     // form takes the count N. Apply this before the form-id rename, since
     // the runtime key name is what triggers it.
-    if (recon === 'LMR' && key === 'recon_seeds' && Array.isArray(val)) {
+    if (strat === 'lmr' && key === 'recon_seeds' && Array.isArray(val)) {
       val = val.length;
     }
     const formPrefix = map[key] || key;

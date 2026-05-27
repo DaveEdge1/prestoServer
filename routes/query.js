@@ -9,58 +9,22 @@ const path = require('path');
 const fs = require('fs');
 
 const queryDir = path.join(__dirname, '..', 'query');
+const reconRegistry = require('../presto/reconRegistry');
 
-// Page-specific configuration injected into the unified query.html template
-// timeSlider range is in yr BP (BP = years before 1950 AD).
+// Page-specific configuration injected into the unified query.html template now
+// lives in presto/reconRegistry.json (the `pageConfig` field per recon). The
+// timeSlider range is in yr BP (BP = years before 1950 AD):
 //   min: -70  ⇒ year 2020 AD  (allows recent records past 1950)
 //   max: 1950 ⇒ year   0 AD   (= 1 BCE) for LMR
 //   max: 9950 ⇒ year 8000 BCE for Holocene DA / Downloads
-const PAGE_CONFIGS = {
-  LMR: {
-    defaultMode: 'archive',
-    archivedCompilation: { name: 'Pages2kTemperature', version: '2_2_0' },
-    compilationFilter: 'Pages2k',
-    interpVarDefault: 'temperature',
-    extendBackDefault: 100,
-    timeSlider: { min: -70, max: 1950, step: 10 },
-  },
-  holocene_da: {
-    defaultMode: 'archive',
-    archivedCompilation: { name: 'Temp12k', version: '1_0_2' },
-    compilationFilter: 'Temp12k-1_2_0',
-    interpVarDefault: 'temperature',
-    minRecordLength: 100,
-    // Always-on units filter. Holocene_DA assimilates only degC proxies;
-    // surfacing other units in the query page guarantees user picks the
-    // orchestrator + loader would silently drop downstream.
-    unitsFilter: 'degC',
-    timeSlider: { min: -70, max: 9950, step: 10 },
-  },
-  download: {
-    defaultMode: 'query',
-    archivedCompilation: { name: '', version: '' },
-    compilationFilter: '',
-    timeSlider: { min: -70, max: 9950, step: 10 },
-  },
-  downloadNew: {
-    defaultMode: 'query',
-    archivedCompilation: { name: '', version: '' },
-    compilationFilter: '',
-    timeSlider: { min: -70, max: 9950, step: 10 },
-  }
-};
 
 // Read the unified template once at startup
 const queryTemplate = fs.readFileSync(path.join(queryDir, 'query.html'), 'utf8');
 
-// Index PAGE_CONFIGS by lowercased recon name so URLs like /query/lmr,
-// /query/LMR, and /query/Lmr all resolve to the same config. Without this,
-// the bare {recon} param lookup is case-sensitive and only the exact-case
-// keys (LMR, holocene_da, ...) work — anything else falls through to the
-// static-file fallback, which 500s when no matching .html exists.
-const PAGE_CONFIG_BY_LOWER = Object.fromEntries(
-  Object.entries(PAGE_CONFIGS).map(([k, v]) => [k.toLowerCase(), v])
-);
+// Page configs indexed by lowercased recon handle + aliases, so URLs like
+// /query/lmr, /query/LMR, /query/download, and /query/downloadNew all resolve.
+// Built once at startup from the registry.
+const PAGE_CONFIG_BY_LOWER = reconRegistry.pageConfigByLower();
 
 // Serve static files from query/public
 router.use('/', express.static(path.join(queryDir, 'public')));

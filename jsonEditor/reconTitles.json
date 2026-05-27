@@ -1,7 +1,7 @@
 {
-	"temp12k": "Temp 12k Regional Composites",
-	"holocene_da": "Holocene Data Assimilation",
-	"graph_em": "Graphical Expectation-Maximization",
-	"query": "Gather Proxy Data from the LiPDverse",
-	"LMR": "Last Millennium Reanalysis"
+  "query": "Gather Proxy Data from the LiPDverse",
+  "holocene_da": "Holocene Data Assimilation",
+  "LMR": "Last Millennium Reanalysis",
+  "temp12k": "Temp 12k Regional Composites",
+  "graph_em": "Graphical Expectation-Maximization"
 }

@@ -294,6 +294,7 @@
 	      -->
                 <div class="table-responsive">
 	        <table class="table table-striped">
+		<thead>
 		<tr>
 		<th>Reconstruction Name</th>
 		<th>Time Interval Covered</th>
@@ -302,33 +303,17 @@
 		<th>Methods</th>
 		<th>Original Publication</th>
 		</tr>
-		<tr>
-		<td>Holocene DA</td>
-		<td>0-12,000 years BP</td>
-		<td><a href="https://lipdverse.org/project/temp12k/" target="_blank">Temperature 12k proxy database</a></td>
-		<td><a href="https://www.earthsystemgrid.org/project/trace.html" target="_blank">TraCE-21ka</a> and a <a href="https://www.metoffice.gov.uk/research/approach/modelling-systems/unified-model/climate-models/hadcm3" target="_blank">HadCM3</a> transient deglacial simulation</td>
-		<td>Data assimilation</td>
-		<td><a href="https://doi.org/10.5194/cp-18-2599-2022" target="_blank">Erb et al., 2022</a><td>
-		</tr>
-		<tr>
-		<td>LMR (Last Millennium Reanalysis)</td>
-		<td>0-2,000 years BP</td>
-		<td><a href="https://lipdverse.org/project/pages2k/" target="_blank">PAGES 2k proxy database</a></td>
-		<td><a href="https://www.cesm.ucar.edu/models/ccsm4.0/" target="_blank">CCSM4</a> last millennium simulation (past1000)</td>
-		<td>Data assimilation with Climate Field Reconstruction (CFR)</td>
-		<td><a href="https://doi.org/10.5194/cp-15-1251-2019" target="_blank">Tardif et al., 2019</a>; <a href="https://doi.org/10.1002/2016JD024751" target="_blank">Hakim et al., 2016</a><td>
-		</tr>
+		</thead>
+		<!-- Rows populated from /forms/recons.json (recon registry) -->
+		<tbody id="reconTableBody"></tbody>
 		</table>
                 <br><br>
 
 		<div style="text-align:center;">
 		<form id="tableForm" style="padding-right:50px; font-size:24px" onSubmit="EvaluateForm()" method="POST">
       <select id="select_id" name="select_id" style="font-size:24px">
-          <optgroup label="Select Reconstruction" style="font-size:24px">
-	      <option name="lipdDownload" value="lipdDownload">LiPD Download</option>
-              <option name="HoloceneDA" value="holocene_da">Holocene DA</option>
-	      <option name="LMR" value="LMR">LMR (Last Millennium Reanalysis)</option>
-          </optgroup>
+          <!-- Options populated from /forms/recons.json (recon registry) -->
+          <optgroup id="reconOptGroup" label="Select Reconstruction" style="font-size:24px"></optgroup>
       </select>
       <br><br>
               <div class="button-submit" style="text-align:center">
@@ -346,6 +331,54 @@
 	    var timeNow = function() { return("" + d.getTime() + Math.round(Math.random()*10000))}
             document.getElementById('tableForm').action = "/forms/getUserInfo?recon=" + document.getElementById('select_id').value + '&uniqueID=' + timeNow();
 }
+
+	// Populate the comparison table + picker from the recon registry so new
+	// methods appear automatically once registered (see /forms/recons.json).
+	(function loadRecons() {
+	    function esc(s) {
+	        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+	            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+	        });
+	    }
+	    // Prefer a curated *Html field (rich links, reviewed in the PR) and fall
+	    // back to escaping the plain field when no rich version is provided.
+	    function rich(htmlField, plainField) {
+	        if (htmlField) return htmlField;
+	        return plainField && plainField !== 'NA' ? esc(plainField) : '—';
+	    }
+	    fetch('/forms/recons.json')
+	        .then(function (res) { return res.json(); })
+	        .then(function (recons) {
+	            var tbody = document.getElementById('reconTableBody');
+	            var optGroup = document.getElementById('reconOptGroup');
+	            recons.forEach(function (r) {
+	                // Comparison table: only methods flagged showInTable.
+	                if (r.showInTable) {
+	                    var publication = r.publicationHtml
+	                        ? r.publicationHtml
+	                        : (r.doi && r.doi !== 'NA'
+	                            ? '<a href="' + esc(r.doi) + '" target="_blank">publication</a>'
+	                            : '—');
+	                    var tr = document.createElement('tr');
+	                    tr.innerHTML =
+	                        '<td>' + esc(r.title) + '</td>' +
+	                        '<td>' + esc(r.timeHtml || r.time) + '</td>' +
+	                        '<td>' + rich(r.proxiesHtml, r.proxies) + '</td>' +
+	                        '<td>' + rich(r.modelsHtml, r.models) + '</td>' +
+	                        '<td>' + rich(r.methodsHtml, r.methods) + '</td>' +
+	                        '<td>' + publication + '</td>';
+	                    tbody.appendChild(tr);
+	                }
+
+	                // Picker: every enabled method.
+	                var opt = document.createElement('option');
+	                opt.value = r.handle;
+	                opt.textContent = r.dropdownLabel || r.title || r.handle;
+	                optGroup.appendChild(opt);
+	            });
+	        })
+	        .catch(function (err) { console.error('Failed to load recons.json', err); });
+	})();
 </script>
 	    <!--
             <div class="col-md-4">

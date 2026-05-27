@@ -1,38 +1,65 @@
 {
-	"holocene_da": {
-		"title":"Holocene DA",
-		"time":"0-12,000 years",
-		"proxies":"Temperature 12k proxy database",
-		"models":"TraCE-21ka and a HadCM3 transient deglacial simulation",
-		"methods":"Data Assimilation",
-		"doi":"https://doi.org/10.5194/cp-18-2599-2022",
-		"language":"Python"
-	},
-	"temp12k": {
-		"title":"Temperature 12k Composites",
-		"time":"0-12,000 years",
-		"proxies":"Temperature 12k proxy database",
-		"models":"NA",
-		"methods":"Standard calibrated composite (SCC)",
-		"doi":"https://doi.org/10.1038/s41597-020-0445-3",
-		"language":"R"
-	},
-	"graph_em": {
-		"title":"GraphEM",
-		"time":"0-2,000 years",
-		"proxies":"Pages 2k proxy database",
-		"models":"NA",
-		"methods":"Graphical Expectation-Maximization algorithm",
-		"doi":"https://doi.org/10.1214/14-AOAS794",
-		"language":"Python"
-	},
-	"download": {
-		"title":"Download LiPDs",
-		"time":"NA",
-		"proxies":"NA",
-		"models":"NA",
-		"methods":"NA",
-		"doi":"https://doi.org/10.5194/cp-12-1093-2016",
-		"language":"NA"
-	}
+  "lipdDownload": {
+    "title": "Download LiPDs",
+    "time": "NA",
+    "proxies": "NA",
+    "models": "NA",
+    "methods": "NA",
+    "doi": "https://doi.org/10.5194/cp-12-1093-2016",
+    "language": "NA"
+  },
+  "download": {
+    "title": "Download LiPDs",
+    "time": "NA",
+    "proxies": "NA",
+    "models": "NA",
+    "methods": "NA",
+    "doi": "https://doi.org/10.5194/cp-12-1093-2016",
+    "language": "NA"
+  },
+  "downloadNew": {
+    "title": "Download LiPDs",
+    "time": "NA",
+    "proxies": "NA",
+    "models": "NA",
+    "methods": "NA",
+    "doi": "https://doi.org/10.5194/cp-12-1093-2016",
+    "language": "NA"
+  },
+  "holocene_da": {
+    "title": "Holocene DA",
+    "time": "0-12,000 years",
+    "proxies": "Temperature 12k proxy database",
+    "models": "TraCE-21ka and a HadCM3 transient deglacial simulation",
+    "methods": "Data Assimilation",
+    "doi": "https://doi.org/10.5194/cp-18-2599-2022",
+    "language": "Python"
+  },
+  "LMR": {
+    "title": "LMR (Last Millennium Reanalysis)",
+    "time": "0-2,000 years BP",
+    "proxies": "PAGES 2k proxy database",
+    "models": "CCSM4 last millennium simulation (past1000)",
+    "methods": "Data assimilation with Climate Field Reconstruction (CFR)",
+    "doi": "https://doi.org/10.5194/cp-15-1251-2019",
+    "language": "Python"
+  },
+  "temp12k": {
+    "title": "Temperature 12k Composites",
+    "time": "0-12,000 years",
+    "proxies": "Temperature 12k proxy database",
+    "models": "NA",
+    "methods": "Standard calibrated composite (SCC)",
+    "doi": "https://doi.org/10.1038/s41597-020-0445-3",
+    "language": "R"
+  },
+  "graph_em": {
+    "title": "GraphEM",
+    "time": "0-2,000 years",
+    "proxies": "Pages 2k proxy database",
+    "models": "NA",
+    "methods": "Graphical Expectation-Maximization algorithm",
+    "doi": "https://doi.org/10.1214/14-AOAS794",
+    "language": "Python"
+  }
 }

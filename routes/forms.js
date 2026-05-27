@@ -10,6 +10,7 @@ const path = require('path');
 const YAML = require('yaml');
 const multer = require('multer');
 const config = require('../config');
+const reconRegistry = require('../presto/reconRegistry');
 
 const formDir = path.join(__dirname, '..', 'prestoForm');
 
@@ -63,6 +64,16 @@ router.get('/down', (req, res) => {
 router.get('/', (req, res) => {
   console.log(req.ip);
   res.sendFile(path.join(formDir, 'index.html'));
+});
+
+// GET /recons.json - Enabled reconstruction methods for the picker + comparison
+// table on index.html. Sourced from the recon registry (single source of truth),
+// so a new method appears here automatically once registered.
+router.get('/recons.json', (req, res) => {
+  const recons = reconRegistry
+    .list({ enabledOnly: true })
+    .map(e => Object.assign({ handle: e.handle }, e.ui));
+  res.json(recons);
 });
 
 // GET /query - Query parameter info

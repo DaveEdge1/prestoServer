@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2');
 const config = require('../config');
+const reconRegistry = require('../presto/reconRegistry');
 
 // Cache for full dataset query (24 hour TTL)
 let datasetCache = {
@@ -30,11 +31,9 @@ const pool = mysql.createPool({
 // Per-recon predicate defining what counts as a "real" proxy in the
 // reconstruction loader's eyes. Used by computeTsidComplement to find
 // sibling TSIDs that would otherwise ride along inside the parent .lpd
-// files. Missing key → no complement is computed (legacy behavior).
-const RECON_PREDICATES = {
-  holocene_da: { unitsEq: 'degC' },
-  // LMR / lipd-downloads: wire when ready.
-};
+// files. Sourced from presto/reconRegistry.json (behavior.reconPredicate);
+// a recon with no predicate → no complement is computed (legacy behavior).
+const RECON_PREDICATES = reconRegistry.predicates();
 
 // Columns the query UI is allowed to filter on. The previous implementation
 // interpolated raw user input from query-string keys directly into SQL, so
@@ -198,7 +197,7 @@ router.get('/TS', (req, res) => {
  * registered, so callers don't need to special-case unconfigured recons.
  */
 async function computeTsidComplement(tsids, recon) {
-  const pred = RECON_PREDICATES[recon];
+  const pred = RECON_PREDICATES[reconRegistry.canonical(recon)];
   if (!pred || !Array.isArray(tsids) || tsids.length === 0) {
     return { complement: [], stats: null };
   }

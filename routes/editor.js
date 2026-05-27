@@ -11,6 +11,7 @@ const YAML = require('yaml');
 const mysql = require('mysql2/promise');
 const config = require('../config');
 const { computeTsidComplement } = require('./data');
+const reconRegistry = require('../presto/reconRegistry');
 
 const editorDir = path.join(__dirname, '..', 'jsonEditor');
 
@@ -142,7 +143,10 @@ function writeConfigs(recon, user, domain, jsonBody, uniqueID, language) {
 // GET /querypath - Query path form (the live editor; users always reach
 // this via /query/:recon → optional /datacleaning → /editor/querypath)
 router.get('/querypath', (req, res) => {
-  res.sendFile(path.join(editorDir, 'forms-query', req.query.recon + '.html'));
+  // Resolve aliases (e.g. download → lipdDownload) to the canonical handle so
+  // the form file name matches the registry. Fall back to the raw param.
+  const recon = reconRegistry.canonical(req.query.recon) || req.query.recon;
+  res.sendFile(path.join(editorDir, 'forms-query', recon + '.html'));
 });
 
 // POST /sendReconRequest - Submit reconstruction request
@@ -216,7 +220,7 @@ router.post('/sendReconRequest', async (req, res) => {
       let lipdQueryJson = null;
       let cleaningReportJson = null;
       let variableFilterYaml = null;
-      if ((recon === 'LMR' || recon === 'holocene_da') && isAuthenticated) {
+      if (reconRegistry.get(recon)?.behavior?.lipdProcessing && isAuthenticated) {
         console.log(`Processing LiPD data for ${recon} reconstruction...`);
         const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_${recon}`);
         const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
@@ -332,9 +336,11 @@ router.post('/sendReconRequest', async (req, res) => {
               variableFilterYaml    // null if no variable filter state
             );
 
-            // LMR & holocene_da: workflow triggered by the push to query_params.json — no explicit dispatch needed.
+            // Some recons (LMR, holocene_da) have their workflow triggered by the
+            // push to query_params.json — no explicit dispatch needed. Others
+            // (behavior.dispatch === 'workflow') need an explicit dispatch.
             let workflowRun = { id: null };
-            if (recon !== 'LMR' && recon !== 'holocene_da') {
+            if (reconRegistry.get(recon)?.behavior?.dispatch === 'workflow') {
               console.log(`Dispatching workflow for ${repoData.name}...`);
               workflowRun = await githubService.dispatchWorkflow(
                 token,
