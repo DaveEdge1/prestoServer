@@ -194,15 +194,33 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ===========================================
 
-require('./services/cleanup').startCleanupScheduler();
-require('./services/compilationUpdater').startCompilationUpdater();
+// Apply any pending DB migrations before accepting traffic. A failure here is
+// logged loudly but does NOT prevent startup — the app still serves (some
+// routes don't touch the DB), and the operator can run `node setup-db.js`
+// manually. This keeps a bad migration from crash-looping the container.
+async function autoMigrate() {
+  try {
+    const { setupDatabase } = require('./setup-db');
+    await setupDatabase();
+    logger.info('startup migrations applied (or already up to date)');
+  } catch (err) {
+    logger.error({ err }, 'startup migrations FAILED — continuing to listen; run `node setup-db.js` to investigate');
+  }
+}
 
-app.listen(config.port, () => {
-  logger.info({
-    port: config.port,
-    env: config.nodeEnv,
-    baseUrl: config.baseUrl,
-  }, 'presto orchestrator listening');
-});
+(async () => {
+  await autoMigrate();
+
+  require('./services/cleanup').startCleanupScheduler();
+  require('./services/compilationUpdater').startCompilationUpdater();
+
+  app.listen(config.port, () => {
+    logger.info({
+      port: config.port,
+      env: config.nodeEnv,
+      baseUrl: config.baseUrl,
+    }, 'presto orchestrator listening');
+  });
+})();
 
 module.exports = app;

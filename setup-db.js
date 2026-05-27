@@ -112,4 +112,10 @@ async function setupDatabase() {
   }
 }
 
-setupDatabase().catch(console.error);
+// Run directly (`node setup-db.js`) → execute and exit. When required by app.js
+// (auto-migrate on startup) → just export the runner.
+if (require.main === module) {
+  setupDatabase().catch(console.error);
+}
+
+module.exports = { setupDatabase };
