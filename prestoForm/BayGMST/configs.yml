@@ -1,0 +1,154 @@
+#==============================================
+# BayGMST parameter editor schema (query path).
+# Sections become form groups; each key renders an input. Field ids are
+# <section>_<key> and map to the nested config via lookup.json.
+#==============================================
+
+proxy:
+  ptype:
+    value: ALL
+    default: ALL
+    limits: null
+    options: [ALL, ALL_cached_Barboza, lake, speleothem, ice, borehole, tree, documents, hybrid, marine, coral, bivalve]
+    precision: null
+    long_name: proxy type
+    description: Which proxy archive types to include. "ALL_cached_Barboza" uses the cached reduced proxies baked into the image and ignores your LiPDverse query.
+    data_type: character
+    complexity: standard
+    URL: null
+
+  rp_method:
+    value: PCR
+    default: PCR
+    limits: null
+    options: [LASSO, PCR, sPCR, SIR, SPLS]
+    precision: null
+    long_name: reduced-proxy method
+    description: Method used to compute the reduced proxy predictors. SIR is still under construction upstream.
+    data_type: character
+    complexity: standard
+    URL: null
+
+stan:
+  iter_warmup:
+    value: 500
+    default: 500
+    limits: [100, 2000]
+    options: null
+    precision: 1
+    long_name: warmup iterations
+    description: Number of Stan warmup (burn-in) iterations per chain.
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+  iter_sampling:
+    value: 1500
+    default: 1500
+    limits: [1000, 5000]
+    options: null
+    precision: 1
+    long_name: sampling iterations
+    description: Number of Stan sampling iterations per chain (must be at least 1000).
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+  chains:
+    value: 4
+    default: 4
+    limits: [1, 8]
+    options: null
+    precision: 1
+    long_name: chains
+    description: Number of Stan MCMC chains.
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+  parallel_chains:
+    value: 2
+    default: 2
+    limits: [1, 8]
+    options: null
+    precision: 1
+    long_name: parallel chains
+    description: Number of chains to run in parallel.
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+partition:
+  t1:
+    value: 1001
+    default: 1001
+    limits: [1, 2000]
+    options: null
+    precision: 1
+    long_name: window start (CE)
+    description: First year of the full reconstruction window (years CE).
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+  t2:
+    value: 1850
+    default: 1850
+    limits: [1, 2000]
+    options: null
+    precision: 1
+    long_name: instrumental start (CE)
+    description: First year of the instrumental period; earlier years are treated as missing.
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+  t3:
+    value: 2000
+    default: 2000
+    limits: [1, 2000]
+    options: null
+    precision: 1
+    long_name: window end (CE)
+    description: Final year of the full reconstruction window (years CE).
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+co2:
+  c0:
+    value: 280
+    default: 280
+    limits: [200, 400]
+    options: null
+    precision: 1
+    long_name: preindustrial CO2 (ppm)
+    description: Preindustrial CO2 reference concentration for the forcing transform G = co2_coef * log(CO2 / c0).
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+  co2_coef:
+    value: 5.35
+    default: 5.35
+    limits: [1, 10]
+    options: null
+    precision: 0.01
+    long_name: CO2 coefficient
+    description: Scaling coefficient in the CO2 forcing transform.
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+vol:
+  vol_coef:
+    value: 25.0
+    default: 25.0
+    limits: [0, 100]
+    options: null
+    precision: 0.1
+    long_name: volcanic coefficient
+    description: Scaling coefficient in the volcanic forcing transform V = -|vol_coef| * (1 - exp(-V)).
+    data_type: numeric
+    complexity: advanced
+    URL: null

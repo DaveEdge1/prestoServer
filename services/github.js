@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const config = require('../config');
+const reconRegistry = require('../presto/reconRegistry');
 
 /**
  * Encrypt a GitHub access token for secure storage
@@ -110,15 +111,9 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
   const userInfo = await getUserInfo(token);
   const owner = userInfo.username;
 
-  // Template repository mapping
-  const templates = {
-    'LMR':          { owner: 'DaveEdge1', name: 'LMR2' },
-    'lipdDownload': { owner: 'DaveEdge1', name: 'lipd-downloads' },
-    'holocene_da':  { owner: 'DaveEdge1', name: 'presto-holocene_da' },
-    'temp12k':      { owner: 'DaveEdge1', name: 'temp12k_template' } // TODO: create this
-  };
-
-  const template = templates[recon];
+  // Template repository mapping comes from the recon registry.
+  const entry = reconRegistry.get(recon);
+  const template = entry && entry.template;
   if (!template) {
     throw new Error(`No template repository configured for ${recon}`);
   }
@@ -148,8 +143,8 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
   // build_type:'workflow' doesn't require a gh-pages branch to exist, so this
   // works immediately at repo creation time. configure-pages@v5 defaults to
   // enablement:false and won't create Pages on its own.
-  // Downloads don't publish Pages — skip for lipdDownload.
-  if (recon !== 'lipdDownload') {
+  // Downloads don't publish Pages — controlled per recon via behavior.publishesPages.
+  if (entry.behavior.publishesPages) {
     try {
       await octokit.rest.repos.createPagesSite({
         owner,
@@ -324,15 +319,18 @@ function generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJso
 async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, configData, queryParamsJson = null, cleaningReportJson = null, variableFilterYaml = null) {
   console.log('Updating repository configuration...');
 
-  const configPath = recon === 'LMR' ? 'lmr_configs.yml' : 'config/user_config.yml';
+  const entry = reconRegistry.get(recon);
+  const isDownload = reconRegistry.canonical(recon) === 'lipdDownload';
+  const configPath = entry.behavior.configPath;
 
   // For LMR, generate a user_config.yml with proper CFR key names and types.
   // This is mounted as /app/user_config.yml and merged over the base lmr_configs.yml
   // by cfr_main_code.py — so only override keys need to be present here.
+  // configStrategy 'none' (e.g. lipdDownload) commits no config file at all.
   let configYaml = null;
-  if (recon !== 'lipdDownload') {
+  if (entry.configStrategy !== 'none') {
     let effectiveConfigData;
-    if (recon === 'LMR') {
+    if (entry.configStrategy === 'lmr') {
       const toIntArray = arr => (Array.isArray(arr) ? arr : []).map(v => parseInt(v, 10)).filter(n => !isNaN(n));
       effectiveConfigData = {
         recon_period:            toIntArray(configData.recon_period).length   ? toIntArray(configData.recon_period)            : [0, 2000],
@@ -345,13 +343,14 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
         proxydb_path:            '/app/lipd_cfr.pkl',
         save_dirpath:            '/recons',
       };
-    } else if (recon === 'holocene_da') {
+    } else if (entry.configStrategy === 'holocene_da') {
       // Translate standardized form values to flat config_default.yml keys
-      // using the lookup.json mapping (same logic as prestoForm/holocene_da/translate.js)
+      // using the recon's lookup.json mapping (same logic as the recon's
+      // prestoForm/<handle>/translate.js).
       const lookup = JSON.parse(fs.readFileSync(
-        path.join(__dirname, '..', 'prestoForm', 'holocene_da', 'lookup.json'), 'utf8'));
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'lookup.json'), 'utf8'));
       const defaults = yaml.load(fs.readFileSync(
-        path.join(__dirname, '..', 'prestoForm', 'holocene_da', 'config_default.yml'), 'utf8'));
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'config_default.yml'), 'utf8'));
 
       for (const [formKey, mapping] of Object.entries(lookup)) {
         // configData comes from req.body which has the standardized nested structure
@@ -384,6 +383,43 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
       // Hardcode data_dir so paths resolve to /proxies/... and /models/...
       defaults.data_dir = '/';
       effectiveConfigData = defaults;
+    } else if (entry.configStrategy === 'nested') {
+      // General nested-config translation: lookup.json maps each standardized
+      // form key to a `path` array into config_default.yml; set each leaf,
+      // coercing to the type of the existing default. Reusable by any recon
+      // whose container reads a nested config (e.g. BayGMST's user_config.yml).
+      const lookup = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'lookup.json'), 'utf8'));
+      const defaults = yaml.load(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'config_default.yml'), 'utf8'));
+
+      for (const [formKey, mapping] of Object.entries(lookup)) {
+        const pathArr = mapping && mapping.path;
+        if (!Array.isArray(pathArr) || pathArr.length === 0) continue;
+        if (configData[formKey] === undefined) continue;
+
+        let val = configData[formKey];
+        if (val && typeof val === 'object' && 'value' in val) val = val.value;
+
+        // Walk to the parent node, creating intermediate objects if needed.
+        let node = defaults;
+        for (let i = 0; i < pathArr.length - 1; i++) {
+          if (node[pathArr[i]] == null || typeof node[pathArr[i]] !== 'object') {
+            node[pathArr[i]] = {};
+          }
+          node = node[pathArr[i]];
+        }
+        const leaf = pathArr[pathArr.length - 1];
+
+        // Coerce the form string to match the existing default's type.
+        const cur = node[leaf];
+        if (typeof cur === 'number') val = Number(val);
+        else if (typeof cur === 'boolean') val = (val === true || val === 'true');
+        if (val === 'null' || val === 'None') val = null;
+
+        node[leaf] = val;
+      }
+      effectiveConfigData = defaults;
     } else {
       effectiveConfigData = configData;
     }
@@ -414,7 +450,7 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
     const readmeContent = Buffer.from(readmeFile.content, 'base64').toString('utf8');
 
     let updatedReadme;
-    if (recon === 'lipdDownload' && queryParamsJson) {
+    if (isDownload && queryParamsJson) {
       updatedReadme = generateLipdDownloadReadme(uniqueID, queryParamsJson, cleaningReportJson);
     } else {
       updatedReadme = readmeContent.replace(/Reconstruction ID:.*/, `Reconstruction ID: ${uniqueID}`);
@@ -425,22 +461,22 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
     const treeItems = [
       { path: 'README.md', mode: '100644', type: 'blob', content: updatedReadme },
     ];
-    if (recon !== 'lipdDownload') {
+    if (entry.configStrategy !== 'none') {
       treeItems.push({ path: configPath, mode: '100644', type: 'blob', content: configYaml });
     }
-    if ((recon === 'LMR' || recon === 'lipdDownload' || recon === 'holocene_da') && queryParamsJson) {
+    if (entry.behavior.commitsQueryParams && queryParamsJson) {
       treeItems.push({ path: 'query_params.json', mode: '100644', type: 'blob', content: queryParamsJson });
     }
     if (cleaningReportJson) {
       treeItems.push({ path: 'cleaning_report.json', mode: '100644', type: 'blob', content: cleaningReportJson });
     }
-    // variable_filter.yaml — committed for LMR and holocene_da so the workflow
-    // can inspect which variable names the user included/excluded. Not used
-    // by lipdDownload (no reconstruction step there).
-    if (variableFilterYaml && (recon === 'LMR' || recon === 'holocene_da')) {
+    // variable_filter.yaml — committed when the recon's workflow inspects which
+    // variable names the user included/excluded. Not used by lipdDownload
+    // (no reconstruction step there).
+    if (variableFilterYaml && entry.behavior.commitsVariableFilter) {
       treeItems.push({ path: 'variable_filter.yaml', mode: '100644', type: 'blob', content: variableFilterYaml });
     }
-    if (recon === 'LMR') {
+    if (entry.configStrategy === 'lmr') {
       const scriptsDir = path.join(__dirname, '..', 'templates', 'scripts');
       for (const script of ['lipd_to_pdb.py', 'combine_seeds.py']) {
         const content = fs.readFileSync(path.join(scriptsDir, script), 'utf8');

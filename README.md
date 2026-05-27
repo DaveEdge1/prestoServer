@@ -73,21 +73,11 @@ Worker containers published as `davidedge/lipd_webapps:<tag>` (lipdGenerator, li
 
 ## Adding a new reconstruction
 
-1. **Build a reconstruction container** that runs against the [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md). It should read a params file (yaml or json) and write results to a known directory.
+Reconstruction methods are registered in a single source of truth,
+`presto/reconRegistry.json` — in the common case, adding a method needs **no
+server code**, just a new `prestoForm/<handle>/` folder and one registry entry.
 
-2. **Create a public GitHub template repo** containing:
-   - `.github/workflows/<recon>.yml` that checks out the repo, pulls the container, mounts the params/results dirs, and (optionally) publishes results to GitHub Pages.
-   - Default `configs.yml` and any expected input files.
-   - See existing templates: [`DaveEdge1/LMR2`](https://github.com/DaveEdge1/LMR2), [`DaveEdge1/presto-holocene_da`](https://github.com/DaveEdge1/presto-holocene_da), [`DaveEdge1/lipd-downloads`](https://github.com/DaveEdge1/lipd-downloads).
-
-3. **Register the recon in this repo:**
-   - Add `prestoForm/<handle>/` with:
-     - `formIntro.txt` — intro text shown to users ([example](prestoForm/holocene_da/formIntro.txt))
-     - `configs.yml` — the standardized PReSto config users will edit
-     - `lookup.json` + `translate.js` — if your container expects a non-standard config format, these map between the standard form and your format ([example](prestoForm/holocene_da/translate.js))
-   - Add an entry in `prestoForm/index.html` with title, duration, proxy DB(s), model(s), method name, and DOI.
-   - Add the template-repo mapping in `services/github.js` (search for `templates = {`).
-   - Add the recon title to `jsonEditor/reconTitles.json` and run `node jsonEditor/writeForm.js` to regenerate the parameter editor.
-
-4. **Test the end-to-end flow** with a real GitHub account: log in, fill the form, watch the fork get created in your account, watch the workflow run.
+See **[docs/adding-a-reconstruction.md](docs/adding-a-reconstruction.md)** for the
+full guide, and open your PR with the
+[pull request template](.github/PULL_REQUEST_TEMPLATE.md) checklist.
 

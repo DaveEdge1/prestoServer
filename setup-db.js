@@ -1,12 +1,39 @@
 /**
- * Database Setup Script
- * Checks if tables exist and runs migrations if needed
+ * Database Setup / Migration Runner
+ *
+ * Applies every db/migrations/NNN_*.sql in numeric order exactly once, tracking
+ * applied files in a `schema_migrations` table. Safe to run repeatedly.
+ *
+ * First-run backfill: on a database that was set up before this runner existed
+ * (the `users` table already exists but `schema_migrations` does not), the
+ * schema-creating migrations 001/002 are recorded as already-applied so they
+ * are NOT re-run (CREATE TABLE would fail). Later migrations (004, 005, ...)
+ * are idempotent ALTERs and run normally.
  */
 
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
+
+const MIGRATIONS_DIR = path.join(__dirname, 'db', 'migrations');
+
+// Migrations that predate this runner (and the schema_migrations table). On a
+// database whose schema already exists, they are assumed already applied — the
+// live schema reflects them, or a later migration supersedes them — so we never
+// replay them. (Notably 004 sets a restrictive recon_type ENUM that conflicts
+// with current data and is superseded by 005's VARCHAR conversion.)
+const LEGACY_MIGRATIONS = [
+  '001_github_integration.sql',
+  '002_add_hybrid_auth_support.sql',
+  '004_add_lmr_recon_type.sql',
+];
+
+function migrationFiles() {
+  return fs.readdirSync(MIGRATIONS_DIR)
+    .filter(f => /^\d+.*\.sql$/.test(f))
+    .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+}
 
 async function setupDatabase() {
   console.log('Connecting to database...');
@@ -20,61 +47,59 @@ async function setupDatabase() {
   });
 
   try {
-    // Check if tables exist
-    console.log('\nChecking existing tables...');
-    const [tables] = await connection.query("SHOW TABLES LIKE '%users%'");
+    // Ensure the migration-tracking table exists.
+    await connection.query(
+      `CREATE TABLE IF NOT EXISTS schema_migrations (
+        filename VARCHAR(255) NOT NULL PRIMARY KEY,
+        applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`
+    );
 
-    if (tables.length === 0) {
-      console.log('❌ Tables not found. Running migrations...\n');
-
-      // Run migration 001
-      console.log('Running migration 001_github_integration.sql...');
-      const migration001 = fs.readFileSync(
-        path.join(__dirname, 'db', 'migrations', '001_github_integration.sql'),
-        'utf8'
-      );
-      await connection.query(migration001);
-      console.log('✅ Migration 001 completed');
-
-      // Run migration 002
-      console.log('Running migration 002_add_hybrid_auth_support.sql...');
-      const migration002 = fs.readFileSync(
-        path.join(__dirname, 'db', 'migrations', '002_add_hybrid_auth_support.sql'),
-        'utf8'
-      );
-      await connection.query(migration002);
-      console.log('✅ Migration 002 completed');
-
-    } else {
-      console.log('✅ Tables already exist');
+    // Backfill: if the schema already exists, mark the legacy (pre-runner)
+    // migrations as applied so we never recreate tables or replay the outdated
+    // recon_type ENUM. INSERT IGNORE keeps this idempotent and lets it recover
+    // if a prior run recorded only some of them.
+    const [users] = await connection.query("SHOW TABLES LIKE 'users'");
+    if (users.length > 0) {
+      for (const f of LEGACY_MIGRATIONS) {
+        await connection.query('INSERT IGNORE INTO schema_migrations (filename) VALUES (?)', [f]);
+      }
     }
 
-    // Verify all tables
-    console.log('\nVerifying tables...');
-    const [allTables] = await connection.query("SHOW TABLES");
-    const tableNames = allTables.map(row => Object.values(row)[0]);
+    const [appliedRows] = await connection.query('SELECT filename FROM schema_migrations');
+    const applied = new Set(appliedRows.map(r => r.filename));
 
+    // Apply any migration not yet recorded, in numeric order.
+    const files = migrationFiles();
+    let ranAny = false;
+    for (const file of files) {
+      if (applied.has(file)) continue;
+      console.log(`Running migration ${file}...`);
+      const sql = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8');
+      await connection.query(sql);
+      await connection.query('INSERT INTO schema_migrations (filename) VALUES (?)', [file]);
+      console.log(`✅ ${file} applied`);
+      ranAny = true;
+    }
+    if (!ranAny) console.log('✅ No pending migrations — schema up to date.');
+
+    // Verify expected tables / columns.
+    console.log('\nVerifying tables...');
+    const [allTables] = await connection.query('SHOW TABLES');
+    const tableNames = allTables.map(row => Object.values(row)[0]);
     const requiredTables = ['users', 'github_tokens', 'reconstruction_jobs', 'webhook_events'];
     const missingTables = requiredTables.filter(t => !tableNames.includes(t));
-
     if (missingTables.length > 0) {
       console.log('❌ Missing tables:', missingTables.join(', '));
     } else {
       console.log('✅ All required tables exist:', requiredTables.join(', '));
     }
 
-    // Check reconstruction_jobs columns
-    console.log('\nChecking reconstruction_jobs columns...');
-    const [columns] = await connection.query("SHOW COLUMNS FROM reconstruction_jobs");
-    const columnNames = columns.map(c => c.Field);
-
-    const requiredColumns = ['auth_type', 'is_anonymous', 'github_org'];
-    const hasHybridColumns = requiredColumns.every(col => columnNames.includes(col));
-
-    if (hasHybridColumns) {
-      console.log('✅ Hybrid auth columns exist:', requiredColumns.join(', '));
-    } else {
-      console.log('❌ Missing hybrid auth columns');
+    const [reconTypeCol] = await connection.query(
+      "SHOW COLUMNS FROM reconstruction_jobs LIKE 'recon_type'"
+    );
+    if (reconTypeCol.length > 0) {
+      console.log(`✅ recon_type column type: ${reconTypeCol[0].Type}`);
     }
 
     console.log('\n✅ Database setup complete!');
@@ -87,4 +112,10 @@ async function setupDatabase() {
   }
 }
 
-setupDatabase().catch(console.error);
+// Run directly (`node setup-db.js`) → execute and exit. When required by app.js
+// (auto-migrate on startup) → just export the runner.
+if (require.main === module) {
+  setupDatabase().catch(console.error);
+}
+
+module.exports = { setupDatabase };

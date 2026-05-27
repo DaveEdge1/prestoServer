@@ -1,55 +1,20 @@
 /**
  * Forms routes (was formServer.js)
- * Configuration forms and file uploads
+ * Configuration forms and the reconstruction-method picker feed.
  */
 
 const express = require('express');
 const router = express.Router();
-const fs = require('fs');
 const path = require('path');
-const YAML = require('yaml');
-const multer = require('multer');
-const config = require('../config');
+const reconRegistry = require('../presto/reconRegistry');
 
 const formDir = path.join(__dirname, '..', 'prestoForm');
 
-// EJS helpers
+// EJS helpers (kept for any view that requires them at load time)
 const ejs_helpers = require(path.join(formDir, 'helpers.js'));
-
-// Multer storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads');
-  },
-  filename: function (req, file, cb) {
-    cb(null, 'config_default.yml');
-  }
-});
-
-const maxSize = 1 * 1000 * 10;
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: maxSize },
-  fileFilter: function (req, file, cb) {
-    const filetypes = /json|yml/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
-    if (extname) {
-      return cb(null, true);
-    }
-
-    cb('Error: File upload only supports the following filetypes - ' + filetypes);
-  }
-}).single('conf');
 
 // Serve static files from prestoForm/public
 router.use('/', express.static(path.join(formDir, 'public')));
-
-// Track current reconstruction picker (for legacy support)
-let reconPicker = '';
-let parsedUser = '';
-let parsedDomain = '';
 
 // GET /down - Maintenance page
 router.get('/down', (req, res) => {
@@ -65,6 +30,16 @@ router.get('/', (req, res) => {
   res.sendFile(path.join(formDir, 'index.html'));
 });
 
+// GET /recons.json - Enabled reconstruction methods for the picker + comparison
+// table on index.html. Sourced from the recon registry (single source of truth),
+// so a new method appears here automatically once registered.
+router.get('/recons.json', (req, res) => {
+  const recons = reconRegistry
+    .list({ enabledOnly: true })
+    .map(e => Object.assign({ handle: e.handle }, e.ui));
+  res.json(recons);
+});
+
 // GET /query - Query parameter info
 router.get('/query', (req, res) => {
   res.send(req.query.id + '<br>' + req.query.num);
@@ -78,38 +53,6 @@ router.get('/getUserInfo', (req, res) => {
 // POST /getUserInfo - Get user info form
 router.post('/getUserInfo', (req, res) => {
   res.sendFile(path.join(formDir, 'index2.html'));
-});
-
-// GET /configDownload - Download config template
-router.get('/configDownload', (req, res) => {
-  if (reconPicker === 'holocene_da') {
-    const s = fs.readFileSync(
-      path.join(formDir, 'holocene_da', 'holoceneDA_configs_standardized.yml'),
-      'utf8'
-    );
-    res.send(YAML.parse(s));
-  }
-  if (reconPicker === 'temp12k') {
-    const s = fs.readFileSync(path.join(formDir, 'temp12k', 'params.json'), 'utf8');
-    res.send(JSON.parse(s));
-    console.log(JSON.parse(s));
-  }
-});
-
-// POST /uploadConfigs - Upload configuration file
-router.post('/uploadConfigs', (req, res, next) => {
-  upload(req, res, (err) => {
-    if (err) {
-      res.send(err);
-    } else {
-      // Build download path using BASE_URL
-      const downloadpath = `${config.baseUrl}/reconstruct/${reconPicker}/${parsedUser}/${parsedDomain}/manual`;
-      res.writeHead(302, {
-        Location: downloadpath
-      });
-      res.end();
-    }
-  });
 });
 
 module.exports = router;

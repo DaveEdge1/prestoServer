@@ -1,0 +1,14 @@
+{
+  "proxy_ptype":            { "path": ["ptype"] },
+  "proxy_rp_method":        { "path": ["rp_method"] },
+  "stan_iter_warmup":       { "path": ["stan_params", "iter_warmup"] },
+  "stan_iter_sampling":     { "path": ["stan_params", "iter_sampling"] },
+  "stan_chains":            { "path": ["stan_params", "chains"] },
+  "stan_parallel_chains":   { "path": ["stan_params", "parallel_chains"] },
+  "partition_t1":           { "path": ["partition_years", "t1"] },
+  "partition_t2":           { "path": ["partition_years", "t2"] },
+  "partition_t3":           { "path": ["partition_years", "t3"] },
+  "co2_c0":                 { "path": ["co2_params", "c0"] },
+  "co2_co2_coef":           { "path": ["co2_params", "co2_coef"] },
+  "vol_vol_coef":           { "path": ["vol_params", "vol_coef"] }
+}

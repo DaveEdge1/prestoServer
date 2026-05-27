@@ -1,0 +1,35 @@
+# BayGMST user configuration (PReSto defaults).
+# The server merges the user's form selections over these defaults and commits
+# the result to config/user_config.yml in the reconstruction repo, where the
+# reconstruct job mounts it at /app/config/user_config.yml.
+
+# Reduced-proxy selection. "ALL_cached_Barboza" uses cached reduced-proxy CSVs
+# baked into the image (the LiPDverse query is ignored on that path). Any other
+# value runs scripts/lipd_to_baygmst.py on the LiPDverse pickle.
+ptype: "ALL"
+
+# Reduced-proxy method: "LASSO", "PCR", "sPCR", "SIR", or "SPLS".
+rp_method: "PCR"
+
+# Stan sampler controls. iter_sampling must be >= 1000.
+stan_params:
+  iter_warmup: 500
+  iter_sampling: 1500
+  chains: 4
+  parallel_chains: 2
+
+# Reconstruction window (years CE). years <- t1:t3; years < t2 are treated as
+# the missing pre-instrumental period.
+partition_years:
+  t1: 1001
+  t2: 1850
+  t3: 2000
+
+# CO2 forcing transform:  G = co2_coef * log(CO2 / c0)
+co2_params:
+  c0: 280
+  co2_coef: 5.35
+
+# Volcanic forcing transform:  V = -|vol_coef| * (1 - exp(-V))
+vol_params:
+  vol_coef: 25.0

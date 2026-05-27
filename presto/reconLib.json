@@ -1,28 +1,12 @@
 {
-  "holocene_da": {
-    "title": "Holocene DA reconstruction",
-    "paramsCon": "/config_default.yml",
-    "resultsDir": "/results",
-    "github": "https://github.com/Holocene-Reconstruction/Holocene-code",
-    "conTag": "davidedge/lipd_webapps:holocene_da",
-    "translate": "true",
-    "workingParams": "/root/presto/prestoForm/holocene_da/config_default.yml"
-  },
-  "temp12k": {
-    "title": "Temperature 12k Standard Calibrated Composite reconstruction",
-    "paramsCon": "/params.json",
-    "resultsDir": "/output",
-    "github": "https://github.com/paleopresto/temp12k-regional-composites",
-    "conTag": "davidedge/lipd_webapps:temp12k",
-    "translate": "false"
-  },
-  "graph_em": {
-    "title": "GraphEM reconstruction",
-    "paramsCon": "/configs.yml",
-    "resultsDir": "/recons",
-    "github": "https://fzhu2e.github.io/cfr/ug-graphem.html",
-    "conTag": "davidedge/lipd_webapps:graph_em",
-    "translate": "false"
+  "lipdDownload": {
+    "title": "LiPD download",
+    "paramsCon": "",
+    "resultsDir": "",
+    "github": "https://lipdverse.org/",
+    "conTag": "",
+    "translate": false,
+    "workingParams": ""
   },
   "download": {
     "title": "LiPD download",
@@ -30,7 +14,26 @@
     "resultsDir": "",
     "github": "https://lipdverse.org/",
     "conTag": "",
-    "translate": "false"
+    "translate": false,
+    "workingParams": ""
+  },
+  "downloadNew": {
+    "title": "LiPD download",
+    "paramsCon": "",
+    "resultsDir": "",
+    "github": "https://lipdverse.org/",
+    "conTag": "",
+    "translate": false,
+    "workingParams": ""
+  },
+  "holocene_da": {
+    "title": "Holocene DA reconstruction",
+    "paramsCon": "/config_default.yml",
+    "resultsDir": "/results",
+    "github": "https://github.com/Holocene-Reconstruction/Holocene-code",
+    "conTag": "davidedge/lipd_webapps:holocene_da",
+    "translate": true,
+    "workingParams": "/root/presto/prestoForm/holocene_da/config_default.yml"
   },
   "LMR": {
     "title": "Last Millennium Reanalysis (LMR) reconstruction",
@@ -38,6 +41,34 @@
     "resultsDir": "/recons",
     "github": "https://github.com/fzhu2e/cfr",
     "conTag": "davidedge/lmr2:latest",
-    "translate": "false"
+    "translate": false,
+    "workingParams": ""
+  },
+  "BayGMST": {
+    "title": "Bayesian GMST (BayGMST) reconstruction",
+    "paramsCon": "/app/config/user_config.yml",
+    "resultsDir": "/recons",
+    "github": "https://github.com/DaveEdge1/presto-BayGMST",
+    "conTag": "davidedge/lipd_webapps:baygmst",
+    "translate": false,
+    "workingParams": ""
+  },
+  "temp12k": {
+    "title": "Temperature 12k Standard Calibrated Composite reconstruction",
+    "paramsCon": "/params.json",
+    "resultsDir": "/output",
+    "github": "https://github.com/paleopresto/temp12k-regional-composites",
+    "conTag": "davidedge/lipd_webapps:temp12k",
+    "translate": false,
+    "workingParams": ""
+  },
+  "graph_em": {
+    "title": "GraphEM reconstruction",
+    "paramsCon": "/configs.yml",
+    "resultsDir": "/recons",
+    "github": "https://fzhu2e.github.io/cfr/ug-graphem.html",
+    "conTag": "davidedge/lipd_webapps:graph_em",
+    "translate": false,
+    "workingParams": ""
   }
 }

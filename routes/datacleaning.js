@@ -11,13 +11,25 @@ const path = require('path');
 const axios = require('axios');
 const YAML = require('yaml');
 const config = require('../config');
+const reconRegistry = require('../presto/reconRegistry');
 
 const PROXY_ANALYSIS_URL = process.env.PROXY_ANALYSIS_URL || 'http://proxy-analysis:8090';
 const queryDir = path.join(__dirname, '..', 'query');
 
-// GET / - Serve the data cleaning page
+// Cache the template once; the dedup strategy is injected per-request.
+const datacleaningTemplate = fs.readFileSync(path.join(queryDir, 'datacleaning.html'), 'utf8');
+
+// GET / - Serve the data cleaning page. Injects the recon's dedupStrategy so the
+// client (datacleaningApp.js) can pick the right duplicate-ranking strategy
+// without hardcoding recon names.
 router.get('/', (req, res) => {
-  res.sendFile(path.join(queryDir, 'datacleaning.html'));
+  const entry = reconRegistry.get(req.query.recon);
+  const dedupStrategy = (entry && entry.dedupStrategy) || 'neutral';
+  const html = datacleaningTemplate.replace(
+    '<!--DEDUP_CONFIG-->',
+    `<script>var DEDUP_STRATEGY = ${JSON.stringify(dedupStrategy)};</script>`
+  );
+  res.type('html').send(html);
 });
 
 // POST /analyze - Call proxy-analysis service and return results

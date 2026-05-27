@@ -1,0 +1,293 @@
+{
+  "lipdDownload": {
+    "handle": "lipdDownload",
+    "aliases": ["download", "downloadNew"],
+    "enabled": true,
+    "order": 10,
+    "ui": {
+      "dropdownLabel": "LiPD Download",
+      "category": "Data Only",
+      "title": "Download LiPDs",
+      "time": "NA",
+      "proxies": "NA",
+      "models": "NA",
+      "methods": "NA",
+      "doi": "https://doi.org/10.5194/cp-12-1093-2016",
+      "language": "NA"
+    },
+    "lib": {
+      "title": "LiPD download",
+      "paramsCon": "",
+      "resultsDir": "",
+      "github": "https://lipdverse.org/",
+      "conTag": "",
+      "translate": false,
+      "workingParams": ""
+    },
+    "editorTitle": null,
+    "template": { "owner": "DaveEdge1", "name": "lipd-downloads" },
+    "pageConfig": {
+      "defaultMode": "query",
+      "archivedCompilation": { "name": "", "version": "" },
+      "compilationFilter": "",
+      "timeSlider": { "min": -70, "max": 9950, "step": 10 }
+    },
+    "behavior": {
+      "publishesPages": false,
+      "dispatch": "push",
+      "lipdProcessing": false,
+      "commitsQueryParams": true,
+      "commitsVariableFilter": false,
+      "reconPredicate": null,
+      "runtimeHiddenKeys": [],
+      "configPath": null
+    },
+    "dedupStrategy": "neutral",
+    "configStrategy": "none",
+    "runtimeKeyStrategy": "none"
+  },
+  "holocene_da": {
+    "handle": "holocene_da",
+    "aliases": [],
+    "enabled": true,
+    "order": 20,
+    "ui": {
+      "dropdownLabel": "Holocene DA",
+      "category": "Reconstructions",
+      "title": "Holocene DA",
+      "time": "0-12,000 years",
+      "proxies": "Temperature 12k proxy database",
+      "models": "TraCE-21ka and a HadCM3 transient deglacial simulation",
+      "methods": "Data Assimilation",
+      "doi": "https://doi.org/10.5194/cp-18-2599-2022",
+      "language": "Python",
+      "showInTable": true,
+      "timeHtml": "0-12,000 years BP",
+      "proxiesHtml": "<a href=\"https://lipdverse.org/project/temp12k/\" target=\"_blank\">Temperature 12k proxy database</a>",
+      "modelsHtml": "<a href=\"https://www.earthsystemgrid.org/project/trace.html\" target=\"_blank\">TraCE-21ka</a> and a <a href=\"https://www.metoffice.gov.uk/research/approach/modelling-systems/unified-model/climate-models/hadcm3\" target=\"_blank\">HadCM3</a> transient deglacial simulation",
+      "publicationHtml": "<a href=\"https://doi.org/10.5194/cp-18-2599-2022\" target=\"_blank\">Erb et al., 2022</a>"
+    },
+    "lib": {
+      "title": "Holocene DA reconstruction",
+      "paramsCon": "/config_default.yml",
+      "resultsDir": "/results",
+      "github": "https://github.com/Holocene-Reconstruction/Holocene-code",
+      "conTag": "davidedge/lipd_webapps:holocene_da",
+      "translate": true,
+      "workingParams": "/root/presto/prestoForm/holocene_da/config_default.yml"
+    },
+    "editorTitle": "Holocene Data Assimilation",
+    "template": { "owner": "DaveEdge1", "name": "presto-holocene_da" },
+    "pageConfig": {
+      "defaultMode": "archive",
+      "archivedCompilation": { "name": "Temp12k", "version": "1_0_2" },
+      "compilationFilter": "Temp12k-1_2_0",
+      "interpVarDefault": "temperature",
+      "minRecordLength": 100,
+      "unitsFilter": "degC",
+      "timeSlider": { "min": -70, "max": 9950, "step": 10 }
+    },
+    "behavior": {
+      "publishesPages": true,
+      "dispatch": "push",
+      "lipdProcessing": true,
+      "commitsQueryParams": true,
+      "commitsVariableFilter": true,
+      "reconPredicate": { "unitsEq": "degC" },
+      "runtimeHiddenKeys": ["data_dir"],
+      "configPath": "config/user_config.yml"
+    },
+    "dedupStrategy": "neutral",
+    "configStrategy": "holocene_da",
+    "runtimeKeyStrategy": "lookupInverse"
+  },
+  "LMR": {
+    "handle": "LMR",
+    "aliases": [],
+    "enabled": true,
+    "order": 30,
+    "ui": {
+      "dropdownLabel": "LMR (Last Millennium Reanalysis)",
+      "category": "Reconstructions",
+      "title": "LMR (Last Millennium Reanalysis)",
+      "time": "0-2,000 years BP",
+      "proxies": "PAGES 2k proxy database",
+      "models": "CCSM4 last millennium simulation (past1000)",
+      "methods": "Data assimilation with Climate Field Reconstruction (CFR)",
+      "doi": "https://doi.org/10.5194/cp-15-1251-2019",
+      "language": "Python",
+      "showInTable": true,
+      "proxiesHtml": "<a href=\"https://lipdverse.org/project/pages2k/\" target=\"_blank\">PAGES 2k proxy database</a>",
+      "modelsHtml": "<a href=\"https://www.cesm.ucar.edu/models/ccsm4.0/\" target=\"_blank\">CCSM4</a> last millennium simulation (past1000)",
+      "publicationHtml": "<a href=\"https://doi.org/10.5194/cp-15-1251-2019\" target=\"_blank\">Tardif et al., 2019</a>; <a href=\"https://doi.org/10.1002/2016JD024751\" target=\"_blank\">Hakim et al., 2016</a>"
+    },
+    "lib": {
+      "title": "Last Millennium Reanalysis (LMR) reconstruction",
+      "paramsCon": "/lmr_configs.yml",
+      "resultsDir": "/recons",
+      "github": "https://github.com/fzhu2e/cfr",
+      "conTag": "davidedge/lmr2:latest",
+      "translate": false,
+      "workingParams": ""
+    },
+    "editorTitle": "Last Millennium Reanalysis",
+    "template": { "owner": "DaveEdge1", "name": "LMR2" },
+    "pageConfig": {
+      "defaultMode": "archive",
+      "archivedCompilation": { "name": "Pages2kTemperature", "version": "2_2_0" },
+      "compilationFilter": "Pages2k",
+      "interpVarDefault": "temperature",
+      "extendBackDefault": 100,
+      "timeSlider": { "min": -70, "max": 1950, "step": 10 }
+    },
+    "behavior": {
+      "publishesPages": true,
+      "dispatch": "push",
+      "lipdProcessing": true,
+      "commitsQueryParams": true,
+      "commitsVariableFilter": true,
+      "reconPredicate": null,
+      "runtimeHiddenKeys": ["proxydb_path", "save_dirpath"],
+      "configPath": "lmr_configs.yml"
+    },
+    "dedupStrategy": "lmr",
+    "configStrategy": "lmr",
+    "runtimeKeyStrategy": "lmr"
+  },
+  "BayGMST": {
+    "handle": "BayGMST",
+    "aliases": [],
+    "enabled": true,
+    "order": 35,
+    "ui": {
+      "dropdownLabel": "BayGMST",
+      "category": "New methods, in testing",
+      "title": "BayGMST",
+      "time": "1,001-2,000 CE",
+      "proxies": "PAGES 2k proxy database",
+      "models": "NA (Bayesian hierarchical model)",
+      "methods": "Bayesian global mean surface temperature (STAN)",
+      "doi": "",
+      "language": "R",
+      "showInTable": true,
+      "proxiesHtml": "<a href=\"https://lipdverse.org/project/pages2k/\" target=\"_blank\">PAGES 2k proxy database</a>",
+      "publicationHtml": "Bagwell et al., 2026 (In review)"
+    },
+    "lib": {
+      "title": "Bayesian GMST (BayGMST) reconstruction",
+      "paramsCon": "/app/config/user_config.yml",
+      "resultsDir": "/recons",
+      "github": "https://github.com/DaveEdge1/presto-BayGMST",
+      "conTag": "davidedge/lipd_webapps:baygmst",
+      "translate": false,
+      "workingParams": ""
+    },
+    "editorTitle": "Bayesian GMST Reconstruction",
+    "template": { "owner": "DaveEdge1", "name": "presto-BayGMST" },
+    "pageConfig": {
+      "defaultMode": "archive",
+      "archivedCompilation": { "name": "Pages2kTemperature", "version": "2_2_0" },
+      "compilationFilter": "Pages2k",
+      "interpVarDefault": "temperature",
+      "extendBackDefault": 100,
+      "timeSlider": { "min": -70, "max": 1950, "step": 10 }
+    },
+    "behavior": {
+      "publishesPages": true,
+      "dispatch": "push",
+      "lipdProcessing": true,
+      "commitsQueryParams": true,
+      "commitsVariableFilter": true,
+      "reconPredicate": null,
+      "runtimeHiddenKeys": [],
+      "configPath": "config/user_config.yml"
+    },
+    "dedupStrategy": "lmr",
+    "configStrategy": "nested",
+    "runtimeKeyStrategy": "none"
+  },
+  "temp12k": {
+    "handle": "temp12k",
+    "aliases": [],
+    "enabled": false,
+    "order": 40,
+    "ui": {
+      "dropdownLabel": "Temperature 12k Composites",
+      "category": "Reconstructions",
+      "title": "Temperature 12k Composites",
+      "time": "0-12,000 years",
+      "proxies": "Temperature 12k proxy database",
+      "models": "NA",
+      "methods": "Standard calibrated composite (SCC)",
+      "doi": "https://doi.org/10.1038/s41597-020-0445-3",
+      "language": "R"
+    },
+    "lib": {
+      "title": "Temperature 12k Standard Calibrated Composite reconstruction",
+      "paramsCon": "/params.json",
+      "resultsDir": "/output",
+      "github": "https://github.com/paleopresto/temp12k-regional-composites",
+      "conTag": "davidedge/lipd_webapps:temp12k",
+      "translate": false,
+      "workingParams": ""
+    },
+    "editorTitle": "Temp 12k Regional Composites",
+    "template": { "owner": "DaveEdge1", "name": "temp12k_template" },
+    "pageConfig": null,
+    "behavior": {
+      "publishesPages": true,
+      "dispatch": "workflow",
+      "lipdProcessing": false,
+      "commitsQueryParams": false,
+      "commitsVariableFilter": false,
+      "reconPredicate": null,
+      "runtimeHiddenKeys": [],
+      "configPath": "config/user_config.yml"
+    },
+    "dedupStrategy": "neutral",
+    "configStrategy": "passthrough",
+    "runtimeKeyStrategy": "none"
+  },
+  "graph_em": {
+    "handle": "graph_em",
+    "aliases": [],
+    "enabled": false,
+    "order": 50,
+    "ui": {
+      "dropdownLabel": "GraphEM",
+      "category": "Reconstructions",
+      "title": "GraphEM",
+      "time": "0-2,000 years",
+      "proxies": "Pages 2k proxy database",
+      "models": "NA",
+      "methods": "Graphical Expectation-Maximization algorithm",
+      "doi": "https://doi.org/10.1214/14-AOAS794",
+      "language": "Python"
+    },
+    "lib": {
+      "title": "GraphEM reconstruction",
+      "paramsCon": "/configs.yml",
+      "resultsDir": "/recons",
+      "github": "https://fzhu2e.github.io/cfr/ug-graphem.html",
+      "conTag": "davidedge/lipd_webapps:graph_em",
+      "translate": false,
+      "workingParams": ""
+    },
+    "editorTitle": "Graphical Expectation-Maximization",
+    "template": null,
+    "pageConfig": null,
+    "behavior": {
+      "publishesPages": true,
+      "dispatch": "workflow",
+      "lipdProcessing": false,
+      "commitsQueryParams": false,
+      "commitsVariableFilter": false,
+      "reconPredicate": null,
+      "runtimeHiddenKeys": [],
+      "configPath": "config/user_config.yml"
+    },
+    "dedupStrategy": "neutral",
+    "configStrategy": "passthrough",
+    "runtimeKeyStrategy": "none"
+  }
+}

@@ -11,6 +11,7 @@ const YAML = require('yaml');
 const mysql = require('mysql2/promise');
 const config = require('../config');
 const { computeTsidComplement } = require('./data');
+const reconRegistry = require('../presto/reconRegistry');
 
 const editorDir = path.join(__dirname, '..', 'jsonEditor');
 
@@ -123,26 +124,13 @@ function editConfigs(configLoc, formEdits, recon, uniqueID) {
   return path.join(configDir, 'configs.yml');
 }
 
-// Write configs and return redirect path
-function writeConfigs(recon, user, domain, jsonBody, uniqueID, language) {
-  console.log('language: ' + language);
-  const reconID = uniqueID + '_' + recon;
-
-  // Use BASE_URL for redirects
-  const downloadPath = `${config.baseUrl}/reconstruct/${recon}/${user}/${domain}/${reconID}/${language}`;
-
-  if (recon !== 'download') {
-    const configLoc = path.join(config.paths.prestoForm, recon, 'configs.yml');
-    editConfigs(configLoc, jsonBody, recon, reconID);
-  }
-
-  return downloadPath;
-}
-
 // GET /querypath - Query path form (the live editor; users always reach
 // this via /query/:recon → optional /datacleaning → /editor/querypath)
 router.get('/querypath', (req, res) => {
-  res.sendFile(path.join(editorDir, 'forms-query', req.query.recon + '.html'));
+  // Resolve aliases (e.g. download → lipdDownload) to the canonical handle so
+  // the form file name matches the registry. Fall back to the raw param.
+  const recon = reconRegistry.canonical(req.query.recon) || req.query.recon;
+  res.sendFile(path.join(editorDir, 'forms-query', recon + '.html'));
 });
 
 // POST /sendReconRequest - Submit reconstruction request
@@ -150,13 +138,14 @@ router.post('/sendReconRequest', async (req, res) => {
   console.log(req.query.uniqueID);
 
   const { recon, user, domain, uniqueID, language } = req.query;
-  const useGitHubActions = req.body.useGitHubActions === 'true';
   const isAuthenticated = !!(req.session && req.session.userId);
 
-  console.log(`Reconstruction submission - useGitHubActions: ${useGitHubActions}, isAuthenticated: ${isAuthenticated}, userId: ${req.session?.userId}, username: ${req.session?.githubUsername}`);
+  console.log(`Reconstruction submission - isAuthenticated: ${isAuthenticated}, userId: ${req.session?.userId}, username: ${req.session?.githubUsername}`);
 
-  // GitHub Actions workflow (OAuth or App)
-  if (useGitHubActions) {
+  // All reconstructions run via GitHub Actions (OAuth for logged-in users, the
+  // GitHub App for anonymous submissions). The legacy server-side execution
+  // path (writeConfigs → /reconstruct → prestoGo) has been removed.
+  {
     try {
       // ── Idempotency guard ─────────────────────────────────────────────────
       // If a row already exists for this uniqueID, the user has already
@@ -216,7 +205,7 @@ router.post('/sendReconRequest', async (req, res) => {
       let lipdQueryJson = null;
       let cleaningReportJson = null;
       let variableFilterYaml = null;
-      if ((recon === 'LMR' || recon === 'holocene_da') && isAuthenticated) {
+      if (reconRegistry.get(recon)?.behavior?.lipdProcessing && isAuthenticated) {
         console.log(`Processing LiPD data for ${recon} reconstruction...`);
         const userReconDir = path.join(config.paths.userRecons, `${uniqueID}_${recon}`);
         const archivedCompPath = path.join(userReconDir, 'archivedComp.json');
@@ -332,9 +321,11 @@ router.post('/sendReconRequest', async (req, res) => {
               variableFilterYaml    // null if no variable filter state
             );
 
-            // LMR & holocene_da: workflow triggered by the push to query_params.json — no explicit dispatch needed.
+            // Some recons (LMR, holocene_da) have their workflow triggered by the
+            // push to query_params.json — no explicit dispatch needed. Others
+            // (behavior.dispatch === 'workflow') need an explicit dispatch.
             let workflowRun = { id: null };
-            if (recon !== 'LMR' && recon !== 'holocene_da') {
+            if (reconRegistry.get(recon)?.behavior?.dispatch === 'workflow') {
               console.log(`Dispatching workflow for ${repoData.name}...`);
               workflowRun = await githubService.dispatchWorkflow(
                 token,
@@ -417,18 +408,6 @@ router.post('/sendReconRequest', async (req, res) => {
         <p><a href="javascript:history.back()">Go back</a></p>
       `);
     }
-  } else {
-    // Traditional workflow (existing code)
-    res.redirect(
-      writeConfigs(
-        req.query.recon,
-        req.query.user,
-        req.query.domain,
-        req.body,
-        req.query.uniqueID,
-        req.query.language
-      )
-    );
   }
 });
 

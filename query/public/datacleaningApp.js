@@ -1958,6 +1958,9 @@ function _bucketKey(r, effective) {
 // Returns a sort key tuple — lower sorts first. Fields that are "more is
 // better" (span, nComps) are negated.
 function _isLmrRecon() {
+  // dedupStrategy is injected by routes/datacleaning.js from the recon registry.
+  // Fall back to the recon handle for safety if the global isn't present.
+  if (typeof DEDUP_STRATEGY !== 'undefined') return DEDUP_STRATEGY === 'lmr';
   return typeof RECON === 'string' && RECON === 'LMR';
 }
 
