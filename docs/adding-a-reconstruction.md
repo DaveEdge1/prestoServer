@@ -31,7 +31,7 @@ registry and regenerate.
 
 It must read a params file (yaml or json) and write results to a known
 directory, per the
-[PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md).
+[PReSto input standard](./presto_input_standards.md).
 
 ### 2. Start from the canonical template repo
 
@@ -46,6 +46,13 @@ everything the platform expects:
   a `Dockerfile` + `environment.yml`, and a `results/` layout.
 
 You mostly swap in your container/algorithm; the PReSto wiring is already there.
+
+> **Do not commit a `query_params.json` to your template repo.** The workflow is
+> push-triggered on that path, and the PReSto server commits the real one on
+> submission. If the template ships a placeholder, creating a repo from the
+> template triggers an extra reconstruction with those default params before the
+> user's query ever lands. `presto-template` no longer includes it.
+
 Existing live examples to crib from:
 [`DaveEdge1/LMR2`](https://github.com/DaveEdge1/LMR2),
 [`DaveEdge1/presto-holocene_da`](https://github.com/DaveEdge1/presto-holocene_da),

@@ -27,7 +27,10 @@ just fill in Summary.
       and followed its `ADAPTING.md` (it already ships the push-triggered
       `reconstruct.yml`, `config/user_config.yml`, and the LiPD→input scripts).
       Your container reads the
-      [PReSto input standard](https://github.com/paleopresto/prestoRecons/blob/main/presto_input_standards.md).
+      [PReSto input standard](../docs/presto_input_standards.md).
+- [ ] Your template repo does **not** commit a `query_params.json` (the server
+      commits it on submission; shipping one triggers a default-params run when
+      the repo is created from the template).
 - [ ] Added `prestoForm/<handle>/` with at least `formIntro.txt`, `configs.yml`,
       and `querypathconfigs.yml` (plus `config_default.yml` + `lookup.json` +
       `translate.js` if the container expects a non-standard config format).
