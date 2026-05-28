@@ -1149,6 +1149,24 @@ function updatePoints (coords){
 	};
     }
     console.log('updatePoints: rectCoord =', rectCoord);
+
+    // "Unique locations" = distinct coordinates inside the box, counted once.
+    // Compute from the raw datasets, NOT the rendered features: loadLatLon adds
+    // a dateline "ghost" copy of every point at lon ± 360, and an antimeridian
+    // box matches both the original and its ghost — which would double-count the
+    // location (the "more locations than datasets" bug).
+    var locSeen = {};
+    coords.forEach(function(d){
+        var lat = +d.geo_latitude;
+        var lon = +d.geo_longitude;
+        var lonIn = (rectCoord.West <= rectCoord.East)
+            ? (lon >= rectCoord.West && lon <= rectCoord.East)
+            : (lon >= rectCoord.West || lon <= rectCoord.East);
+        if (lat >= rectCoord.South && lat <= rectCoord.North && lonIn) {
+            var key = lat + ',' + lon;
+            if (!locSeen[key]) { locSeen[key] = true; inRectCount = inRectCount + 1; }
+        }
+    });
  L.geoJSON([loadLatLon(coords)], {
 
 		style : function(feature) {
@@ -1162,18 +1180,15 @@ function updatePoints (coords){
 	},
 
 	filter: function(feature, layer) {
-	    // Check if point is within coordinate bounds
+	    // Render points (including dateline ghosts) inside the box. The count
+	    // is computed separately above to avoid double-counting ghosts.
 	    var lat = feature.geometry.coordinates[1];
 	    var lon = feature.geometry.coordinates[0];
 	    // Longitude bounds wrap across the antimeridian when West > East.
 	    var lonInBounds = (rectCoord.West <= rectCoord.East)
 	        ? (lon >= rectCoord.West && lon <= rectCoord.East)
 	        : (lon >= rectCoord.West || lon <= rectCoord.East);
-	    var isInBounds = lat >= rectCoord.South && lat <= rectCoord.North && lonInBounds;
-	    if (isInBounds) {
-		inRectCount = inRectCount + 1;
-	    }
-	    return isInBounds;
+	    return lat >= rectCoord.South && lat <= rectCoord.North && lonInBounds;
 	},
 
 		pointToLayer : function(feature, latlng) {
