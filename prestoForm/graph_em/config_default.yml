@@ -1,56 +1,58 @@
-annualize_proxydb_months:
-- 12
-- 1
-- 2
-annualize_proxydb_ptypes:
-- coral
-calib_period:
-- 1901
-- 2000
-compress_params:
-  zlib: true
-cutoff_radius: 1500
+# GraphEM native defaults (flat cfr config).
+#
+# The PReSto server starts from THIS file and overrides only the form-exposed
+# keys (per lookup.json, via the `graph_em` configStrategy in
+# services/github.js), then commits the result to config/user_config.yml in
+# the reconstruction repo. It mirrors the schema of presto-graphem's
+# config/user_config.yml and is consumed verbatim by
+# cfr.ReconJob.run_graphem_cfg.
+
+# ── Proxy database ──────────────────────────────────────────────────
+# Produced at runtime from the LiPDverse query (overridden by the container);
+# placeholder here. proxydb_path / save_dirpath are runtimeHiddenKeys.
+proxydb_path: /tmp/proxydb_cfr.pkl
 filter_proxydb_args: []
 filter_proxydb_kwargs:
   by: ptype
   keys:
   - coral
-graph_method: hybrid
-obs_annualize_months:
-- 12
-- 1
-- 2
-obs_anom_period:
-- 1951
-- 1980
-obs_lat_max: 20
-obs_lat_min: -20
-obs_lat_name: lat
-obs_lon_max: 260
-obs_lon_min: 150
-obs_lon_name: lon
+annualize_proxydb_months: [12, 1, 2]
+annualize_proxydb_ptypes: [coral]
+proxydb_center_ref_period: [1901, 2000]
+uniform_pdb: true
+
+# ── Instrumental observation field (baked into the image) ───────────
 obs_path:
-  tas: gistemp1200_GHCNv4_ERSSTv5
-obs_regrid_nlat: 42
-obs_regrid_nlon: 63
+  tas: /app/reference_data/gistemp1200_GHCNv4_ERSSTv5.nc
 obs_rename_dict:
   tas: tempanomaly
 obs_time_name: time
-output_indices:
-- gm
-- nhm
-- shm
-- nino3.4
-proxydb_center_ref_period:
-- 1901
-- 2000
-proxydb_path: PAGES2kv2
-recon_period:
-- 1871
-- 2000
+obs_lat_name: lat
+obs_lon_name: lon
+obs_anom_period: [1951, 1980]
+obs_annualize_months: [12, 1, 2]
+obs_regrid_nlat: 42
+obs_regrid_nlon: 63
+obs_lat_min: -20
+obs_lat_max: 20
+obs_lon_min: 150
+obs_lon_max: 260
+
+# ── Reconstruction window ───────────────────────────────────────────
+recon_period: [1871, 2000]
 recon_timescale: 1
-save_dirpath: ./recons/test-run-graphem-cfg
-save_filename: job_r01_recon.nc
+calib_period: [1901, 2000]
+
+# ── Graph estimation / GraphEM solver ───────────────────────────────
+graph_method: hybrid
+cutoff_radius: 1500
 sp_FF: 3
 sp_FP: 4
-uniform_pdb: true
+sp_PP: 3
+output_indices: [gm, nhm, shm, nino3.4]
+compress_params:
+  zlib: true
+
+# ── Output (overridden at runtime to /results) ──────────────────────
+save_dirpath: /results
+save_filename: job_r01_recon.nc

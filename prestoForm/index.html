@@ -390,6 +390,11 @@
 	                var opt = document.createElement('option');
 	                opt.value = r.handle;
 	                opt.textContent = r.dropdownLabel || r.title || r.handle;
+	                // Grey out still-in-testing methods (those without a
+	                // promoted ui.category) to set them apart from reviewed ones.
+	                if (!r.category || r.category === 'New methods, in testing') {
+	                    opt.style.color = '#888';
+	                }
 	                groupFor(r.category).appendChild(opt);
 	            });
 	        })

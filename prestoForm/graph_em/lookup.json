@@ -1,50 +1,16 @@
 {
-    "time_range_to_reconstruct":{
-        "orig":"recon_period",
-        "first":"time",
-        "last":"range_to_reconstruct"},
-    "time_recon_timescale":{
-        "orig":"recon_timescale",
-        "first":"time",
-        "last":"recon_timescale"},
-    "proxy_annualize_months":{
-        "orig":"annualize_proxydb_months",
-        "first":"proxy",
-        "last":"annualize_months"},
-    "proxy_center_ref_period":{
-        "orig":"proxydb_center_ref_period",
-        "first":"proxy",
-        "last":"center_ref_period"},
-    "proxy_compilation":{
-        "orig":"proxydb_path",
-        "first":"proxy",
-        "last":"compilation"},
-    "proxy_archiveType":{
-        "orig":"annualize_proxydb_ptypes",
-        "first":"proxy",
-        "last":"archiveType"},
-    "calibration_anom_period":{
-        "orig":"obs_anom_period",
-        "first":"calibration",
-        "last":"anom_period"},
-    "calibration_coord_bounds":{
-        "orig":["obs_lat_min","obs_lat_max","obs_lon_min","obs_lon_max"],
-        "first":"calibration",
-        "last":"coord_bounds"},
-    "calibration_annualize_months":{
-        "orig":"obs_annualize_months",
-        "first":"calibration",
-        "last":"annualize_months"},
-    "calibration_interval":{
-        "orig":"calib_period",
-        "first":"calibration",
-        "last":"interval"},
-    "calibration_regrid_lat":{
-        "orig":"obs_regrid_nlat",
-        "first":"calibration",
-        "last":"regrid_lat"},
-    "calibration_regrid_lon":{
-        "orig":"obs_regrid_nlon",
-        "first":"calibration",
-        "last":"regrid_lon"}
+    "time_range_to_reconstruct":    { "path": ["recon_period"] },
+    "time_recon_timescale":         { "path": ["recon_timescale"] },
+    "proxy_annualize_months":       { "path": ["annualize_proxydb_months"] },
+    "proxy_center_ref_period":      { "path": ["proxydb_center_ref_period"] },
+    "proxy_archiveType":            { "path": ["filter_proxydb_kwargs", "keys"] },
+    "calibration_anom_period":      { "path": ["obs_anom_period"] },
+    "calibration_annualize_months": { "path": ["obs_annualize_months"] },
+    "calibration_interval":         { "path": ["calib_period"] },
+    "calibration_lat_min":          { "path": ["obs_lat_min"] },
+    "calibration_lat_max":          { "path": ["obs_lat_max"] },
+    "calibration_lon_min":          { "path": ["obs_lon_min"] },
+    "calibration_lon_max":          { "path": ["obs_lon_max"] },
+    "calibration_regrid_lat":       { "path": ["obs_regrid_nlat"] },
+    "calibration_regrid_lon":       { "path": ["obs_regrid_nlon"] }
 }

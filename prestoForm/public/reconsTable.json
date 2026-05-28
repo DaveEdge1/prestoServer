@@ -64,10 +64,10 @@
   },
   "graph_em": {
     "title": "GraphEM",
-    "time": "0-2,000 years",
-    "proxies": "Pages 2k proxy database",
+    "time": "1871-2000 CE",
+    "proxies": "PAGES 2k proxy database",
     "models": "NA",
-    "methods": "Graphical Expectation-Maximization algorithm",
+    "methods": "Graphical Expectation-Maximization (GraphEM)",
     "doi": "https://doi.org/10.1214/14-AOAS794",
     "language": "Python"
   }
