@@ -1,45 +1,155 @@
 #==============================================
-# SETTINGS for running the temp12k composites code
-# See the README.md file for more explaination.
-# https://github.com/DaveEdge1/temp12k-regional-composites
+# Temperature 12k Composites parameter editor schema (query path).
+# Mirrors configs.yml; sections become form groups; field ids are
+# <section>_<key> and map to the nested config via lookup.json.
+# https://github.com/DaveEdge1/presto-temp12k
 #==============================================
 
-
-time:
-  range_to_reconstruct: 
-    value: [7000,12000]
-    default: [7000, 12000]
-    limits: [0, 12000]
-    options: null
-    precision: 1
-    long_name: time interval for reconstruction
-    description: define a start and end year in units years BP
-    data_type: range
-    complexity: standard
-    URL: null
-
-proxy:
-  interpVariable: 
-    value: T
-    default: T
+methods:
+  scc:
+    value: true
+    default: true
     limits: null
-    options: [T, P]
+    options: [true, false]
     precision: null
-    long_name: interpretation variable
-    description: Climate interpretation of proxies
-    data_type: character
+    long_name: Standard Calibrated Composite (SCC)
+    description: Align records over the 3-5 ka window, equal-area gridding, native degC variance.
+    data_type: logical
     complexity: standard
     URL: null
 
-uncertainty:
+  dcc:
+    value: true
+    default: true
+    limits: null
+    options: [true, false]
+    precision: null
+    long_name: Dynamic Calibrated Composite (DCC)
+    description: Iterative mean alignment over the Holocene, native degC variance.
+    data_type: logical
+    complexity: standard
+    URL: null
+
+  gam:
+    value: true
+    default: true
+    limits: null
+    options: [true, false]
+    precision: null
+    long_name: Generalized Additive Model (GAM)
+    description: Per-grid-cell penalized B-spline through the age/temperature ensemble.
+    data_type: logical
+    complexity: standard
+    URL: null
+
+  cps:
+    value: true
+    default: true
+    limits: null
+    options: [true, false]
+    precision: null
+    long_name: Composite Plus Scale (CPS)
+    description: Z-score composite scaled to the PAGES 2k target (high-amplitude method).
+    data_type: logical
+    complexity: standard
+    URL: null
+
+  paico:
+    value: true
+    default: true
+    limits: null
+    options: [true, false]
+    precision: null
+    long_name: Pairwise Comparison (PaiCo)
+    description: Rank-based pairwise-comparison reconstruction scaled to the 2k target.
+    data_type: logical
+    complexity: standard
+    URL: null
+
+ensemble:
   nens:
     value: 50
     default: 50
-    limits: [1,1000]
+    limits: [10, 500]
     options: null
     precision: 1
-    long_name: number of ensembles
-    description: Number of ensemble members, used to estimate uncertainty
+    long_name: ensemble members (per method)
+    description: Number of ensemble members per method; pooled across methods for the consensus. Paper used 500.
     data_type: numeric
     complexity: standard
+    URL: null
+
+binning:
+  step:
+    value: 100
+    default: 100
+    limits: [50, 500]
+    options: null
+    precision: 1
+    long_name: bin width (years)
+    description: Width of the temporal bins over the 0-12 ka Holocene window.
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+reference:
+  start:
+    value: 1800
+    default: 1800
+    limits: [0, 2000]
+    options: null
+    precision: 1
+    long_name: reference period start (CE)
+    description: Anomalies are computed relative to the mean over this pre-industrial window.
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+  end:
+    value: 1900
+    default: 1900
+    limits: [0, 2000]
+    options: null
+    precision: 1
+    long_name: reference period end (CE)
+    description: End of the pre-industrial reference window.
+    data_type: numeric
+    complexity: standard
+    URL: null
+
+advanced:
+  dcc_duration:
+    value: 3000
+    default: 3000
+    limits: [500, 6000]
+    options: null
+    precision: 1
+    long_name: DCC standardization interval (yr)
+    description: Length of the random interval used to standardize each record (DCC/CPS).
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+  gam_spline_k:
+    value: 25
+    default: 25
+    limits: [5, 60]
+    options: null
+    precision: 1
+    long_name: GAM spline basis dimension
+    description: Number of penalized B-spline basis functions per grid-cell GAM.
+    data_type: numeric
+    complexity: advanced
+    URL: null
+
+  paico_reg_param:
+    value: 1.0
+    default: 1.0
+    limits: [0.01, 10]
+    options: null
+    precision: 0.01
+    long_name: PaiCo regularization parameter
+    description: Regularization strength for the pairwise-comparison reconstruction.
+    data_type: numeric
+    complexity: advanced
     URL: null

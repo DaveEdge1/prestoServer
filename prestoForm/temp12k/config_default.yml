@@ -1,0 +1,37 @@
+# Temperature 12k Composites (PReSto defaults).
+# The server merges the user's form selections over these defaults (configStrategy
+# "nested") and commits the result to config/user_config.yml in the reconstruction
+# repo, where the container mounts it at /app/config/user_config.yml.
+
+# which composite methods to run (paper: SCC, DCC, GAM, CPS, PaiCo)
+methods:
+  scc: true
+  dcc: true
+  gam: true
+  cps: true
+  paico: true
+
+# temporal binning (yr BP; 100-yr bins over the Holocene)
+bin:
+  start_bp: -50
+  end_bp: 12050
+  step: 100
+
+# ensemble size per method (paper used 500; 50 keeps the 5-method run within CI limits)
+nens: 50
+
+# parallel workers inside the container (CI runs each method as its own 2-core job)
+ncores: 2
+
+# pre-industrial reference period (CE)
+reference_period:
+  start: 1800
+  end: 1900
+
+# advanced per-method knobs
+advanced:
+  dcc_duration: 3000
+  cps_duration: 3000
+  cps_scale_window: [0, 1000]
+  gam_spline_k: 25
+  paico_reg_param: 1.0

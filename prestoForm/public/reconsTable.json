@@ -55,12 +55,12 @@
   },
   "temp12k": {
     "title": "Temperature 12k Composites",
-    "time": "0-12,000 years",
+    "time": "0-12,000 yr BP",
     "proxies": "Temperature 12k proxy database",
     "models": "NA",
-    "methods": "Standard calibrated composite (SCC)",
-    "doi": "https://doi.org/10.1038/s41597-020-0445-3",
-    "language": "R"
+    "methods": "Multi-method composite: SCC, DCC, GAM, CPS, PaiCo",
+    "doi": "https://doi.org/10.1038/s41597-020-0530-7",
+    "language": "R / Python"
   },
   "graph_em": {
     "title": "GraphEM",

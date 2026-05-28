@@ -54,10 +54,10 @@
     "workingParams": ""
   },
   "temp12k": {
-    "title": "Temperature 12k Standard Calibrated Composite reconstruction",
-    "paramsCon": "/params.json",
-    "resultsDir": "/output",
-    "github": "https://github.com/paleopresto/temp12k-regional-composites",
+    "title": "Temperature 12k multi-method composite (SCC, DCC, GAM, CPS, PaiCo)",
+    "paramsCon": "/app/config/user_config.yml",
+    "resultsDir": "/results",
+    "github": "https://github.com/DaveEdge1/presto-Temp12k_Composites",
     "conTag": "davidedge/lipd_webapps:temp12k",
     "translate": false,
     "workingParams": ""
