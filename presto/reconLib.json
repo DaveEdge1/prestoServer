@@ -64,10 +64,10 @@
   },
   "graph_em": {
     "title": "GraphEM reconstruction",
-    "paramsCon": "/configs.yml",
-    "resultsDir": "/recons",
-    "github": "https://fzhu2e.github.io/cfr/ug-graphem.html",
-    "conTag": "davidedge/lipd_webapps:graph_em",
+    "paramsCon": "/config/user_config.yml",
+    "resultsDir": "/results",
+    "github": "https://github.com/DaveEdge1/presto-graphem",
+    "conTag": "",
     "translate": false,
     "workingParams": ""
   }

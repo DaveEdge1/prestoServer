@@ -420,6 +420,59 @@ async function updateRepositoryConfig(octokit, owner, repo, recon, uniqueID, con
         node[leaf] = val;
       }
       effectiveConfigData = defaults;
+    } else if (entry.configStrategy === 'graph_em') {
+      // GraphEM reads a FLAT cfr config (consumed verbatim by
+      // cfr.ReconJob.run_graphem_cfg), but its knobs are array-heavy (year
+      // ranges, month lists, archive lists) AND one target is nested
+      // (filter_proxydb_kwargs.keys). This combines the `nested` strategy's
+      // path walking with the `holocene_da` strategy's array-element type
+      // coercion; unlike holocene_da it injects no method-specific keys.
+      const lookup = JSON.parse(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'lookup.json'), 'utf8'));
+      const defaults = yaml.load(fs.readFileSync(
+        path.join(__dirname, '..', 'prestoForm', entry.handle, 'config_default.yml'), 'utf8'));
+
+      for (const [formKey, mapping] of Object.entries(lookup)) {
+        const pathArr = mapping && mapping.path;
+        if (!Array.isArray(pathArr) || pathArr.length === 0) continue;
+        if (configData[formKey] === undefined) continue;
+
+        let val = configData[formKey];
+        if (val && typeof val === 'object' && !Array.isArray(val) && 'value' in val) {
+          val = val.value;
+        }
+
+        // Walk to the parent node, creating intermediate objects if needed.
+        let node = defaults;
+        for (let i = 0; i < pathArr.length - 1; i++) {
+          if (node[pathArr[i]] == null || typeof node[pathArr[i]] !== 'object') {
+            node[pathArr[i]] = {};
+          }
+          node = node[pathArr[i]];
+        }
+        const leaf = pathArr[pathArr.length - 1];
+        const cur = node[leaf];
+
+        // Coerce the form value to the existing default's type (scalars and
+        // arrays). Form inputs arrive as strings, so numeric/array knobs must
+        // be cast or cfr's np.arange / indexing will choke on string years.
+        if (typeof cur === 'number') {
+          val = Number(val);
+        } else if (typeof cur === 'boolean') {
+          val = (val === true || val === 'true');
+        } else if (Array.isArray(cur)) {
+          if (!Array.isArray(val)) val = [val];
+          if (cur.length > 0 && typeof cur[0] === 'number') {
+            val = val.map(v => Number(v));
+          } else if (cur.length > 0 && typeof cur[0] === 'boolean') {
+            val = val.map(v => v === true || v === 'true');
+          }
+        }
+        if (val === 'null' || val === 'None') val = null;
+
+        node[leaf] = val;
+      }
+      effectiveConfigData = defaults;
     } else {
       effectiveConfigData = configData;
     }

@@ -251,43 +251,54 @@
   "graph_em": {
     "handle": "graph_em",
     "aliases": [],
-    "enabled": false,
+    "enabled": true,
     "order": 50,
     "ui": {
       "dropdownLabel": "GraphEM",
-      "category": "Reconstructions",
+      "category": "New methods, in testing",
       "title": "GraphEM",
-      "time": "0-2,000 years",
-      "proxies": "Pages 2k proxy database",
+      "time": "1871-2000 CE",
+      "proxies": "PAGES 2k proxy database",
       "models": "NA",
-      "methods": "Graphical Expectation-Maximization algorithm",
+      "methods": "Graphical Expectation-Maximization (GraphEM)",
       "doi": "https://doi.org/10.1214/14-AOAS794",
-      "language": "Python"
+      "language": "Python",
+      "showInTable": true,
+      "proxiesHtml": "<a href=\"https://lipdverse.org/project/pages2k/\" target=\"_blank\">PAGES 2k proxy database</a>",
+      "methodsHtml": "<a href=\"https://fzhu2e.github.io/cfr/ug-graphem.html\" target=\"_blank\">Graphical Expectation-Maximization (GraphEM)</a>",
+      "publicationHtml": "<a href=\"https://doi.org/10.1214/14-AOAS794\" target=\"_blank\">Guillot et al., 2015</a>"
     },
     "lib": {
       "title": "GraphEM reconstruction",
-      "paramsCon": "/configs.yml",
-      "resultsDir": "/recons",
-      "github": "https://fzhu2e.github.io/cfr/ug-graphem.html",
-      "conTag": "davidedge/lipd_webapps:graph_em",
+      "paramsCon": "/config/user_config.yml",
+      "resultsDir": "/results",
+      "github": "https://github.com/DaveEdge1/presto-graphem",
+      "conTag": "",
       "translate": false,
       "workingParams": ""
     },
-    "editorTitle": "Graphical Expectation-Maximization",
-    "template": null,
-    "pageConfig": null,
+    "editorTitle": "Graphical Expectation-Maximization (GraphEM)",
+    "template": { "owner": "DaveEdge1", "name": "presto-graphem" },
+    "pageConfig": {
+      "defaultMode": "archive",
+      "archivedCompilation": { "name": "Pages2kTemperature", "version": "2_2_0" },
+      "compilationFilter": "Pages2k",
+      "interpVarDefault": "temperature",
+      "extendBackDefault": 100,
+      "timeSlider": { "min": -70, "max": 1950, "step": 10 }
+    },
     "behavior": {
       "publishesPages": true,
-      "dispatch": "workflow",
-      "lipdProcessing": false,
-      "commitsQueryParams": false,
-      "commitsVariableFilter": false,
+      "dispatch": "push",
+      "lipdProcessing": true,
+      "commitsQueryParams": true,
+      "commitsVariableFilter": true,
       "reconPredicate": null,
-      "runtimeHiddenKeys": [],
+      "runtimeHiddenKeys": ["proxydb_path", "save_dirpath"],
       "configPath": "config/user_config.yml"
     },
     "dedupStrategy": "neutral",
-    "configStrategy": "passthrough",
+    "configStrategy": "graph_em",
     "runtimeKeyStrategy": "none"
   }
 }
