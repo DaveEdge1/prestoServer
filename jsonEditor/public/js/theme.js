@@ -232,8 +232,10 @@ document.addEventListener("DOMContentLoaded", function () {
     ===================================================== */
     function navBarBehavior() {
         const topBar = document.getElementById("topBar"),
-            topBarHeight = topBar.offsetHeight,
-            header = document.querySelector(".make-sticky"),
+            header = document.querySelector(".make-sticky");
+        // Custom-engine pages (pce-header) have no theme navbar — nothing to do.
+        if (!topBar || !header) return;
+        const topBarHeight = topBar.offsetHeight,
             headerHeight = header.offsetHeight,
             scroll = window.pageYOffset;
 
@@ -281,6 +283,8 @@ document.addEventListener("DOMContentLoaded", function () {
     //I'm using "click" but it works with any event
     document.addEventListener("click", function (event) {
         var specifiedElement = document.querySelector(".dropdown");
+        // No theme dropdown on this page (e.g. custom-engine pce-header pages).
+        if (!specifiedElement) return;
         var isClickInside = specifiedElement.contains(event.target);
 
         if (!isClickInside) {
