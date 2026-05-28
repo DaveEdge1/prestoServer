@@ -83,7 +83,13 @@ def filter_datasets(df, query_params):
     if coords and len(coords) == 4:
         lat_min, lat_max, lon_min, lon_max = coords
         mask &= (df['geo_latitude'] >= lat_min) & (df['geo_latitude'] <= lat_max)
-        mask &= (df['geo_longitude'] >= lon_min) & (df['geo_longitude'] <= lon_max)
+        # Longitude can wrap across the antimeridian. Stored geo_longitude is
+        # -180..180, so a box whose western edge is east of its eastern edge
+        # (e.g. 150 .. -150 across the Pacific) matches lon >= west OR lon <= east.
+        if lon_min <= lon_max:
+            mask &= (df['geo_longitude'] >= lon_min) & (df['geo_longitude'] <= lon_max)
+        else:
+            mask &= (df['geo_longitude'] >= lon_min) | (df['geo_longitude'] <= lon_max)
         print(f"Coord filter: lat [{lat_min}, {lat_max}], lon [{lon_min}, {lon_max}]")
 
     archive_types = query_params.get('archiveTypes')

@@ -687,10 +687,30 @@ getAllMonths = function(startSpan,endSpan){
 
             if (useCoords===true){
                 if (JSON.parse(filters1['coords'])){
-                    queryParts.push('geo_latitude < ' + document.getElementById("lat_max").value);
-                    queryParts.push('geo_latitude > ' + document.getElementById("lat_min").value);
-                    queryParts.push('geo_longitude < ' + document.getElementById("lon_max").value);
-                    queryParts.push('geo_longitude > ' + document.getElementById("lon_min").value);
+                    // Normalize a longitude into the -180..180 range the DB stores.
+                    var normLon = function(x){ return ((x + 180) % 360 + 360) % 360 - 180; };
+                    var latMinV = +document.getElementById("lat_min").value;
+                    var latMaxV = +document.getElementById("lat_max").value;
+                    var lonMinV = +document.getElementById("lon_min").value;
+                    var lonMaxV = +document.getElementById("lon_max").value;
+                    queryParts.push('geo_latitude < ' + latMaxV);
+                    queryParts.push('geo_latitude > ' + latMinV);
+                    // Longitude can wrap across the antimeridian. The DB stores
+                    // geo_longitude in -180..180, so a box whose western edge sits
+                    // east of its eastern edge (e.g. 150 .. -150 across the Pacific)
+                    // must match lon > west OR lon < east, not an impossible AND.
+                    // A full 360°-wide box needs no longitude filter at all.
+                    if ((lonMaxV - lonMinV) < 360) {
+                        var w = normLon(lonMinV), e = normLon(lonMaxV);
+                        if (w <= e) {
+                            queryParts.push('geo_longitude > ' + w);
+                            queryParts.push('geo_longitude < ' + e);
+                        } else {
+                            // Single OR part — the server injects it verbatim
+                            // inside its own parentheses and ANDs it with the rest.
+                            queryParts.push('geo_longitude > ' + w + ' OR geo_longitude < ' + e);
+                        }
+                    }
                 }
             }
             // Independent temporal-extent filters. Express's querystring parser
@@ -741,7 +761,10 @@ getAllMonths = function(startSpan,endSpan){
             return qstring;
         };
         sendQuery = function(){
-            var param1 = params(useCoords=false)
+            // Apply the coordinate box to the preview query itself (when the
+            // "Filter by coordinates" toggle is on) so datasets outside the box
+            // are neither drawn nor counted — matching the final TSID query.
+            var param1 = params(useCoords=true)
             var xhr0 = new XMLHttpRequest();
                 xhr0.timeout = 2000;
                 xhr0.onreadystatechange = function(e){
@@ -1142,8 +1165,11 @@ function updatePoints (coords){
 	    // Check if point is within coordinate bounds
 	    var lat = feature.geometry.coordinates[1];
 	    var lon = feature.geometry.coordinates[0];
-	    var isInBounds = lat >= rectCoord.South && lat <= rectCoord.North &&
-	                     lon >= rectCoord.West && lon <= rectCoord.East;
+	    // Longitude bounds wrap across the antimeridian when West > East.
+	    var lonInBounds = (rectCoord.West <= rectCoord.East)
+	        ? (lon >= rectCoord.West && lon <= rectCoord.East)
+	        : (lon >= rectCoord.West || lon <= rectCoord.East);
+	    var isInBounds = lat >= rectCoord.South && lat <= rectCoord.North && lonInBounds;
 	    if (isInBounds) {
 		inRectCount = inRectCount + 1;
 	    }

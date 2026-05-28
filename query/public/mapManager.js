@@ -24,6 +24,7 @@
       prevResp: {},
       inRectCount: 0,
       legendMode: 'archiveType',
+      expandOther: false,
       originalUpdatePoints: null,
       config: {
          defaultProjection: 'mollweide',
@@ -458,6 +459,54 @@
    };
 
    /**
+    * Antimeridian-aware point-in-box test.
+    * @param {number} lat - point latitude
+    * @param {number} lon - point longitude (-180..180)
+    * @param {Object} b - bounds {South, West, North, East}; West > East wraps the
+    *                      longitude span across the 180° meridian.
+    * @private
+    */
+   function _isInBounds(lat, lon, b) {
+      if (lat < b.South || lat > b.North) return false;
+      return (b.West <= b.East)
+         ? (lon >= b.West && lon <= b.East)
+         : (lon >= b.West || lon <= b.East);
+   }
+
+   /**
+    * Wire a click handler onto the expandable "*Other*" legend header so it
+    * toggles state.expandOther and rebuilds the legend. The handler is read back
+    * from the just-rendered Leaflet legend DOM; the PNG export reads that same
+    * DOM, so an expanded legend exports expanded too (#3).
+    * @private
+    */
+   function _bindOtherToggle() {
+      var root = (state.legend && state.legend.getContainer)
+         ? state.legend.getContainer()
+         : document.querySelector('.leaflet-legend');
+      if (!root) return;
+      var items = root.querySelectorAll('.leaflet-legend-item');
+      for (var i = 0; i < items.length; i++) {
+         var span = items[i].querySelector('span');
+         if (!span) continue;
+         var txt = (span.innerText || span.textContent || '');
+         if (txt.indexOf('Other (') !== -1 && (txt.charAt(0) === '▸' || txt.charAt(0) === '▾')) {
+            var itemEl = items[i];
+            itemEl.style.cursor = 'pointer';
+            itemEl.title = state.expandOther
+               ? 'Click to collapse'
+               : 'Click to list every grouped variable';
+            L.DomEvent.on(itemEl, 'click', function(e) {
+               L.DomEvent.stop(e);
+               state.expandOther = !state.expandOther;
+               MapManager.updateLegend();
+            });
+            break;
+         }
+      }
+   }
+
+   /**
     * Calculate top 10 most common proxies from visible data
     * @private
     */
@@ -465,10 +514,7 @@
       var proxyCounts = {};
 
       data.forEach(function(item) {
-         var lat = item.geo_latitude;
-         var lon = item.geo_longitude;
-         var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
-                        lon >= rectCoord.West && lon <= rectCoord.East;
+         var isVisible = _isInBounds(item.geo_latitude, item.geo_longitude, rectCoord);
 
          if (isVisible && item.paleoData_proxy) {
             var proxies = Array.isArray(item.paleoData_proxy)
@@ -567,6 +613,7 @@
                L.DomEvent.on(radio, 'change', function(e) {
                   state.legendMode = e.target.value;
                   window.legendMode = e.target.value; // Expose to global for compatibility
+                  state.expandOther = false; // Each mode's "Other" bucket differs
                   console.log('Legend mode changed to:', state.legendMode);
                   MapManager.updateLegend();
                   // Redraw markers with new coloring
@@ -829,21 +876,13 @@
          // Add tile layers
          state.tiles = L.tileLayer(config.tileLayer, config.tileOptions).addTo(state.map);
 
-         // Add imagery base layer and switcher if available for this projection
-         if (config.imageryTileLayer) {
-            state.imageryTiles = L.tileLayer(config.imageryTileLayer, config.imageryTileOptions);
-            var baseLayers = {
-               'Relief': state.tiles,
-               'Imagery': state.imageryTiles
-            };
-            state.baseLayerControl = L.control.layers(baseLayers, null, {
-               collapsed: false,
-               position: 'topleft'
-            }).addTo(state.map);
-         } else {
-            state.imageryTiles = null;
-            state.baseLayerControl = null;
-         }
+         // Blue Marble imagery tiles are currently unavailable, so the
+         // Relief/Imagery base-layer switcher is disabled — the map shows the
+         // Natural Earth relief tiles only. To re-enable, recreate the imagery
+         // L.tileLayer (config.imageryTileLayer) and the L.control.layers
+         // switcher here once those tiles are served again.
+         state.imageryTiles = null;
+         state.baseLayerControl = null;
 
          // Add layer group for points
          state.layerGroup = L.layerGroup().addTo(state.map);
@@ -1008,6 +1047,7 @@
       setLegendMode: function(mode) {
          state.legendMode = mode;
          window.legendMode = mode; // Expose to global for compatibility
+         state.expandOther = false; // Each mode's "Other" bucket differs
          this.updateLegend();
       },
 
@@ -1025,6 +1065,9 @@
          }
 
          var visibleTypes = new Set();
+         // Actual variable names that fall into the "*Other*" bucket (the ones
+         // beyond the top-N), so the legend can expand to reveal them (#3).
+         var otherNames = new Set();
 
          // Get coordinate bounds from form inputs
          var rectCoord = {
@@ -1041,10 +1084,7 @@
          if (state.legendMode === 'archiveType') {
             // Collect unique visible archive types
             state.prevResp.forEach(function(item) {
-               var lat = item.geo_latitude;
-               var lon = item.geo_longitude;
-               var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
-                              lon >= rectCoord.West && lon <= rectCoord.East;
+               var isVisible = _isInBounds(item.geo_latitude, item.geo_longitude, rectCoord);
 
                if (isVisible && item.archiveType) {
                   visibleTypes.add(item.archiveType);
@@ -1056,15 +1096,13 @@
          } else if (state.legendMode === 'interpVar') {
             // Collect unique visible interpretation variables
             state.prevResp.forEach(function(item) {
-               var lat = item.geo_latitude;
-               var lon = item.geo_longitude;
-               var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
-                              lon >= rectCoord.West && lon <= rectCoord.East;
+               var isVisible = _isInBounds(item.geo_latitude, item.geo_longitude, rectCoord);
 
                if (isVisible && item.interp_Vars) {
                   var interpVar = item.interp_Vars;
-                  // Map to top 15 or "Other"
+                  // Map to top 15 or "Other" (remembering the real name).
                   if (top15InterpVars.indexOf(interpVar) === -1) {
+                     otherNames.add(interpVar);
                      interpVar = "*Other*";
                   }
                   visibleTypes.add(interpVar);
@@ -1078,10 +1116,7 @@
             var currentTop10 = _calculateTopProxies(state.prevResp, rectCoord);
 
             state.prevResp.forEach(function(item) {
-               var lat = item.geo_latitude;
-               var lon = item.geo_longitude;
-               var isVisible = lat >= rectCoord.South && lat <= rectCoord.North &&
-                              lon >= rectCoord.West && lon <= rectCoord.East;
+               var isVisible = _isInBounds(item.geo_latitude, item.geo_longitude, rectCoord);
 
                if (isVisible && item.paleoData_proxy) {
                   var proxies = Array.isArray(item.paleoData_proxy)
@@ -1095,6 +1130,7 @@
                         if (currentTop10.indexOf(normalized) !== -1) {
                            visibleTypes.add(normalized);
                         } else {
+                           otherNames.add(normalized);
                            visibleTypes.add("*Other*");
                         }
                      }
@@ -1106,8 +1142,30 @@
             legendTitle = "Proxy Type";
          }
 
+         // The "*Other*" bucket is expandable for proxy / interpretation-variable
+         // legends so users can read the actual names it groups together (#3).
+         var otherExpandable = otherNames.size > 0 &&
+            (state.legendMode === 'interpVar' || state.legendMode === 'proxy');
+
          // Build legend entries for visible types only
          visibleTypes.forEach(function(type) {
+            if (type === "*Other*" && otherExpandable) {
+               var base = legendEntrySource["*Other*"];
+               var names = Array.from(otherNames).sort();
+               // Clickable header; _bindOtherToggle() (below) wires the click.
+               legendEntries.push(Object.assign({}, base, {
+                  label: (state.expandOther ? '▾ ' : '▸ ') + 'Other (' + names.length + ')'
+               }));
+               // When expanded, list each grouped name. They share the single
+               // "*Other*" map-marker color, so the symbol stays consistent.
+               if (state.expandOther) {
+                  names.forEach(function(n) {
+                     legendEntries.push(Object.assign({}, base, { label: n }));
+                  });
+               }
+               return;
+            }
+
             var entry;
             if (state.legendMode === 'proxy') {
                entry = _getProxyLegendEntry(type);
@@ -1132,7 +1190,9 @@
             state.legend = null;
          }
 
-         // Add updated legend as Leaflet control inside the map
+         // Add updated legend as Leaflet control inside the map. When the
+         // "*Other*" group is expanded, drop to a single column so the header
+         // and the names it reveals stay together and readable.
          if (legendEntries.length > 0 && state.map) {
             state.legend = L.control.Legend({
                position: "bottomright",
@@ -1141,9 +1201,13 @@
                symbolWidth: 12,
                symbolHeight: 12,
                opacity: 1,
-               column: 5,
+               column: (otherExpandable && state.expandOther) ? 1 : 5,
                legends: legendEntries
             }).addTo(state.map);
+
+            if (otherExpandable) {
+               _bindOtherToggle();
+            }
          }
       },
 
@@ -1190,20 +1254,13 @@
                var lonMin = +(document.getElementById('lon_min') ? document.getElementById('lon_min').value : -180);
                var lonMax = +(document.getElementById('lon_max') ? document.getElementById('lon_max').value : 180);
 
-               // Count datasets within bounds. Mirror loadLatLon's dateline
-               // wrap (each rendered point gets a ghost at lon ± 360) so that
-               // antimeridian-crossing query boxes — e.g. lon ∈ [-260, -100]
-               // for the tropical Pacific — match points stored in the raw
-               // -180..180 range via their wrapped equivalent. Without this
-               // the count reads 0 while queryHelpers' filter (which already
-               // operates on wrapped feature geometry) reports 80+ in-bounds.
+               // Count datasets within bounds, using the same antimeridian-aware
+               // test as the map filter and legend (West > East wraps across the
+               // 180° meridian) so the three always agree.
                var inBoundsCount = coords.filter(function(point) {
-                  var lat = +point.geo_latitude;
-                  var lon = +point.geo_longitude;
-                  if (lat < latMin || lat > latMax) return false;
-                  if (lon >= lonMin && lon <= lonMax) return true;
-                  var wlon = lon < 0 ? lon + 360 : lon - 360;
-                  return wlon >= lonMin && wlon <= lonMax;
+                  return _isInBounds(+point.geo_latitude, +point.geo_longitude, {
+                     South: latMin, North: latMax, West: lonMin, East: lonMax
+                  });
                }).length;
 
                // Update the display to show correct count
