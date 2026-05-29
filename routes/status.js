@@ -8,13 +8,8 @@ const router = express.Router();
 const path = require('path');
 const config = require('../config');
 
-// Database connection
-const mysql = require('mysql2/promise');
-let db;
-
-(async () => {
-  db = await mysql.createPool(config.mysql);
-})();
+// Shared MySQL pool (services/db.js) — one process-wide pool.
+const { promisePool: db } = require('../services/db');
 
 /**
  * GET /status/:uniqueID

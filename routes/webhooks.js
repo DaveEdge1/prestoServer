@@ -8,13 +8,9 @@ const router = express.Router();
 const crypto = require('crypto');
 const config = require('../config');
 
-// Database connection
-const mysql = require('mysql2/promise');
-let db;
-
-(async () => {
-  db = await mysql.createPool(config.mysql);
-})();
+// Shared MySQL pool (services/db.js) — one process-wide pool so the six route
+// modules don't each open their own connectionLimit and exceed max_connections.
+const { promisePool: db } = require('../services/db');
 
 /**
  * Verify GitHub webhook signature
@@ -30,8 +26,19 @@ function verifyGitHubSignature(payload, signature) {
   const hmac = crypto.createHmac('sha256', config.github.webhookSecret);
   const digest = 'sha256=' + hmac.update(payload).digest('hex');
 
+  const digestBuf = Buffer.from(digest);
+  const signatureBuf = Buffer.from(signature);
+
+  // timingSafeEqual throws a RangeError when the buffers differ in length, so a
+  // malformed X-Hub-Signature-256 header (any wrong length) would otherwise
+  // bubble up as an unhandled rejection and exit the process. A length mismatch
+  // can never be a valid signature, so reject it before the constant-time check.
+  if (digestBuf.length !== signatureBuf.length) {
+    return false;
+  }
+
   // Constant-time comparison to prevent timing attacks
-  return crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(signature));
+  return crypto.timingSafeEqual(digestBuf, signatureBuf);
 }
 
 /**

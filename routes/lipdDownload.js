@@ -12,15 +12,10 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const mysql = require('mysql2/promise');
 const config = require('../config');
+const { promisePool: db } = require('../services/db');
 
 const queryDir = path.join(__dirname, '..', 'query');
-
-// Single shared connection pool — created at module load, not per request.
-// The previous in-handler createPool was a connection leak that exhausted
-// MySQL's max_connections under sustained download submissions.
-const db = mysql.createPool(config.mysql);
 
 // GET /confirm — serve the confirmation page
 router.get('/confirm', (req, res) => {

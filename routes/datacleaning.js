@@ -117,6 +117,20 @@ router.get('/analyze-stream', async (req, res) => {
     // Pipe the SSE stream directly to the client
     response.data.pipe(res);
 
+    // If the upstream stream errors mid-flight (proxy-analysis drops the
+    // connection, etc.) the readable emits 'error'. With no listener that
+    // throws as an uncaughtException and the global handler exits the whole
+    // orchestrator — convert it to an SSE error frame and close instead.
+    response.data.on('error', (streamErr) => {
+      console.error('analyze-stream upstream error:', streamErr.message);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ phase: 'error', message: 'Analysis stream interrupted' })}\n\n`);
+        res.end();
+      }
+    });
+    // A client disconnect can make writes to res throw EPIPE; tear down upstream.
+    res.on('error', () => response.data.destroy());
+
     // Clean up when client disconnects
     req.on('close', () => {
       response.data.destroy();
@@ -200,6 +214,17 @@ router.post('/exact-duplicates-stream', async (req, res) => {
     );
 
     response.data.pipe(res);
+
+    // Without an 'error' listener an upstream mid-stream failure throws as an
+    // uncaughtException and exits the process (see /analyze-stream).
+    response.data.on('error', (streamErr) => {
+      console.error('exact-duplicates-stream upstream error:', streamErr.message);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ phase: 'error', message: 'Duplicate scan stream interrupted' })}\n\n`);
+        res.end();
+      }
+    });
+    res.on('error', () => response.data.destroy());
 
     req.on('close', () => {
       response.data.destroy();

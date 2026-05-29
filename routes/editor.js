@@ -8,17 +8,12 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const YAML = require('yaml');
-const mysql = require('mysql2/promise');
 const config = require('../config');
 const { computeTsidComplement } = require('./data');
+const { promisePool: db } = require('../services/db');
 const reconRegistry = require('../presto/reconRegistry');
 
 const editorDir = path.join(__dirname, '..', 'jsonEditor');
-
-// Single shared connection pool — created at module load, not per request.
-// The previous in-handler createPool was a connection leak that exhausted
-// MySQL's max_connections under sustained submission traffic.
-const db = mysql.createPool(config.mysql);
 
 // Serve static files from jsonEditor/public
 router.use('/', express.static(path.join(editorDir, 'public')));

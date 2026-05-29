@@ -5,8 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2');
-const config = require('../config');
+const { pool } = require('../services/db');
 const reconRegistry = require('../presto/reconRegistry');
 
 // Cache for full dataset query (24 hour TTL)
@@ -16,17 +15,9 @@ let datasetCache = {
   ttl: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 };
 
-// Single shared connection pool. Created once at module load. The old
-// per-request `getPool()` exhausted MySQL's max_connections under load —
-// each /data hit was creating a brand-new pool with its own backlog of
-// idle connections that never returned to MySQL until pool GC'd.
-const pool = mysql.createPool({
-  connectionLimit: config.mysql.connectionLimit,
-  host: config.mysql.host,
-  user: config.mysql.user,
-  password: config.mysql.password,
-  database: config.mysql.database,
-});
+// The MySQL pool is shared process-wide via services/db.js (imported above),
+// so /data, /editor, /status, etc. all draw from one connectionLimit instead
+// of each opening its own — see services/db.js for the rationale.
 
 // Per-recon predicate defining what counts as a "real" proxy in the
 // reconstruction loader's eyes. Used by computeTsidComplement to find

@@ -9,14 +9,10 @@ const crypto = require('crypto');
 const githubService = require('../services/github');
 const config = require('../config');
 
-// Database connection (using mysql2 pool)
-const mysql = require('mysql2/promise');
-let db;
-
-// Initialize database connection
-(async () => {
-  db = await mysql.createPool(config.mysql);
-})();
+// Shared MySQL pool (services/db.js) — one process-wide pool. Replaces the
+// per-module createPool; also removes the startup race where `db` was briefly
+// undefined while the async initializer ran.
+const { promisePool: db } = require('../services/db');
 
 /**
  * GET /oauth/github
