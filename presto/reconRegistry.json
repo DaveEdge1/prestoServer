@@ -223,7 +223,7 @@
       "language": "R / Python",
       "showInTable": true,
       "proxiesHtml": "<a href=\"https://lipdverse.org/Temp12k/1_0_2/\" target=\"_blank\">Temperature 12k proxy database</a>",
-      "publicationHtml": "Kaufman et al., 2020, Scientific Data 7:201"
+      "publicationHtml": "<a href=\"https://www.nature.com/articles/s41597-020-0530-7\" target=\"_blank\">Kaufman et al., 2020</a>"
     },
     "lib": {
       "title": "Temperature 12k multi-method composite (SCC, DCC, GAM, CPS, PaiCo)",
