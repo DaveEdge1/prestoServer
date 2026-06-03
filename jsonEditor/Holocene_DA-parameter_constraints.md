@@ -112,6 +112,11 @@ These produce silent NaN output or cryptic crashes — they should never reach t
 - `reference_period[1] > reference_period[0]` (non-empty range, when applicable).
 - `time_resolution ≤ (age_range_to_reconstruct[1] - age_range_to_reconstruct[0])`.
 - `prior_window > 0` (or the literal string `'all'`).
+- (only when `reconstruction_type == 'relative'`) `reference_period` fully
+  contained in `age_range_to_reconstruct` — the time interval for
+  reconstruction must fully cover the time interval for anomaly calculation.
+  (Promoted from soft to hard: anomalies defined against a period outside the
+  reconstruction window are uninterpretable to the user.)
 
 ### Soft constraints (warn, allow override)
 
@@ -120,9 +125,6 @@ These produce silent NaN output or cryptic crashes — they should never reach t
   all reconstruction ages."
 - `prior_window < 2 × time_resolution` → "Per-age prior may contain very few
   ensemble members; reconstructions can become noisy or unstable."
-- (only when `reconstruction_type == 'relative'`) `reference_period` not
-  contained in `age_range_to_reconstruct` → "Anomalies will be defined
-  relative to a period outside your reconstruction window."
 
 ### Live diagnostics (informational, recompute on every change)
 

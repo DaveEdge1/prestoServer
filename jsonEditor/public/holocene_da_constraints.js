@@ -96,7 +96,7 @@
     if (isRelative) {
       const refContained = s.referencePeriod[0] >= s.reconRange[0] && s.referencePeriod[1] <= s.reconRange[1];
       if (!refContained) {
-        warnings.push('Reference period is not fully contained in the reconstruction range; anomalies will be defined relative to a period partially outside your output.');
+        errors.push('The time interval for reconstruction [' + s.reconRange[0] + ', ' + s.reconRange[1] + '] must fully cover the time interval for anomaly calculation [' + s.referencePeriod[0] + ', ' + s.referencePeriod[1] + '].');
       }
     }
 
