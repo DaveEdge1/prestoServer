@@ -41,10 +41,10 @@ MD5_FILE = "/home/user/prestoServer/query/lipdverseQuery.md5"
 
 # MySQL Configuration
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'dave',
-    'password': 'peb0pk0q',
-    'database': 'lipdverse',
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'user': os.environ.get('MYSQL_USER', 'dave'),
+    'password': os.environ['MYSQL_PASSWORD'],
+    'database': os.environ.get('MYSQL_DATABASE', 'lipdverse'),
     'allow_local_infile': True
 }
 

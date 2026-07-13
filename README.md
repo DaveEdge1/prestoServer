@@ -1,8 +1,8 @@
 # Paleo Presto Server
 
-Web platform for running paleoclimate reconstructions (LMR, Holocene DA, temp12k, …) against [lipdverse](https://lipdverse.org/) data. Users configure a reconstruction in the browser, the orchestrator forks a per-recon template repo into the user's GitHub account, and the reconstruction runs as a GitHub Actions workflow there. Results are committed back to the user's fork and published via GitHub Pages.
+Web platform for running paleoclimate reconstructions (LMR, Holocene DA, temp12k, …) against [lipdverse](https://lipdverse.org/) data. Users configure a reconstruction in the browser, the orchestrator generates a per-recon repo from a template into the user's GitHub account (GitHub "Use this template"), and the reconstruction runs as a GitHub Actions workflow there. Results are committed back to the user's repo and published via GitHub Pages.
 
-**Live:** http://143.198.98.66:84/forms/
+**Live:** https://custom.paleopresto.com/forms/
 
 ## Architecture
 
@@ -15,17 +15,17 @@ Web platform for running paleoclimate reconstructions (LMR, Holocene DA, temp12k
                     │            ├─ tile-server (Blue Marble)       │
                     │            └─ lipdGenerator (one-shot worker) │
                     └─────────────────┬────────────────────────────┘
-                                      │ fork + dispatch
+                                      │ create-from-template + dispatch
                                       ▼
                     ┌──────────────────────────────────────────────┐
-                    │  GitHub Actions in user's fork of            │
+                    │  GitHub Actions in user's copy of            │
                     │  DaveEdge1/<template> (LMR2, presto-…, …)    │
                     │  → runs reconstruction container             │
                     │  → commits results + publishes Pages         │
                     └──────────────────────────────────────────────┘
 ```
 
-The orchestrator (`app.js`) consolidates what used to be 9 separate Node services into one Express app, with route modules under `routes/`. It does not run reconstructions itself — its job is to serve the form/query/editor UIs, fork the template repo via the GitHub API, write user inputs into the fork, and dispatch the workflow.
+The orchestrator (`app.js`) consolidates what used to be 9 separate Node services into one Express app, with route modules under `routes/`. It does not run reconstructions itself — its job is to serve the form/query/editor UIs, generate the user's repo from the template via the GitHub API, write user inputs into it, and dispatch the workflow.
 
 ## Quickstart (local dev)
 
@@ -52,10 +52,14 @@ docker-compose logs -f presto-orchestrator
 ```
 app.js                  Express entry point
 routes/                 Route modules: oauth, forms, query, datacleaning,
-                        editor, reconstruct, downloads, viz, …
-services/               github.js (fork + dispatch), lipdDataService.js,
-                        cleanup.js, compilationUpdater.js, logger, metrics
+                        editor, lipds, lipdDownload, reuse, downloads, viz,
+                        data, sparql, posttsids, status, webhooks
+services/               github.js / githubApp.js (create-from-template +
+                        dispatch), db.js, cleanup.js, compilationUpdater.js,
+                        logger.js, metrics.js
 config/                 Central config (port, baseUrl, MySQL, paths)
+presto/                 reconRegistry.json — single source of truth for recon
+                        methods; generateReconLib.js regenerates reconLib.json
 prestoForm/             Per-recon UI + translation logic (one dir per recon)
 query/                  Shared query UI (one template, multiple recons)
 jsonEditor/             Parameter editor generator (writeForm.js → HTML/JS)
@@ -63,13 +67,16 @@ getLipds/               Worker containers used by the orchestrator
                           lipdGenerator/   download + filter lipdverse data
                           lipdPickler/     (legacy, filtered path)
                           proxyAnalysis/   PCA + spatial dedup service
-templates/workflows/    GitHub Actions workflow templates (per recon)
+                          holoceneDA/      Holocene DA container
+templates/              workflows/ (per-recon GitHub Actions) + scripts/
 nginx/                  Reverse proxy config
 monitoring/             Prometheus, Grafana, Loki, Promtail configs
-docs/                   Deeper docs
+scripts/                Operational/build scripts (build-and-push, DB updates)
+docs/                   Deeper docs (deployment runbooks, contributor guides;
+                        archive/ holds superseded historical docs)
 ```
 
-Worker containers published as `davidedge/lipd_webapps:<tag>` (lipdGenerator, lipdPickler, holocene_da) and `davidedge/lmr2:latest`.
+Worker containers published as `davidedge/lipd_webapps:<tag>` (lipdGenerator, lipdPickler, holocene_da, holocene_da_viz) and `davidedge/lmr2:latest`.
 
 ## Adding a new reconstruction
 

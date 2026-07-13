@@ -7,6 +7,7 @@ Usage:
 """
 
 import csv
+import os
 import sys
 
 try:
@@ -18,10 +19,10 @@ except ImportError:
 
 # MySQL Configuration
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'dave',
-    'password': 'peb0pk0q',
-    'database': 'lipdverse'
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'user': os.environ.get('MYSQL_USER', 'dave'),
+    'password': os.environ['MYSQL_PASSWORD'],
+    'database': os.environ.get('MYSQL_DATABASE', 'lipdverse')
 }
 
 CSV_FILE = '/tmp/lipdverseQuery.csv'
