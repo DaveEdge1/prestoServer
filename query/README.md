@@ -1,32 +1,37 @@
-## Linking the query container with presto form and existing recons
+# Query subsystem
 
-### Current functionality
+The browser-facing query/selection UI for picking lipdverse datasets. Served by
+`routes/query.js` (part of the consolidated orchestrator — no standalone server).
 
-* mysql database for lipdverse query (running at port=3306)
-  * access for nick and dave through Rmysql
-  * nodejs access via queryDB.js (port 88, query string used by mySQL)
-    * comlplex query strings are processed as in:
-      * '?archiveType=Wood,Coral&paleoData_proxy=ring%20width,maximum%20latewood%20density'
-      * WHERE (archiveType = "Wood" OR "Coral") AND (paleoData_proxy = "ring width" OR "maximum latewood density")
-  * UI access via http://143.198.98.66:86/ (queryServer.js)
-    * autocomplete for multiselect inputs (eg. archiveType)
-    * leaflet map to select area and display selected datasets
-    * remaining UI to mimick presto inputs (writeForm.js)
+## How it's served
 
-* queryContainer runs query in lipdR
-  * Node app at query/getLipd.js 
-    * Accepts a json query file(queryParams.json)
-    * If queryParams.json specifies R interface, outputs .rds
-    * Else if Python interface, outputs folder of .lpd files
-  * queryContainer stdout stored as ‘queryContainer_stdout.log’
-  * Node app checks for R/Python param
-    * If R, finished
-    * If Python launch the lipdPickler container
-      * Accepts directory path as input
-      * Outputs lipid.pkl and ‘pickleContainer_stdout.log’
+- `GET /query/:recon` renders the **unified template** `query.html`, injecting a
+  per-recon `PAGE_CONFIG` from `presto/reconRegistry.json` (the `pageConfig`
+  field). One template drives every recon (LMR, holocene_da, lipdDownload /
+  download / downloadNew, temp12k, BayGMST, graph_em, …). Edit `query.html`
+  only, then restart the orchestrator.
+- `GET /query/` serves `index.html`.
+- Static assets (Leaflet, `mapManager.js`, `mollweide-crs.js`, `queryHelpers.js`,
+  map tiles, CSS, …) live under `query/public/` and are served at `/query/*`.
+- Database-backed lookups (autocomplete, dataset filtering) are handled by
+  `routes/data.js` (formerly the standalone `queryDB.js`), which builds MySQL
+  `WHERE` clauses from query-string filters, e.g.
+  `?archiveType=Wood,Coral&paleoData_proxy=ring width,maximum latewood density`
+  → `WHERE (archiveType IN ('Wood','Coral')) AND (paleoData_proxy IN (...))`.
 
-### Working on selecting multiple values from a list with autocomplete
-* currently running via query/queryServer.js at port 86
-* Autocomplete now functions as it should
-* Form inputs are not taken from the slected checkboxes (maybe because I changed the values from ('selectProp' to 'groupBy')
-* The form currently sends a post request which prints the json form output on the webpage
+Actual reconstruction data generation runs in the `lipdGenerator` container and
+GitHub Actions — not in this subsystem.
+
+## Keeping the lipdverse MySQL cache in sync
+
+The `*.py` / `*.sh` scripts here are an operational toolkit (run in the
+`lipdverse-db` conda env) for refreshing and validating the `query` MySQL table:
+
+- `setup_env.sh` — create the conda env from `environment.yml`
+- `run_update.sh` → `update_lipdverse_db.py` — download + load the latest lipdverse export
+- `run_check.sh` → `check_mysql_sync.py` — compare the DB against the CSV
+- `run_check_actual.sh` → `check_actual_query.py` — run the web form's exact query
+
+Credentials come from the environment (`MYSQL_HOST` / `MYSQL_USER` /
+`MYSQL_PASSWORD` / `MYSQL_DATABASE`) — do not hard-code them. See
+`QUICKSTART.md`, `CONDA_SETUP.md`, and `UPDATE_DATABASE_README.md`.

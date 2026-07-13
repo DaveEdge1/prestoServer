@@ -337,14 +337,16 @@ If markers are misaligned, check:
 
 ## Files to Update
 
-When adding a new projection, update these files:
+When adding a new projection, update:
 
-1. **query/download.html** - Main query interface
-2. **query/downloadNew.html** - Alternative query interface
-3. **query/temp12k.html** - Temp12k-specific interface
-4. **query/holocene_da.html** - Holocene DA interface
+1. **query/query.html** - the unified query template (all recons share it; the
+   old per-recon `download.html` / `temp12k.html` / `holocene_da.html` pages
+   were removed in favor of this single template)
+2. **query/public/mapManager.js** and **query/public/mollweide-crs.js** - the
+   map/projection logic loaded by the template
 
-All files share the same projection configuration structure.
+Per-recon differences come from `pageConfig` in `presto/reconRegistry.json`, not
+from separate HTML files.
 
 ---
 
