@@ -1,5 +1,0 @@
-
-        ?var le:hasVariableID ?variableID .
-        ?var le:hasValues ?values .
-}
-LIMIT 10000

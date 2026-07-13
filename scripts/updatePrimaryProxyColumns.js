@@ -39,7 +39,7 @@ function dbConfig() {
   return {
     host:     process.env.MYSQL_HOST     || 'mysql',
     user:     process.env.MYSQL_USER     || 'dave',
-    password: process.env.MYSQL_PASSWORD || 'peb0pk0q',
+    password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE || 'lipdverse',
   };
 }

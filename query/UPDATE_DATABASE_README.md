@@ -64,13 +64,18 @@ pip3 install mysql-connector-python
 
 ### Error: Access denied for user 'dave'
 
-Check MySQL credentials in the script (lines 24-29):
+The scripts read MySQL credentials from the environment. Set them before running:
+```bash
+export MYSQL_HOST=localhost MYSQL_USER=dave MYSQL_DATABASE=lipdverse
+export MYSQL_PASSWORD=...   # do not hard-code this
+```
+The connection dict resolves to:
 ```python
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'dave',
-    'password': 'peb0pk0q',
-    'database': 'lipdverse',
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'user': os.environ.get('MYSQL_USER', 'dave'),
+    'password': os.environ['MYSQL_PASSWORD'],
+    'database': os.environ.get('MYSQL_DATABASE', 'lipdverse'),
     'allow_local_infile': True
 }
 ```

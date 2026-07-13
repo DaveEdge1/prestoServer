@@ -5,6 +5,7 @@ Check what the MySQL query actually returns vs what the CSV has
 This will query MySQL with the exact same query as the web form
 """
 
+import os
 import sys
 
 try:
@@ -16,10 +17,10 @@ except ImportError:
 
 # MySQL Configuration
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'dave',
-    'password': 'peb0pk0q',
-    'database': 'lipdverse'
+    'host': os.environ.get('MYSQL_HOST', 'localhost'),
+    'user': os.environ.get('MYSQL_USER', 'dave'),
+    'password': os.environ['MYSQL_PASSWORD'],
+    'database': os.environ.get('MYSQL_DATABASE', 'lipdverse')
 }
 
 TARGET_COMPILATIONS = ['Pages2kTemperature-2_2_0', 'CoralHydro2k-1_0_0', 'iso2k-1_1_2']

@@ -28,3 +28,11 @@ temp/
 __pycache__/
 *.pyc
 loadtest/runs/
+
+# Large reference data — kept locally, not tracked (hundreds of MB, not used at runtime)
+lipdverse_dump.sql/
+
+# Scratch / stray files that keep landing at the repo root
+*.log
+queryContainer_stdout.log
+test.png
