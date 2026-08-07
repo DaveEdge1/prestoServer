@@ -88,3 +88,7 @@ See **[docs/adding-a-reconstruction.md](docs/adding-a-reconstruction.md)** for t
 full guide, and open your PR with the
 [pull request template](.github/PULL_REQUEST_TEMPLATE.md) checklist.
 
+## License
+
+[Apache-2.0](LICENSE)
+

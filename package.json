@@ -8,7 +8,7 @@
     "dev": "NODE_ENV=development node app.js"
   },
   "author": "Dave Edge",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "@octokit/app": "^14.0.0",
     "@octokit/rest": "^20.0.0",
