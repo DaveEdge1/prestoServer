@@ -4976,6 +4976,16 @@ function renderAutoFilterSummary() {
   el.textContent =
     `${kept.length} / ${valid.length} records kept · ` +
     `${datasetsKept} / ${datasetsTotal} datasets contribute`;
+  // Hover tooltip explaining what the two ratios mean (issue #45).
+  el.title =
+    'A "record" is one proxy time series; a dataset (site) can contain ' +
+    'several (e.g. d18O and Mg/Ca measured on the same core).\n\n' +
+    `Records kept: ${kept.length} of the ${valid.length} time series ` +
+    'returned by your query pass the auto-selection filters above.\n' +
+    `Datasets contribute: ${datasetsKept} of the ${datasetsTotal} datasets ` +
+    'in your query still have at least one kept time series.\n\n' +
+    'When both numbers are equal (e.g. 708 / 708), the current filters ' +
+    'are not excluding anything.';
 }
 
 function onAutoFilterChange() {

@@ -227,6 +227,14 @@
       font-size: 0.82rem;
       color: #555;
     }
+    /* The kept-counts line carries an explanatory hover tooltip (issue #45);
+       cursor + info glyph signal that there is something to hover. */
+    #auto-filter-summary { cursor: help; }
+    #auto-filter-summary:not(:empty)::after {
+      content: ' \24D8'; /* ⓘ */
+      color: #999;
+      font-size: 0.9em;
+    }
 
     /* Auto-selection filters panel */
     .auto-filter-sub {
