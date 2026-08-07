@@ -548,6 +548,16 @@ _metadata_cache_time: float = 0.0
 # =============================================================================
 class AnalyzeRequest(BaseModel):
     tsids: List[str]
+    # Optional user override for the spatial candidate gate (issue #51).
+    # None / non-positive → SPATIAL_THRESHOLD_KM default; capped at 500 km.
+    spatial_threshold_km: Optional[float] = None
+
+
+def _effective_spatial_km(req: "AnalyzeRequest") -> float:
+    v = req.spatial_threshold_km
+    if v is None or not (v > 0):
+        return SPATIAL_THRESHOLD_KM
+    return min(float(v), 500.0)
 
 
 # =============================================================================
@@ -1157,7 +1167,7 @@ async def analyze(req: AnalyzeRequest, background_tasks: BackgroundTasks) -> Dic
             if not _ages_overlap(min_i, max_i, min_j, max_j):
                 continue
             dist = haversine_km(lat_i, lon_i, lat_j, lon_j)
-            if dist < SPATIAL_THRESHOLD_KM:
+            if dist < _effective_spatial_km(req):
                 candidate_pairs.append((i, j, dist))
 
     logger.info("Found %d spatial candidate pairs", len(candidate_pairs))
@@ -1359,7 +1369,7 @@ async def analyze_stream(req: AnalyzeRequest, background_tasks: BackgroundTasks)
                     if not _ages_overlap(min_i, max_i, min_j, max_j):
                         continue
                     dist = haversine_km(lat_i, lon_i, lat_j, lon_j)
-                    if dist < SPATIAL_THRESHOLD_KM:
+                    if dist < _effective_spatial_km(req):
                         candidate_pairs.append((i, j, dist))
 
             # Throttle by wall-clock time: emit a progress event at most once

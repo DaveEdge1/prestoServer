@@ -68,6 +68,15 @@ let filterOptions = { interpVarSummary: [], variablesByArchive: {} };
 let currentStep = 1;
 let step2EverEntered = false;  // lazy-render gate for renderDuplicates/Coverage/PCA
 
+// User-adjustable duplicate-detection thresholds (issue #51).
+// - spatialKm gates which pairs count as spatial-duplicate candidates. It is
+//   applied SERVER-side during the scan, so changing it requires a re-scan
+//   (the "Apply & re-scan" button).
+// - pearson / dtw drive the ok-vs-warn signal on the pair-score chips and
+//   their explanatory tooltips; they apply to newly rendered scores.
+const DETECTION_DEFAULTS = { spatialKm: 10, pearson: 0.8, dtw: 0.03 };
+let detectionThresholds = { ...DETECTION_DEFAULTS };
+
 // Sort state
 let sortKey = null;
 let sortAsc = true;
@@ -356,7 +365,8 @@ function showPriorCurationBanner(state) {
 // SSE streaming analysis
 // =============================================================================
 async function analyzeWithStreaming() {
-  const url = `/datacleaning/analyze-stream?uniqueID=${encodeURIComponent(UNIQUE_ID)}&recon=${encodeURIComponent(RECON)}`;
+  const url = `/datacleaning/analyze-stream?uniqueID=${encodeURIComponent(UNIQUE_ID)}&recon=${encodeURIComponent(RECON)}` +
+              `&spatial_km=${encodeURIComponent(detectionThresholds.spatialKm)}`;
   const resp = await fetch(url);
 
   if (!resp.ok) {
@@ -1803,8 +1813,8 @@ function renderDatasetMetrics(dsName) {
   }
 
   const TIPS = {
-    r:   'Pearson r on overlapping intervals. Range −1..1. ≥ 0.8 suggests the two records co-vary — a strong signal they are duplicates (e.g. a master composite and its constituent cores in the same dataset).',
-    dtw: 'DTW: shape-similarity score (0 identical, 1 opposite). < 0.03 ≈ near-identical series.',
+    r:   `Pearson r on overlapping intervals. Range −1..1. ≥ ${detectionThresholds.pearson} suggests the two records co-vary — a strong signal they are duplicates (e.g. a master composite and its constituent cores in the same dataset).`,
+    dtw: `DTW: shape-similarity score (0 identical, 1 opposite). < ${detectionThresholds.dtw} ≈ near-identical series.`,
   };
   const na = (label, title) => chip(label, '—', 'na', title);
 
@@ -1814,8 +1824,8 @@ function renderDatasetMetrics(dsName) {
       : '<span style="color:#888;font-size:0.8rem;margin-left:6px;">Select two records to compare</span>';
     scoresEl.innerHTML = `<div class="metrics-strip">${na('Pearson r', TIPS.r)}${na('DTW', TIPS.dtw)}${hint}</div>`;
   } else {
-    const rChip   = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > 0.8 ? '' : 'warn', TIPS.r);
-    const dtwChip = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < 0.03    ? '' : 'warn', TIPS.dtw);
+    const rChip   = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > detectionThresholds.pearson ? '' : 'warn', TIPS.r);
+    const dtwChip = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < detectionThresholds.dtw    ? '' : 'warn', TIPS.dtw);
     scoresEl.innerHTML = `<div class="metrics-strip">${rChip}${dtwChip}</div>`;
   }
   scoresEl.style.display = '';
@@ -2592,6 +2602,7 @@ async function saveProgress() {
         excludedTSIDs: [...excludedTSIDs],
         excludedVariableNames: [...excludedVariableNames],
         filterState:   serializeFilterState(),
+        detectionThresholds: { ...detectionThresholds },
         groupNotes,
         datasetNotes,
         savedDatasets: [...savedDatasets],
@@ -2724,6 +2735,16 @@ async function loadAndRestoreProgress() {
     // manual Keep/Remove decisions from Step 1/2 survive.
     if (Array.isArray(progress.excludedTSIDs)) {
       for (const t of progress.excludedTSIDs) excludedTSIDs.add(t);
+    }
+
+    // Restore detection thresholds (issue #51) — guarded per field so a
+    // malformed value falls back to the default rather than poisoning state.
+    if (progress.detectionThresholds && typeof progress.detectionThresholds === 'object') {
+      const p = progress.detectionThresholds;
+      const sk = Number(p.spatialKm), pr = Number(p.pearson), dt = Number(p.dtw);
+      if (Number.isFinite(sk) && sk > 0 && sk <= 500) detectionThresholds.spatialKm = sk;
+      if (Number.isFinite(pr) && pr >= 0 && pr <= 1)  detectionThresholds.pearson   = pr;
+      if (Number.isFinite(dt) && dt > 0 && dt <= 1)   detectionThresholds.dtw       = dt;
     }
 
     // Restore variable-name exclusions (replaces the default blacklist when
@@ -3311,10 +3332,10 @@ function renderGroupMetrics(groupId) {
 
   const TIPS = {
     dist: 'Geographic distance between the two proxy sites in kilometres.',
-    r:    'Pearson r: linear correlation coefficient. Range: −1 to 1. Values above 0.8 suggest the two records co-vary strongly and may be duplicates. Unlike DTW, Pearson r is sensitive to the exact timing of each data point.',
+    r:    `Pearson r: linear correlation coefficient. Range: −1 to 1. Values above ${detectionThresholds.pearson} suggest the two records co-vary strongly and may be duplicates. Unlike DTW, Pearson r is sensitive to the exact timing of each data point.`,
     dtw:  'DTW (Dynamic Time Warping): shape-similarity score. Range: 0 to 1 (both series are min–max scaled to [0, 1] before comparison, then the total path cost is divided by series length). ' +
           '0 = perfectly identical shapes; 1 = completely opposite. ' +
-          'Values below 0.03 indicate near-identical records. ' +
+          `Values below ${detectionThresholds.dtw} indicate near-identical records. ` +
           'A value of 0.1 means the two series differ by ~10 % of their full amplitude on average — moderate similarity. ' +
           'Unlike Pearson r, DTW allows for small age-model offsets, so two records can score well here even if their time axes are slightly misaligned.'
   };
@@ -3328,8 +3349,8 @@ function renderGroupMetrics(groupId) {
     scoresEl.innerHTML = `<div class="metrics-strip">${na('Distance', TIPS.dist)}${na('Pearson r', TIPS.r)}${na('DTW', TIPS.dtw)}${hint}</div>`;
   } else {
     const distChip = chip('Distance', pair.distKm  != null ? `${pair.distKm} km`     : '—', pair.distKm  == null ? 'na' : '',                              TIPS.dist);
-    const rChip    = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > 0.8 ? '' : 'warn', TIPS.r);
-    const dtwChip  = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < 0.03    ? '' : 'warn', TIPS.dtw);
+    const rChip    = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > detectionThresholds.pearson ? '' : 'warn', TIPS.r);
+    const dtwChip  = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < detectionThresholds.dtw    ? '' : 'warn', TIPS.dtw);
     scoresEl.innerHTML = `<div class="metrics-strip">${distChip}${rChip}${dtwChip}</div>`;
   }
   scoresEl.style.display = '';
@@ -3712,8 +3733,8 @@ function renderModalMetrics(groupId) {
 
   const TIPS = {
     dist: 'Geographic distance between the two proxy sites in kilometres.',
-    r:    'Pearson r: linear correlation coefficient. Values above 0.8 suggest the records may be duplicates.',
-    dtw:  'DTW (Dynamic Time Warping): shape-similarity. 0 = identical; 1 = opposite. Values below 0.03 indicate near-identical records.'
+    r:    `Pearson r: linear correlation coefficient. Values above ${detectionThresholds.pearson} suggest the records may be duplicates.`,
+    dtw:  `DTW (Dynamic Time Warping): shape-similarity. 0 = identical; 1 = opposite. Values below ${detectionThresholds.dtw} indicate near-identical records.`
   };
   const na = (label, title) => chip(label, '—', 'na', title);
 
@@ -3724,8 +3745,8 @@ function renderModalMetrics(groupId) {
     scoresEl.innerHTML = `<div class="metrics-strip">${na('Distance', TIPS.dist)}${na('Pearson r', TIPS.r)}${na('DTW', TIPS.dtw)}${hint}</div>`;
   } else {
     const distChip = chip('Distance', pair.distKm  != null ? `${pair.distKm} km`     : '—', pair.distKm  == null ? 'na' : '',                              TIPS.dist);
-    const rChip    = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > 0.8 ? '' : 'warn', TIPS.r);
-    const dtwChip  = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < 0.03    ? '' : 'warn', TIPS.dtw);
+    const rChip    = chip('Pearson r', pair.pearson != null ? pair.pearson.toFixed(3) : '—', pair.pearson == null ? 'na' : pair.pearson > detectionThresholds.pearson ? '' : 'warn', TIPS.r);
+    const dtwChip  = chip('DTW',       pair.dtw     != null ? pair.dtw.toFixed(4)     : '—', pair.dtw     == null ? 'na' : pair.dtw < detectionThresholds.dtw    ? '' : 'warn', TIPS.dtw);
     scoresEl.innerHTML = `<div class="metrics-strip">${distChip}${rChip}${dtwChip}</div>`;
   }
 }
@@ -4912,6 +4933,7 @@ function renderAutoFilters() {
   renderInterpFilter();
   renderVariablesByArchive();
   renderCompilationBetaToggle();
+  renderDetectionThresholds();
   renderAutoFilterSummary();
 }
 
@@ -5006,6 +5028,50 @@ function renderCompilationBetaToggle() {
     filterState.requireCompilation = cb.checked;
     onAutoFilterChange();
   };
+}
+
+// Detection-thresholds panel (issue #51). Pearson/DTW cutoffs apply to newly
+// rendered pair scores immediately; the distance gate is server-side, so the
+// button re-runs the duplicate scan with the new value.
+function renderDetectionThresholds() {
+  const sk  = document.getElementById('thresh-spatial-km');
+  const pr  = document.getElementById('thresh-pearson');
+  const dt  = document.getElementById('thresh-dtw');
+  const btn = document.getElementById('btn-rescan-thresholds');
+  if (!sk || !pr || !dt || !btn) return;
+
+  sk.value = detectionThresholds.spatialKm;
+  pr.value = detectionThresholds.pearson;
+  dt.value = detectionThresholds.dtw;
+
+  pr.onchange = () => {
+    const v = Number(pr.value);
+    if (Number.isFinite(v) && v >= 0 && v <= 1) detectionThresholds.pearson = v;
+    pr.value = detectionThresholds.pearson;
+    scheduleAutoSave();
+  };
+  dt.onchange = () => {
+    const v = Number(dt.value);
+    if (Number.isFinite(v) && v > 0 && v <= 1) detectionThresholds.dtw = v;
+    dt.value = detectionThresholds.dtw;
+    scheduleAutoSave();
+  };
+  btn.onclick = rescanWithNewDistance;
+}
+
+async function rescanWithNewDistance() {
+  const sk = document.getElementById('thresh-spatial-km');
+  const v  = Number(sk && sk.value);
+  if (Number.isFinite(v) && v > 0 && v <= 500) {
+    detectionThresholds.spatialKm = v;
+  }
+  if (sk) sk.value = detectionThresholds.spatialKm;
+  scheduleAutoSave();
+  // Same re-run path the "start fresh" banner uses: the streaming events
+  // replace duplicateGroups (and re-render) as they arrive; manual
+  // Keep/Remove decisions live in excludedTSIDs and survive the re-scan.
+  showLoading();
+  await runFreshAnalysis();
 }
 
 function renderAutoFilterSummary() {

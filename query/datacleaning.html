@@ -227,6 +227,18 @@
       font-size: 0.82rem;
       color: #555;
     }
+    /* Detection-thresholds panel (issue #51) */
+    .threshold-grid {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+    }
+    .threshold-field { display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; color: #444; cursor: help; margin: 0; }
+    .threshold-field input { width: 90px; padding: 3px 6px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; }
+    .btn-rescan {
+      padding: 5px 12px; font-size: 0.82rem; border: 1px solid #2a6496;
+      background: #fff; color: #2a6496; border-radius: 4px; cursor: pointer;
+    }
+    .btn-rescan:hover { background: #2a6496; color: #fff; }
+
     /* The kept-counts line carries an explanatory hover tooltip (issue #45);
        cursor + info glyph signal that there is something to hover. */
     #auto-filter-summary { cursor: help; }
@@ -1388,6 +1400,31 @@
             default; enabling it restricts selection to records that belong to at
             least one compilation, useful for reconstructions that want to lean
             on curator-vetted data only.
+          </p>
+        </div>
+
+        <!-- Detection thresholds (issue #51) -->
+        <div class="auto-filter-sub">
+          <h4 class="auto-filter-sub-head">Duplicate-detection thresholds</h4>
+          <div class="threshold-grid">
+            <label class="threshold-field" title="Two records at the same site count as duplicate candidates when they are closer than this. Applied during the scan — click Apply &amp; re-scan after changing.">
+              <span>Distance (km)</span>
+              <input type="number" id="thresh-spatial-km" min="0.1" max="500" step="0.1">
+            </label>
+            <label class="threshold-field" title="Pair-score chips flag a pair as likely duplicate when Pearson r exceeds this.">
+              <span>Correlation (r) &gt;</span>
+              <input type="number" id="thresh-pearson" min="0" max="1" step="0.01">
+            </label>
+            <label class="threshold-field" title="Pair-score chips flag a pair as near-identical when the DTW shape score is below this.">
+              <span>DTW &lt;</span>
+              <input type="number" id="thresh-dtw" min="0.005" max="1" step="0.005">
+            </label>
+            <button type="button" id="btn-rescan-thresholds" class="btn-rescan" title="Re-run the duplicate scan with the distance above. Manual keep/remove decisions are preserved.">Apply &amp; re-scan</button>
+          </div>
+          <p class="auto-filter-sub-desc" style="margin-top:4px;">
+            Defaults: 10&nbsp;km, r&nbsp;&gt;&nbsp;0.8, DTW&nbsp;&lt;&nbsp;0.03. Distance
+            changes need a re-scan; correlation and DTW cutoffs apply to pair scores
+            as they render. The removal dialog's own similarity slider (0.99) is separate.
           </p>
         </div>
 

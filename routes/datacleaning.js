@@ -58,10 +58,14 @@ router.post('/analyze', async (req, res) => {
     return res.status(400).json({ error: 'No TSIDs found in TSIDs.json' });
   }
 
+  // Optional user override of the spatial candidate gate (issue #51).
+  const spatialKmBody = Number(req.body.spatialKm);
+  const spatialOk = Number.isFinite(spatialKmBody) && spatialKmBody > 0 && spatialKmBody <= 500;
+
   try {
     const response = await axios.post(
       `${PROXY_ANALYSIS_URL}/analyze`,
-      { tsids },
+      spatialOk ? { tsids, spatial_threshold_km: spatialKmBody } : { tsids },
       { timeout: 120000 } // 2 minutes — metadata download can be slow
     );
     res.json(response.data);
@@ -107,10 +111,15 @@ router.get('/analyze-stream', async (req, res) => {
   res.setHeader('X-Accel-Buffering', 'no'); // disable nginx buffering
   res.flushHeaders();
 
+  // Optional user override of the spatial candidate gate (issue #51),
+  // passed by the client as ?spatial_km= on the SSE URL.
+  const spatialKm = Number(req.query.spatial_km);
+  const spatialOk = Number.isFinite(spatialKm) && spatialKm > 0 && spatialKm <= 500;
+
   try {
     const response = await axios.post(
       `${PROXY_ANALYSIS_URL}/analyze-stream`,
-      { tsids },
+      spatialOk ? { tsids, spatial_threshold_km: spatialKm } : { tsids },
       { responseType: 'stream', timeout: 600000 } // 10 min — events flow continuously
     );
 
@@ -280,6 +289,7 @@ router.post('/save-progress', async (req, res) => {
     uniqueID, recon, urlParams,
     excludedTSIDs, excludedVariableNames, filterState,
     groupNotes, datasetNotes, savedDatasets, savedGroups,
+    detectionThresholds,
   } = req.body;
 
   if (!uniqueID || !recon) {
@@ -296,6 +306,9 @@ router.post('/save-progress', async (req, res) => {
     excludedTSIDs:         Array.isArray(excludedTSIDs) ? excludedTSIDs : [],
     excludedVariableNames: Array.isArray(excludedVariableNames) ? excludedVariableNames : [],
     filterState:           (filterState && typeof filterState === 'object') ? filterState : null,
+    // User-adjusted duplicate-detection thresholds (issue #51); null for
+    // sessions saved before the feature existed.
+    detectionThresholds:   (detectionThresholds && typeof detectionThresholds === 'object') ? detectionThresholds : null,
     groupNotes:            (groupNotes && typeof groupNotes === 'object') ? groupNotes : {},
     datasetNotes:          (datasetNotes && typeof datasetNotes === 'object') ? datasetNotes : {},
     savedDatasets:         Array.isArray(savedDatasets) ? savedDatasets : [],
