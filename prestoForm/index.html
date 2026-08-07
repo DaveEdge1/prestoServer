@@ -177,12 +177,9 @@
         border: 1px solid #e0e0e0;
         border-radius: 6px;
         padding: 0.75rem 1.25rem;
-        transition: border-color 0.2s, box-shadow 0.2s;
       }
-      .pce-step-card:hover {
-        border-color: #c4956a;
-        box-shadow: 0 2px 12px rgba(196,149,106,0.15);
-      }
+      /* No :hover effect here on purpose — these summary cards are not
+         clickable, and a rollover made them look like they were (issue #43). */
       .pce-step-num {
         flex-shrink: 0;
         width: 1.6rem;
