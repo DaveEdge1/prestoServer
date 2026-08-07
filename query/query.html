@@ -318,6 +318,10 @@
          <br>
          <div>
             <p style="text-align: center; font-size:16px;" id="datasetCount"></p>
+            <!-- Series-level match count (issue #53): the map counts datasets,
+                 but the reconstruction needs single series matching ALL filters
+                 at once — this line shows that count, red-flagged when 0. -->
+            <p style="text-align: center; font-size:13px; color:#666; margin-top:-4px; display:none;" id="tsCount"></p>
             <p style="text-align: center; font-size:13px; color:#666; margin-top:-4px; display:none;" id="unitsFilterNote"></p>
          </div>
          <br>

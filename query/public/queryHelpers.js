@@ -760,6 +760,42 @@ getAllMonths = function(startSpan,endSpan){
             console.log("qstring from params(): " + qstring)
             return qstring;
         };
+        // Live series-level count (issue #53). The map counts DATASETS, but the
+        // reconstruction pulls individual time series — one row must satisfy ALL
+        // filters at once, including the always-on units filter. Surfacing this
+        // count beside the dataset count lets users see a 0 before they submit.
+        updateTsCount = function(param1){
+            var el = document.getElementById('tsCount');
+            if (!el) return;
+            // The archived-compilation path never runs the series query.
+            var archived = document.getElementById('archivedCompilation');
+            if (archived && archived.checked) { el.style.display = 'none'; return; }
+            var xhrTs = new XMLHttpRequest();
+            xhrTs.timeout = 5000;
+            xhrTs.onreadystatechange = function(){
+                if (xhrTs.readyState !== 4) return;
+                if (xhrTs.status !== 200) { el.style.display = 'none'; return; }
+                var n = 0;
+                try { n = JSON.parse(xhrTs.responseText).length; }
+                catch (_) { el.style.display = 'none'; return; }
+                el.style.display = 'block';
+                if (n === 0) {
+                    el.style.color = '#c00';
+                    var msg = '⚠ 0 individual time series match all filters — submitting will find no usable records.';
+                    if (window.PAGE_CONFIG && window.PAGE_CONFIG.unitsFilter) {
+                        msg += ' Each series must have units "' + window.PAGE_CONFIG.unitsFilter +
+                               '" AND match every other filter at the same time.';
+                    }
+                    el.textContent = msg;
+                } else {
+                    el.style.color = '#666';
+                    el.textContent = n + ' individual time series match all filters.';
+                }
+            };
+            xhrTs.open('get', '/data/TS' + param1, /*async*/ true);
+            xhrTs.send();
+        };
+
         sendQuery = function(){
             // Apply the coordinate box to the preview query itself (when the
             // "Filter by coordinates" toggle is on) so datasets outside the box
@@ -781,6 +817,7 @@ getAllMonths = function(startSpan,endSpan){
                     promise1.then(() => {
                       updatePoints(prevResp)
                       console.log("After updatePoints, inRectCount = " + inRectCount);
+                      updateTsCount(param1);
                       xhr0 = null;
                       // Expected output: "Success!"
                     });
@@ -1007,6 +1044,26 @@ getAllMonths = function(startSpan,endSpan){
                             return; // leave the promise pending — user stays on the page
                         }
                         var resoJSON = JSON.parse(reso);
+
+                        // Zero series can legitimately come back even when the map
+                        // shows datasets: the map query matches at the DATASET level
+                        // (different series of one dataset can satisfy different
+                        // filters), while this query requires a single series row to
+                        // satisfy ALL filters — including the always-on units filter
+                        // (issue #53). Explain instead of crashing on resoJSON[0].
+                        if (!Array.isArray(resoJSON) || resoJSON.length === 0) {
+                            var msg0 = 'No individual time series match all of your filters.';
+                            if (window.PAGE_CONFIG && window.PAGE_CONFIG.unitsFilter) {
+                                msg0 += '\n\nNote: this reconstruction only accepts series with units "' +
+                                    window.PAGE_CONFIG.unitsFilter + '". A dataset can appear on the map ' +
+                                    'because a different series in that dataset has those units — e.g. a ' +
+                                    'pollen record interpreted as precipitation shows on the map but ' +
+                                    'provides no usable series.';
+                            }
+                            msg0 += '\n\nBroaden your filters, update the map, and try again.';
+                            alert(msg0);
+                            return; // leave the promise pending — user stays on the page
+                        }
 
                         // DEBUG: Check what /TS endpoint returned
                         console.log("DEBUG: First TSID record from /TS endpoint:", resoJSON[0]);
