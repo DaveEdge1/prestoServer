@@ -10,6 +10,10 @@
   <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
   <style>
     /* ── Layout ── */
+    /* Bootstrap 3 sets html{font-size:10px}, which silently shrank every rem
+       size on this page to 62.5% of its designed value (issue #44). Restore
+       the 16px root so 0.85rem means 13.6px, not 8.5px. */
+    html { font-size: 16px; }
     html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; }
 
     #app { display: flex; flex-direction: column; min-height: 100vh; }
