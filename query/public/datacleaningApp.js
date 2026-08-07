@@ -970,7 +970,7 @@ function renderTable() {
       <td><input type="checkbox" class="row-check" data-tsid="${tsid}"
           ${excluded ? '' : 'checked'}
           onchange="onRowCheck('${tsid}', this.checked)" /></td>
-      <td title="${tsid}">${rec.dataSetName || '—'}</td>
+      <td title="${tsid}">${lipdverseLinkHtml(rec, escapeHtml(rec.dataSetName || '')) || escapeHtml(rec.dataSetName || '—')}</td>
       <td>${rec.archiveType || '—'}</td>
       <td>${rec.variableName || '—'}</td>
       <td title="${rec.compilation || ''}">${rec.compilation || '—'}</td>
@@ -1130,6 +1130,27 @@ function escapeHtml(s) {
 
 function _recordByTsid(tsid) {
   return allRecords.find(r => r.tsid === tsid) || null;
+}
+
+// --- lipdverse links (issues #46/#49) ---------------------------------------
+// Dataset pages live at https://lipdverse.org/data/{datasetId}/ — the same
+// URL scheme the query map's popups use. datasetId arrives per record from
+// /analyze; when it's missing (e.g. proxy-analysis container not yet updated)
+// these return '' and the UI simply shows no link.
+function lipdverseDatasetUrl(rec) {
+  return rec && rec.datasetId
+    ? 'https://lipdverse.org/data/' + encodeURIComponent(rec.datasetId) + '/'
+    : '';
+}
+
+function lipdverseLinkHtml(rec, label) {
+  const url = lipdverseDatasetUrl(rec);
+  if (!url) return '';
+  // stopPropagation: these links sit inside clickable card headers/rows and
+  // must not toggle their parent when clicked.
+  return `<a class="lipdverse-link" href="${url}" target="_blank" rel="noopener" ` +
+         `title="Open this dataset on lipdverse.org" ` +
+         `onclick="event.stopPropagation()">${label}</a>`;
 }
 
 function toggleDatasetCandidate(tsid) {
@@ -2279,7 +2300,12 @@ function _renderDatasetCard(ds) {
     `<div class="${cardClass}" id="ds-card-${safeName}">` +
       `<div class="ds-review-header" onclick="toggleDatasetDetails('${safeNameAttr}')">` +
         `<span class="expand-icon${isOpen ? ' open' : ''}" id="ds-expand-${safeName}">&#9654;</span>` +
-        `<span class="ds-review-title">${safeName}</span>` +
+        `<span class="ds-review-title">${safeName}${(() => {
+          const dsRec = _recordByTsid(allTsids[0]) ||
+                        allRecords.find(r => r.dataSetName === ds.dataSetName);
+          const link = lipdverseLinkHtml(dsRec, '&#8599;');
+          return link ? ' ' + link : '';
+        })()}</span>` +
         `<span class="ds-review-archive">${escapeHtml(ds.archiveType || '—')}</span>` +
         `<span class="ds-review-hint">${escapeHtml(hintText)}</span>` +
         `<span class="${statusCls}" style="margin-left:auto;">${statusText}</span>` +
@@ -3501,11 +3527,12 @@ function openGroupModal(groupId, event) {
     const meta     = allRecords.find(r => r.tsid === tsid) || {};
     const color    = tsidColors[tsid] || '';
     const excluded = excludedTSIDs.has(tsid);
+    const dsLink   = lipdverseLinkHtml(meta, 'lipdverse &#8599;');
     recordsHtml += `
       <div class="dup-record" data-tsid="${tsid}">
         <div class="record-info">
           <div class="record-name"${color ? ` style="color:${color}"` : ''}>${meta.dataSetName || tsid}</div>
-          <div class="record-meta"><code style="font-size:0.82em;color:#555;">${tsid}</code></div>
+          <div class="record-meta"><code style="font-size:0.82em;color:#555;">${tsid}</code>${dsLink ? ' · ' + dsLink : ''}</div>
           ${meta.compilation ? `<div class="record-meta"><em>${formatCompilationString(meta.compilation)}</em></div>` : ''}
         </div>
         <div class="keep-remove">

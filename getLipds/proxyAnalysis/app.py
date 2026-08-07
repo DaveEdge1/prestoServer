@@ -955,6 +955,10 @@ def row_to_record(row: pd.Series) -> Dict[str, Any]:
 
     return {
         "tsid": _safe_str(_first_present(row, "paleoData_TSid", "TSid", "tsid")),
+        # datasetId powers the lipdverse.org/data/{id}/ links in the UI
+        # (issues #46/#49); '' when the CSV row has none and the UI omits
+        # the link.
+        "datasetId": _safe_str(row.get("datasetId")),
         "dataSetName": _safe_str(
             _first_present(row, "dataSetName", "datasetName", "datasetId")
         ),
