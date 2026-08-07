@@ -94,7 +94,7 @@ Per-age priors longer than this minimum are deterministically subsampled
 | 4 | `prior_window` ≥ span of `age_range_model` | Slide rule collapses to a static prior; time-varying behaviour disabled | **Silent methodological** |
 | 5 | `prior_window < time_resolution` | Some ages may get 0 or 1 slices; if 0, RuntimeError; if low, EnKF poorly conditioned | Hard fail or quality drop |
 | 6 | `prior_window < 2 × time_resolution` | Possible but very small per-age priors (often <30 members) → high sampling noise, EnKF instability | Quality |
-| 7 | `reference_period` not contained in `age_range_to_reconstruct` | Anomalies defined against a period the user cannot see in their output | UX / interpretability |
+| 7 | `reference_period` not strictly inside `age_range_to_reconstruct` (extends beyond it **or** exactly touches an edge) | NaN values in the reconstruction output (observed for both overshoot and exact edge alignment — issue #48) | **Silent corruption** |
 | 8 | `reference_period` overlaps `prior_window` heavily for nearby ages (relative mode) | Same model slices that set the anomaly baseline also populate the prior — mild circularity | Methodological |
 | 9 | `time_resolution > (age_range_to_reconstruct[1] - age_range_to_reconstruct[0])` | Zero `age_centers` → cryptic shape error in array allocation | Hard fail (poor UX) |
 | 10 | `time_resolution` not in the pre-processed set `{10, 20, 50, 100, 200, 500, 1000}` | Workflow falls back to downloading raw model data from Zenodo and processing in-container — works but slow | Performance |
@@ -112,11 +112,12 @@ These produce silent NaN output or cryptic crashes — they should never reach t
 - `reference_period[1] > reference_period[0]` (non-empty range, when applicable).
 - `time_resolution ≤ (age_range_to_reconstruct[1] - age_range_to_reconstruct[0])`.
 - `prior_window > 0` (or the literal string `'all'`).
-- (only when `reconstruction_type == 'relative'`) `reference_period` fully
-  contained in `age_range_to_reconstruct` — the time interval for
-  reconstruction must fully cover the time interval for anomaly calculation.
-  (Promoted from soft to hard: anomalies defined against a period outside the
-  reconstruction window are uninterpretable to the user.)
+- (only when `reconstruction_type == 'relative'`) `reference_period` **strictly**
+  inside `age_range_to_reconstruct`: `reference_period[0] > age_range_to_reconstruct[0]`
+  **and** `reference_period[1] < age_range_to_reconstruct[1]`. Exact edge
+  alignment is rejected too — testing showed NaN output both when the reference
+  period extends beyond the reconstruction window and when one or both edges
+  are exactly aligned with it (issue #48).
 
 ### Soft constraints (warn, allow override)
 

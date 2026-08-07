@@ -94,9 +94,12 @@
     }
 
     if (isRelative) {
-      const refContained = s.referencePeriod[0] >= s.reconRange[0] && s.referencePeriod[1] <= s.reconRange[1];
+      // Strict containment: exact edge alignment also produces NaN output
+      // (issue #48), so the reference period must sit strictly inside the
+      // reconstruction range, not merely within it.
+      const refContained = s.referencePeriod[0] > s.reconRange[0] && s.referencePeriod[1] < s.reconRange[1];
       if (!refContained) {
-        errors.push('The time interval for reconstruction [' + s.reconRange[0] + ', ' + s.reconRange[1] + '] must fully cover the time interval for anomaly calculation [' + s.referencePeriod[0] + ', ' + s.referencePeriod[1] + '].');
+        errors.push('The time interval for anomaly calculation [' + s.referencePeriod[0] + ', ' + s.referencePeriod[1] + '] must be strictly inside the time interval for reconstruction [' + s.reconRange[0] + ', ' + s.reconRange[1] + '] — edges must not touch, or the reconstruction returns NaN.');
       }
     }
 
