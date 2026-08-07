@@ -86,13 +86,39 @@ async function getUserInfo(token) {
 }
 
 /**
- * Create repository name following convention: presto-{recon_type}-{uniqueID}
+ * Sanitize a user-supplied reconstruction name into a repo-name-safe slug:
+ * lowercase, alphanumeric runs joined by single hyphens, capped at 30 chars.
+ * Returns '' when the input is missing or nothing usable remains, so callers
+ * can fall back to the unnamed convention.
+ * @param {string} name - Free-text reconstruction name from the editor form
+ * @returns {string} Slug, possibly empty
+ */
+function slugifyReconName(name) {
+  if (!name || typeof name !== 'string') return '';
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 30)
+    .replace(/-+$/, '');
+}
+
+/**
+ * Create repository name following convention:
+ *   presto-{recon_type}-{uniqueID}                (no name given)
+ *   presto-{recon_type}-{name-slug}-{uniqueID}    (user named the run — issue #38)
+ * uniqueID stays in the name so repos remain unique per owner even when two
+ * runs share a reconstruction name.
  * @param {string} recon - Reconstruction type (holocene_da or temp12k)
  * @param {string} uniqueID - Unique reconstruction identifier
+ * @param {string} [reconName] - Optional user-supplied reconstruction name
  * @returns {string} Repository name
  */
-function generateRepoName(recon, uniqueID) {
-  return `presto-${recon}-${uniqueID}`;
+function generateRepoName(recon, uniqueID, reconName) {
+  const slug = slugifyReconName(reconName);
+  return slug
+    ? `presto-${recon}-${slug}-${uniqueID}`
+    : `presto-${recon}-${uniqueID}`;
 }
 
 /**
@@ -105,7 +131,7 @@ function generateRepoName(recon, uniqueID) {
  */
 async function createRepository(token, recon, uniqueID, configData, queryParamsJson = null, cleaningReportJson = null, variableFilterYaml = null) {
   const octokit = new Octokit({ auth: token });
-  const repoName = generateRepoName(recon, uniqueID);
+  const repoName = generateRepoName(recon, uniqueID, configData && configData.reconstruction_name);
 
   // Get authenticated user
   const userInfo = await getUserInfo(token);
@@ -125,7 +151,9 @@ async function createRepository(token, recon, uniqueID, configData, queryParamsJ
     template_owner: template.owner,
     template_repo: template.name,
     name: repoName,
-    description: `PReSto ${recon} reconstruction - ${uniqueID}`,
+    description: configData && configData.reconstruction_name
+      ? `PReSto ${recon} reconstruction "${String(configData.reconstruction_name).slice(0, 80)}" - ${uniqueID}`
+      : `PReSto ${recon} reconstruction - ${uniqueID}`,
     private: config.github.defaultVisibility === 'private',
     include_all_branches: false
   });
@@ -760,7 +788,7 @@ Check the [Actions tab](../../actions) for workflow status and logs.
 ## Results
 
 ${recon === 'holocene_da'
-  ? '- **Visualizations:** [GitHub Pages](https://' + configData.user + '.github.io/' + generateRepoName(recon, uniqueID) + ')\n- **Validation report:** Published alongside the visualization on the same GitHub Pages site — GMST R + CE vs published Holocene reconstructions (Kaufman 2020 Temp12k, Marcott 2013 if available) plus a 6 ka spatial anomaly map\n- **Plots & config:** \`results/*.png\`, \`results/configs.yml\` (committed to this repo)\n- **NetCDF output:** [Releases tab](../../releases) — each run publishes a release tagged `results-<run_id>` with the `.nc` file as an asset (git\'s 100MB per-file push limit rules out committing it directly)\n- **Workflow artifact:** The full `results/` folder is also kept for 90 days on the [Actions run page](../../actions)'
+  ? '- **Visualizations:** [GitHub Pages](https://' + configData.user + '.github.io/' + generateRepoName(recon, uniqueID, configData.reconstruction_name) + ')\n- **Validation report:** Published alongside the visualization on the same GitHub Pages site — GMST R + CE vs published Holocene reconstructions (Kaufman 2020 Temp12k, Marcott 2013 if available) plus a 6 ka spatial anomaly map\n- **Plots & config:** \`results/*.png\`, \`results/configs.yml\` (committed to this repo)\n- **NetCDF output:** [Releases tab](../../releases) — each run publishes a release tagged `results-<run_id>` with the `.nc` file as an asset (git\'s 100MB per-file push limit rules out committing it directly)\n- **Workflow artifact:** The full `results/` folder is also kept for 90 days on the [Actions run page](../../actions)'
   : '- **NetCDF Files:** \`results/*.nc\`\n- **Artifacts:** Available in Actions workflow runs (90-day retention)'}
 
 ## Configuration
@@ -895,6 +923,7 @@ module.exports = {
   decryptToken,
   authenticateUser,
   getUserInfo,
+  slugifyReconName,
   generateRepoName,
   createRepository,
   initializeRepository,

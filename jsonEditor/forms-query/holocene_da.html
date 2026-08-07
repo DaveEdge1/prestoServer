@@ -143,6 +143,11 @@ For more information about each of the options, mouse over the question mark ico
 <input id="user" name="user" type="hidden" value="">
 <input id="domain" name="domain" type="hidden" value="">
 <input id="uniqueID" name="uniqueID" type="hidden" value="">
+<div class="form-group" style="margin:15px 0;">
+<label for="reconstruction_name" style="font-size:18px;">Reconstruction name (optional)</label><br>
+<input style="font-size:16px; width:320px;" type="text" class="form-control" id="reconstruction_name" name="reconstruction_name" maxlength="60" placeholder="e.g. My Holocene test run" title="Included in the name of the GitHub repository created for this run">
+<small style="display:block; color:#666;">Included in the name of the GitHub repository created for this run.</small>
+</div>
 <script>
 document.getElementById("recon").value = getQueryVariable("recon");
 document.getElementById("user").value = getQueryVariable("user");

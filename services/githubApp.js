@@ -73,13 +73,19 @@ async function getInstallationToken() {
  * Generate repository name for centralized storage
  * Format: presto-{reconType}-{date}-{uniqueId}
  * Example: presto-holocene-da-20260126-a1b2c3
+ * With a user-supplied reconstruction name (issue #38) the slug is inserted:
+ * presto-holocene-da-my-test-run-20260126-a1b2c3
  */
-function generateRepoName(reconType, uniqueId) {
+function generateRepoName(reconType, uniqueId, reconName) {
+  const { slugifyReconName } = require('./github');
   const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
   const sanitizedType = reconType.toLowerCase().replace(/_/g, '-');
   const shortId = uniqueId.substring(0, 6);
+  const slug = slugifyReconName(reconName);
 
-  return `presto-${sanitizedType}-${date}-${shortId}`;
+  return slug
+    ? `presto-${sanitizedType}-${slug}-${date}-${shortId}`
+    : `presto-${sanitizedType}-${date}-${shortId}`;
 }
 
 /**
@@ -103,7 +109,7 @@ async function createReconstructionRepo(reconData) {
 
   try {
     const octokit = await getInstallationToken();
-    const repoName = generateRepoName(reconType, uniqueId);
+    const repoName = generateRepoName(reconType, uniqueId, formData && formData.reconstruction_name);
 
     // Create repository in organization
     const { data: repo } = await octokit.repos.createInOrg({

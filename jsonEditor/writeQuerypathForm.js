@@ -430,7 +430,12 @@ function buildHtml(configs, recon) {
        + '<input id="user" name="user" type="hidden" value="">\n'
        + '<input id="domain" name="domain" type="hidden" value="">\n'
        + '<input id="uniqueID" name="uniqueID" type="hidden" value="">\n'
-       + writeBody(configs) 
+       + '<div class="form-group" style="margin:15px 0;">\n'
+       + '<label for="reconstruction_name" style="font-size:18px;">Reconstruction name (optional)</label><br>\n'
+       + '<input style="font-size:16px; width:320px;" type="text" class="form-control" id="reconstruction_name" name="reconstruction_name" maxlength="60" placeholder="e.g. My Holocene test run" title="Included in the name of the GitHub repository created for this run">\n'
+       + '<small style="display:block; color:#666;">Included in the name of the GitHub repository created for this run.</small>\n'
+       + '</div>\n'
+       + writeBody(configs)
        + '<br>\n'
        + '<br>\n'
        + '<br>\n'
