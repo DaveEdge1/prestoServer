@@ -1098,6 +1098,18 @@ function applyStep2EmptyState() {
   const banner    = document.getElementById('step2-empty-banner');
   const automated = document.getElementById('section-automated-review');
   const duplicatesPanel = document.getElementById('section-duplicates');
+  // Never surface step-2 chrome while the user is on step 1. renderDuplicates()
+  // also runs during step 1 (async /analyze duplicate events, refreshAllViews
+  // on every filter change), and unconditionally un-hiding these panels here
+  // was the "step 2 shows at the bottom of step 1" bug (issue #50).
+  // advanceToStep2() re-calls this on every entry, so the correct state is
+  // applied the moment step 2 actually opens.
+  if (currentStep !== 2) {
+    if (banner)          banner.style.display          = 'none';
+    if (automated)       automated.style.display       = 'none';
+    if (duplicatesPanel) duplicatesPanel.style.display = 'none';
+    return;
+  }
   const isEmpty = !duplicateGroups || duplicateGroups.length === 0;
   if (banner)          banner.style.display          = isEmpty ? '' : 'none';
   if (automated)       automated.style.display       = isEmpty ? 'none' : '';
@@ -1107,6 +1119,9 @@ function applyStep2EmptyState() {
 function returnToStep1() {
   currentStep = 1;
   applyStepVisibility();
+  // The empty-state banner has no data-step attribute, so applyStepVisibility
+  // doesn't hide it — without this it would linger into step 1 (issue #50).
+  applyStep2EmptyState();
   updateFooter();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
