@@ -57,6 +57,11 @@ let filterState = {
   // (paleoData_mostRecentCompilations) to pass. Default off per user
   // request — casts a wide net by default; curator-vetted-only is opt-in.
   requireCompilation: false,
+  // Checked seasonality buckets (issue #54), keyed by lowercased declared
+  // seasonality ('(not specified)' for blank/NA). null until seeded from the
+  // records — while null the seasonality filter is inactive (pass-all), so
+  // restore/seed ordering can't accidentally drop every record.
+  seasonalities: null,
 };
 // Server-provided metadata for the filter panel UI. interpVarSummary is
 // [{value, count}]. variablesByArchive is {archive: [{name, count, isDefault}]}.
@@ -4672,6 +4677,7 @@ function serializeFilterState() {
     interpVars: [...filterState.interpVars],
     variablesByArchive: variables,
     requireCompilation: !!filterState.requireCompilation,
+    seasonalities: filterState.seasonalities ? [...filterState.seasonalities] : null,
   };
 }
 
@@ -4690,6 +4696,11 @@ function deserializeFilterState(raw) {
   // Accept the legacy `useCompilationBeta` key from progress files saved
   // before this rename.
   filterState.requireCompilation = !!(raw.requireCompilation ?? raw.useCompilationBeta);
+  // Seasonality buckets (issue #54). Progress files saved before the feature
+  // have no key — leave whatever the seed produced (all-on).
+  if (Array.isArray(raw.seasonalities)) {
+    filterState.seasonalities = new Set(raw.seasonalities.map(s => String(s).toLowerCase()));
+  }
 }
 
 function initFilterStateFromServer() {
@@ -4709,6 +4720,11 @@ function initFilterStateFromServer() {
     filterState.variablesByArchive[archive] = set;
   }
   filterState.requireCompilation = false;
+  // Seasonality — derived client-side from the records (issue #54); every
+  // bucket present in the data starts checked so the filter is a no-op until
+  // the user narrows (e.g. keep Annual only).
+  filterState.seasonalities = new Set();
+  for (const r of allRecords) filterState.seasonalities.add(_seasonalityKey(r));
 }
 
 function interpBucketsFor(record) {
@@ -4742,6 +4758,14 @@ function recordHasCompilation(record) {
   return s.split(/[|;,]/).some(t => t.trim().length > 0);
 }
 
+// Lowercased seasonality bucket key for a record; blank/NA collapse into
+// '(not specified)' (issue #54).
+function _seasonalityKey(r) {
+  const s = (r.seasonality || '').trim();
+  if (!s || s.toLowerCase() === 'na') return '(not specified)';
+  return s.toLowerCase();
+}
+
 function recordPassesAutoFilter(r) {
   // 1) Per-archive variable whitelist
   const archive = (r.archiveType || '').trim() || '(unknown)';
@@ -4757,7 +4781,12 @@ function recordPassesAutoFilter(r) {
   }
   if (!interpMatch) return false;
 
-  // 3) Optional compilation-membership requirement
+  // 3) Seasonality bucket must be checked (inactive until seeded — issue #54)
+  if (filterState.seasonalities && !filterState.seasonalities.has(_seasonalityKey(r))) {
+    return false;
+  }
+
+  // 4) Optional compilation-membership requirement
   if (filterState.requireCompilation && !recordHasCompilation(r)) return false;
 
   return true;
@@ -4931,10 +4960,51 @@ function applyAutoFilterToExclusions() {
 
 function renderAutoFilters() {
   renderInterpFilter();
+  renderSeasonalityFilter();
   renderVariablesByArchive();
   renderCompilationBetaToggle();
   renderDetectionThresholds();
   renderAutoFilterSummary();
+}
+
+// Seasonality facet (issue #54) — buckets derived client-side from the
+// records, one checkbox per distinct declared seasonality with its record
+// count. Display label = first-seen original casing; bucket key = lowercased.
+function renderSeasonalityFilter() {
+  const container = document.getElementById('seasonality-filter-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Build {key -> {label, count}} over valid records so counts line up with
+  // what the other facets report.
+  const buckets = new Map();
+  for (const r of allRecords.filter(isValidProxyRecord)) {
+    const key = _seasonalityKey(r);
+    if (!buckets.has(key)) {
+      const s = (r.seasonality || '').trim();
+      const label = key === '(not specified)' ? '(not specified)' : s;
+      buckets.set(key, { label, count: 0 });
+    }
+    buckets.get(key).count++;
+  }
+
+  // Annual first (the common target when narrowing), then by count.
+  const entries = [...buckets.entries()].sort((a, b) => {
+    if (a[0] === 'annual') return -1;
+    if (b[0] === 'annual') return 1;
+    return b[1].count - a[1].count;
+  });
+
+  for (const [key, info] of entries) {
+    const checked = !filterState.seasonalities || filterState.seasonalities.has(key);
+    const row = _renderCheckRow(key, info.label, info.count, checked, (c) => {
+      if (!filterState.seasonalities) filterState.seasonalities = new Set(buckets.keys());
+      if (c) filterState.seasonalities.add(key);
+      else   filterState.seasonalities.delete(key);
+      onAutoFilterChange();
+    });
+    container.appendChild(row);
+  }
 }
 
 function _renderCheckRow(key, label, count, checked, onToggle) {
